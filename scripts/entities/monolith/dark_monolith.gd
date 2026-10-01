@@ -1,0 +1,173 @@
+extends StaticBody3D
+
+## Dark Monolith - Metin2 Stone equivalent in the Harry Potter MMO
+## A towering cursed obelisk that spawns aggressive waves of dark creatures as its HP is chipped away.
+## On destruction, it drops massive loot (Galleons, Phoenix Ashes, Dragon Cores, Potions).
+
+signal monolith_damaged(current_hp: int, max_hp: int)
+signal monolith_destroyed
+
+@export var max_hp: int = 3000
+var current_hp: int = 3000
+
+var wave1_triggered: bool = false
+var wave2_triggered: bool = false
+var wave3_triggered: bool = false
+var is_destroyed: bool = false
+
+@onready var mesh: MeshInstance3D = $MeshInstance3D
+@onready var hp_label: Label3D = $HpLabel3D
+@onready var aura_particles: CPUParticles3D = $AuraParticles
+@onready var dark_light: OmniLight3D = $OmniLight3D
+
+const ACROMANTULA_SCENE = preload("res://scenes/entities/mobs/mob_acromantula.tscn")
+const INFERI_SCENE = preload("res://scenes/entities/mobs/mob_inferi.tscn")
+const SNATCHER_SCENE = preload("res://scenes/entities/mobs/mob_darksnatcher.tscn")
+const LOOT_SCENE = preload("res://scenes/entities/loot/loot_drop.tscn")
+
+func _ready() -> void:
+	add_to_group("monoliths")
+	add_to_group("targetable")
+	current_hp = max_hp
+	_update_label()
+
+func _update_label() -> void:
+	if hp_label:
+		var pct := int((float(current_hp) / float(max_hp)) * 100.0)
+		hp_label.text = "Dark Monolith (Lv.35)\n%d / %d (%d%%)" % [current_hp, max_hp, pct]
+		if pct > 50:
+			hp_label.modulate = Color(0.9, 0.4, 1.0)
+		elif pct > 25:
+			hp_label.modulate = Color(1.0, 0.5, 0.2)
+		else:
+			hp_label.modulate = Color(1.0, 0.2, 0.2)
+
+func take_damage(amount: int, spell_type: String, attacker: Node3D) -> void:
+	if is_destroyed:
+		return
+	
+	current_hp = max(0, current_hp - amount)
+	_update_label()
+	emit_signal("monolith_damaged", current_hp, max_hp)
+	
+	# Flash mesh on hit
+	_flash_red()
+	
+	# Check wave milestones
+	var ratio := float(current_hp) / float(max_hp)
+	if ratio <= 0.75 and not wave1_triggered:
+		wave1_triggered = true
+		_spawn_wave(1, attacker)
+	elif ratio <= 0.50 and not wave2_triggered:
+		wave2_triggered = true
+		_spawn_wave(2, attacker)
+	elif ratio <= 0.25 and not wave3_triggered:
+		wave3_triggered = true
+		_spawn_wave(3, attacker)
+	
+	if current_hp <= 0:
+		_destroy_monolith(attacker)
+
+func _flash_red() -> void:
+	if mesh:
+		var mat: StandardMaterial3D = mesh.get_active_material(0)
+		if mat:
+			mat.albedo_color = Color(1.0, 0.2, 0.3)
+			await get_tree().create_timer(0.08).timeout
+			if is_instance_valid(mat):
+				mat.albedo_color = Color(0.15, 0.05, 0.2)
+
+func _spawn_wave(wave_num: int, target_player: Node3D) -> void:
+	# Zone notification
+	NetworkManager.send_chat("[Dark Monolith] A wave of dark creatures emerges from the ground! (Wave %d/3)" % wave_num)
+	
+	# Visual burst
+	if dark_light:
+		dark_light.light_energy = 8.0
+	
+	var mob_configs := []
+	if wave_num == 1:
+		mob_configs = [
+			{"scene": ACROMANTULA_SCENE, "count": 3},
+			{"scene": INFERI_SCENE, "count": 2}
+		]
+	elif wave_num == 2:
+		mob_configs = [
+			{"scene": INFERI_SCENE, "count": 4},
+			{"scene": SNATCHER_SCENE, "count": 2}
+		]
+	else:
+		mob_configs = [
+			{"scene": ACROMANTULA_SCENE, "count": 4},
+			{"scene": INFERI_SCENE, "count": 4},
+			{"scene": SNATCHER_SCENE, "count": 2}
+		]
+	
+	for group in mob_configs:
+		var scene_res: PackedScene = group["scene"]
+		var count: int = group["count"]
+		for i in range(count):
+			var mob = scene_res.instantiate()
+			get_parent().add_child(mob)
+			var angle := randf() * TAU
+			var dist := randf_range(4.0, 9.0)
+			var spawn_pos := global_position + Vector3(cos(angle) * dist, 0.5, sin(angle) * dist)
+			mob.global_position = spawn_pos
+			# Immediate aggro onto attacking player (Metin2 pack aggro)
+			if is_instance_valid(target_player) and mob.has_method("aggro_on"):
+				mob.aggro_on(target_player)
+
+func _destroy_monolith(shatterer: Node3D) -> void:
+	is_destroyed = true
+	emit_signal("monolith_destroyed")
+	
+	var shatterer_name := "A brave Wizard"
+	if is_instance_valid(shatterer) and "player_name" in shatterer:
+		shatterer_name = shatterer.player_name
+		if shatterer.has_method("add_exp"):
+			shatterer.add_exp(850)
+	
+	NetworkManager.send_chat("[Server] The Dark Monolith has been shattered by %s! Riches shower the realm!" % shatterer_name)
+	
+	# Shower massive loot around monolith base
+	_drop_loot()
+	
+	# Disappear & schedule respawn
+	hide()
+	$CollisionShape3D.disabled = true
+	await get_tree().create_timer(30.0).timeout
+	_respawn()
+
+func _drop_loot() -> void:
+	var drops := [
+		{"id": "galleons", "amount": randi_range(600, 1800)},
+		{"id": "galleons", "amount": randi_range(400, 1200)},
+		{"id": "mat_phoenix_ash", "amount": randi_range(2, 4)},
+		{"id": "mat_dragon_heartstring", "amount": randi_range(1, 3)},
+		{"id": "mat_thestral_hair", "amount": randi_range(1, 2)},
+		{"id": "potion_health", "amount": randi_range(3, 6)},
+		{"id": "potion_mana", "amount": randi_range(3, 6)},
+	]
+	
+	# 25% chance of rare Elder core
+	if randf() < 0.25:
+		drops.append({"id": "mat_elder_core", "amount": 1})
+	
+	for drop_data in drops:
+		var loot = LOOT_SCENE.instantiate()
+		get_parent().add_child(loot)
+		var angle := randf() * TAU
+		var dist := randf_range(2.0, 7.5)
+		loot.global_position = global_position + Vector3(cos(angle) * dist, 0.4, sin(angle) * dist)
+		loot.setup(drop_data["id"], drop_data["amount"])
+
+func _respawn() -> void:
+	current_hp = max_hp
+	wave1_triggered = false
+	wave2_triggered = false
+	wave3_triggered = false
+	is_destroyed = false
+	show()
+	$CollisionShape3D.disabled = false
+	_update_label()
+	NetworkManager.send_chat("[Dark Monolith] A new Dark Monolith has manifested in the realm!")

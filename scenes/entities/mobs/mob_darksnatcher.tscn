@@ -1,0 +1,65 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/mobs/mob_base.gd" id="1_mb"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+radius = 0.5
+height = 1.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_robe"]
+albedo_color = Color(0.1, 0.1, 0.14, 1)
+roughness = 0.5
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+material = SubResource("StandardMaterial3D_robe")
+radius = 0.4
+height = 1.85
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wand"]
+albedo_color = Color(0.05, 0.05, 0.05, 1)
+emission_enabled = true
+emission = Color(0.1, 0.9, 0.2, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_wand"]
+material = SubResource("StandardMaterial3D_wand")
+top_radius = 0.02
+bottom_radius = 0.04
+height = 0.6
+
+[node name="MobDarkSnatcher" type="CharacterBody3D" groups=["mobs", "targetable"]]
+collision_layer = 2
+collision_mask = 7
+script = ExtResource("1_mb")
+mob_name = "Dark Snatcher"
+level = 20
+max_hp = 420
+attack_power = 40
+move_speed = 5.5
+aggro_radius = 16.0
+attack_range = 14.0
+attack_cooldown = 2.0
+exp_reward = 180
+is_ranged = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("CapsuleShape3D_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="WandMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.866, -0.5, 0, 0.5, 0.866, 0, 0, 0, 1, 0.45, 1.0, -0.4)
+mesh = SubResource("CylinderMesh_wand")
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3, 0)
+billboard = 1
+double_sided = false
+text = "[Lv.20] Dark Snatcher
+420 / 420"
+font_size = 32
+outline_size = 8
+outline_modulate = Color(0, 0, 0, 1)

@@ -1,0 +1,116 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/game_world.gd" id="1_gw"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="2_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/inventory_ui.tscn" id="3_inv"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ollivander_ui.tscn" id="4_oll"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_top_color = Color(0.2, 0.35, 0.6, 1)
+sky_horizon_color = Color(0.7, 0.75, 0.82, 1)
+ground_bottom_color = Color(0.12, 0.15, 0.12, 1)
+ground_horizon_color = Color(0.5, 0.55, 0.5, 1)
+
+[sub_resource type="Sky" id="Sky_env"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_env")
+ambient_light_source = 3
+ambient_light_color = Color(0.7, 0.75, 0.85, 1)
+tonemap_mode = 2
+glow_enabled = true
+glow_intensity = 0.6
+glow_bloom = 0.2
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(200, 1, 200)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_grass"]
+albedo_color = Color(0.2, 0.35, 0.18, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_grass"]
+material = SubResource("StandardMaterial3D_grass")
+size = Vector3(200, 1, 200)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stone"]
+albedo_color = Color(0.4, 0.4, 0.42, 1)
+roughness = 0.6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_courtyard"]
+material = SubResource("StandardMaterial3D_stone")
+top_radius = 16.0
+bottom_radius = 16.0
+height = 1.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gold"]
+albedo_color = Color(0.9, 0.75, 0.25, 1)
+metallic = 0.8
+roughness = 0.2
+emission_enabled = true
+emission = Color(0.8, 0.6, 0.1, 1)
+emission_energy_multiplier = 1.2
+
+[sub_resource type="BoxMesh" id="BoxMesh_anvil"]
+material = SubResource("StandardMaterial3D_gold")
+size = Vector3(1.4, 1.0, 1.4)
+
+[node name="GameWorld" type="Node3D"]
+script = ExtResource("1_gw")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 0, 25, 0)
+light_color = Color(1, 0.95, 0.85, 1)
+light_energy = 1.3
+shadow_enabled = true
+
+[node name="Terrain" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="GrassMesh" type="MeshInstance3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+mesh = SubResource("BoxMesh_grass")
+
+[node name="CourtyardMesh" type="MeshInstance3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.45, 5.0)
+mesh = SubResource("CylinderMesh_courtyard")
+
+[node name="OllivanderWorkshop" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.0, 0.5, 5.0)
+
+[node name="AnvilMesh" type="MeshInstance3D" parent="OllivanderWorkshop"]
+mesh = SubResource("BoxMesh_anvil")
+
+[node name="WorkshopLabel" type="Label3D" parent="OllivanderWorkshop"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+billboard = 1
+double_sided = false
+text = "Ollivander's Forge
+[Press 'O' or Click to Refine]"
+font_size = 28
+outline_size = 6
+outline_modulate = Color(0, 0, 0, 1)
+
+[node name="Players" type="Node3D" parent="."]
+
+[node name="Mobs" type="Node3D" parent="."]
+
+[node name="Monoliths" type="Node3D" parent="."]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HUD" parent="CanvasLayer" instance=ExtResource("2_hud")]
+
+[node name="InventoryUI" parent="CanvasLayer" instance=ExtResource("3_inv")]
+
+[node name="OllivanderUI" parent="CanvasLayer" instance=ExtResource("4_oll")]

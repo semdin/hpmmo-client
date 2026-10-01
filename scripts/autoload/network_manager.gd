@@ -1,0 +1,141 @@
+extends Node
+
+## NetworkManager Autoload - Multiplayer ENet Host/Client Management
+## Handles connection lifecycle, peer registry, chat replication, and spell networking
+
+signal player_connected_signal(peer_id: int, player_info: Dictionary)
+signal player_disconnected_signal(peer_id: int)
+signal connection_status_changed(status: String)
+signal chat_message_received(sender_name: String, sender_house: String, message: String)
+
+const DEFAULT_PORT: int = 7777
+const MAX_PLAYERS: int = 32
+
+var peer: ENetMultiplayerPeer = null
+var is_server: bool = false
+var is_connected_to_game: bool = false
+
+var local_player_name: String = "Harry"
+var local_player_house: String = "Gryffindor"
+var connected_players: Dictionary = {}
+
+func _ready() -> void:
+	multiplayer.peer_connected.connect(_on_peer_connected)
+	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	multiplayer.connected_to_server.connect(_on_connected_to_server)
+	multiplayer.connection_failed.connect(_on_connection_failed)
+	multiplayer.server_disconnected.connect(_on_server_disconnected)
+
+## Host a new game (Server + Local Player)
+func host_game(port: int = DEFAULT_PORT) -> Error:
+	peer = ENetMultiplayerPeer.new()
+	var error := peer.create_server(port, MAX_PLAYERS)
+	if error != OK:
+		emit_signal("connection_status_changed", "Failed to host on port %d" % port)
+		return error
+	
+	multiplayer.multiplayer_peer = peer
+	is_server = true
+	is_connected_to_game = true
+	
+	# Register host local player
+	var local_info := {
+		"name": local_player_name,
+		"house": local_player_house,
+		"level": 1,
+		"wand_tier": 0
+	}
+	connected_players[1] = local_info
+	emit_signal("connection_status_changed", "Server started on port %d" % port)
+	return OK
+
+## Join an existing game via IP and port
+func join_game(address: String = "127.0.0.1", port: int = DEFAULT_PORT) -> Error:
+	peer = ENetMultiplayerPeer.new()
+	var error := peer.create_client(address, port)
+	if error != OK:
+		emit_signal("connection_status_changed", "Failed to connect to %s:%d" % [address, port])
+		return error
+		
+	multiplayer.multiplayer_peer = peer
+	is_server = false
+	emit_signal("connection_status_changed", "Connecting to %s:%d..." % [address, port])
+	return OK
+
+## Start singleplayer / offline session
+func start_offline() -> void:
+	is_server = true
+	is_connected_to_game = true
+	connected_players[1] = {
+		"name": local_player_name,
+		"house": local_player_house,
+		"level": 1,
+		"wand_tier": 0
+	}
+	emit_signal("connection_status_changed", "Offline mode active")
+
+func _on_peer_connected(id: int) -> void:
+	print("Peer connected: ", id)
+	# Ask peer to send their info
+	if multiplayer.is_server():
+		# Sync all currently connected players to the new peer
+		for p_id in connected_players:
+			_sync_player_info.rpc_id(id, p_id, connected_players[p_id])
+
+func _on_peer_disconnected(id: int) -> void:
+	print("Peer disconnected: ", id)
+	if connected_players.has(id):
+		connected_players.erase(id)
+	emit_signal("player_disconnected_signal", id)
+
+func _on_connected_to_server() -> void:
+	is_connected_to_game = true
+	var my_id := multiplayer.get_unique_id()
+	var my_info := {
+		"name": local_player_name,
+		"house": local_player_house,
+		"level": 1,
+		"wand_tier": 0
+	}
+	connected_players[my_id] = my_info
+	emit_signal("connection_status_changed", "Connected to server as ID %d" % my_id)
+	_register_my_info.rpc(my_info)
+
+func _on_connection_failed() -> void:
+	multiplayer.multiplayer_peer = null
+	is_connected_to_game = false
+	emit_signal("connection_status_changed", "Connection failed!")
+
+func _on_server_disconnected() -> void:
+	multiplayer.multiplayer_peer = null
+	is_connected_to_game = false
+	is_server = false
+	connected_players.clear()
+	emit_signal("connection_status_changed", "Server disconnected")
+
+@rpc("any_peer", "reliable")
+func _register_my_info(info: Dictionary) -> void:
+	var sender_id := multiplayer.get_remote_sender_id()
+	connected_players[sender_id] = info
+	emit_signal("player_connected_signal", sender_id, info)
+	if multiplayer.is_server():
+		# Broadcast to all other peers
+		_sync_player_info.rpc(sender_id, info)
+
+@rpc("authority", "reliable")
+func _sync_player_info(id: int, info: Dictionary) -> void:
+	connected_players[id] = info
+	emit_signal("player_connected_signal", id, info)
+
+## Chat message replication
+@rpc("any_peer", "call_local", "reliable")
+func rpc_send_chat(sender_name: String, sender_house: String, message: String) -> void:
+	emit_signal("chat_message_received", sender_name, sender_house, message)
+
+func send_chat(message: String) -> void:
+	if message.strip_edges().is_empty():
+		return
+	if multiplayer.has_multiplayer_peer() and is_connected_to_game:
+		rpc_send_chat.rpc(local_player_name, local_player_house, message)
+	else:
+		emit_signal("chat_message_received", local_player_name, local_player_house, message)
