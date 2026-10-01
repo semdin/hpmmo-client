@@ -1,31 +1,11 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/entities/mobs/mob_base.gd" id="1_mb"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/dark_wizard.glb" id="2_dw"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
-radius = 0.5
-height = 1.9
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_robe"]
-albedo_color = Color(0.1, 0.1, 0.14, 1)
-roughness = 0.5
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
-material = SubResource("StandardMaterial3D_robe")
-radius = 0.4
+radius = 0.45
 height = 1.85
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wand"]
-albedo_color = Color(0.05, 0.05, 0.05, 1)
-emission_enabled = true
-emission = Color(0.1, 0.9, 0.2, 1)
-emission_energy_multiplier = 1.5
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_wand"]
-material = SubResource("StandardMaterial3D_wand")
-top_radius = 0.02
-bottom_radius = 0.04
-height = 0.6
 
 [node name="MobDarkSnatcher" type="CharacterBody3D" groups=["mobs", "targetable"]]
 collision_layer = 2
@@ -46,13 +26,10 @@ is_ranged = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
 shape = SubResource("CapsuleShape3D_1")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
-mesh = SubResource("CapsuleMesh_body")
+[node name="Visuals" type="Node3D" parent="."]
 
-[node name="WandMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.866, -0.5, 0, 0.5, 0.866, 0, 0, 0, 1, 0.45, 1.0, -0.4)
-mesh = SubResource("CylinderMesh_wand")
+[node name="dark_wizard" parent="Visuals" instance=ExtResource("2_dw")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
 
 [node name="Label3D" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3, 0)

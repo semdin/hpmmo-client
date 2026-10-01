@@ -7,6 +7,7 @@ signal player_connected_signal(peer_id: int, player_info: Dictionary)
 signal player_disconnected_signal(peer_id: int)
 signal connection_status_changed(status: String)
 signal chat_message_received(sender_name: String, sender_house: String, message: String)
+signal remote_spell_cast(peer_id: int, spell_id: String, from_pos: Vector3, dir: Vector3)
 
 const DEFAULT_PORT: int = 7777
 const MAX_PLAYERS: int = 32
@@ -14,10 +15,12 @@ const MAX_PLAYERS: int = 32
 var peer: ENetMultiplayerPeer = null
 var is_server: bool = false
 var is_connected_to_game: bool = false
+var _sync_timer: float = 0.0
 
 var local_player_name: String = "Harry"
 var local_player_house: String = "Gryffindor"
 var connected_players: Dictionary = {}
+var remote_states: Dictionary = {} # peer_id -> {pos, rot_y, mounted, hp, level}
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_peer_connected)
@@ -111,7 +114,45 @@ func _on_server_disconnected() -> void:
 	is_connected_to_game = false
 	is_server = false
 	connected_players.clear()
+	remote_states.clear()
 	emit_signal("connection_status_changed", "Server disconnected")
+
+func _process(delta: float) -> void:
+	if not is_connected_to_game or not multiplayer.has_multiplayer_peer():
+		return
+	# 15 Hz transform broadcast from local player
+	_sync_timer -= delta
+	if _sync_timer <= 0.0:
+		_sync_timer = 1.0 / 15.0
+		var lp := _find_local_player()
+		if lp:
+			rpc_broadcast_state.rpc(lp.global_position, lp.rotation.y, lp.is_mounted, lp.current_hp, lp.level)
+
+func _find_local_player() -> Node3D:
+	var players := get_tree().get_nodes_in_group("players")
+	for p in players:
+		if is_instance_valid(p) and p.get("is_local_player") == true:
+			return p
+	return null
+
+@rpc("any_peer", "unreliable")
+func rpc_broadcast_state(pos: Vector3, rot_y: float, mounted: bool, hp: int, level: int) -> void:
+	var sender := multiplayer.get_remote_sender_id()
+	if sender == 0:
+		sender = multiplayer.get_unique_id()
+	remote_states[sender] = {"pos": pos, "rot_y": rot_y, "mounted": mounted, "hp": hp, "level": level}
+
+@rpc("any_peer", "reliable")
+func rpc_broadcast_spell(spell_id: String, from_pos: Vector3, dir: Vector3) -> void:
+	var sender := multiplayer.get_remote_sender_id()
+	emit_signal("remote_spell_cast", sender, spell_id, from_pos, dir)
+
+func broadcast_spell(spell_id: String, from_pos: Vector3, dir: Vector3) -> void:
+	if multiplayer.has_multiplayer_peer() and is_connected_to_game and not is_server_only_offline():
+		rpc_broadcast_spell.rpc(spell_id, from_pos, dir)
+
+func is_server_only_offline() -> bool:
+	return not multiplayer.has_multiplayer_peer()
 
 @rpc("any_peer", "reliable")
 func _register_my_info(info: Dictionary) -> void:

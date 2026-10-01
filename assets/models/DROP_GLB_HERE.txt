@@ -1,0 +1,8 @@
+Drop CC0 .glb/.gltf here (Kenney.nl, Quaternius, OpenGameArt). Game auto-detects and announces them; procedural rigs stay as fallback so nothing breaks.
+
+Suggested CC0 packs:
+- Kenney Character Pack / Nature Pack (CC0)
+- Quaternius Ultimate RPG / Nature (CC0)
+- OpenGameArt X11 (CC-BY, check license)
+
+Do NOT drop ripped Metin2 / Harry Potter movie assets (copyrighted).

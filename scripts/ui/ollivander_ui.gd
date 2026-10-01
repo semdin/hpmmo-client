@@ -82,13 +82,18 @@ func _on_refine_pressed() -> void:
 	
 	# Roll success
 	var roll := randf() * 100.0
+	var audio := get_node_or_null("/root/AudioManager")
 	if roll <= up_info.chance:
 		# SUCCESS!
 		player.upgrade_wand(tier + 1)
 		result_label.text = "REFINING SUCCEEDED! Your wand surges with arcane power!"
 		result_label.modulate = Color(0.2, 1.0, 0.4)
+		if audio:
+			audio.play_upgrade_success()
 	else:
 		# FAILURE (Classic Metin2 risk!)
+		if audio:
+			audio.play_upgrade_fail()
 		if tier >= 4:
 			# Tier drop penalty
 			player.upgrade_wand(tier - 1)

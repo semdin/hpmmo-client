@@ -3,26 +3,52 @@
 [ext_resource type="Script" path="res://scripts/entities/mobs/mob_base.gd" id="1_mb"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_1"]
-radius = 0.9
+radius = 1.0
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_spider"]
-albedo_color = Color(0.12, 0.08, 0.08, 1)
-roughness = 0.3
-metallic = 0.2
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_chitin"]
+albedo_color = Color(0.1, 0.08, 0.08, 1)
+metallic = 0.3
+roughness = 0.25
+rim_enabled = true
+rim = 0.5
+rim_tint = 0.4
 
 [sub_resource type="SphereMesh" id="SphereMesh_abdomen"]
-material = SubResource("StandardMaterial3D_spider")
-radius = 0.8
-height = 1.2
+material = SubResource("StandardMaterial3D_chitin")
+radius = 0.85
+height = 1.3
+
+[sub_resource type="SphereMesh" id="SphereMesh_thorax"]
+material = SubResource("StandardMaterial3D_chitin")
+radius = 0.55
+height = 0.8
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eyes"]
 shading_mode = 0
-albedo_color = Color(1, 0.05, 0.05, 1)
+albedo_color = Color(1, 0.08, 0.08, 1)
 
-[sub_resource type="SphereMesh" id="SphereMesh_eyes"]
+[sub_resource type="SphereMesh" id="SphereMesh_eye"]
 material = SubResource("StandardMaterial3D_eyes")
-radius = 0.1
-height = 0.2
+radius = 0.07
+height = 0.14
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fang"]
+albedo_color = Color(0.2, 0.85, 0.2, 1)
+emission_enabled = true
+emission = Color(0.1, 0.9, 0.2, 1)
+emission_energy_multiplier = 1.2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_fang"]
+material = SubResource("StandardMaterial3D_fang")
+top_radius = 0.02
+bottom_radius = 0.07
+height = 0.35
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_leg"]
+material = SubResource("StandardMaterial3D_chitin")
+top_radius = 0.05
+bottom_radius = 0.08
+height = 1.3
 
 [node name="MobAcromantula" type="CharacterBody3D" groups=["mobs", "targetable"]]
 collision_layer = 2
@@ -40,20 +66,74 @@ exp_reward = 110
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 shape = SubResource("SphereShape3D_1")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1.4, 0, 0, 0, 0.7, 0, 0, 0, 1.2, 0, 0.5, 0)
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="Thorax" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 0.8, 0, 0, 0, 1.1, 0, 0.55, 0)
+mesh = SubResource("SphereMesh_thorax")
+
+[node name="Abdomen" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1.3, 0, 0, 0, 0.9, 0, 0, 0, 1.4, 0, 0.75, 1.1)
 mesh = SubResource("SphereMesh_abdomen")
 
-[node name="EyesMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.6, -0.7)
-mesh = SubResource("SphereMesh_eyes")
+[node name="EyeL1" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16, 0.68, -0.52)
+mesh = SubResource("SphereMesh_eye")
 
-[node name="EyesMesh2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.6, -0.7)
-mesh = SubResource("SphereMesh_eyes")
+[node name="EyeR1" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16, 0.68, -0.52)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="EyeL2" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 0.28, 0.74, -0.46)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="EyeR2" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, -0.28, 0.74, -0.46)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="FangL" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.966, 0, 0.259, 0, 1, 0, -0.259, 0, 0.966, 0.14, 0.35, -0.6)
+mesh = SubResource("CylinderMesh_fang")
+
+[node name="FangR" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.966, 0, -0.259, 0, 1, 0, 0.259, 0, 0.966, -0.14, 0.35, -0.6)
+mesh = SubResource("CylinderMesh_fang")
+
+[node name="LegL1" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.707, 0.707, 0, -0.707, 0.707, 0, 0, 0, 1, 0.75, 0.5, -0.3)
+mesh = SubResource("CylinderMesh_leg")
+
+[node name="LegR1" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.707, -0.707, 0, 0.707, 0.707, 0, 0, 0, 1, -0.75, 0.5, -0.3)
+mesh = SubResource("CylinderMesh_leg")
+
+[node name="LegL2" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.643, 0.766, 0, -0.766, 0.643, 0, 0, 0, 1, 0.85, 0.5, 0.1)
+mesh = SubResource("CylinderMesh_leg")
+
+[node name="LegR2" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.643, -0.766, 0, 0.766, 0.643, 0, 0, 0, 1, -0.85, 0.5, 0.1)
+mesh = SubResource("CylinderMesh_leg")
+
+[node name="LegL3" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.5, 0.866, 0, -0.866, 0.5, 0, 0, 0, 1, 0.8, 0.5, 0.5)
+mesh = SubResource("CylinderMesh_leg")
+
+[node name="LegR3" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.5, -0.866, 0, 0.866, 0.5, 0, 0, 0, 1, -0.8, 0.5, 0.5)
+mesh = SubResource("CylinderMesh_leg")
+
+[node name="LegL4" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.342, 0.94, 0, -0.94, 0.342, 0, 0, 0, 1, 0.65, 0.45, 0.9)
+mesh = SubResource("CylinderMesh_leg")
+
+[node name="LegR4" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(0.342, -0.94, 0, 0.94, 0.342, 0, 0, 0, 1, -0.65, 0.45, 0.9)
+mesh = SubResource("CylinderMesh_leg")
 
 [node name="Label3D" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
 billboard = 1
 double_sided = false
 text = "[Lv.14] Acromantula

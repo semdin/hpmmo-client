@@ -1,5 +1,7 @@
 extends StaticBody3D
 
+const MaterialKitScript = preload("res://scripts/assets/material_kit.gd")
+
 ## Dark Monolith - Metin2 Stone equivalent in the Harry Potter MMO
 ## A towering cursed obelisk that spawns aggressive waves of dark creatures as its HP is chipped away.
 ## On destruction, it drops massive loot (Galleons, Phoenix Ashes, Dragon Cores, Potions).
@@ -29,6 +31,7 @@ func _ready() -> void:
 	add_to_group("monoliths")
 	add_to_group("targetable")
 	current_hp = max_hp
+	_add_sky_beam()
 	_update_label()
 
 func _update_label() -> void:
@@ -45,6 +48,8 @@ func _update_label() -> void:
 func take_damage(amount: int, spell_type: String, attacker: Node3D) -> void:
 	if is_destroyed:
 		return
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_hit()
 	
 	current_hp = max(0, current_hp - amount)
 	_update_label()
@@ -115,11 +120,13 @@ func _spawn_wave(wave_num: int, target_player: Node3D) -> void:
 			mob.global_position = spawn_pos
 			# Immediate aggro onto attacking player (Metin2 pack aggro)
 			if is_instance_valid(target_player) and mob.has_method("aggro_on"):
-				mob.aggro_on(target_player)
+				mob.aggro_on(target_player, true)
 
 func _destroy_monolith(shatterer: Node3D) -> void:
 	is_destroyed = true
 	emit_signal("monolith_destroyed")
+	if has_node("/root/QuestManager"):
+		QuestManager.add_monolith()
 	
 	var shatterer_name := "A brave Wizard"
 	if is_instance_valid(shatterer) and "player_name" in shatterer:
@@ -171,3 +178,41 @@ func _respawn() -> void:
 	$CollisionShape3D.disabled = false
 	_update_label()
 	NetworkManager.send_chat("[Dark Monolith] A new Dark Monolith has manifested in the realm!")
+
+func _add_sky_beam() -> void:
+	# tall purple beacon so players can find world bosses from anywhere
+	var beam := MeshInstance3D.new()
+	beam.name = "SkyBeam"
+	var cm := CylinderMesh.new()
+	cm.top_radius = 0.8
+	cm.bottom_radius = 1.1
+	cm.height = 60.0
+	var bm := StandardMaterial3D.new()
+	bm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	bm.albedo_color = Color(0.65, 0.2, 1.0, 0.35)
+	bm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	cm.material = bm
+	beam.mesh = cm
+	beam.position = Vector3(0, 30, 0)
+	add_child(beam)
+	# floating rune rocks orbiting base
+	for i in range(5):
+		var rock := MeshInstance3D.new()
+		var rm := BoxMesh.new()
+		rm.size = Vector3(0.5, 0.5, 0.5)
+		rm.material = 	MaterialKitScript.obsidian_material()
+		rock.mesh = rm
+		var ang := TAU * float(i) / 5.0
+		rock.position = Vector3(cos(ang) * 2.4, 0.6, sin(ang) * 2.4)
+		rock.set_meta("orbit_ang", ang)
+		rock.set_meta("orbit_speed", randf_range(0.5, 1.0))
+		rock.add_to_group("monolith_orbits")
+		add_child(rock)
+
+func _process(delta: float) -> void:
+	for child in get_children():
+		if child.is_in_group("monolith_orbits") and child is MeshInstance3D:
+			var ang: float = child.get_meta("orbit_ang") + delta * float(child.get_meta("orbit_speed"))
+			child.set_meta("orbit_ang", ang)
+			child.position = Vector3(cos(ang) * 2.4, 0.6 + sin(Time.get_ticks_msec() * 0.002 + ang) * 0.3, sin(ang) * 2.4)
+			child.rotation.y += delta * 2.0

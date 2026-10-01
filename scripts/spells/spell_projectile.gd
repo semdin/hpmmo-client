@@ -1,5 +1,7 @@
 extends Area3D
 
+const SkillFXScript = preload("res://scripts/spells/skill_fx.gd")
+
 ## Spell projectile with particle trail, targeting, and Protego reflection support
 
 @export var speed: float = 40.0
@@ -52,16 +54,20 @@ func _physics_process(delta: float) -> void:
 	if lifetime >= max_lifetime:
 		queue_free()
 		return
-	
+
 	# Slight homing towards locked target if exists and valid
 	if is_instance_valid(target_node):
 		var target_pos := target_node.global_position + Vector3(0, 1.2, 0)
 		var desired_dir := (target_pos - global_position).normalized()
 		direction = direction.lerp(desired_dir, 6.0 * delta).normalized()
-	
+
 	global_position += direction * speed * delta
 	if direction.length_squared() > 0.001:
 		look_at(global_position + direction, Vector3.UP)
+	# MMO bolt pulse so projectiles read at distance
+	if mesh:
+		var s := 1.0 + sin(Time.get_ticks_msec() * 0.03) * 0.18
+		mesh.scale = Vector3.ONE * s
 
 func _on_body_entered(body: Node3D) -> void:
 	if body == caster:
@@ -105,7 +111,10 @@ func _handle_hit(target: Node) -> void:
 	# Bombarda AOE explosion trigger
 	if spell_id == "bombarda":
 		_trigger_bombarda_aoe()
-	
+
+	# MMO impact FX (own art) + damage numbers
+	if is_instance_valid(get_parent()):
+		SkillFXScript.play_impact(get_parent() as Node3D, global_position, spell_id)
 	# Spawn impact effect
 	_spawn_impact_particles()
 	queue_free()

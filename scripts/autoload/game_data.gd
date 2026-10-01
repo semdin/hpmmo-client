@@ -247,6 +247,7 @@ func _register_input_actions() -> void:
 	_ensure_action("toggle_inventory", [KEY_I])
 	_ensure_action("toggle_ollivander", [KEY_O])
 	_ensure_action("toggle_chat", [KEY_ENTER])
+	_ensure_action("interact", [KEY_F])
 	
 	# Spell Hotkeys
 	_ensure_action("spell_1", [KEY_1])
