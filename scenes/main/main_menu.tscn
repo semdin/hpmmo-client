@@ -189,7 +189,7 @@ text = "Server IP:"
 [node name="IpInput" type="LineEdit" parent="VBoxContainer/NetworkRow"]
 custom_minimum_size = Vector2(160, 36)
 layout_mode = 2
-text = "127.0.0.1"
+text = "213.250.145.75"
 
 [node name="PortLabel" type="Label" parent="VBoxContainer/NetworkRow"]
 layout_mode = 2

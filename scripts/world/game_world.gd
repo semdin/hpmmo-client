@@ -27,12 +27,19 @@ var _candle_t: float = 0.0
 
 func _ready() -> void:
 	WorldBuilderScript.build(self)
-	_spawn_local_player()
+	if not NetworkManager.is_dedicated_server:
+		_spawn_local_player()
+		_setup_overlay()
+		_connect_ui_signals()
+	else:
+		print("[Dedicated Server] Headless world active (no local player/UI).")
+		var cl = get_node_or_null("CanvasLayer")
+		if cl:
+			cl.queue_free()
+	
 	_setup_npcs()
 	_setup_training_grounds()
 	_setup_monoliths_and_mobs()
-	_setup_overlay()
-	_connect_ui_signals()
 
 	NetworkManager.player_connected_signal.connect(_on_remote_player_connected)
 	NetworkManager.player_disconnected_signal.connect(_on_remote_player_disconnected)
