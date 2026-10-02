@@ -6,6 +6,9 @@ extends RefCounted
 
 static var _cache: Dictionary = {}
 
+static func clear_cache() -> void:
+	_cache.clear()
+
 static func _noise_tex(base: Color, variation: Color, size: int = 128, scale_cells: int = 8, seed_val: int = 1) -> ImageTexture:
 	var key := "%s_%s_%d_%d_%d" % [base.to_html(), variation.to_html(), size, scale_cells, seed_val]
 	if _cache.has(key):

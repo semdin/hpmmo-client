@@ -6,6 +6,9 @@ extends Node
 signal player_connected_signal(peer_id: int, player_info: Dictionary)
 signal player_disconnected_signal(peer_id: int)
 signal connection_status_changed(status: String)
+signal connection_succeeded
+signal connection_failed
+signal server_disconnected_signal
 signal chat_message_received(sender_name: String, sender_house: String, message: String)
 signal remote_spell_cast(peer_id: int, spell_id: String, from_pos: Vector3, dir: Vector3)
 
@@ -23,6 +26,13 @@ var local_player_house: String = "Gryffindor"
 var connected_players: Dictionary = {}
 var remote_states: Dictionary = {} # peer_id -> {pos, rot_y, mounted, hp, level}
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_PREDELETE:
+		disconnect_game()
+		var mk = load("res://scripts/assets/material_kit.gd")
+		if mk and mk.has_method("clear_cache"):
+			mk.clear_cache()
+
 func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
@@ -30,8 +40,22 @@ func _ready() -> void:
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 
+## Disconnect active peer and reset state cleanly
+func disconnect_game() -> void:
+	if is_inside_tree() and multiplayer and multiplayer.has_multiplayer_peer():
+		if multiplayer.multiplayer_peer:
+			multiplayer.multiplayer_peer.close()
+		multiplayer.multiplayer_peer = null
+	peer = null
+	is_connected_to_game = false
+	is_server = false
+	is_dedicated_server = false
+	connected_players.clear()
+	remote_states.clear()
+
 ## Start Authoritative Dedicated Server (for Linux VPS)
 func start_dedicated_server(port: int = DEFAULT_PORT) -> Error:
+	disconnect_game()
 	peer = ENetMultiplayerPeer.new()
 	var error := peer.create_server(port, MAX_PLAYERS)
 	if error != OK:
@@ -52,6 +76,7 @@ func start_dedicated_server(port: int = DEFAULT_PORT) -> Error:
 
 ## Host a new game (Server + Local Player)
 func host_game(port: int = DEFAULT_PORT) -> Error:
+	disconnect_game()
 	peer = ENetMultiplayerPeer.new()
 	var error := peer.create_server(port, MAX_PLAYERS)
 	if error != OK:
@@ -75,10 +100,12 @@ func host_game(port: int = DEFAULT_PORT) -> Error:
 
 ## Join an existing game via IP and port
 func join_game(address: String = "213.250.145.75", port: int = DEFAULT_PORT) -> Error:
+	disconnect_game()
 	peer = ENetMultiplayerPeer.new()
 	var error := peer.create_client(address, port)
 	if error != OK:
 		emit_signal("connection_status_changed", "Failed to connect to %s:%d" % [address, port])
+		emit_signal("connection_failed")
 		return error
 		
 	multiplayer.multiplayer_peer = peer
@@ -89,6 +116,7 @@ func join_game(address: String = "213.250.145.75", port: int = DEFAULT_PORT) -> 
 
 ## Start singleplayer / offline session
 func start_offline() -> void:
+	disconnect_game()
 	is_server = true
 	is_dedicated_server = false
 	is_connected_to_game = true
@@ -127,24 +155,21 @@ func _on_connected_to_server() -> void:
 	}
 	connected_players[my_id] = my_info
 	emit_signal("connection_status_changed", "Connected to server as ID %d" % my_id)
+	emit_signal("connection_succeeded")
 	_register_my_info.rpc(my_info)
 
 func _on_connection_failed() -> void:
-	multiplayer.multiplayer_peer = null
-	is_connected_to_game = false
+	disconnect_game()
 	emit_signal("connection_status_changed", "Connection failed! Check server IP & firewall.")
+	emit_signal("connection_failed")
 
 func _on_server_disconnected() -> void:
-	multiplayer.multiplayer_peer = null
-	is_connected_to_game = false
-	is_server = false
-	is_dedicated_server = false
-	connected_players.clear()
-	remote_states.clear()
+	disconnect_game()
 	emit_signal("connection_status_changed", "Disconnected from server.")
+	emit_signal("server_disconnected_signal")
 
 func _process(delta: float) -> void:
-	if not is_connected_to_game or not multiplayer.has_multiplayer_peer():
+	if not is_connected_to_game or not multiplayer or not multiplayer.has_multiplayer_peer():
 		return
 	if is_dedicated_server:
 		return
@@ -158,7 +183,12 @@ func _process(delta: float) -> void:
 			rpc_broadcast_state.rpc(lp.global_position, lp.rotation.y, lp.is_mounted, lp.current_hp, lp.level)
 
 func _find_local_player() -> Node3D:
-	var players := get_tree().get_nodes_in_group("players")
+	if not is_inside_tree():
+		return null
+	var tree := get_tree()
+	if not tree:
+		return null
+	var players := tree.get_nodes_in_group("players")
 	for p in players:
 		if is_instance_valid(p) and p.get("is_local_player") == true:
 			return p
@@ -197,11 +227,11 @@ func rpc_relay_spell(caster_id: int, spell_id: String, from_pos: Vector3, dir: V
 	emit_signal("remote_spell_cast", caster_id, spell_id, from_pos, dir)
 
 func broadcast_spell(spell_id: String, from_pos: Vector3, dir: Vector3) -> void:
-	if multiplayer.has_multiplayer_peer() and is_connected_to_game and not is_server_only_offline():
+	if multiplayer and multiplayer.has_multiplayer_peer() and is_connected_to_game and not is_server_only_offline():
 		rpc_broadcast_spell.rpc(spell_id, from_pos, dir)
 
 func is_server_only_offline() -> bool:
-	return not multiplayer.has_multiplayer_peer()
+	return not multiplayer or not multiplayer.has_multiplayer_peer()
 
 @rpc("any_peer", "reliable")
 func _register_my_info(info: Dictionary) -> void:
@@ -225,7 +255,7 @@ func rpc_send_chat(sender_name: String, sender_house: String, message: String) -
 func send_chat(message: String) -> void:
 	if message.strip_edges().is_empty():
 		return
-	if multiplayer.has_multiplayer_peer() and is_connected_to_game:
+	if multiplayer and multiplayer.has_multiplayer_peer() and is_connected_to_game:
 		rpc_send_chat.rpc(local_player_name, local_player_house, message)
 	else:
 		emit_signal("chat_message_received", local_player_name, local_player_house, message)

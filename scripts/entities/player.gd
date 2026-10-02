@@ -180,6 +180,36 @@ func _physics_process(delta: float) -> void:
 		spring_arm.rotation_degrees.x = camera_rot_x
 	
 	if not is_local_player:
+		var peer_id := name.to_int()
+		if peer_id > 0 and NetworkManager.remote_states.has(peer_id):
+			var r_state: Dictionary = NetworkManager.remote_states[peer_id]
+			var prev_pos := global_position
+			global_position = global_position.lerp(r_state.get("pos", global_position), 15.0 * delta)
+			visuals.rotation.y = lerp_angle(visuals.rotation.y, r_state.get("rot_y", visuals.rotation.y), 15.0 * delta)
+			
+			var rem_mounted: bool = r_state.get("mounted", false)
+			if is_mounted != rem_mounted:
+				is_mounted = rem_mounted
+				broom_mesh.visible = is_mounted
+				if broom_particles:
+					broom_particles.emitting = is_mounted
+				visuals.position.y = 0.55 if is_mounted else 0.0
+			
+			var rem_hp: int = r_state.get("hp", current_hp)
+			var rem_lvl: int = r_state.get("level", level)
+			if current_hp != rem_hp or level != rem_lvl:
+				current_hp = rem_hp
+				level = rem_lvl
+				_update_nameplate()
+			
+			if not is_casting_anim and is_instance_valid(anim_player):
+				var moved_dist := (global_position - prev_pos).length()
+				if moved_dist > 0.02 and not is_mounted:
+					if anim_player.current_animation != "Running_A":
+						anim_player.play("Running_A", 0.2)
+				else:
+					if anim_player.current_animation != "Idle":
+						anim_player.play("Idle", 0.25)
 		return
 	
 	# Gravity & Mounting
