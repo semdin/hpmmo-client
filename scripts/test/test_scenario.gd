@@ -2,6 +2,7 @@ extends Node
 
 const FX = preload("res://scripts/spells/skill_fx.gd")
 const Rules = preload("res://scripts/spells/combat_rules.gd")
+const SafeZone = preload("res://scripts/world/safe_zone.gd")
 var failures: Array[String] = []
 var checks := 0
 @onready var world = $GameWorld
@@ -74,9 +75,66 @@ func _ready() -> void:
 		check(pack.members.size() == pack.count, "Encounter has its configured 3/5 pack or boss composition")
 		for member in pack.members:
 			check(member.spawn_point.distance_to(member.global_position) < 8, "Spawn anchor is assigned before mob ready")
+	# Phase 1: ordinary mobs are reactive; protected volumes gate damage.
+	# Fixed staging point far from every authored volume keeps these checks
+	# deterministic regardless of the random pack anchors.
+	var staging := Vector3(-70, 0.1, 20)
+	var passive_pack = director.packs[1]
+	var passive_mob = passive_pack.members[0]
+	var staged: Array = [passive_mob, passive_pack.members[1], passive_pack.members[2]]
+	var homes: Array = []
+	var anchors: Array = []
+	for i in range(3):
+		homes.append(staged[i].spawn_point)
+		anchors.append(staged[i].pack_anchor)
+		staged[i].pack_anchor = staging + Vector3(i * 3.1, 0, 0)
+		staged[i].spawn_point = staging + Vector3(i * 3.1, 0, 0)
+		staged[i].global_position = staging + Vector3(i * 3.1, 0, 0)
+	player.global_position = staging + Vector3(0, 0, 14)
+	await get_tree().create_timer(1.0).timeout
+	check(passive_mob.state != passive_mob.State.CHASE and passive_mob.target_player == null, "Walking beside a reactive pack does not start combat")
+	check(passive_mob.aggro_mode == "reactive" and passive_mob.assist_radius == 16.0 and passive_mob.leash_distance == 26.0, "Encounter aggro fields are data-configured")
+	check(director.packs[5].members[0].leash_distance == 40.0 and director.packs[5].members[0].assist_radius == 20.0, "Boss encounters carry their own leash and assist data")
+	passive_mob.take_damage(5, "basic_cast", player)
+	check(passive_mob.state == passive_mob.State.CHASE and passive_mob.target_player == player, "A valid hit activates the attacked mob")
+	check(passive_pack.members[1].target_player == player, "Assistance stays inside the attacked pack")
+	check(director.packs[2].members[0].target_player == null, "Other packs are not chain-pulled")
+	# Positive control: explicit aggressive data still uses the proximity scan.
+	passive_pack.members[2].aggro_mode = "aggressive"
+	passive_pack.members[2].aggro_radius = 40.0
+	passive_pack.members[2].global_position = staging + Vector3(-14, 0, 0)
+	passive_pack.members[2].pack_anchor = staging + Vector3(-14, 0, 0)
+	passive_pack.members[2].spawn_point = staging + Vector3(-14, 0, 0)
+	await get_tree().create_timer(0.8).timeout
+	check(passive_pack.members[2].target_player == player, "Aggressive encounter data still aggros via proximity")
+	passive_pack.members[2].aggro_mode = "reactive"
+	passive_pack.members[2].aggro_radius = 9.0
+	passive_pack.members[2]._respawn()
+	player.global_position = Vector3(0, 0.1, 5)
+	await get_tree().create_timer(0.12).timeout
+	check(passive_mob.target_player == null and passive_pack.members[1].target_player == null and passive_mob.state not in [passive_mob.State.CHASE, passive_mob.State.ATTACK], "Mobs drop the fight when the target enters the courtyard")
+	var zone_mob = director.packs[2].members[0]
+	check(SafeZone.is_protected_point(Vector3(0, 0, 5)) and not SafeZone.is_protected_point(Vector3(60, 0, 60)), "Safe-zone volumes are authored at specific locations")
+	check(not Rules.can_damage(zone_mob, player), "Mobs cannot attack a player inside the courtyard")
+	check(not Rules.can_damage(player, zone_mob), "Protected players cannot snipe outdoor mobs")
+	check(Rules.can_damage(player, dummy), "Training dummies remain practiceable inside the courtyard")
+	zone_mob.global_position = Vector3(-70, 0.1, -20)
+	player.global_position = Vector3(-62, 0.1, -20)
+	check(Rules.can_damage(player, zone_mob), "Outside protected space, combat is allowed")
+	check(not director._formation_clear(Vector3(0, 0.1, 0), 5) and director._formation_clear(Vector3(60, 0.1, 60), 5), "Encounter spawn sampling rejects protected anchors and rings")
+	var stray = director.packs[3].members[0]
+	stray.global_position = Vector3(0, 0.1, -2)
+	await get_tree().create_timer(0.12).timeout
+	check(stray.state == stray.State.RETURN, "Enemies displaced inside a protected volume are sent home")
+	stray._respawn()
+	zone_mob._respawn()
+	for i in range(3):
+		staged[i].pack_anchor = anchors[i]
+		staged[i].spawn_point = homes[i]
+		staged[i]._respawn()
 	var pack = director.packs[0]
 	var mob = pack.members[0]
-	player.global_position = mob.global_position + Vector3(0, 0, 7)
+	player.global_position = mob.global_position + Vector3(7, 0, 0)
 	mob.aggro_on(player)
 	check(pack.members[1].target_player == player, "Pulling one mob alerts the entire pack")
 	mob.take_damage(1, "stupefy", player)
@@ -140,15 +198,39 @@ func _ready() -> void:
 	player.global_position = Vector3(0, 0.1, 5)
 	await get_tree().create_timer(0.2).timeout
 	player._cast_lock = 0
+	player._mount_lock = 0
 	player.toggle_broom_mount()
 	check(player.is_mounted, "Grounded mount succeeds")
+	await get_tree().create_timer(0.35).timeout
+	player.current_mana = player.max_mana
+	var mana_before_mounted_cast: int = player.current_mana
+	player.cast_spell("stupefy")
+	check(player.current_mana == mana_before_mounted_cast and float(player.spell_cooldowns.get("stupefy", 0.0)) <= 0.0, "Offensive casting is disabled while mounted")
+	var ft_parent = player.get_parent()
+	var texts_before := 0
+	for child in ft_parent.get_children():
+		if child is Node3D and child.scene_file_path.ends_with("floating_text.tscn"):
+			texts_before += 1
+	player._basic_held = true
+	await get_tree().create_timer(0.3).timeout
+	player._basic_held = false
+	var texts_after := 0
+	for child in ft_parent.get_children():
+		if child is Node3D and child.scene_file_path.ends_with("floating_text.tscn"):
+			texts_after += 1
+	check(texts_after - texts_before <= 1, "Held attack while mounted does not spawn feedback every frame")
 	player.global_position.y = 12
 	player.toggle_broom_mount()
 	check(player.is_mounted, "High-altitude dismount is rejected")
+	await get_tree().create_timer(0.35).timeout
 	player.global_position.y = 1.5
 	player.toggle_broom_mount()
 	check(not player.is_mounted, "Dismount near the ground succeeds")
 	check(player.broom_particles.mesh is QuadMesh, "Flight uses textured translucent particles")
+	var bristles: Node3D = player.get_node("Visuals/BroomMesh/Bristles")
+	var exhaust: Node3D = player.get_node("Visuals/BroomMesh/BroomParticles")
+	check(player.visuals.to_local(bristles.global_position).z < -0.4, "Broom bristles trail behind the rider")
+	check(player.visuals.to_local(exhaust.global_position).z < -0.5, "Broom exhaust emits behind the rider")
 	var monolith = world.monoliths_container.get_child(0)
 	monolith.take_damage(2300, "bombarda", player)
 	check(monolith.wave1_triggered and monolith.wave2_triggered and monolith.wave3_triggered, "Heavy monolith hit triggers every crossed wave threshold")
@@ -158,6 +240,10 @@ func _ready() -> void:
 		if enemy.summoned:
 			summons += 1
 	check(summons == 21, "Monolith summons three waves with finite lifecycles")
+	monolith.take_damage(10000, "test", player)
+	check(monolith.is_destroyed and not monolith.visible and is_instance_valid(monolith._respawn_timer) and monolith._respawn_timer.time_left > 0.0, "Destroyed monolith arms exactly one respawn timer")
+	monolith._respawn()
+	check(not monolith.is_destroyed and monolith.visible and monolith._respawn_timer == null and monolith.current_hp == monolith.max_hp, "Monolith respawn clears the timer and restores state")
 	player.is_protego_active = false
 	player.take_damage(100000, "test", null)
 	var death_mana: int = player.current_mana

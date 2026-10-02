@@ -63,17 +63,21 @@ func _on_item_clicked(item_data: Dictionary) -> void:
 	var item_id = item_data.id
 	if item_id == "potion_health":
 		if player.current_hp < player.max_hp and item_data.amount > 0:
+			var healed: int = mini(player.max_hp - player.current_hp, 150)
 			item_data.amount -= 1
 			player.current_hp = min(player.max_hp, player.current_hp + 150)
 			player.emit_stats()
+			player.show_floating_text("+%d" % healed, Color(0.4, 1.0, 0.4))
 			if item_data.amount <= 0:
 				player.inventory.erase(item_data)
 			refresh()
 	elif item_id == "potion_mana":
 		if player.current_mana < player.max_mana and item_data.amount > 0:
+			var restored: int = mini(player.max_mana - player.current_mana, 120)
 			item_data.amount -= 1
 			player.current_mana = min(player.max_mana, player.current_mana + 120)
 			player.emit_stats()
+			player.show_floating_text("+%d" % restored, Color(0.4, 0.7, 1.0))
 			if item_data.amount <= 0:
 				player.inventory.erase(item_data)
 			refresh()

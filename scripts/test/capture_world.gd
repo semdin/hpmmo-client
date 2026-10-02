@@ -39,6 +39,14 @@ func _ready() -> void:
 	player.toggle_broom_mount()
 	player.global_position = Vector3(0, 4, 15)
 	await _capture(camera, "broom-flight", Vector3(5, 5, 20), Vector3(0, 5, 15))
+	# Phase 1 orientation evidence: rider + broom from rear, front and side,
+	# moved to open ground so the castle-gate pillars do not occlude the shot.
+	player.global_position = Vector3(0, 4.2, 24)
+	player.visuals.rotation.y = 0.0
+	await get_tree().create_timer(0.3).timeout
+	await _capture(camera, "mount-rear", Vector3(0, 3.6, 19.6), Vector3(0, 3.9, 24))
+	await _capture(camera, "mount-front", Vector3(0, 3.6, 28.4), Vector3(0, 3.9, 24))
+	await _capture(camera, "mount-side", Vector3(5.2, 3.8, 24), Vector3(0, 3.9, 24))
 	world.queue_free()
 	await get_tree().process_frame
 	get_tree().quit()

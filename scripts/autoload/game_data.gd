@@ -177,7 +177,7 @@ var ITEMS: Dictionary = {
 		"type": "mount",
 		"speed_bonus": 1.8,
 		"icon_color": Color(0.8, 0.4, 0.1),
-		"desc": "Sleek mahogany racing broom. Press Shift or Ctrl to mount/dismount!"
+		"desc": "Sleek mahogany racing broom. Press Shift to mount or dismount (Ctrl descends while flying)."
 	},
 	"mat_phoenix_ash": {
 		"id": "mat_phoenix_ash",
@@ -233,6 +233,10 @@ var ITEMS: Dictionary = {
 
 var QUESTS: Dictionary = {}
 
+## Protected volumes (Phase 1) loaded from res://data/json/safe_zones.json.
+## Consumed by scripts/world/safe_zone.gd.
+var SAFE_ZONES: Dictionary = {}
+
 func _ready() -> void:
 	_load_json_data()
 	_register_input_actions()
@@ -264,8 +268,12 @@ func _load_json_data() -> void:
 	var quests_json = _read_json_file("res://data/json/quests.json")
 	if quests_json is Dictionary and not quests_json.is_empty():
 		QUESTS = quests_json
-	print("[GameData] Static JSON configs loaded into RAM: %d Spells, %d Items, %d Houses, %d Quests" % [
-		SPELLS.size(), ITEMS.size(), HOUSES.size(), QUESTS.size()
+
+	var zones_json = _read_json_file("res://data/json/safe_zones.json")
+	if zones_json is Dictionary and not zones_json.is_empty():
+		SAFE_ZONES = zones_json
+	print("[GameData] Static JSON configs loaded into RAM: %d Spells, %d Items, %d Houses, %d Quests, %d Safe Zones" % [
+		SPELLS.size(), ITEMS.size(), HOUSES.size(), QUESTS.size(), (SAFE_ZONES.get("zones", []) as Array).size()
 	])
 
 func _read_json_file(path: String) -> Variant:

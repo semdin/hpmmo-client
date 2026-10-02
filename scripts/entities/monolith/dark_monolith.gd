@@ -11,6 +11,8 @@ signal monolith_destroyed
 
 @export var max_hp: int = 3000
 var current_hp: int = 3000
+var _respawn_timer: Timer = null
+var _base_albedo := Color(0.15, 0.05, 0.2)
 
 var wave1_triggered: bool = false
 var wave2_triggered: bool = false
@@ -33,6 +35,9 @@ func _ready() -> void:
 	current_hp = max_hp
 	if mesh.get_active_material(0):
 		mesh.material_override = mesh.get_active_material(0).duplicate()
+	var base_mat := mesh.material_override as StandardMaterial3D
+	if base_mat:
+		_base_albedo = base_mat.albedo_color
 	_add_sky_beam()
 	_update_label()
 
@@ -76,13 +81,21 @@ func take_damage(amount: int, spell_type: String, attacker: Node3D) -> void:
 		_destroy_monolith(attacker)
 
 func _flash_red() -> void:
-	if mesh:
-		var mat: StandardMaterial3D = mesh.get_active_material(0)
-		if mat:
-			mat.albedo_color = Color(1.0, 0.2, 0.3)
-			await get_tree().create_timer(0.08).timeout
-			if is_instance_valid(mat):
-				mat.albedo_color = Color(0.15, 0.05, 0.2)
+	if not mesh:
+		return
+	var mat: StandardMaterial3D = mesh.get_active_material(0)
+	if mat == null:
+		return
+	mat.albedo_color = Color(1.0, 0.2, 0.3)
+	# Tween instead of await: the tween is bound to this node, so no coroutine
+	# can resume on a freed instance after a scene change, and the authored
+	# albedo is restored instead of a hardcoded colour.
+	var tw := create_tween()
+	tw.tween_interval(0.08)
+	tw.tween_callback(func():
+		if is_instance_valid(mat):
+			mat.albedo_color = _base_albedo
+	)
 
 func _spawn_wave(wave_num: int, target_player: Node3D) -> void:
 	# Zone notification
@@ -144,11 +157,18 @@ func _destroy_monolith(shatterer: Node3D) -> void:
 	# Shower massive loot around monolith base
 	_drop_loot.call_deferred()
 	
-	# Disappear & schedule respawn
+	# Disappear & schedule respawn through a child timer: it is freed with this
+	# node, so a scene change can never resume a coroutine on a freed instance.
 	hide()
 	$CollisionShape3D.set_deferred("disabled", true)
-	await get_tree().create_timer(30.0).timeout
-	_respawn()
+	if _respawn_timer:
+		_respawn_timer.queue_free()
+	_respawn_timer = Timer.new()
+	_respawn_timer.one_shot = true
+	_respawn_timer.wait_time = 30.0
+	_respawn_timer.timeout.connect(_respawn)
+	add_child(_respawn_timer)
+	_respawn_timer.start()
 
 func _drop_loot() -> void:
 	var drops := [
@@ -174,6 +194,11 @@ func _drop_loot() -> void:
 		loot.setup(drop_data["id"], drop_data["amount"])
 
 func _respawn() -> void:
+	if is_queued_for_deletion():
+		return
+	if _respawn_timer:
+		_respawn_timer.queue_free()
+		_respawn_timer = null
 	current_hp = max_hp
 	wave1_triggered = false
 	wave2_triggered = false

@@ -75,7 +75,7 @@ scale_amount_min = 0.6
 scale_amount_max = 1.4
 
 [node name="BroomMesh" type="MeshInstance3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 0.05, 0.999, 0, -0.999, 0.05, 0, 0.62, 0.05)
+transform = Transform3D(1, 0, 0, 0, -0.05, -0.999, 0, 0.999, -0.05, 0, 0.62, 0.05)
 visible = false
 mesh = SubResource("CylinderMesh_handle")
 

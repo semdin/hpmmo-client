@@ -107,6 +107,8 @@ static func _flash_light(world: Node3D, pos: Vector3, col: Color, energy: float,
 	tw.tween_callback(l.queue_free)
 
 static func _muzzle_flash(world: Node3D, pos: Vector3, dir: Vector3, col: Color) -> void:
+	if dir.length_squared() < 0.000001:
+		dir = Vector3.FORWARD
 	_flash_light(world, pos, col, 3.0, 7.0, 0.25)
 	var orb := MeshInstance3D.new()
 	var sm := SphereMesh.new()
@@ -155,6 +157,8 @@ static func _bolt_ring(world: Node3D, pos: Vector3, col: Color) -> void:
 	tw.chain().tween_callback(ring.queue_free).set_delay(0.32)
 
 static func _fire_cone(world: Node3D, pos: Vector3, dir: Vector3, col: Color) -> void:
+	if dir.length_squared() < 0.000001:
+		dir = Vector3.FORWARD
 	_flash_light(world, pos + dir * 2.0, col, 2.0, 10.0, 0.45)
 	var flame := CPUParticles3D.new()
 	preload("res://scripts/assets/particle_kit.gd").configure(flame, true)
@@ -175,6 +179,8 @@ static func _fire_cone(world: Node3D, pos: Vector3, dir: Vector3, col: Color) ->
 	flame.finished.connect(flame.queue_free)
 
 static func _arc_slash(world: Node3D, pos: Vector3, dir: Vector3, col: Color) -> void:
+	if dir.length_squared() < 0.000001:
+		dir = Vector3.FORWARD
 	var arc := MeshInstance3D.new()
 	var tm := TorusMesh.new()
 	tm.inner_radius = 0.9

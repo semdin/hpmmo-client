@@ -1,6 +1,10 @@
 extends Area3D
 
 ## Bombarda AOE Explosion - High damage blast with area knockback
+## Currently unreferenced (SkillFX handles live impacts); kept gated so it
+## cannot bypass faction/safe-zone rules if it is ever wired up again.
+
+const Rules = preload("res://scripts/spells/combat_rules.gd")
 
 var caster: Node3D = null
 var base_damage: int = 160
@@ -21,7 +25,7 @@ func _ready() -> void:
 	for body in bodies:
 		if body == caster:
 			continue
-		if body.has_method("take_damage"):
+		if body.has_method("take_damage") and Rules.can_damage(caster, body):
 			var dist := global_position.distance_to(body.global_position)
 			var falloff: float = clamp(1.0 - (dist / radius), 0.4, 1.0)
 			var dmg := int(base_damage * falloff)

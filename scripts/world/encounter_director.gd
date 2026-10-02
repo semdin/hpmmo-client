@@ -6,6 +6,7 @@ const INFERI = preload("res://scenes/entities/mobs/mob_inferi.tscn")
 const SPIDER = preload("res://scenes/entities/mobs/mob_acromantula.tscn")
 const SNATCHER = preload("res://scenes/entities/mobs/mob_darksnatcher.tscn")
 const COMMANDER = preload("res://assets/models/monsters/Orc_Skull.gltf")
+const SafeZone = preload("res://scripts/world/safe_zone.gd")
 var packs: Array[Dictionary] = []
 var container: Node3D
 var rng := RandomNumberGenerator.new()
@@ -14,13 +15,13 @@ func start(mobs: Node3D) -> void:
 	container = mobs
 	rng.randomize()
 	var zones := [
-		{"area": Rect2(17, -33, 15, 15), "scene": INFERI, "level": 3, "count": 3},
-		{"area": Rect2(8, 31, 19, 15), "scene": SPIDER, "level": 4, "count": 3},
-		{"area": Rect2(-37, -28, 14, 16), "scene": SPIDER, "level": 8, "count": 5},
-		{"area": Rect2(46, -57, 17, 15), "scene": SNATCHER, "level": 12, "count": 3},
-		{"area": Rect2(-69, -48, 16, 19), "scene": INFERI, "level": 14, "count": 5},
-		{"area": Rect2(-91, -74, 16, 16), "scene": SPIDER, "level": 25, "count": 1, "boss": true},
-		{"area": Rect2(53, -91, 18, 15), "scene": SNATCHER, "level": 20, "count": 3, "boss": true, "commander": true},
+		{"area": Rect2(17, -33, 15, 15), "scene": INFERI, "level": 3, "count": 3, "aggro_mode": "reactive", "assist_radius": 16.0, "leash_distance": 26.0},
+		{"area": Rect2(8, 31, 19, 15), "scene": SPIDER, "level": 4, "count": 3, "aggro_mode": "reactive", "assist_radius": 16.0, "leash_distance": 26.0},
+		{"area": Rect2(-37, -28, 14, 16), "scene": SPIDER, "level": 8, "count": 5, "aggro_mode": "reactive", "assist_radius": 16.0, "leash_distance": 26.0},
+		{"area": Rect2(46, -57, 17, 15), "scene": SNATCHER, "level": 12, "count": 3, "aggro_mode": "reactive", "assist_radius": 16.0, "leash_distance": 26.0},
+		{"area": Rect2(-69, -48, 16, 19), "scene": INFERI, "level": 14, "count": 5, "aggro_mode": "reactive", "assist_radius": 16.0, "leash_distance": 26.0},
+		{"area": Rect2(-91, -74, 16, 16), "scene": SPIDER, "level": 25, "count": 1, "boss": true, "aggro_mode": "reactive", "assist_radius": 20.0, "leash_distance": 40.0},
+		{"area": Rect2(53, -91, 18, 15), "scene": SNATCHER, "level": 20, "count": 3, "boss": true, "commander": true, "aggro_mode": "reactive", "assist_radius": 20.0, "leash_distance": 40.0},
 	]
 	for zone in zones:
 		zone["members"] = []
@@ -33,9 +34,11 @@ func _spawn_initial() -> void:
 	for index in range(packs.size()):
 		_spawn_pack(index)
 
-func _clear_anchor(area: Rect2) -> Vector3:
+func _clear_anchor(area: Rect2, member_count: int) -> Vector3:
 	for _attempt in range(40):
 		var point := Vector3(rng.randf_range(area.position.x, area.end.x), 0.1, rng.randf_range(area.position.y, area.end.y))
+		if not _formation_clear(point, member_count):
+			continue
 		var near_player := false
 		for player in get_tree().get_nodes_in_group("players"):
 			if player.global_position.distance_to(point) < 16:
@@ -54,9 +57,21 @@ func _clear_anchor(area: Rect2) -> Vector3:
 	# Defer a blocked spawn rather than putting enemies inside walls or players.
 	return Vector3.INF
 
+## Every formation member (not just the anchor) must sit outside the protected
+## volumes and their spawn buffer (plan Phase 1, task 2).
+func _formation_clear(anchor: Vector3, member_count: int) -> bool:
+	if SafeZone.is_spawn_blocked(anchor):
+		return false
+	if member_count > 1:
+		for i in range(member_count):
+			var offset := Vector3(cos(i * TAU / member_count), 0, sin(i * TAU / member_count)) * 3.1
+			if SafeZone.is_spawn_blocked(anchor + offset):
+				return false
+	return true
+
 func _spawn_pack(index: int) -> void:
 	var pack := packs[index]
-	var anchor := _clear_anchor(pack.area)
+	var anchor := _clear_anchor(pack.area, int(pack.count))
 	if not anchor.is_finite():
 		pack.timer = 5.0
 		return
@@ -76,6 +91,9 @@ func _spawn_pack(index: int) -> void:
 			mob.attack_power = int(mob.attack_power * strength * 0.75)
 			mob.exp_reward = int(25 + pack.level * 6)
 			mob.aggro_radius = 9 if pack.level < 8 else 12
+			mob.aggro_mode = String(pack.get("aggro_mode", "reactive"))
+			mob.assist_radius = float(pack.get("assist_radius", 16.0))
+			mob.leash_distance = float(pack.get("leash_distance", 26.0))
 			if i == 0 and pack.get("boss", false):
 				mob.is_boss = true
 				mob.is_commander = pack.get("commander", false)

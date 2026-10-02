@@ -62,6 +62,8 @@ func disconnect_game() -> void:
 	is_dedicated_server = false
 	connected_players.clear()
 	remote_states.clear()
+	peer_account_map.clear()
+	peer_char_data_map.clear()
 
 ## Start Authoritative Dedicated Server (for Linux VPS)
 func start_dedicated_server(port: int = DEFAULT_PORT) -> Error:
@@ -147,9 +149,12 @@ func _on_peer_connected(id: int) -> void:
 
 func _on_peer_disconnected(id: int) -> void:
 	print("[Network] Peer disconnected: ID %d" % id)
-	if multiplayer.is_server() and peer_char_data_map.has(id):
-		_save_peer_character(id)
-		peer_char_data_map.erase(id)
+	if multiplayer.is_server():
+		if peer_char_data_map.has(id):
+			_save_peer_character(id)
+			peer_char_data_map.erase(id)
+		# Account mapping must clear even for peers that logged in but never
+		# selected a character (previously leaked).
 		peer_account_map.erase(id)
 	if connected_players.has(id):
 		var p_info = connected_players[id]

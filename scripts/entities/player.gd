@@ -50,6 +50,8 @@ var is_dead := false
 var _regen_hp := 0.0
 var _regen_mana := 0.0
 var _cast_lock := 0.0
+var _mount_lock := 0.0
+var _mount_notice_cd := 0.0
 var _queued_spell := ""
 var _queue_time := 0.0
 var _mount_blend := 0.0
@@ -223,6 +225,8 @@ func _process(delta: float) -> void:
 	
 	_cast_lock = maxf(0.0, _cast_lock - delta)
 	_hit_recovery = maxf(0.0, _hit_recovery - delta)
+	_mount_lock = maxf(0.0, _mount_lock - delta)
+	_mount_notice_cd = maxf(0.0, _mount_notice_cd - delta)
 	_queue_time = maxf(0.0, _queue_time - delta)
 	_update_flight_pose(delta)
 	if is_local_player and not is_dead:
@@ -269,10 +273,10 @@ func _physics_process(delta: float) -> void:
 			var rem_mounted: bool = r_state.get("mounted", false)
 			if is_mounted != rem_mounted:
 				is_mounted = rem_mounted
-				broom_mesh.visible = is_mounted
+				if broom_mesh:
+					broom_mesh.visible = is_mounted
 				if broom_particles:
 					broom_particles.emitting = is_mounted
-				visuals.position.y = 0.55 if is_mounted else 0.0
 			
 			var rem_hp: int = r_state.get("hp", current_hp)
 			var rem_lvl: int = r_state.get("level", level)
@@ -383,7 +387,7 @@ func _handle_hotkeys() -> void:
 		pickup_nearest_loot()
 
 func toggle_broom_mount() -> void:
-	if is_dead or _cast_lock > 0:
+	if is_dead or _cast_lock > 0 or _mount_lock > 0:
 		return
 	if is_mounted:
 		if not can_dismount_safely():
@@ -395,7 +399,10 @@ func toggle_broom_mount() -> void:
 			return
 		is_mounted = true
 		velocity.y = 3.0
-	broom_particles.emitting = is_mounted
+	if broom_particles:
+		broom_particles.emitting = is_mounted
+	_basic_held = false
+	_mount_lock = 0.3
 	emit_signal("mounted_changed", is_mounted)
 
 func _ground_below(distance: float) -> Dictionary:
@@ -404,7 +411,18 @@ func _ground_below(distance: float) -> Dictionary:
 
 func can_dismount_safely() -> bool:
 	var ground := _ground_below(3.0)
-	return not ground.is_empty() and ground.normal.dot(Vector3.UP) > 0.7
+	if ground.is_empty() or ground.normal.dot(Vector3.UP) <= 0.7:
+		return false
+	# Reject landings without capsule clearance (low ceilings, walls, props).
+	var shape := CapsuleShape3D.new()
+	shape.radius = 0.45
+	shape.height = 1.8
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.transform = Transform3D(Basis(), ground.position + Vector3.UP * 0.91)
+	query.collision_mask = 1
+	query.exclude = [get_rid()]
+	return get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty()
 
 func input_blocked() -> bool:
 	var focus := get_viewport().gui_get_focus_owner()
@@ -431,7 +449,8 @@ func _tick_regeneration(delta: float) -> void:
 func _update_flight_pose(delta: float) -> void:
 	_flight_time += delta
 	_mount_blend = move_toward(_mount_blend, 1.0 if is_mounted else 0.0, delta * 3.2)
-	broom_mesh.visible = _mount_blend > 0.01
+	if broom_mesh:
+		broom_mesh.visible = _mount_blend > 0.01
 	visuals.position.y = _mount_blend * (0.15 + sin(_flight_time * 3.0) * 0.06)
 	var speed_ratio := Vector2(velocity.x, velocity.z).length() / mounted_speed
 	visuals.rotation.x = lerpf(visuals.rotation.x, -0.2 * speed_ratio * _mount_blend, minf(1, delta * 5))
@@ -478,6 +497,16 @@ func get_mouse_aim_point() -> Vector3:
 
 func cast_spell(spell_id: String) -> void:
 	if is_dead or not GameData.SPELLS.has(spell_id):
+		return
+	# Plan Phase 1: offensive casting is disabled while mounted (Protego is
+	# defensive and stays available); airborne combat is a later feature.
+	# Held basic-attack repeats every frame, so drop the held input and
+	# throttle the feedback instead of spawning a node per frame.
+	if is_mounted and spell_id != "protego":
+		_basic_held = false
+		if _mount_notice_cd <= 0.0:
+			_mount_notice_cd = 1.0
+			_spawn_floating_text("Not while mounted!", Color(1.0, 0.8, 0.4))
 		return
 	
 	var s_data: Dictionary = GameData.SPELLS[spell_id]
@@ -615,7 +644,8 @@ func _die() -> void:
 	_queued_spell = ""
 	_basic_held = false
 	is_mounted = false
-	broom_particles.emitting = false
+	if broom_particles:
+		broom_particles.emitting = false
 	mounted_changed.emit(false)
 	velocity = Vector3.ZERO
 	if is_instance_valid(anim_player):
@@ -739,6 +769,10 @@ func _spawn_floating_text(text: String, col: Color, scale_mult: float = 1.0) -> 
 		get_parent().add_child(ft)
 		ft.global_position = global_position + Vector3(0, 2.2, 0)
 		ft.setup(text, col, scale_mult)
+
+## Public single-line feedback hook (potions, UI events).
+func show_floating_text(text: String, col: Color, scale_mult: float = 1.0) -> void:
+	_spawn_floating_text(text, col, scale_mult)
 
 func emit_stats() -> void:
 	emit_signal("stats_changed", current_hp, max_hp, current_mana, max_mana, current_exp, max_exp, level)

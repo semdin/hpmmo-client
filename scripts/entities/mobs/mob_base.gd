@@ -8,6 +8,11 @@ signal died(mob: Node3D)
 @export var attack_power := 25
 @export var move_speed := 6.0
 @export var aggro_radius := 12.0
+## "reactive" (default): a valid hit activates the mob and its pack.
+## "aggressive": proximity scan inside aggro_radius also activates.
+@export var aggro_mode := "reactive"
+@export var assist_radius := 16.0
+@export var leash_distance := 26.0
 @export var attack_range := 2.2
 @export var attack_cooldown := 1.4
 @export var exp_reward := 65
@@ -47,6 +52,7 @@ var _scan_timer := 0.0
 @onready var label: Label3D = $Label3D
 @onready var visuals: Node3D = $Visuals
 const Rules = preload("res://scripts/spells/combat_rules.gd")
+const SafeZone = preload("res://scripts/world/safe_zone.gd")
 const FX = preload("res://scripts/spells/skill_fx.gd")
 const LOOT_SCENE = preload("res://scenes/entities/loot/loot_drop.tscn")
 const PROJECTILE_SCENE = preload("res://scenes/spells/spell_projectile.tscn")
@@ -96,6 +102,12 @@ func _physics_process(delta: float) -> void:
 		if not managed_respawn and not summoned and _corpse_time > _respawn_delay:
 			_respawn()
 		return
+	# Phase 1: enemies displaced inside a protected volume cancel the fight and
+	# walk home instead of attacking through the boundary.
+	if state != State.RETURN and SafeZone.is_protected_point(global_position) and not SafeZone.is_protected_point(spawn_point):
+		_cancel_attack()
+		target_player = null
+		state = State.RETURN
 	attack_timer = maxf(0, attack_timer - delta)
 	_weaken_timer = maxf(0, _weaken_timer - delta)
 	if _burn_timer > 0:
@@ -103,7 +115,10 @@ func _physics_process(delta: float) -> void:
 		_burn_tick -= delta
 		if _burn_tick <= 0:
 			_burn_tick = 1
-			take_damage(35, "burn", _burn_source)
+			# Phase 1: burn keeps its duration but stops damaging inside
+			# protected volumes (defense-in-depth; the fight is dropped there).
+			if not SafeZone.is_protected_point(global_position):
+				take_damage(35, "burn", _burn_source)
 			if state == State.DEAD:
 				return
 	if state == State.STUNNED:
@@ -142,10 +157,13 @@ func _idle_and_wander(delta: float) -> void:
 	_scan_timer -= delta
 	if _scan_timer <= 0:
 		_scan_timer = 0.35
-		for player in get_tree().get_nodes_in_group("players"):
-			if Rules.can_damage(self, player) and global_position.distance_to(player.global_position) < aggro_radius and Rules.has_line_of_sight(self, player):
-				aggro_on(player)
-				return
+		# Ordinary mobs are reactive: only explicit aggressive encounters use
+		# the proximity trigger (plan Phase 1, gameplay policy 3.3).
+		if aggro_mode == "aggressive":
+			for player in get_tree().get_nodes_in_group("players"):
+				if Rules.can_damage(self, player) and global_position.distance_to(player.global_position) < aggro_radius and Rules.has_line_of_sight(self, player):
+					aggro_on(player)
+					return
 	if state == State.WANDER:
 		_move_to(wander_target, move_speed * 0.3, delta)
 		wander_timer -= delta
@@ -171,14 +189,14 @@ func aggro_on(player: Node3D, alert_pack: bool = true) -> void:
 		state = State.CHASE
 	if alert_pack and pack_id > 0:
 		for mob in get_tree().get_nodes_in_group("mobs"):
-			if mob != self and mob.pack_id == pack_id:
+			if mob != self and mob.pack_id == pack_id and global_position.distance_to(mob.global_position) <= assist_radius:
 				mob.aggro_on(player, false)
 
 func _valid_target() -> bool:
 	return Rules.can_damage(self, target_player)
 
 func _fight(delta: float) -> void:
-	if not _valid_target() or global_position.distance_to(pack_anchor) > (40 if is_boss else 26):
+	if not _valid_target() or global_position.distance_to(pack_anchor) > leash_distance:
 		_cancel_attack()
 		target_player = null
 		state = State.RETURN
