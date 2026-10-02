@@ -6,19 +6,17 @@ const MaterialKitScript = preload("res://scripts/assets/material_kit.gd")
 ## quidditch pitch, paths, lamps, fences, floating candles, stars.
 ## All procedural so no external binary assets are needed.
 
-static var _built := false
 
 static func build(world: Node3D) -> void:
-	if _built:
+	if world.has_node("HogwartsCastle"):
 		return
-	_built = true
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 20260707
 
 	_apply_sky_and_fog(world)
 	_reskin_terrain(world)
 	_build_paths(world)
-	_build_castle(world)
+	preload("res://scripts/world/castle_builder.gd").build(world)
 	_build_courtyard_details(world)
 	_build_village(world)
 	_build_forbidden_forest(world, rng)
@@ -28,6 +26,7 @@ static func build(world: Node3D) -> void:
 	_build_level_dressing(world, rng)
 	_build_floating_candles(world)
 	_build_stars_and_moon(world)
+	_build_world_boundaries(world)
 
 # ---------------------------------------------------------------- sky
 
@@ -37,40 +36,49 @@ static func _apply_sky_and_fog(world: Node3D) -> void:
 		var env: Environment = (env_node as WorldEnvironment).environment
 		if env:
 			env.background_mode = Environment.BG_SKY
-			# Golden-hour grade: warm sun, cool shadows, readable characters.
+			# Golden-hour grade: warm sun, cool shadows, crystal-clear horizons
 			var sky_mat := env.sky.sky_material as ProceduralSkyMaterial
 			if sky_mat:
-				sky_mat.sky_top_color = Color(0.16, 0.30, 0.58)
-				sky_mat.sky_horizon_color = Color(0.98, 0.72, 0.45)
-				sky_mat.ground_bottom_color = Color(0.10, 0.12, 0.14)
-				sky_mat.ground_horizon_color = Color(0.55, 0.48, 0.42)
-				sky_mat.sun_angle_max = 12.0
-			env.fog_enabled = true
-			env.fog_light_color = Color(0.72, 0.62, 0.55)
-			env.fog_density = 0.008
-			env.fog_sky_affect = 0.45
+				sky_mat.sky_top_color = Color(0.12, 0.29, 0.52)
+				sky_mat.sky_horizon_color = Color(0.62, 0.76, 0.88)
+				sky_mat.ground_bottom_color = Color(0.08, 0.10, 0.12)
+				sky_mat.ground_horizon_color = Color(0.35, 0.42, 0.49)
+				sky_mat.sun_angle_max = 14.0
+			
+			# Fog Removal & Horizon Clarity (Section 8.1 of plan.md):
+			# Reduced by 92% from 0.008 to 0.0006 for pristine horizons and distant castle visibility
+			env.fog_enabled = false
+			env.fog_light_color = Color(0.75, 0.68, 0.60)
+			env.fog_density = 0.0006
+			env.fog_aerial_perspective = 0.08
+			env.fog_sky_affect = 0.15
+			
+			# Lighting & Filmic Post-Processing (Section 8.2 of plan.md):
 			env.glow_enabled = true
-			env.glow_intensity = 0.85
-			env.glow_bloom = 0.3
+			env.glow_intensity = 0.35
+			env.glow_bloom = 0.04
 			env.glow_blend_mode = Environment.GLOW_BLEND_MODE_ADDITIVE
-			env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-			env.tonemap_exposure = 1.1
+			env.tonemap_mode = Environment.TONE_MAPPER_ACES
+			env.tonemap_exposure = 1.15
 			env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-			env.ambient_light_energy = 0.75
+			env.ambient_light_energy = 0.95
 			env.adjustment_enabled = true
-			env.adjustment_saturation = 1.15
-			env.adjustment_contrast = 1.08
+			env.adjustment_saturation = 1.05
+			env.adjustment_contrast = 1.02
 			env.ssao_enabled = true
-			env.ssao_intensity = 0.6
-	# Warm low sun + cool moon fill for depth and long readable shadows.
+			env.ssao_intensity = 1.2
+			env.ssr_enabled = false
+			env.ssr_max_steps = 64
+	
+	# Directional Sunlight: Golden hour rim lighting with 4-split shadow cascades (Section 8.2)
 	var sun := world.get_node_or_null("DirectionalLight3D") as DirectionalLight3D
 	if sun:
-		sun.light_color = Color(1.0, 0.82, 0.62)
-		sun.light_energy = 1.5
+		sun.light_color = Color(1.0, 0.93, 0.8)
+		sun.light_energy = 1.35
 		sun.shadow_enabled = true
 		sun.rotation_degrees = Vector3(-38, -32, 0)
 		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
-		sun.directional_shadow_max_distance = 160.0
+		sun.directional_shadow_max_distance = 110.0
 
 # ---------------------------------------------------------------- terrain
 
@@ -88,7 +96,7 @@ static func _reskin_terrain(world: Node3D) -> void:
 	meadow.position = Vector3(0, -0.62, 0)
 	world.add_child(meadow)
 
-	var court := world.get_node_or_null("Terrain/CourtyardMesh")
+	var court := world.get_node_or_null("Terrain/Courtyard")
 	if court and court is MeshInstance3D:
 		(court as MeshInstance3D).set_surface_override_material(0, 	MaterialKitScript.cobble_material())
 
@@ -115,134 +123,13 @@ static func _build_paths(world: Node3D) -> void:
 	paths.name = "StonePaths"
 	world.add_child(paths)
 	# courtyard -> castle, village, lake, pitch, forest edge
-	_cobble_path(paths, Vector3(0, 0, 5), Vector3(0, 0, -38), 4.0)
+	_cobble_path(paths, Vector3(0, 0, 5), Vector3(0, 0, -47), 6.0)
 	_cobble_path(paths, Vector3(0, 0, 5), Vector3(38, 0, 14), 3.0)
 	_cobble_path(paths, Vector3(0, 0, 5), Vector3(-34, 0, 18), 3.0)
 	_cobble_path(paths, Vector3(0, 0, -20), Vector3(-52, 0, -52), 2.5)
 	_cobble_path(paths, Vector3(0, 0, -20), Vector3(55, 0, -55), 2.5)
 
 # ---------------------------------------------------------------- castle
-
-static func _tower(parent: Node3D, pos: Vector3, radius: float, height: float, wall_mat: Material, roof_mat: Material) -> void:
-	var body := MeshInstance3D.new()
-	var cyl := CylinderMesh.new()
-	cyl.top_radius = radius
-	cyl.bottom_radius = radius * 1.08
-	cyl.height = height
-	cyl.radial_segments = 12
-	cyl.material = wall_mat
-	body.mesh = cyl
-	body.position = pos + Vector3(0, height * 0.5, 0)
-	parent.add_child(body)
-	# collision-ish not needed for visuals; add static body for main keep only
-
-	var roof := MeshInstance3D.new()
-	var cone := CylinderMesh.new()
-	cone.top_radius = 0.05
-	cone.bottom_radius = radius * 1.35
-	cone.height = radius * 2.2
-	cone.radial_segments = 12
-	cone.material = roof_mat
-	roof.mesh = cone
-	roof.position = pos + Vector3(0, height + radius * 1.1, 0)
-	parent.add_child(roof)
-
-	# glowing windows band
-	for i in range(3):
-		var win := MeshInstance3D.new()
-		var bm := BoxMesh.new()
-		bm.size = Vector3(0.5, 0.8, 0.1)
-		var wm := StandardMaterial3D.new()
-		wm.albedo_color = Color(1.0, 0.82, 0.4)
-		wm.emission_enabled = true
-		wm.emission = Color(1.0, 0.75, 0.3)
-		wm.emission_energy_multiplier = 2.5
-		bm.material = wm
-		win.mesh = bm
-		var ang := TAU * float(i) / 3.0
-		win.position = pos + Vector3(cos(ang) * radius * 1.02, height * 0.62, sin(ang) * radius * 1.02)
-		win.rotation.y = -ang + PI * 0.5
-		parent.add_child(win)
-
-static func _build_castle(world: Node3D) -> void:
-	var castle := Node3D.new()
-	castle.name = "HogwartsCastle"
-	castle.position = Vector3(0, 0, -72)
-	world.add_child(castle)
-
-	var wall_mat := 	MaterialKitScript.castle_wall_material()
-	var roof_mat := 	MaterialKitScript.castle_roof_material()
-	var wood_mat := 	MaterialKitScript.wood_material()
-
-	# main keep
-	var keep := MeshInstance3D.new()
-	var keep_mesh := BoxMesh.new()
-	keep_mesh.size = Vector3(34, 18, 12)
-	keep_mesh.material = wall_mat
-	keep.mesh = keep_mesh
-	keep.position = Vector3(0, 9, 0)
-	castle.add_child(keep)
-
-	# great hall extension
-	var hall := MeshInstance3D.new()
-	var hall_mesh := BoxMesh.new()
-	hall_mesh.size = Vector3(20, 10, 18)
-	hall_mesh.material = wall_mat
-	hall.mesh = hall_mesh
-	hall.position = Vector3(0, 5, 13)
-	castle.add_child(hall)
-
-	var hall_roof := MeshInstance3D.new()
-	var prism := PrismMesh.new()
-	prism.size = Vector3(21, 5, 19)
-	prism.material = roof_mat
-	hall_roof.mesh = prism
-	hall_roof.position = Vector3(0, 12.5, 13)
-	castle.add_child(hall_roof)
-
-	# towers
-	_tower(castle, Vector3(-18, 0, -4), 4.0, 26.0, wall_mat, roof_mat)
-	_tower(castle, Vector3(18, 0, -4), 4.0, 26.0, wall_mat, roof_mat)
-	_tower(castle, Vector3(-12, 0, 6), 3.0, 20.0, wall_mat, roof_mat)
-	_tower(castle, Vector3(12, 0, 6), 3.0, 20.0, wall_mat, roof_mat)
-	_tower(castle, Vector3(0, 12, -2), 5.0, 22.0, wall_mat, roof_mat) # astronomy tower on keep
-
-	# gate + warm entrance light
-	var gate := MeshInstance3D.new()
-	var gate_mesh := BoxMesh.new()
-	gate_mesh.size = Vector3(6, 7, 1.0)
-	gate_mesh.material = wood_mat
-	gate.mesh = gate_mesh
-	gate.position = Vector3(0, 3.5, 22.2)
-	castle.add_child(gate)
-
-	var gate_light := OmniLight3D.new()
-	gate_light.position = Vector3(0, 5, 24)
-	gate_light.light_color = Color(1.0, 0.8, 0.45)
-	gate_light.light_energy = 2.5
-	gate_light.omni_range = 18.0
-	castle.add_child(gate_light)
-
-	var label := Label3D.new()
-	label.text = "HOGWARTS CASTLE"
-	label.font_size = 48
-	label.outline_size = 10
-	label.outline_modulate = Color(0, 0, 0)
-	label.modulate = Color(1.0, 0.9, 0.55)
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.position = Vector3(0, 30, 6)
-	castle.add_child(label)
-
-	# castle hill base
-	var hill := MeshInstance3D.new()
-	var hill_mesh := CylinderMesh.new()
-	hill_mesh.top_radius = 30.0
-	hill_mesh.bottom_radius = 38.0
-	hill_mesh.height = 4.0
-	hill_mesh.material = 	MaterialKitScript.grass_material()
-	hill.mesh = hill_mesh
-	hill.position = Vector3(0, -2.0, 2)
-	castle.add_child(hill)
 
 static func _build_courtyard_details(world: Node3D) -> void:
 	var forge := world.get_node_or_null("OllivanderWorkshop")
@@ -610,7 +497,7 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 	beam.position = Vector3(0, 6.4, -14)
 	dz.add_child(beam)
 	var arch_label := Label3D.new()
-	arch_label.text = "FORBIDDEN FOREST →"
+	arch_label.text = "HOGWARTS ↑   •   FOREST ←"
 	arch_label.font_size = 32
 	arch_label.outline_size = 8
 	arch_label.outline_modulate = Color(0, 0, 0)
@@ -618,7 +505,7 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 	arch_label.position = Vector3(0, 7.6, -14)
 	dz.add_child(arch_label)
 	# -- ruins + crystals near each monolith approach (cover + landmark)
-	var ruin_spots := [Vector3(6, 0, -26), Vector3(39, 0, -20), Vector3(-39, 0, -23)]
+	var ruin_spots := [Vector3(28, 0, -40), Vector3(39, 0, -20), Vector3(-39, 0, -23)]
 	for rs in ruin_spots:
 		for i in range(4):
 			var wall := MeshInstance3D.new()
@@ -704,18 +591,7 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 		plank.mesh = plm
 		plank.position = Vector3(-30 + 0.0, 0.25, 22 + i * 1.0)
 		dz.add_child(plank)
-	# -- mountain ring (level bounds so the valley reads as a place)
-	for i in range(14):
-		var ang := TAU * float(i) / 14.0
-		var m := MeshInstance3D.new()
-		var cm := CylinderMesh.new()
-		cm.top_radius = 2.0
-		cm.bottom_radius = rng.randf_range(18, 30)
-		cm.height = rng.randf_range(28, 48)
-		cm.material = stone
-		m.mesh = cm
-		m.position = Vector3(cos(ang) * 150.0, -4.0, sin(ang) * 150.0)
-		dz.add_child(m)
+	preload("res://scripts/world/distant_ridges.gd").build(dz)
 	# -- scatter: grass tufts (crossed planes), rocks, flowers — cheap but rich
 	var leaf := MaterialKitScript.leaf_material()
 	for i in range(160):
@@ -725,7 +601,8 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 		tm.material = leaf
 		tuft.mesh = tm
 		tuft.position = Vector3(rng.randf_range(-90, 90), 0.25, rng.randf_range(-70, 45))
-		if tuft.position.distance_to(Vector3(0, 0, 5)) < 12.0:
+		if tuft.position.distance_to(Vector3(0, 0, 5)) < 12.0 or (absf(tuft.position.x) < 40 and tuft.position.z < -38):
+			tuft.free()
 			continue # keep courtyard clean
 		tuft.rotation.y = rng.randf_range(0, TAU)
 		dz.add_child(tuft)
@@ -737,6 +614,9 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 		rm.material = stone
 		rock.mesh = rm
 		rock.position = Vector3(rng.randf_range(-90, 90), 0.15, rng.randf_range(-70, 45))
+		if absf(rock.position.x) < 40 and rock.position.z < -38:
+			rock.free()
+			continue
 		rock.scale.y = 0.6
 		dz.add_child(rock)
 	for i in range(60):
@@ -834,3 +714,50 @@ static func _build_stars_and_moon(world: Node3D) -> void:
 	ml.light_energy = 0.35
 	ml.rotation_degrees = Vector3(-50, -30, 0)
 	world.add_child(ml)
+
+# ---------------------------------------------------------------- boundaries
+
+static func _build_world_boundaries(world: Node3D) -> void:
+	var bounds := Node3D.new()
+	bounds.name = "WorldBoundaries"
+	world.add_child(bounds)
+
+	var half_size: float = 250.0 # 500m x 500m world boundary
+	var wall_height: float = 60.0
+	var wall_thickness: float = 8.0
+
+	var wall_specs = [
+		{"pos": Vector3(0, wall_height * 0.5, -half_size), "size": Vector3(half_size * 2, wall_height, wall_thickness)}, # North
+		{"pos": Vector3(0, wall_height * 0.5, half_size), "size": Vector3(half_size * 2, wall_height, wall_thickness)},  # South
+		{"pos": Vector3(-half_size, wall_height * 0.5, 0), "size": Vector3(wall_thickness, wall_height, half_size * 2)}, # West
+		{"pos": Vector3(half_size, wall_height * 0.5, 0), "size": Vector3(wall_thickness, wall_height, half_size * 2)}   # East
+	]
+
+	# Glowing ancient magical barrier effect (Section 7.2 of plan.md)
+	var barrier_mat := StandardMaterial3D.new()
+	barrier_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	barrier_mat.albedo_color = Color(0.15, 0.55, 1.0, 0.12)
+	barrier_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	barrier_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+	for spec in wall_specs:
+		var sb := StaticBody3D.new()
+		sb.collision_layer = 1
+		sb.collision_mask = 3
+		sb.position = spec["pos"]
+		bounds.add_child(sb)
+
+		var col := CollisionShape3D.new()
+		var box := BoxShape3D.new()
+		box.size = spec["size"]
+		col.shape = box
+		sb.add_child(col)
+
+		# Visual subtle shimmering blue ancient ward barrier
+		var mesh_inst := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		bm.size = spec["size"]
+		bm.material = barrier_mat
+		mesh_inst.mesh = bm
+		mesh_inst.visible = false
+		sb.add_child(mesh_inst)

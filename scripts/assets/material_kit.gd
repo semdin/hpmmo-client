@@ -16,18 +16,15 @@ static func _noise_tex(base: Color, variation: Color, size: int = 128, scale_cel
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_val
 	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
-	# value-noise-ish blotches + per-pixel grain
-	var cell := size / scale_cells
+	var noise := FastNoiseLite.new()
+	noise.seed = seed_val
+	noise.frequency = 0.025
+	noise.fractal_octaves = 4
 	for y in range(size):
 		for x in range(size):
-			var cx := int(x / cell)
-			var cy := int(y / cell)
-			var cell_hash := float((cx * 73856093) ^ (cy * 19349663) ^ (seed_val * 83492791))
-			cell_hash = abs(fmod(cell_hash, 1000.0)) / 1000.0
-			var grain := rng.randf_range(-0.08, 0.08)
-			var t: float = clamp(cell_hash * 0.65 + grain + 0.18 * sin(float(x) * 0.35) * cos(float(y) * 0.3), 0.0, 1.0)
-			var col := base.lerp(variation, t)
-			img.set_pixel(x, y, col)
+			var t := clampf(noise.get_noise_2d(x, y) * 0.8 + 0.5 + rng.randf_range(-0.035, 0.035), 0, 1)
+			img.set_pixel(x, y, base.lerp(variation, t))
+	img.generate_mipmaps()
 	var tex := ImageTexture.create_from_image(img)
 	_cache[key] = tex
 	return tex

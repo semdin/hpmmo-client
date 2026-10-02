@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HPMMO — Official Launcher & Auto-Updater</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient magical particle container -->
+  <div id="particles-bg"></div>
+
+  <!-- Main Background Container with Banner Image -->
+  <div class="launcher-backdrop">
+    <div class="backdrop-image"></div>
+    <div class="backdrop-gradient"></div>
+    <div class="backdrop-vignette"></div>
+  </div>
+
+  <div class="app-window">
+    <!-- Top Custom Header -->
+    <header class="launcher-header">
+      <div class="brand-group">
+        <img src="../assets/hpmmo_logo.jpg" alt="HPMMO Logo" class="brand-logo" id="brandLogo">
+        <div class="brand-text">
+          <h1 class="brand-title">HPMMO</h1>
+          <span class="brand-subtitle">WIZARDING REALM MMORPG • METIN2 SPELL COMBAT</span>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <!-- Live Realm Status Pill -->
+        <div class="realm-pill" id="realmStatusPill">
+          <span class="status-dot pinging" id="statusDot"></span>
+          <span class="realm-text" id="statusText">Pinging Realm...</span>
+          <span class="ping-tag" id="pingTag">-- ms</span>
+        </div>
+
+        <div class="version-badge" id="clientVerBadge">Client v1.1.0</div>
+
+        <!-- Custom Window Controls -->
+        <div class="window-controls">
+          <button class="win-btn" id="btnMinimize" title="Minimize">─</button>
+          <button class="win-btn close" id="btnClose" title="Close">✕</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="launcher-body">
+      <!-- Left Column: Authentication & Game Launch -->
+      <section class="left-section">
+        <!-- Auth Card -->
+        <div class="glass-card auth-card">
+          <div class="card-header">
+            <div class="auth-tabs">
+              <button class="auth-tab active" id="tabLogin" data-mode="login">🔑 GİRİŞ YAP</button>
+              <button class="auth-tab" id="tabRegister" data-mode="register">📝 KAYIT OL</button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="input-group">
+              <label for="usernameInput">Hesap Adı / Username</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🧙</span>
+                <input type="text" id="usernameInput" placeholder="Kullanıcı adı girin..." autocomplete="username">
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="passwordInput">Şifre / Password</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🔒</span>
+                <input type="password" id="passwordInput" placeholder="Şifrenizi girin..." autocomplete="current-password">
+              </div>
+            </div>
+
+            <div class="auth-row-options">
+              <label class="checkbox-label">
+                <input type="checkbox" id="rememberMe" checked>
+                <span>Beni Hatırla (Auto-save)</span>
+              </label>
+              <span class="auth-mode-hint" id="authModeHint">Karakterleriniz PostgreSQL'e kaydedilir.</span>
+            </div>
+
+            <!-- Feedback Notice Message -->
+            <div class="auth-notice" id="authNotice" style="display: none;"></div>
+
+            <!-- In-Card Action Button (For Register / Verify) -->
+            <div class="auth-action-row" id="authActionRow" style="display: none;">
+              <button class="btn-secondary" id="btnSubmitRegister">Hesabı Oluştur</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Launch Action Area -->
+        <div class="launch-card">
+          <div class="main-buttons">
+            <!-- Huge Primary Play Now Button -->
+            <button class="btn-hero-play" id="btnPlayNow">
+              <div class="btn-glow"></div>
+              <div class="btn-content">
+                <span class="play-icon">⚔️</span>
+                <div class="play-labels">
+                  <span class="play-title">OYUNA BAŞLA</span>
+                  <span class="play-sub">DEDICATED REALM • ONLINE</span>
+                </div>
+              </div>
+            </button>
+
+            <!-- Solo Offline Mode Button -->
+            <button class="btn-solo-offline" id="btnSoloOffline" title="Solo Çevrimdışı Mod (İnternet veya sunucu gerektirmez)">
+              <span class="solo-icon">🕹️</span>
+              <div class="solo-labels">
+                <span class="solo-title">SOLO MOD</span>
+                <span class="solo-sub">Çevrimdışı Solo Oyun</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Utility quick links -->
+          <div class="quick-links">
+            <button class="link-btn" id="btnGameFolder">📁 Oyun Klasörü</button>
+            <button class="link-btn" id="btnRefreshPing">🔄 Ping Yenile</button>
+            <button class="link-btn" id="btnSettingsToggle">⚙️ Sunucu Ayarı</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Realm Status & News Dispatches -->
+      <section class="right-section">
+        <!-- Settings Overlay Panel (Collapsible) -->
+        <div class="glass-card settings-card" id="settingsPanel" style="display: none;">
+          <div class="card-header">
+            <h3>⚙️ SUNUCU BAĞLANTI AYARLARI</h3>
+          </div>
+          <div class="card-body">
+            <div class="preset-buttons">
+              <button class="preset-btn active" id="presetOfficial" data-ip="213.250.145.75" data-port="7777">🌐 Official VPS (213.250.145.75)</button>
+              <button class="preset-btn" id="presetLocal" data-ip="127.0.0.1" data-port="7777">💻 Localhost (127.0.0.1)</button>
+            </div>
+            <div class="settings-inputs">
+              <div class="setting-col">
+                <label>Server IP:</label>
+                <input type="text" id="serverIpInput" value="213.250.145.75">
+              </div>
+              <div class="setting-col">
+                <label>UDP Port:</label>
+                <input type="number" id="serverPortInput" value="7777">
+              </div>
+            </div>
+            <button class="btn-primary-small" id="btnSaveConfig">Ayarları Kaydet</button>
+          </div>
+        </div>
+
+        <!-- News & Patch Dispatches Card -->
+        <div class="glass-card news-card">
+          <div class="card-header space-between">
+            <div class="header-title-group">
+              <span class="news-icon">📜</span>
+              <h2 class="card-title">HOGWARTS POSTASI & YAMA NOTLARI</h2>
+            </div>
+            <span class="realm-ver-tag" id="serverVerTag">Realm: v1.1.0</span>
+          </div>
+
+          <div class="news-feed" id="newsFeed">
+            <article class="news-item highlight">
+              <div class="news-meta">
+                <span class="tag-update">⚡ YENİ SÜRÜM</span>
+                <span class="news-date">v1.1.0 • Canlı Güncelleme</span>
+              </div>
+              <h3 class="news-title">PostgreSQL & JSON & RAM Hibrit Mimari Canlıda!</h3>
+              <p class="news-text">
+                Hesap kayıt, 4 Hogwarts binası seçimi, asa dereceleri ve Gallon verileri artık Linux VPS üzerindeki PostgreSQL veritabanında 7/24 kalıcı saklanıyor.
+              </p>
+            </article>
+
+            <article class="news-item">
+              <div class="news-meta">
+                <span class="tag-feature">✨ BÜYÜ VFX</span>
+                <span class="news-date">Görsel Efektler</span>
+              </div>
+              <h3 class="news-title">Stupefy, Incendio & Bombarda Efektleri Yenilendi</h3>
+              <p class="news-text">
+                Monolit dalgalarına karşı alan hasarları, şok dalgası halkaları ve alev parçacıkları modernize edildi. Süpürge uçuş senkronizasyonu geliştirildi.
+              </p>
+            </article>
+
+            <article class="news-item">
+              <div class="news-meta">
+                <span class="tag-info">🏰 BİNALAR</span>
+                <span class="news-date">Pasif Özellikler</span>
+              </div>
+              <h3 class="news-title">Gryffindor, Slytherin, Ravenclaw & Hufflepuff</h3>
+              <p class="news-text">
+                Karakterinizi oluştururken binanızı seçin: Gryffindor kritik hasar bonusu, Slytherin hızlı mana dolumu, Ravenclaw büyü menzili ve Hufflepuff maksimum HP takviyesi sunar.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Footer Bar -->
+    <footer class="launcher-footer">
+      <div class="footer-left">
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-labels">
+            <span class="status-msg" id="footerStatusMsg">HPMMO Büyücülük Dünyasına Girişe Hazır.</span>
+            <span class="progress-percent" id="progressPercent">100%</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progressBarFill" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-right">
+        <div class="server-endpoint-info">
+          <span class="ep-label">VPS Realm:</span>
+          <span class="ep-value" id="footerServerIp">213.250.145.75:7777</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,6 +1,37 @@
-# Godot 4+ .gitignore
+# Godot engine artifacts
 .godot/
 *.translation
 *.uid
+
+# Server archives & bundles
 *.tar.gz
 *.zip
+
+# Launcher & Browser Caches
+launcher/.cache/
+.cache/
+
+# C++ Build Artifacts
+launcher_cpp/build/
+build/
+CMakeFiles/
+*.ninja_deps
+*.ninja_log
+CMakeCache.txt
+
+# Python Caches & Bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Local Client Config & Temporary Logs
+client_config.json
+*.log
+*.tmp
+test_log.txt
+
+# OS & Editor Artifacts
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini

@@ -1,6 +1,6 @@
 extends Node
 
-## GameData Autoload - Central Database for PotterMetin MMO
+## GameData Autoload - Central Database for HPMMO
 ## Houses, Spells, Items, Ollivander Upgrade Logic, and Input Registration
 
 # House Factions
@@ -288,7 +288,8 @@ func _register_input_actions() -> void:
 	_ensure_action("move_left", [KEY_A, KEY_LEFT])
 	_ensure_action("move_right", [KEY_D, KEY_RIGHT])
 	_ensure_action("jump", [KEY_SPACE])
-	_ensure_action("mount_broom", [KEY_SHIFT, KEY_CTRL])
+	_ensure_action("flight_descend", [KEY_CTRL])
+	_ensure_action("mount_broom", [KEY_SHIFT])
 	_ensure_action("target_cycle", [KEY_TAB])
 	_ensure_action("pickup_loot", [KEY_Z, KEY_QUOTELEFT])
 	_ensure_action("toggle_inventory", [KEY_I])

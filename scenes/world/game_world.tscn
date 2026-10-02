@@ -32,22 +32,22 @@ sky = SubResource("Sky_env")
 ambient_light_source = 2
 ambient_light_color = Color(0.25, 0.28, 0.38, 1)
 ambient_light_energy = 0.9
-tonemap_mode = 2
-tonemap_exposure = 1.05
+tonemap_mode = 3
+tonemap_exposure = 1.15
 tonemap_white = 1.15
 ssao_enabled = true
 ssao_radius = 1.5
-ssao_intensity = 2.0
+ssao_intensity = 1.2
 glow_enabled = true
 glow_levels/1 = 0.6
 glow_levels/2 = 0.4
-glow_intensity = 0.8
+glow_intensity = 0.9
 glow_strength = 1.0
-glow_bloom = 0.06
+glow_bloom = 0.35
 glow_hdr_threshold = 1.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(220, 1, 220)
+size = Vector3(520, 1, 520)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_grass"]
 albedo_color = Color(0.18, 0.3, 0.15, 1)
@@ -55,7 +55,7 @@ roughness = 0.85
 
 [sub_resource type="BoxMesh" id="BoxMesh_grass"]
 material = SubResource("StandardMaterial3D_grass")
-size = Vector3(220, 1, 220)
+size = Vector3(520, 1, 520)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_courtyard"]
 albedo_color = Color(0.38, 0.36, 0.35, 1)

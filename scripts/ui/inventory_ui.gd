@@ -14,11 +14,17 @@ func _ready() -> void:
 
 func open_for_player(p_player: Node3D) -> void:
 	player = p_player
+	if not player.inventory_changed.is_connected(_on_inventory_changed):
+		player.inventory_changed.connect(_on_inventory_changed)
 	refresh()
 	show()
 
+func _on_inventory_changed() -> void:
+	if visible:
+		refresh()
+
 func refresh() -> void:
-	if not is_instance_valid(player):
+	if not is_instance_valid(player) or player.is_dead:
 		return
 	
 	galleons_label.text = "Galleons: %d" % player.galleons
@@ -51,7 +57,7 @@ func refresh() -> void:
 		item_container.add_child(btn)
 
 func _on_item_clicked(item_data: Dictionary) -> void:
-	if not is_instance_valid(player):
+	if not is_instance_valid(player) or player.is_dead:
 		return
 	
 	var item_id = item_data.id

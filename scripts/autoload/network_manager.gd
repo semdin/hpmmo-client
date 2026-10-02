@@ -37,7 +37,7 @@ var peer_char_data_map: Dictionary = {} # peer_id -> full char_data
 var _auto_save_timer: float = 30.0
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_PREDELETE:
+	if what == NOTIFICATION_PREDELETE:
 		disconnect_game()
 		var mk = load("res://scripts/assets/material_kit.gd")
 		if mk and mk.has_method("clear_cache"):
@@ -78,7 +78,7 @@ func start_dedicated_server(port: int = DEFAULT_PORT) -> Error:
 	is_dedicated_server = true
 	is_connected_to_game = true
 	print("=========================================================")
-	print("[Dedicated Server] PotterMetin MMO Running on Port %d" % port)
+	print("[Dedicated Server] HPMMO Running on Port %d" % port)
 	print("[Dedicated Server] Ready for incoming player connections!")
 	print("=========================================================")
 	emit_signal("connection_status_changed", "Dedicated Server active on port %d" % port)
@@ -217,7 +217,7 @@ func _process(delta: float) -> void:
 		_sync_timer = 1.0 / 15.0
 		var lp := _find_local_player()
 		if lp:
-			rpc_broadcast_state.rpc(lp.global_position, lp.rotation.y, lp.is_mounted, lp.current_hp, lp.level)
+			rpc_broadcast_state.rpc(lp.global_position, lp.visuals.rotation.y, lp.is_mounted, lp.current_hp, lp.level)
 
 func _find_local_player() -> Node3D:
 	if not is_inside_tree():

@@ -86,6 +86,7 @@ func _on_refine_pressed() -> void:
 	if roll <= up_info.chance:
 		# SUCCESS!
 		player.upgrade_wand(tier + 1)
+		QuestManager.add_refine()
 		result_label.text = "REFINING SUCCEEDED! Your wand surges with arcane power!"
 		result_label.modulate = Color(0.2, 1.0, 0.4)
 		if audio:

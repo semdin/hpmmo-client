@@ -1,0 +1,398 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/character_select.gd" id="1_cs"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
+sky_top_color = Color(0.04, 0.06, 0.12, 1)
+sky_horizon_color = Color(0.12, 0.15, 0.22, 1)
+ground_bottom_color = Color(0.02, 0.03, 0.05, 1)
+ground_horizon_color = Color(0.08, 0.1, 0.15, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("ProceduralSkyMaterial_1")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 2
+ambient_light_color = Color(0.2, 0.22, 0.3, 1)
+ambient_light_energy = 0.8
+tonemap_mode = 3
+glow_enabled = true
+glow_intensity = 0.6
+glow_bloom = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_podium"]
+albedo_color = Color(0.18, 0.18, 0.22, 1)
+metallic = 0.2
+roughness = 0.7
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_podium"]
+material = SubResource("StandardMaterial3D_podium")
+top_radius = 1.3
+bottom_radius = 1.45
+height = 0.5
+radial_segments = 32
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rune"]
+shading_mode = 0
+albedo_color = Color(0.85, 0.7, 0.2, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_rune"]
+material = SubResource("StandardMaterial3D_rune")
+inner_radius = 1.15
+outer_radius = 1.25
+rings = 24
+ring_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ember"]
+shading_mode = 0
+albedo_color = Color(1, 0.75, 0.3, 0.8)
+
+[sub_resource type="SphereMesh" id="SphereMesh_ember"]
+material = SubResource("StandardMaterial3D_ember")
+radius = 0.025
+height = 0.05
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_spark"]
+shading_mode = 0
+albedo_color = Color(1, 0.85, 0.2, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_spark"]
+material = SubResource("StandardMaterial3D_spark")
+radius = 0.05
+height = 0.1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.08, 0.09, 0.14, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.7, 0.25, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_gold"]
+bg_color = Color(0.35, 0.25, 0.1, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.85, 0.3, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="CharacterSelect" type="Node3D"]
+script = ExtResource("1_cs")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.766, 0.444, -0.465, 0, 0.723, 0.691, 0.643, -0.529, 0.554, 0, 4.0, 0)
+light_color = Color(1, 0.88, 0.7, 1)
+light_energy = 1.5
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.985, 0.174, 0, -0.174, 0.985, 0, 1.45, 3.6)
+current = true
+fov = 62.0
+
+[node name="Podium" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="PodiumMesh" type="MeshInstance3D" parent="Podium"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_podium")
+
+[node name="RuneRing" type="MeshInstance3D" parent="Podium"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.26, 0)
+mesh = SubResource("TorusMesh_rune")
+
+[node name="PodiumLight" type="OmniLight3D" parent="Podium"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+light_color = Color(0.9, 0.75, 0.25, 1)
+light_energy = 2.2
+omni_range = 4.5
+
+[node name="EmbersParticles" type="CPUParticles3D" parent="Podium"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+amount = 25
+lifetime = 2.0
+mesh = SubResource("SphereMesh_ember")
+emission_shape = 1
+emission_sphere_radius = 1.2
+gravity = Vector3(0, 0.8, 0)
+scale_amount_min = 0.5
+scale_amount_max = 1.3
+
+[node name="ModelAnchor" type="Node3D" parent="Podium"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+
+[node name="WandAuraParticles" type="CPUParticles3D" parent="Podium"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 1.4, -0.6)
+emitting = false
+amount = 20
+lifetime = 0.5
+mesh = SubResource("SphereMesh_spark")
+gravity = Vector3(0, 1.5, 0)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="TopBar" type="HBoxContainer" parent="CanvasLayer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 30.0
+offset_top = 25.0
+offset_right = -30.0
+offset_bottom = 75.0
+grow_horizontal = 2
+
+[node name="TitleLabel" type="Label" parent="CanvasLayer/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 28
+text = "HPMMO — HOGWARTS"
+
+[node name="Spacer" type="Control" parent="CanvasLayer/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SlotLabel" type="Label" parent="CanvasLayer/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 18
+text = "BÜYÜCÜ SEÇİMİ — YUVA 1 / 2"
+
+[node name="Spacer2" type="Control" parent="CanvasLayer/TopBar"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="LogoutBtn" type="Button" parent="CanvasLayer/TopBar"]
+custom_minimum_size = Vector2(100, 36)
+layout_mode = 2
+text = "Çıkış"
+
+[node name="NavButtons" type="HBoxContainer" parent="CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -25.0
+offset_right = 340.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PrevSlotBtn" type="Button" parent="CanvasLayer/NavButtons"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+text = "◄"
+
+[node name="Spacer" type="Control" parent="CanvasLayer/NavButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="NextSlotBtn" type="Button" parent="CanvasLayer/NavButtons"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+text = "►"
+
+[node name="InfoCard" type="PanelContainer" parent="CanvasLayer"]
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 40.0
+offset_top = -140.0
+offset_right = 320.0
+offset_bottom = 140.0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="Margin" type="MarginContainer" parent="CanvasLayer/InfoCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/InfoCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CharNameLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 22
+text = "Harry"
+
+[node name="HouseLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "[ Gryffindor ]"
+
+[node name="HSeparator" type="HSeparator" parent="CanvasLayer/InfoCard/Margin/VBox"]
+layout_mode = 2
+
+[node name="StatsLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Seviye: 1  |  Can: 500  |  Mana: 300"
+
+[node name="WandLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "Asa: +0 Büyü Gücü"
+
+[node name="GalleonsLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 13
+text = "Servet: 500 Galleon 💰"
+
+[node name="LocationLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = "Konum: Hogwarts Avlusu"
+
+[node name="BottomBar" type="HBoxContainer" parent="CanvasLayer"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -80.0
+offset_right = -40.0
+offset_bottom = -25.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="EnterWorldBtn" type="Button" parent="CanvasLayer/BottomBar"]
+custom_minimum_size = Vector2(240, 50)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_gold")
+text = "⚔️ OYUNA GİR (ENTER WORLD)"
+
+[node name="NewCharBtn" type="Button" parent="CanvasLayer/BottomBar"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+text = "➕ Yeni Büyücü Oluştur"
+
+[node name="CreateModal" type="PanelContainer" parent="CanvasLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -180.0
+offset_right = 260.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="Margin" type="MarginContainer" parent="CanvasLayer/CreateModal"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/CreateModal/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ModalTitle" type="Label" parent="CanvasLayer/CreateModal/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 20
+text = "Yeni Büyücü Oluştur (Max 2)"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CanvasLayer/CreateModal/Margin/VBox"]
+layout_mode = 2
+
+[node name="NameRow" type="HBoxContainer" parent="CanvasLayer/CreateModal/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NameLbl" type="Label" parent="CanvasLayer/CreateModal/Margin/VBox/NameRow"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Büyücü Adı:"
+
+[node name="NewNameInput" type="LineEdit" parent="CanvasLayer/CreateModal/Margin/VBox/NameRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Adınızı yazın..."
+
+[node name="HouseRow" type="HBoxContainer" parent="CanvasLayer/CreateModal/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="GryfBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
+custom_minimum_size = Vector2(100, 34)
+layout_mode = 2
+text = "Gryffindor"
+
+[node name="SlythBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
+custom_minimum_size = Vector2(100, 34)
+layout_mode = 2
+text = "Slytherin"
+
+[node name="RavenBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
+custom_minimum_size = Vector2(100, 34)
+layout_mode = 2
+text = "Ravenclaw"
+
+[node name="HuffBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
+custom_minimum_size = Vector2(100, 34)
+layout_mode = 2
+text = "Hufflepuff"
+
+[node name="HouseDescLabel" type="Label" parent="CanvasLayer/CreateModal/Margin/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Gryffindor - Cesaret ve Sadakat"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ModalStatusLabel" type="Label" parent="CanvasLayer/CreateModal/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="CanvasLayer/CreateModal/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="ConfirmCreateBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/Buttons"]
+custom_minimum_size = Vector2(150, 40)
+layout_mode = 2
+text = "Büyücüyü Oluştur"
+
+[node name="CancelCreateBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/Buttons"]
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+text = "İptal"

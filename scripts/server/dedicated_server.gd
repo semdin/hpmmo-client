@@ -1,6 +1,6 @@
 extends Node
 
-## PotterMetin Dedicated Server Entry Point
+## HPMMO Dedicated Server Entry Point
 ## Runs authoritatively in headless mode on Linux VPS (Ubuntu 22.04)
 
 var world_scene = preload("res://scenes/world/game_world.tscn")
@@ -8,7 +8,7 @@ var world_instance: Node3D = null
 
 func _ready() -> void:
 	print("=========================================================")
-	print(">>> [POTTERMETIN DEDICATED SERVER] Booting up... <<<")
+	print(">>> [HPMMO DEDICATED SERVER] Booting up... <<<")
 	print("=========================================================")
 	
 	# Start ENet server on port 7777

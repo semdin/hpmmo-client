@@ -53,7 +53,7 @@ func _build() -> void:
 	var qp := Panel.new()
 	qp.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	qp.position = Vector2(-206, 196)
-	qp.custom_minimum_size = Vector2(190, 90)
+	qp.custom_minimum_size = Vector2(190, 124)
 	var qsb := StyleBoxFlat.new()
 	qsb.bg_color = Color(0.06, 0.06, 0.1, 0.82)
 	qsb.border_color = Color(0.9, 0.78, 0.3)
@@ -64,7 +64,7 @@ func _build() -> void:
 	_quest_label.add_theme_font_size_override("font_size", 12)
 	_quest_label.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
 	_quest_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_quest_label.custom_minimum_size = Vector2(174, 74)
+	_quest_label.custom_minimum_size = Vector2(174, 108)
 	_quest_label.position = Vector2(8, 8)
 	qp.add_child(_quest_label)
 	add_child(qp)
@@ -143,9 +143,9 @@ func _build() -> void:
 
 	# --- controls hint (bottom-left): clears up WASD + passive rule ---
 	var help := Panel.new()
-	help.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	help.position = Vector2(16, -128)
-	help.custom_minimum_size = Vector2(300, 112)
+	help.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	help.position = Vector2(-296, 330)
+	help.custom_minimum_size = Vector2(285, 106)
 	var hsb := StyleBoxFlat.new()
 	hsb.bg_color = Color(0.04, 0.05, 0.08, 0.75)
 	hsb.border_color = Color(0.6, 0.65, 0.75)
@@ -153,18 +153,18 @@ func _build() -> void:
 	hsb.set_corner_radius_all(6)
 	help.add_theme_stylebox_override("panel", hsb)
 	var hl := Label.new()
-	hl.text = "WASD move (camera-relative) • SPACE jump\nW = away from camera • S = toward you\nRight-drag orbits • Wheel zooms\nMobs are PASSIVE (yellow) — you strike first!\nF talk • Z loot • Shift broom • Tab target"
+	hl.text = "WASD move • Right-drag camera • Wheel zoom\nLMB attack • 1–4 / Q / E skills • Tab target\nShift mount / dismount • Space rise / jump\nCtrl descend • F talk • Z loot • I bag\nNorth: Great Hall, library and classroom"
 	hl.add_theme_font_size_override("font_size", 11)
 	hl.add_theme_color_override("font_color", Color(0.85, 0.88, 0.92))
 	hl.position = Vector2(8, 6)
-	hl.custom_minimum_size = Vector2(284, 100)
+	hl.custom_minimum_size = Vector2(270, 96)
 	hl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	help.add_child(hl)
 	add_child(help)
 
 func show_dialogue(speaker: String, lines: Array) -> void:
 	_dialog_panel.show()
-	_dialog_text.text = "[%s]\n%s\n\n(click / E to close)" % [speaker, "\n".join(lines)]
+	_dialog_text.text = "[%s]\n%s\n\n(Esc to close)" % [speaker, "\n".join(lines)]
 	await get_tree().create_timer(6.0).timeout
 	if is_instance_valid(_dialog_panel):
 		_dialog_panel.hide()
@@ -208,6 +208,7 @@ func _update_minimap() -> void:
 		if not is_instance_valid(m):
 			continue
 		var d := _dot("mob_%d" % m.get_instance_id(), Color(1, 0.25, 0.25), 5.0)
+		d.visible = m.state != 5
 		d.position = _world_to_map(m.global_position) - Vector2(2.5, 2.5)
 	# monoliths purple
 	for mo in get_tree().get_nodes_in_group("monoliths"):
@@ -224,11 +225,14 @@ func _update_minimap() -> void:
 	# cleanup dead dots (cheap: every frame ok for <200 dots)
 	for key in _dots.keys():
 		if key.begins_with("mob_") or key.begins_with("mon_") or key.begins_with("npc_"):
-			pass # keep; instances persist via respawn
+			var object_id := int(key.get_slice("_", 1))
+			if not is_instance_id_valid(object_id):
+				_dots[key].queue_free()
+				_dots.erase(key)
 
 func zone_at(pos: Vector3) -> String:
-	if pos.distance_to(Vector3(0, 0, -72)) < 38.0:
-		return "Hogwarts Castle"
+	if pos.z < -47 and pos.z > -102 and absf(pos.x) < 38:
+		return "Hogwarts Library" if pos.x < -20 else ("Charms Classroom" if pos.x > 20 else "Hogwarts • Great Hall")
 	if pos.distance_to(Vector3(35, 0, 17)) < 22.0:
 		return "Hogsmeade Village"
 	if pos.x < -35.0 and pos.z < -8.0:
@@ -259,9 +263,9 @@ func _update_zone() -> void:
 
 func _update_boss() -> void:
 	var t: Node = _player.get("current_target") as Node
-	if is_instance_valid(t) and (t as Node3D).is_in_group("monoliths"):
+	if is_instance_valid(t) and (t.is_in_group("monoliths") or ("is_boss" in t and t.is_boss)) and t.current_hp > 0:
 		_boss_panel.show()
-		_boss_name.text = "DARK MONOLITH — Lv.35"
+		_boss_name.text = "DARK MONOLITH — Lv.35" if t.is_in_group("monoliths") else "%s • Lv.%d" % [t.mob_name, t.level]
 		_boss_bar.max_value = (t as Node3D).get("max_hp")
 		_boss_bar.value = (t as Node3D).get("current_hp")
 	else:

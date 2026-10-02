@@ -31,6 +31,8 @@ func _ready() -> void:
 	add_to_group("monoliths")
 	add_to_group("targetable")
 	current_hp = max_hp
+	if mesh.get_active_material(0):
+		mesh.material_override = mesh.get_active_material(0).duplicate()
 	_add_sky_beam()
 	_update_label()
 
@@ -62,13 +64,13 @@ func take_damage(amount: int, spell_type: String, attacker: Node3D) -> void:
 	var ratio := float(current_hp) / float(max_hp)
 	if ratio <= 0.75 and not wave1_triggered:
 		wave1_triggered = true
-		_spawn_wave(1, attacker)
-	elif ratio <= 0.50 and not wave2_triggered:
+		_spawn_wave.call_deferred(1, attacker)
+	if ratio <= 0.50 and not wave2_triggered:
 		wave2_triggered = true
-		_spawn_wave(2, attacker)
-	elif ratio <= 0.25 and not wave3_triggered:
+		_spawn_wave.call_deferred(2, attacker)
+	if ratio <= 0.25 and not wave3_triggered:
 		wave3_triggered = true
-		_spawn_wave(3, attacker)
+		_spawn_wave.call_deferred(3, attacker)
 	
 	if current_hp <= 0:
 		_destroy_monolith(attacker)
@@ -113,11 +115,14 @@ func _spawn_wave(wave_num: int, target_player: Node3D) -> void:
 		var count: int = group["count"]
 		for i in range(count):
 			var mob = scene_res.instantiate()
-			get_parent().add_child(mob)
 			var angle := randf() * TAU
 			var dist := randf_range(4.0, 9.0)
 			var spawn_pos := global_position + Vector3(cos(angle) * dist, 0.5, sin(angle) * dist)
-			mob.global_position = spawn_pos
+			mob.position = get_parent().to_local(spawn_pos)
+			mob.summoned = true
+			mob.pack_anchor = spawn_pos
+			mob.pack_id = int(get_instance_id())
+			get_parent().add_child(mob)
 			# Immediate aggro onto attacking player (Metin2 pack aggro)
 			if is_instance_valid(target_player) and mob.has_method("aggro_on"):
 				mob.aggro_on(target_player, true)
@@ -137,11 +142,11 @@ func _destroy_monolith(shatterer: Node3D) -> void:
 	NetworkManager.send_chat("[Server] The Dark Monolith has been shattered by %s! Riches shower the realm!" % shatterer_name)
 	
 	# Shower massive loot around monolith base
-	_drop_loot()
+	_drop_loot.call_deferred()
 	
 	# Disappear & schedule respawn
 	hide()
-	$CollisionShape3D.disabled = true
+	$CollisionShape3D.set_deferred("disabled", true)
 	await get_tree().create_timer(30.0).timeout
 	_respawn()
 
@@ -175,7 +180,7 @@ func _respawn() -> void:
 	wave3_triggered = false
 	is_destroyed = false
 	show()
-	$CollisionShape3D.disabled = false
+	$CollisionShape3D.set_deferred("disabled", false)
 	_update_label()
 	NetworkManager.send_chat("[Dark Monolith] A new Dark Monolith has manifested in the realm!")
 
@@ -184,16 +189,16 @@ func _add_sky_beam() -> void:
 	var beam := MeshInstance3D.new()
 	beam.name = "SkyBeam"
 	var cm := CylinderMesh.new()
-	cm.top_radius = 0.8
-	cm.bottom_radius = 1.1
-	cm.height = 60.0
+	cm.top_radius = 0.08
+	cm.bottom_radius = 0.18
+	cm.height = 32.0
 	var bm := StandardMaterial3D.new()
 	bm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	bm.albedo_color = Color(0.65, 0.2, 1.0, 0.35)
+	bm.albedo_color = Color(0.55, 0.28, 0.85, 0.14)
 	bm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	cm.material = bm
 	beam.mesh = cm
-	beam.position = Vector3(0, 30, 0)
+	beam.position = Vector3(0, 16, 0)
 	add_child(beam)
 	# floating rune rocks orbiting base
 	for i in range(5):

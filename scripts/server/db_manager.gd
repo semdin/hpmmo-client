@@ -5,7 +5,8 @@ extends Node
 ## Also manages offline local character save files.
 
 const DB_API_URL = "http://127.0.0.1:8081"
-const LOCAL_SAVE_PATH = "user://pottermetin_character_save.json"
+const LOCAL_SAVE_PATH = "user://hpmmo_character_save.json"
+const LEGACY_SAVE_PATH = "user://pottermetin_character_save.json"
 
 var http_client_node: HTTPRequest = null
 
@@ -80,15 +81,18 @@ func save_offline_character(char_data: Dictionary) -> void:
 		print("[DBManager] Offline character saved locally to %s" % LOCAL_SAVE_PATH)
 
 func load_offline_character() -> Dictionary:
-	if not FileAccess.file_exists(LOCAL_SAVE_PATH):
+	var path_to_load = LOCAL_SAVE_PATH
+	if not FileAccess.file_exists(path_to_load) and FileAccess.file_exists(LEGACY_SAVE_PATH):
+		path_to_load = LEGACY_SAVE_PATH
+	if not FileAccess.file_exists(path_to_load):
 		return {}
-	var file = FileAccess.open(LOCAL_SAVE_PATH, FileAccess.READ)
+	var file = FileAccess.open(path_to_load, FileAccess.READ)
 	if not file:
 		return {}
 	var content = file.get_as_text()
 	var json = JSON.new()
 	var err = json.parse(content)
 	if err == OK and json.data is Dictionary:
-		print("[DBManager] Loaded offline character from %s" % LOCAL_SAVE_PATH)
+		print("[DBManager] Loaded offline character from %s" % path_to_load)
 		return json.data
 	return {}

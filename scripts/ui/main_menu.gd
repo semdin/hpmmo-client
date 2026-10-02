@@ -1,6 +1,6 @@
 extends Control
 
-## Main Menu for PotterMetin MMO
+## Main Menu for HPMMO
 ## Authentication (PostgreSQL/SQLite), Character Selection, Character Creation, & Solo Mode
 
 # Panels
@@ -69,6 +69,16 @@ func _ready() -> void:
 	NetworkManager.auth_login_result.connect(_on_auth_login_result)
 	NetworkManager.character_create_result.connect(_on_character_create_result)
 	NetworkManager.character_select_result.connect(_on_character_select_result)
+	
+	# Dynamically load background banner safely without editor import dependency
+	var bg_paths = ["res://assets/branding/hpmmo_banner.jpg", "res://launcher/assets/hpmmo_banner.jpg"]
+	for p in bg_paths:
+		if FileAccess.file_exists(p):
+			var img = Image.load_from_file(ProjectSettings.globalize_path(p))
+			if img and has_node("Background"):
+				var tex = ImageTexture.create_from_image(img)
+				$Background.texture = tex
+				break
 	
 	_show_panel("auth")
 	_select_house("Gryffindor")
@@ -187,11 +197,18 @@ func _on_auth_register_result(success: bool, message: String) -> void:
 func _on_auth_login_result(success: bool, message: String, characters: Array) -> void:
 	auth_status_label.text = message
 	if not success:
+		_show_panel("auth")
 		return
 	
 	characters_cache = characters
-	_render_character_list(characters)
-	_show_panel("select")
+	NetworkManager.local_character_data = {"characters": characters}
+	
+	# Transition directly to 3D Character Selection Stage (Section 3.1 & 3.2 of plan.md)
+	if ResourceLoader.exists("res://scenes/main/character_select.tscn"):
+		get_tree().change_scene_to_file("res://scenes/main/character_select.tscn")
+	else:
+		_render_character_list(characters)
+		_show_panel("select")
 
 ## -------------------------------------------------------------
 ## CHARACTER SELECTION ACTIONS
@@ -363,3 +380,34 @@ func _handle_cmdline_args() -> void:
 	if "--solo" in args or "--offline" in args:
 		print("[MainMenu] Command-line flag --solo detected, starting offline mode...")
 		call_deferred("_on_solo_pressed")
+		return
+
+	var user_val := ""
+	var pass_val := ""
+	var should_autologin := false
+
+	for i in range(args.size()):
+		var arg = args[i]
+		if arg == "--user" and i + 1 < args.size():
+			user_val = args[i + 1]
+		elif arg == "--pass" and i + 1 < args.size():
+			pass_val = args[i + 1]
+		elif (arg == "--server" or arg == "--ip") and i + 1 < args.size():
+			if ip_input:
+				ip_input.text = args[i + 1]
+		elif arg == "--port" and i + 1 < args.size():
+			if port_input:
+				port_input.text = args[i + 1]
+		elif arg == "--autologin":
+			should_autologin = true
+
+	if not user_val.is_empty() and username_input:
+		username_input.text = user_val
+	if not pass_val.is_empty() and password_input:
+		password_input.text = pass_val
+
+	if (should_autologin or (not user_val.is_empty() and not pass_val.is_empty() and "--no-autologin" not in args)):
+		print("[MainMenu] Command-line credentials supplied for '%s', initiating auto-login..." % user_val)
+		_show_panel("none")
+		auth_status_label.text = "Giriş yapılıyor... 3D Karakter Sahnesine bağlanılıyor..."
+		call_deferred("_on_login_pressed")

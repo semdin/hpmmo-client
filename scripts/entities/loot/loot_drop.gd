@@ -15,6 +15,7 @@ extends Area3D
 var float_offset: float = 0.0
 var base_y: float = 0.0
 var is_collected: bool = false
+var remaining_lifetime := 90.0
 
 func _ready() -> void:
 	base_y = global_position.y
@@ -32,6 +33,8 @@ func setup(p_item_id: String, p_amount: int = 1) -> void:
 		if mesh and data.has("icon_color"):
 			var mat: StandardMaterial3D = mesh.get_active_material(0)
 			if mat:
+				mat = mat.duplicate()
+				mesh.material_override = mat
 				mat.albedo_color = data.icon_color
 	elif item_id == "galleons":
 		item_name = "Galleons"
@@ -53,6 +56,10 @@ func _update_display() -> void:
 		label.modulate = Color(0.9, 0.9, 1.0)
 
 func _process(delta: float) -> void:
+	remaining_lifetime -= delta
+	if remaining_lifetime <= 0:
+		queue_free()
+		return
 	if is_collected:
 		return
 	# Gentle rotation and bobbing
@@ -62,7 +69,9 @@ func _process(delta: float) -> void:
 	label.position.y = 1.0 + bob
 
 func collect(collector: Node3D) -> bool:
-	if is_collected:
+	if is_collected or not is_instance_valid(collector) or not collector.has_method("add_loot"):
+		return false
+	if "is_local_player" in collector and (not collector.is_local_player or collector.is_dead):
 		return false
 	is_collected = true
 	

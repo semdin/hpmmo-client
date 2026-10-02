@@ -1,136 +1,97 @@
-# PotterMetin MMO (Godot 4.7.2) — Hogwarts Valley Edition
+# 🏰 HPMMO (Godot 4.7.2) — Wizarding Realm MMORPG
 
-A 3D Wizarding MMO Action RPG inspired by Metin2 mechanics, now rebuilt as a
-real explorable world: Hogwarts Castle, Hogsmeade, Forbidden Forest, Black Lake,
-Quidditch Pitch, quest NPCs, minimap, boss bars, procedural audio, and true
-multiplayer position/spell replication.
+A 3D Wizarding MMO Action RPG inspired by Metin2 mechanics, built with real-time spell combat, Dark Monolith (Metin Stone) wave battles, wand upgrading via Ollivander, broom mounts, and persistent PostgreSQL character progression.
 
-> Note: original wizarding setting inspired by folklore + the books' spirit.
-> No movie/book ripped assets are used — all models/textures/audio are
-> procedural and original (see `assets/textures/`).
+![HPMMO Key Art Banner](assets/branding/hpmmo_banner.jpg)
+
+**2 October 2026 gameplay update:** walkable castle interiors, new animated enemies, coordinated random encounter respawns, smoother combat and flight, live HUD fixes, and resolved startup/shutdown errors. See [changes, controls and validation](docs/GAMEPLAY_UPDATE.md) and [new asset credits](assets/ASSET_CREDITS.md). The local update has not been deployed to the VPS; shared server-authoritative encounters remain separate networking work.
+
+---
+
+## ⚡ Key Features
+
+- **Metin2-Style Real-Time Spell Combat & Ballistic Skillshots**: True mouse-aim ground raycast targeting (League of Legends style skillshots) with 3-hit basic wand combo chain (*flick -> swish -> overhead whip*). Cast *Stupefy* (stun shockwave), *Incendio* (flame plume), *Bombarda* (crater explosion AOE), *Expelliarmus* (spell break), *Protego* (reflective shield), and house-specific Ultimates.
+- **Mob Packs, Pack Aggro & World Bosses**: Pack coordination (2/3/5 pack formations) with linked aggro pull, 4.0s corpse decay lifecycle with ground sinking before zone respawn, plus dedicated World Bosses (*Corrupted Acromantula Matriarch* with telegraphed AOE ground slam and *Dark Snatcher Commander* with bodyguard enrage).
+- **World Boundaries & Broom Flight Safeguards**: 60m tall invisible perimeter collision barriers with magical ward visuals, broom dismount safety ground raycasting (`can_dismount_safely()`), and infinite fall kill-plane teleportation.
+- **Walkable Castle & Clear Lighting**: Enter the Great Hall, library and Charms classroom through connected passages. Textured masonry, arches, furnishings, floating candles and batched geometry; fog disabled, restrained bloom and clear daylight.
+- **3D Character Selection Podium**: Cinematic stone podium with glowing house runes, directional rim lighting, 2 characters maximum per account, and smooth arrow-key switching.
+- **4 Hogwarts Houses & Passives**:
+  - **Gryffindor**: +15% Critical Spell Damage.
+  - **Slytherin**: +25% Mana Regeneration Rate.
+  - **Ravenclaw**: +20% Spell Cast Range.
+  - **Hufflepuff**: +20% Maximum HP & Potion Effectiveness.
+- **Hybrid Persistence (PostgreSQL + RAM + JSON)**:
+  - High-frequency 15 Hz combat and movement calculated in Dedicated Server RAM (no DB I/O lag).
+  - ACID persistent accounts and characters stored in PostgreSQL (with SQLite backup) bound to `0.0.0.0:8081`.
+  - Solo Offline Mode saves progress locally to `user://hpmmo_character_save.json`.
+- **Native C++ Standalone Launcher (`HPMMO_Launcher.exe`)**:
+  - Standalone compiled binary (< 1.5 MB) using WinHTTP, WinSock, and GDI+.
+  - In-launcher Account Registration & Login with single sign-on credential pass-through.
+  - Live VPS Realm Ping monitor (`213.250.145.75:7777` UDP / `8081` HTTP).
+  - One-click **⚔️ OYUNA BAŞLA (PLAY NOW)** and **🕹️ ÇEVRİMDIŞI OYNA (SOLO OFFLINE)** modes.
+
+---
 
 ## 🎮 How to Play
 
-### Launching
-- **1-Click Official Launcher & Auto-Updater**: Double click `Launcher.bat` or run `python launcher/pottermetin_launcher.py`. Features real-time server ping, patch downloading, changelog dispatches, and quick solo/online launch.
-- Direct Game Launch: Double click `play.bat` or run `godot scenes/main/main_menu.tscn`.
-- Headless integration test:
-  ```powershell
-  godot --headless --path . res://scenes/test/test_scenario.tscn
-  ```
-- Dedicated server headless start:
+### 1. Launching
+- **Native C++ Launcher**: Launch `HPMMO_Launcher.exe` directly or run `Launcher.bat`.
+- **Direct Client Launch**: Double-click `play.bat` or run `godot scenes/main/main_menu.tscn`.
+- **Dedicated Server Start**:
   ```powershell
   godot --headless scenes/server/dedicated_server.tscn
   ```
+- **In-Engine Automated Test Suite**:
+  ```powershell
+  godot --headless --path . res://scenes/test/test_scenario.tscn
+  ```
 
-### Controls (camera-relative — W is always AWAY from camera)
+### 2. Controls
 | Key | Action |
 | :--- | :--- |
-| W A S D | Move (W = forward/away, S = back/toward you) |
-| SPACE | Jump (broom glides when mounted) |
-| Right Mouse (hold+drag) | Orbit camera / aim |
-| Wheel | Zoom |
-| Left Click | Cast / talk to NPC / select target |
-| Tab | Cycle target |
-| 1 Stupefy | Damage + 1.8s stun |
-| 2 Incendio | Fire cone, 200% vs Inferi |
-| 3 Bombarda | AOE + knockback |
-| 4 Expelliarmus | Interrupt + weaken |
-| Q Protego | Shield, halves damage, reflects bolts |
-| E Ultimate | House burst |
-| Shift / Ctrl | Mount Nimbus 2000 |
-| Z | Pick up loot |
-| F | Talk to nearby NPC |
-| I / O | Bag / Ollivander refine |
-| Enter | Chat |
+| **W A S D** | Move (camera-relative) |
+| **SPACE** | Jump / Rise on broom |
+| **Right Mouse (Hold & Drag)** | Orbit Camera / Free Aim |
+| **Wheel** | Camera Zoom |
+| **Left Click / 1-4** | Aimed Skillshot Spell / 3-Hit Wand Combo |
+| **Left / Right Arrow (Select Screen)** | Rotate Character Podium (Slot 1 / Slot 2) |
+| **Tab** | Cycle Target |
+| **1 (Stupefy)** | Red energy bolt + 1.8s Stun Shockwave |
+| **2 (Incendio)** | Flame cone plume (200% damage vs Inferi) |
+| **3 (Bombarda)** | Explosive crater AOE + knockback |
+| **4 (Expelliarmus)** | Disarm, interrupt & weaken |
+| **Q (Protego)** | Arcane shield, halves incoming damage, reflects bolts |
+| **E (Ultimate)** | House-specific celestial aura & burst |
+| **Shift** | Mount / Dismount Nimbus 2000 Broom (near ground) |
+| **Ctrl** | Descend on broom |
+| **Z** | Pick up ground loot |
+| **F** | Interact with nearby NPC |
+| **I / O** | Bag Inventory / Ollivander Wand Refine (+0 to +9) |
+| **Enter** | World / System Chat |
 
-### Quest route (6 quests, saved to user://pottermetin_save.json)
-1. Talk to Professor Fig at courtyard fountain
-2. Kill 4 Acromantulas (west woods)
-3. Kill 4 Inferi (use Incendio)
-4. Break 1 Dark Monolith (follow purple sky beams)
-5. Refine wand to +2 (O)
-6. Fly broom to Quidditch Pitch (Shift, then east)
+---
 
-## 🏰 World
-- Hogwarts Castle (keep, great hall, 5 towers, glowing windows, gate light)
-- Courtyard fountain, stone paths, fences, lamp posts with real lights
-- Hogsmeade (7 huts), Black Lake, Quidditch Pitch (6 golden hoops)
-- Forbidden Forest (128 trees, spooky light), floating candles, moon, fog
-- 4 Dark Monolith world bosses with sky beams + orbiting rune rocks
-- 8 leveled mob packs (Lv.5 meadow → Lv.18 deep forest)
+## 🚀 Dedicated Server Deployment (Linux VPS: `213.250.145.75`)
 
-## 🧙 Characters (all procedural, no placeholders)
-- Wizard: robe + torso + belt + head + hat + swinging arms, walk bob, house scarf
-- Acromantula: abdomen + thorax + 8 animated legs + 4 glowing eyes
-- Inferi: hunched ghoul with glowing eyes + dangling arms
-- Snatcher: cloaked figure with metal mask + hood
-- NPCs: Fig, Ollivander, Rosmerta, Hagrid with dialogue + gold ! markers
-
-## 🌐 Real MMORPG networking
-- 15 Hz position/rotation/mount/HP broadcast (`rpc_broadcast_state`)
-- Spell cast replication (`rpc_broadcast_spell`) — see others' bolts
-- Chat, join/leave, remote player interpolation
-- Host / Join / Solo via main menu (ENet, default 7777, 32 players)
-
-## 🔊 Audio (100% synthesized, no files)
-Procedural `AudioManager`: each spell, hit, loot, level-up, refine win/fail,
-quest fanfare — generated as AudioStreamWAV.
-
-## 🛡️ Combat rules: YOU strike first
-- Field mobs are **passive (yellow nameplates)** — they wander, warn `!` if you
-  touch them, and only retaliate after you hit them (pack defends together).
-- **Monolith wave spawns are aggressive (red)** — breaking a monolith is the
-  dungeon pull. Training dummies in the courtyard never fight back.
-
-## ✨ MMO skill animations (original art, Metin2-style feel)
-`scripts/spells/skill_fx.gd` — procedurally animated, no downloads:
-- Wand-arm raise pose on every cast + pulsing bolts with trails
-- Stupefy: red ring + orbiting stun stars • Incendio: fire cone + sparks
-- Expelliarmus: arc slash • Bombarda/Ultimate: shockwave rings, dust pillar,
-  sky beam, camera shake • Protego: bubble + reflect flare
-- Practice safely on courtyard dummies, then pull a monolith wave.
-
-## 📦 Assets: own-made + where to get better CC0 ones
-- Shipped: procedural models + `assets/textures/*.png` (baked, original).
-- I cannot bundle Harry Potter movie assets or Metin2 rips (copyrighted —
-  using them risks takedown and won't export legally). Instead:
-- Drop CC0 `.glb/.gltf` into `assets/models/` — the game announces them at
-  spawn (see `DROP_GLB_HERE.txt`) while procedural rigs keep everything stable.
-- Recommended legal sources: **Kenney.nl** (CC0 character/nature packs),
-  **Quaternius** (CC0 RPG/nature), **OpenGameArt** (check per-asset license).
-- Re-bake textures: `godot --headless --path . -s tools/generate_assets.gd`
-
-## Core systems
-- Monolith waves at 75/50/25%, massive loot shower, 30s respawn
-- Ollivander +0..+9 (100%→15%, fail can drop tier above +4)
-- Nimbus 2000 (+80% speed, mounted casting, wind trail)
-- Houses: Gryffindor fire/crit, Slytherin dark, Ravenclaw cooldown/mana, Hufflepuff HP/armor
-- Minimap, quest tracker, zone banners, boss bar, dialogue box, low-HP vignette
-
-## 🗄️ Database & Persistence Architecture (PostgreSQL + RAM + JSON)
-| Layer | Technology | Purpose |
-| :--- | :--- | :--- |
-| **Persistence** | PostgreSQL (`server/schema.sql`) | Accounts, characters, levels, EXP, HP/MP, galleons, wand tier, inventory, quests, and ACID trade transactions. |
-| **Fallback** | SQLite (`server/pottermetin_server.db`) | Automatic seamless fallback if PostgreSQL server is inactive or offline. |
-| **Game Data** | JSON (`data/json/*.json`) | Spells, items, houses, and quests loaded directly into RAM on boot (`GameData`). |
-| **Realtime Combat** | Server RAM & ENet RPCs | 15 Hz movement broadcast, collision, spell impacts, and monolith damage calculated in memory without DB blocking. |
-
-## 🚀 Dedicated Server Deployment (Linux VPS: 213.250.145.75)
-1. **Package Server Files**:
-   Run `package_server.bat` on Windows to create `pottermetin_server.tar.gz`.
-2. **Transfer to VPS**:
+1. **Package on Windows**:
+   Double click `package_server.bat` (creates `hpmmo_server.tar.gz`).
+2. **Send to VPS**:
    ```bash
-   scp pottermetin_server.tar.gz root@213.250.145.75:~/
+   scp hpmmo_server.tar.gz root@213.250.145.75:~/
    ```
-3. **Run Initial Setup on VPS**:
+3. **First-Time Install**:
    ```bash
-   bash ~/pottermetin/game/setup_server.sh
+   bash ~/hpmmo/game/setup_server.sh
    ```
-4. **Update Existing Server**:
+4. **Update Server**:
    ```bash
-   bash ~/pottermetin/game/update_server.sh
+   bash ~/hpmmo/game/update_server.sh
    ```
-5. **Manage Systemd Services**:
-   - Game Server: `sudo systemctl status pottermetin` / `journalctl -u pottermetin -f`
-   - DB Microservice: `sudo systemctl status pottermetin-db` / `journalctl -u pottermetin-db -f`
+5. **Monitor Live Logs**:
+   ```bash
+   # Dedicated Game Server
+   journalctl -u hpmmo -f
+
+   # PostgreSQL & Account API
+   journalctl -u hpmmo-db -f
+   ```

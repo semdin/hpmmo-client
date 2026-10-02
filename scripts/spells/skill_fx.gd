@@ -131,7 +131,7 @@ static func _muzzle_flash(world: Node3D, pos: Vector3, dir: Vector3, col: Color)
 	streak.mesh = cm
 	world.add_child(streak)
 	streak.global_position = pos + dir * 0.8
-	streak.look_at_from_position(streak.global_position, pos + dir * 3.0, Vector3.UP)
+	streak.look_at_from_position(streak.global_position, pos + dir * 3.0, preload("res://scripts/spells/combat_rules.gd").safe_up(dir))
 	var tw2 := streak.create_tween()
 	tw2.set_parallel(true)
 	tw2.tween_property(streak, "scale", Vector3(1.6, 1.0, 1.6), 0.2)
@@ -155,34 +155,24 @@ static func _bolt_ring(world: Node3D, pos: Vector3, col: Color) -> void:
 	tw.chain().tween_callback(ring.queue_free).set_delay(0.32)
 
 static func _fire_cone(world: Node3D, pos: Vector3, dir: Vector3, col: Color) -> void:
-	_flash_light(world, pos + dir * 2.0, col, 4.0, 12.0, 0.45)
-	var cone := MeshInstance3D.new()
-	var cm := CylinderMesh.new()
-	cm.top_radius = 0.3
-	cm.bottom_radius = 2.6
-	cm.height = 6.0
-	var m := StandardMaterial3D.new()
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.albedo_color = Color(col.r, col.g, col.b, 0.55)
-	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	cm.material = m
-	cone.mesh = cm
-	world.add_child(cone)
-	var flat_dir := Vector3(dir.x, 0.0, dir.z)
-	if flat_dir.length_squared() < 0.01:
-		flat_dir = Vector3(0, 0, -1)
-	flat_dir = flat_dir.normalized()
-	cone.global_position = pos + flat_dir * 3.0 + Vector3(0, 0.4, 0)
-	# orient cone axis along dir
-	var up := Vector3.UP
-	var axis := flat_dir
-	cone.global_transform = Transform3D(Basis().looking_at(axis, up).rotated(Basis().looking_at(axis, up).x, PI * 0.5), cone.global_position)
-	var tw := cone.create_tween()
-	tw.set_parallel(true)
-	tw.tween_property(cone, "scale", Vector3(1.25, 1.0, 1.25), 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.tween_property(cone, "transparency", 1.0, 0.45)
-	tw.chain().tween_callback(cone.queue_free).set_delay(0.5)
-	_sparks(world, pos + flat_dir * 2.5, col, 16)
+	_flash_light(world, pos + dir * 2.0, col, 2.0, 10.0, 0.45)
+	var flame := CPUParticles3D.new()
+	preload("res://scripts/assets/particle_kit.gd").configure(flame, true)
+	flame.amount = 95
+	flame.lifetime = 0.55
+	flame.one_shot = true
+	flame.explosiveness = 0.3
+	flame.direction = dir
+	flame.spread = 24
+	flame.initial_velocity_min = 20
+	flame.initial_velocity_max = 32
+	flame.gravity = Vector3(0, 1.5, 0)
+	flame.scale_amount_min = 1.4
+	flame.scale_amount_max = 3.0
+	world.add_child(flame)
+	flame.global_position = pos
+	flame.emitting = true
+	flame.finished.connect(flame.queue_free)
 
 static func _arc_slash(world: Node3D, pos: Vector3, dir: Vector3, col: Color) -> void:
 	var arc := MeshInstance3D.new()
@@ -193,7 +183,7 @@ static func _arc_slash(world: Node3D, pos: Vector3, dir: Vector3, col: Color) ->
 	arc.mesh = tm
 	world.add_child(arc)
 	arc.global_position = pos + dir * 1.2
-	arc.look_at_from_position(arc.global_position, arc.global_position + dir, Vector3.UP)
+	arc.look_at_from_position(arc.global_position, arc.global_position + dir, preload("res://scripts/spells/combat_rules.gd").safe_up(dir))
 	var tw := arc.create_tween()
 	tw.set_parallel(true)
 	tw.tween_property(arc, "scale", Vector3.ONE * 2.2, 0.3)
@@ -210,7 +200,7 @@ static func _shockwave(world: Node3D, pos: Vector3, col: Color, max_r: float) ->
 	ring.mesh = tm
 	world.add_child(ring)
 	ring.global_position = pos + Vector3(0, 0.4, 0)
-	ring.rotation.x = PI * 0.5
+	ring.rotation.x = 0.0
 	var tw := ring.create_tween()
 	tw.set_parallel(true)
 	tw.tween_property(ring, "scale", Vector3.ONE * (max_r / 1.2), 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -251,6 +241,7 @@ static func _sky_beam(world: Node3D, pos: Vector3, col: Color) -> void:
 
 static func _sparks(world: Node3D, pos: Vector3, col: Color, count: int) -> void:
 	var parts := CPUParticles3D.new()
+	preload("res://scripts/assets/particle_kit.gd").configure(parts)
 	parts.amount = count
 	parts.lifetime = 0.5
 	parts.one_shot = true

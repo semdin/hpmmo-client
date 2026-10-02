@@ -33,37 +33,18 @@ func _build(robe_color: Color) -> void:
 
 	_rig = Node3D.new()
 	add_child(_rig)
-	var robe_mat := 	MaterialKitScript.robe_material(robe_color)
-	var skin_mat := 	MaterialKitScript.skin_material()
-	var robe := MeshInstance3D.new()
-	var rm := CylinderMesh.new()
-	rm.top_radius = 0.32
-	rm.bottom_radius = 0.6
-	rm.height = 1.4
-	rm.material = robe_mat
-	robe.mesh = rm
-	robe.position.y = 0.7
-	_rig.add_child(robe)
-	var head := MeshInstance3D.new()
-	var hm := SphereMesh.new()
-	hm.radius = 0.21
-	hm.height = 0.42
-	hm.material = skin_mat
-	head.mesh = hm
-	head.position.y = 1.75
-	_rig.add_child(head)
-	# pointed hat for professors
-	var hat := MeshInstance3D.new()
-	var cm := CylinderMesh.new()
-	cm.top_radius = 0.03
-	cm.bottom_radius = 0.28
-	cm.height = 0.55
-	var dm := StandardMaterial3D.new()
-	dm.albedo_color = robe_color.darkened(0.5)
-	cm.material = dm
-	hat.mesh = cm
-	hat.position.y = 2.2
-	_rig.add_child(hat)
+	var wizard := preload("res://assets/models/characters/wizard.glb").instantiate()
+	_rig.add_child(wizard)
+	for path in ["Rig/Skeleton3D/handslot_r/2H_Staff", "Rig/Skeleton3D/handslot_l/Spellbook", "Rig/Skeleton3D/handslot_l/Spellbook_open"]:
+		var accessory := wizard.get_node_or_null(path) as Node3D
+		if accessory:
+			accessory.hide()
+	var cape := wizard.get_node_or_null("Rig/Skeleton3D/chest/Mage_Cape") as MeshInstance3D
+	if cape:
+		cape.material_override = MaterialKitScript.robe_material(robe_color)
+	var animation := wizard.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if animation and animation.has_animation("Idle"):
+		animation.play("Idle")
 
 	var label := Label3D.new()
 	label.name = "NpcLabel"

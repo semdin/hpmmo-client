@@ -61,6 +61,7 @@ var active_index: int = 0
 var progress: int = 0
 var done_ids: Array = []
 var player_ref: Node3D = null
+var persistence_enabled := true
 
 func _ready() -> void:
 	load_progress()
@@ -142,14 +143,19 @@ func tracker_text() -> String:
 	return "[%s]\n%s\n(%d/%d)" % [q["title"], q["name"], mini(progress, int(q["count"])), int(q["count"])]
 
 func save_progress() -> void:
-	var f := FileAccess.open("user://pottermetin_save.json", FileAccess.WRITE)
+	if not persistence_enabled:
+		return
+	var f := FileAccess.open("user://hpmmo_save.json", FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify({"active": active_index, "progress": progress, "done": done_ids}))
 
 func load_progress() -> void:
-	if not FileAccess.file_exists("user://pottermetin_save.json"):
+	var path_to_load := "user://hpmmo_save.json"
+	if not FileAccess.file_exists(path_to_load) and FileAccess.file_exists("user://pottermetin_save.json"):
+		path_to_load = "user://pottermetin_save.json"
+	if not FileAccess.file_exists(path_to_load):
 		return
-	var f := FileAccess.open("user://pottermetin_save.json", FileAccess.READ)
+	var f := FileAccess.open(path_to_load, FileAccess.READ)
 	if f:
 		var d: Dictionary = JSON.parse_string(f.get_as_text())
 		if d.has("active"):
