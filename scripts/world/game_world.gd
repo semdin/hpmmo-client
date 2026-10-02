@@ -70,16 +70,70 @@ func _process(delta: float) -> void:
 	if lake:
 		lake.position.y = sin(_candle_t * 0.8) * 0.05
 
+var _offline_save_timer: float = 15.0
+
 func _spawn_local_player() -> void:
 	local_player = PLAYER_SCENE.instantiate()
 	local_player.is_local_player = true
 	local_player.player_name = NetworkManager.local_player_name
 	local_player.house = NetworkManager.local_player_house
 	players_container.add_child(local_player)
-	local_player.global_position = Vector3(0, 0.5, 5.0)
-	local_player.rotation.y = PI # back to camera: W walks away, S walks in
+	
+	if not NetworkManager.local_character_data.is_empty():
+		var c: Dictionary = NetworkManager.local_character_data
+		var px: float = float(c.get("pos_x", 0.0))
+		var py: float = float(c.get("pos_y", 0.5))
+		var pz: float = float(c.get("pos_z", 5.0))
+		local_player.global_position = Vector3(px, py, pz)
+		local_player.rotation.y = float(c.get("rot_y", PI))
+		local_player.level = int(c.get("level", 1))
+		local_player.current_exp = int(c.get("exp", 0))
+		local_player.max_hp = int(c.get("max_hp", 500))
+		local_player.current_hp = int(c.get("current_hp", 500))
+		local_player.max_mana = int(c.get("max_mana", 300))
+		local_player.current_mana = int(c.get("current_mana", 300))
+		local_player.galleons = int(c.get("galleons", 500))
+		local_player.wand_tier = int(c.get("wand_tier", 0))
+		if c.has("inventory") and c["inventory"] is Array and not c["inventory"].is_empty():
+			local_player.inventory = c["inventory"]
+		print("[GameWorld] Restored character '%s' at %s, Level %d, Wand +%d, Galleons %d" % [
+			local_player.player_name, local_player.global_position, local_player.level, local_player.wand_tier, local_player.galleons
+		])
+	else:
+		local_player.global_position = Vector3(0, 0.5, 5.0)
+		local_player.rotation.y = PI
+	
 	hud.bind_player(local_player)
 	_check_external_models()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_PREDELETE:
+		_save_offline_state()
+
+func _save_offline_state() -> void:
+	if not is_instance_valid(local_player):
+		return
+	if NetworkManager.is_server and not NetworkManager.is_dedicated_server:
+		var save_data := {
+			"id": 1,
+			"name": local_player.player_name,
+			"house": local_player.house,
+			"level": local_player.level,
+			"exp": local_player.current_exp,
+			"max_hp": local_player.max_hp,
+			"current_hp": local_player.current_hp,
+			"max_mana": local_player.max_mana,
+			"current_mana": local_player.current_mana,
+			"galleons": local_player.galleons,
+			"wand_tier": local_player.wand_tier,
+			"pos_x": local_player.global_position.x,
+			"pos_y": local_player.global_position.y,
+			"pos_z": local_player.global_position.z,
+			"rot_y": local_player.rotation.y,
+			"inventory": local_player.inventory,
+			"quests": {}
+		}
+		DatabaseManager.save_offline_character(save_data)
 
 func _setup_overlay() -> void:
 	overlay = CanvasLayer.new()

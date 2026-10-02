@@ -45,16 +45,24 @@ var is_protego_active: bool = false
 var is_casting_anim: bool = false
 
 # Node References
-@onready var visuals: Node3D = $Visuals
-@onready var anim_player: AnimationPlayer = $Visuals/wizard/AnimationPlayer
-@onready var camera_pivot: Node3D = $CameraPivot
-@onready var spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
-@onready var camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
-@onready var broom_mesh: MeshInstance3D = $Visuals/BroomMesh
-@onready var broom_particles: CPUParticles3D = $Visuals/BroomMesh/BroomParticles
-@onready var wand_aura_particles: CPUParticles3D = $Visuals/WandAuraParticles
-@onready var wand_tip: Marker3D = $Visuals/WandTipMarker
-@onready var nameplate: Label3D = $NameplateLabel3D
+@onready var visuals: Node3D = get_node_or_null("Visuals")
+@onready var anim_player: AnimationPlayer = _find_anim_player()
+@onready var camera_pivot: Node3D = get_node_or_null("CameraPivot")
+@onready var spring_arm: SpringArm3D = get_node_or_null("CameraPivot/SpringArm3D")
+@onready var camera: Camera3D = get_node_or_null("CameraPivot/SpringArm3D/Camera3D")
+@onready var broom_mesh: MeshInstance3D = get_node_or_null("Visuals/BroomMesh")
+@onready var broom_particles: CPUParticles3D = get_node_or_null("Visuals/BroomMesh/BroomParticles")
+@onready var wand_aura_particles: CPUParticles3D = get_node_or_null("Visuals/WandAuraParticles")
+@onready var wand_tip: Marker3D = get_node_or_null("Visuals/WandTipMarker")
+@onready var nameplate: Label3D = get_node_or_null("NameplateLabel3D")
+
+func _find_anim_player() -> AnimationPlayer:
+	if has_node("Visuals/wizard/AnimationPlayer"):
+		return get_node("Visuals/wizard/AnimationPlayer") as AnimationPlayer
+	var vis = get_node_or_null("Visuals")
+	if vis:
+		return vis.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	return null
 
 const PROJECTILE_SCENE = preload("res://scenes/spells/spell_projectile.tscn")
 const PROTEGO_SCENE = preload("res://scenes/spells/protego_shield.tscn")
@@ -70,23 +78,28 @@ func _ready() -> void:
 			house = nm.local_player_house
 	
 	# Decouple camera pivot from player rotation completely
-	camera_pivot.top_level = true
-	camera_pivot.global_position = global_position + Vector3(0, 1.4, 0)
-	camera_pivot.rotation_degrees = Vector3(0, camera_rot_y, 0)
-	spring_arm.rotation_degrees = Vector3(camera_rot_x, 0, 0)
-	spring_arm.spring_length = camera_distance
+	if camera_pivot and spring_arm:
+		camera_pivot.top_level = true
+		camera_pivot.global_position = global_position + Vector3(0, 1.4, 0)
+		camera_pivot.rotation_degrees = Vector3(0, camera_rot_y, 0)
+		spring_arm.rotation_degrees = Vector3(camera_rot_x, 0, 0)
+		spring_arm.spring_length = camera_distance
 	
 	_setup_character_model()
 	_apply_house_customization()
 	_apply_wand_aura()
 	_update_nameplate()
-	_init_starter_inventory()
+	if inventory.is_empty():
+		_init_starter_inventory()
 	
 	if not is_local_player:
-		camera.current = false
-		camera_pivot.hide()
+		if camera:
+			camera.current = false
+		if camera_pivot:
+			camera_pivot.hide()
 	else:
-		camera.current = true
+		if camera:
+			camera.current = true
 		emit_stats()
 
 func _setup_character_model() -> void:
@@ -177,7 +190,8 @@ func _physics_process(delta: float) -> void:
 	if is_local_player and is_instance_valid(camera_pivot):
 		camera_pivot.global_position = camera_pivot.global_position.lerp(global_position + Vector3(0, 1.4, 0), 20.0 * delta)
 		camera_pivot.rotation_degrees.y = camera_rot_y
-		spring_arm.rotation_degrees.x = camera_rot_x
+		if spring_arm:
+			spring_arm.rotation_degrees.x = camera_rot_x
 	
 	if not is_local_player:
 		var peer_id := name.to_int()

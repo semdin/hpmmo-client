@@ -36,14 +36,31 @@ static func play_impact(world: Node3D, pos: Vector3, spell_id: String) -> void:
 	if GameData.SPELLS.has(spell_id):
 		col = (GameData.SPELLS[spell_id] as Dictionary).get("color", col)
 	match spell_id:
-		"bombarda", "ultimate":
-			_shockwave(world, pos, col, 8.0 if spell_id == "bombarda" else 14.0)
-			_sparks(world, pos, col, 24)
+		"bombarda":
+			_shockwave(world, pos, col, 10.0)
+			_sparks(world, pos, col, 35)
+			_flash_light(world, pos, col, 6.0, 14.0, 0.45)
+		"ultimate":
+			_sky_beam(world, pos, col)
+			_shockwave(world, pos, col, 16.0)
+			_sparks(world, pos, col, 50)
+			_flash_light(world, pos, col, 8.0, 22.0, 0.6)
 		"incendio":
-			_sparks(world, pos, col, 18)
-		_:
-			_sparks(world, pos, col, 10)
+			_shockwave(world, pos, col, 4.5)
+			_sparks(world, pos, col, 28)
+			_flash_light(world, pos, col, 4.0, 10.0, 0.4)
+		"stupefy":
 			_bolt_ring(world, pos, col)
+			_sparks(world, pos, col, 18)
+			_flash_light(world, pos, col, 3.5, 9.0, 0.3)
+		"expelliarmus":
+			_arc_slash(world, pos, Vector3.UP, col)
+			_sparks(world, pos, col, 20)
+			_flash_light(world, pos, col, 4.0, 10.0, 0.35)
+		_:
+			_sparks(world, pos, col, 14)
+			_bolt_ring(world, pos, col)
+			_flash_light(world, pos, col, 2.5, 6.0, 0.25)
 
 static func play_stun_stars(world: Node3D, target: Node3D) -> void:
 	if not is_instance_valid(world) or not is_instance_valid(target):

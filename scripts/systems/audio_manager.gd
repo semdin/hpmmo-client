@@ -6,6 +6,10 @@ extends Node
 var _players: Array[AudioStreamPlayer] = []
 var _cache: Dictionary = {}
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_PREDELETE:
+		_cache.clear()
+
 func _ready() -> void:
 	for i in range(8):
 		var pl := AudioStreamPlayer.new()

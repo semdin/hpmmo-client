@@ -4,7 +4,7 @@ extends Node
 ## Houses, Spells, Items, Ollivander Upgrade Logic, and Input Registration
 
 # House Factions
-const HOUSES = {
+var HOUSES: Dictionary = {
 	"Gryffindor": {
 		"name": "Gryffindor",
 		"primary_color": Color(0.78, 0.08, 0.12),
@@ -36,7 +36,7 @@ const HOUSES = {
 }
 
 # Spells Database
-const SPELLS = {
+var SPELLS: Dictionary = {
 	"basic_cast": {
 		"id": "basic_cast",
 		"name": "Basic Cast",
@@ -143,7 +143,7 @@ const UPGRADE_TABLE = {
 }
 
 # Items Database
-const ITEMS = {
+var ITEMS: Dictionary = {
 	"wand_hawthorn": {
 		"id": "wand_hawthorn",
 		"name": "Hawthorn Wand",
@@ -231,8 +231,55 @@ const ITEMS = {
 	}
 }
 
+var QUESTS: Dictionary = {}
+
 func _ready() -> void:
+	_load_json_data()
 	_register_input_actions()
+
+func _load_json_data() -> void:
+	var spells_json = _read_json_file("res://data/json/spells.json")
+	if spells_json is Dictionary and not spells_json.is_empty():
+		for k in spells_json:
+			var s = spells_json[k]
+			if s.has("color") and s["color"] is String:
+				s["color"] = Color.from_string(s["color"], Color.WHITE)
+			SPELLS[k] = s
+	
+	var items_json = _read_json_file("res://data/json/items.json")
+	if items_json is Dictionary and not items_json.is_empty():
+		for k in items_json:
+			ITEMS[k] = items_json[k]
+
+	var houses_json = _read_json_file("res://data/json/houses.json")
+	if houses_json is Dictionary and not houses_json.is_empty():
+		for k in houses_json:
+			var h = houses_json[k]
+			if h.has("primary_color") and h["primary_color"] is String:
+				h["primary_color"] = Color.from_string(h["primary_color"], Color.WHITE)
+			if h.has("secondary_color") and h["secondary_color"] is String:
+				h["secondary_color"] = Color.from_string(h["secondary_color"], Color.WHITE)
+			HOUSES[k] = h
+
+	var quests_json = _read_json_file("res://data/json/quests.json")
+	if quests_json is Dictionary and not quests_json.is_empty():
+		QUESTS = quests_json
+	print("[GameData] Static JSON configs loaded into RAM: %d Spells, %d Items, %d Houses, %d Quests" % [
+		SPELLS.size(), ITEMS.size(), HOUSES.size(), QUESTS.size()
+	])
+
+func _read_json_file(path: String) -> Variant:
+	if not FileAccess.file_exists(path):
+		return null
+	var file := FileAccess.open(path, FileAccess.READ)
+	if not file:
+		return null
+	var content := file.get_as_text()
+	var json := JSON.new()
+	var err := json.parse(content)
+	if err == OK:
+		return json.data
+	return null
 
 ## Automatically register inputs so WASD, Tab, Space, 1-4, Q, E, Z, I, O work reliably
 func _register_input_actions() -> void:

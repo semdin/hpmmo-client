@@ -3,7 +3,21 @@
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_mm"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-bg_color = Color(0.06, 0.05, 0.08, 1)
+bg_color = Color(0.05, 0.04, 0.07, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.1, 0.08, 0.14, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.7, 0.25, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 12
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_gryf"]
 bg_color = Color(0.65, 0.08, 0.12, 1)
@@ -54,7 +68,7 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action_btn"]
-bg_color = Color(0.2, 0.18, 0.26, 1)
+bg_color = Color(0.24, 0.18, 0.32, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -83,23 +97,18 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="HeaderBox" type="VBoxContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -320.0
-offset_top = -280.0
-offset_right = 320.0
-offset_bottom = 280.0
+offset_left = -300.0
+offset_top = 35.0
+offset_right = 300.0
+offset_bottom = 115.0
 grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 16
-alignment = 1
 
-[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+[node name="TitleLabel" type="Label" parent="HeaderBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_colors/font_outline_color = Color(0.5, 0.1, 0.1, 1)
@@ -108,53 +117,309 @@ theme_override_font_sizes/font_size = 40
 text = "POTTERMETIN MMO"
 horizontal_alignment = 1
 
-[node name="SubtitleLabel" type="Label" parent="VBoxContainer"]
+[node name="SubtitleLabel" type="Label" parent="HeaderBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 15
-text = "A 3D Wizarding ARPG Inspired by Metin2"
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "A 3D Wizarding ARPG Inspired by Metin2 with Wand Combat & Dark Monoliths"
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
-layout_mode = 2
+; -------------------------------------------------------------
+; 1. AUTH PANEL (Login / Register / Server Settings)
+; -------------------------------------------------------------
+[node name="AuthPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -140.0
+offset_right = 260.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="SelectHouseTitle" type="Label" parent="VBoxContainer"]
+[node name="Margin" type="MarginContainer" parent="AuthPanel"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Choose Your Hogwarts House:"
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="AuthPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="AuthTitle" type="Label" parent="AuthPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.85, 0.35, 1)
+theme_override_font_sizes/font_size = 20
+text = "Enter the Wizarding Realm"
 horizontal_alignment = 1
 
-[node name="HouseSelection" type="HBoxContainer" parent="VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="AuthPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="UserRow" type="HBoxContainer" parent="AuthPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="UserLabel" type="Label" parent="AuthPanel/Margin/VBox/UserRow"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Account:"
+
+[node name="UsernameInput" type="LineEdit" parent="AuthPanel/Margin/VBox/UserRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter username..."
+
+[node name="PassRow" type="HBoxContainer" parent="AuthPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PassLabel" type="Label" parent="AuthPanel/Margin/VBox/PassRow"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Password:"
+
+[node name="PasswordInput" type="LineEdit" parent="AuthPanel/Margin/VBox/PassRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+secret = true
+placeholder_text = "Enter password..."
+
+[node name="ServerRow" type="HBoxContainer" parent="AuthPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="IpLabel" type="Label" parent="AuthPanel/Margin/VBox/ServerRow"]
+layout_mode = 2
+text = "Server:"
+
+[node name="IpInput" type="LineEdit" parent="AuthPanel/Margin/VBox/ServerRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "213.250.145.75"
+
+[node name="PortLabel" type="Label" parent="AuthPanel/Margin/VBox/ServerRow"]
+layout_mode = 2
+text = "Port:"
+
+[node name="PortInput" type="LineEdit" parent="AuthPanel/Margin/VBox/ServerRow"]
+custom_minimum_size = Vector2(65, 0)
+layout_mode = 2
+text = "7777"
+
+[node name="StatusLabel" type="Label" parent="AuthPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.4, 1)
+theme_override_font_sizes/font_size = 13
+text = "Ready to connect. Log in or create a new account."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ButtonsRow" type="HBoxContainer" parent="AuthPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 10
 alignment = 1
 
-[node name="GryffindorBtn" type="Button" parent="VBoxContainer/HouseSelection"]
-custom_minimum_size = Vector2(130, 42)
+[node name="LoginButton" type="Button" parent="AuthPanel/Margin/VBox/ButtonsRow"]
+custom_minimum_size = Vector2(140, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
+text = "Log In"
+
+[node name="RegisterButton" type="Button" parent="AuthPanel/Margin/VBox/ButtonsRow"]
+custom_minimum_size = Vector2(140, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
+text = "Register"
+
+[node name="HSeparator2" type="HSeparator" parent="AuthPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="SoloButton" type="Button" parent="AuthPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "Solo / Offline Mode (Local Save)"
+
+; -------------------------------------------------------------
+; 2. CHARACTER SELECTION PANEL
+; -------------------------------------------------------------
+[node name="CharSelectPanel" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -160.0
+offset_right = 320.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="CharSelectPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="CharSelectPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="CharSelectPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.85, 0.35, 1)
+theme_override_font_sizes/font_size = 20
+text = "Select Your Character"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CharSelectPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="CharListContainer" type="VBoxContainer" parent="CharSelectPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NoCharsLabel" type="Label" parent="CharSelectPanel/Margin/VBox/CharListContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "No characters found on this account.
+Click 'Create Character' below to begin!"
+horizontal_alignment = 1
+
+[node name="SelectStatusLabel" type="Label" parent="CharSelectPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.4, 1)
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="ButtonsRow" type="HBoxContainer" parent="CharSelectPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="EnterWorldButton" type="Button" parent="CharSelectPanel/Margin/VBox/ButtonsRow"]
+custom_minimum_size = Vector2(160, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
+text = "Enter World"
+
+[node name="NewCharButton" type="Button" parent="CharSelectPanel/Margin/VBox/ButtonsRow"]
+custom_minimum_size = Vector2(160, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
+text = "Create Character"
+
+[node name="LogoutButton" type="Button" parent="CharSelectPanel/Margin/VBox/ButtonsRow"]
+custom_minimum_size = Vector2(100, 42)
+layout_mode = 2
+text = "Back"
+
+; -------------------------------------------------------------
+; 3. CHARACTER CREATION PANEL
+; -------------------------------------------------------------
+[node name="CharCreatePanel" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -180.0
+offset_right = 320.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="CharCreatePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="CharCreatePanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="CharCreatePanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.85, 0.35, 1)
+theme_override_font_sizes/font_size = 20
+text = "Create New Character"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CharCreatePanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="NameRow" type="HBoxContainer" parent="CharCreatePanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="NameLabel" type="Label" parent="CharCreatePanel/Margin/VBox/NameRow"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Wizard Name:"
+
+[node name="NewCharNameInput" type="LineEdit" parent="CharCreatePanel/Margin/VBox/NameRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Harry"
+placeholder_text = "Enter name..."
+
+[node name="SelectHouseTitle" type="Label" parent="CharCreatePanel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Choose Your Hogwarts House:"
+
+[node name="HouseButtons" type="HBoxContainer" parent="CharCreatePanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="GryffindorBtn" type="Button" parent="CharCreatePanel/Margin/VBox/HouseButtons"]
+custom_minimum_size = Vector2(130, 40)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_gryf")
 text = "Gryffindor"
 
-[node name="SlytherinBtn" type="Button" parent="VBoxContainer/HouseSelection"]
-custom_minimum_size = Vector2(130, 42)
+[node name="SlytherinBtn" type="Button" parent="CharCreatePanel/Margin/VBox/HouseButtons"]
+custom_minimum_size = Vector2(130, 40)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_slyth")
 text = "Slytherin"
 
-[node name="RavenclawBtn" type="Button" parent="VBoxContainer/HouseSelection"]
-custom_minimum_size = Vector2(130, 42)
+[node name="RavenclawBtn" type="Button" parent="CharCreatePanel/Margin/VBox/HouseButtons"]
+custom_minimum_size = Vector2(130, 40)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_raven")
 text = "Ravenclaw"
 
-[node name="HufflepuffBtn" type="Button" parent="VBoxContainer/HouseSelection"]
-custom_minimum_size = Vector2(130, 42)
+[node name="HufflepuffBtn" type="Button" parent="CharCreatePanel/Margin/VBox/HouseButtons"]
+custom_minimum_size = Vector2(130, 40)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_huff")
 text = "Hufflepuff"
 
-[node name="HouseDescLabel" type="Label" parent="VBoxContainer"]
-custom_minimum_size = Vector2(0, 45)
+[node name="HouseDescLabel" type="Label" parent="CharCreatePanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "Gryffindor - \"Forti Animo Estote\"
@@ -162,76 +427,24 @@ Trait: Bravery: +15% Fire Spell Damage & +10% Critical Strike Chance"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="NameRow" type="HBoxContainer" parent="VBoxContainer"]
+[node name="CreateStatusLabel" type="Label" parent="CharCreatePanel/Margin/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 1
-
-[node name="Label" type="Label" parent="VBoxContainer/NameRow"]
-layout_mode = 2
-text = "Wizard Name:"
-
-[node name="NameInput" type="LineEdit" parent="VBoxContainer/NameRow"]
-custom_minimum_size = Vector2(200, 36)
-layout_mode = 2
-text = "Harry"
-placeholder_text = "Enter name..."
-
-[node name="NetworkRow" type="HBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 1
-
-[node name="IpLabel" type="Label" parent="VBoxContainer/NetworkRow"]
-layout_mode = 2
-text = "Server IP:"
-
-[node name="IpInput" type="LineEdit" parent="VBoxContainer/NetworkRow"]
-custom_minimum_size = Vector2(160, 36)
-layout_mode = 2
-text = "213.250.145.75"
-
-[node name="PortLabel" type="Label" parent="VBoxContainer/NetworkRow"]
-layout_mode = 2
-text = "Port:"
-
-[node name="PortInput" type="LineEdit" parent="VBoxContainer/NetworkRow"]
-custom_minimum_size = Vector2(70, 36)
-layout_mode = 2
-text = "7777"
-
-[node name="Buttons" type="HBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 1
-
-[node name="SoloButton" type="Button" parent="VBoxContainer/Buttons"]
-custom_minimum_size = Vector2(160, 48)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
-text = "PLAY SOLO"
-
-[node name="HostButton" type="Button" parent="VBoxContainer/Buttons"]
-custom_minimum_size = Vector2(160, 48)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
-text = "HOST REALM"
-
-[node name="JoinButton" type="Button" parent="VBoxContainer/Buttons"]
-custom_minimum_size = Vector2(160, 48)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
-text = "JOIN REALM"
-
-[node name="StatusLabel" type="Label" parent="VBoxContainer"]
-custom_minimum_size = Vector2(0, 24)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+theme_override_colors/font_color = Color(0.9, 0.75, 0.4, 1)
 theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
+
+[node name="ButtonsRow" type="HBoxContainer" parent="CharCreatePanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="ConfirmCreateBtn" type="Button" parent="CharCreatePanel/Margin/VBox/ButtonsRow"]
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
+text = "Begin Journey"
+
+[node name="CancelCreateBtn" type="Button" parent="CharCreatePanel/Margin/VBox/ButtonsRow"]
+custom_minimum_size = Vector2(120, 42)
+layout_mode = 2
+text = "Cancel"

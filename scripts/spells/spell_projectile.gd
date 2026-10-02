@@ -40,14 +40,32 @@ func setup(p_caster: Node3D, p_spell_id: String, p_dir: Vector3, p_target: Node3
 
 func _apply_visuals() -> void:
 	if mesh:
-		var mat: StandardMaterial3D = mesh.get_active_material(0)
-		if mat:
-			mat.albedo_color = spell_color
-			mat.emission = spell_color
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.albedo_color = spell_color
+		mesh.set_surface_override_material(0, mat)
+		
+		# Distinct projectile shapes and scales
+		if spell_id == "bombarda":
+			mesh.scale = Vector3(1.8, 1.8, 2.4)
+		elif spell_id == "incendio":
+			mesh.scale = Vector3(1.4, 1.4, 2.0)
+		elif spell_id == "ultimate":
+			mesh.scale = Vector3(2.2, 2.2, 3.8)
+		elif spell_id == "stupefy":
+			mesh.scale = Vector3(1.2, 1.2, 1.6)
+		else:
+			mesh.scale = Vector3(0.9, 0.9, 1.3)
+			
 	if light:
 		light.light_color = spell_color
+		light.light_energy = 4.0 if spell_id in ["bombarda", "ultimate"] else 2.2
+		light.omni_range = 9.0 if spell_id in ["bombarda", "ultimate"] else 5.5
+		
 	if particles:
 		particles.color = spell_color
+		particles.amount = 45 if spell_id in ["incendio", "bombarda", "ultimate"] else 24
+		particles.speed_scale = 1.8 if spell_id == "incendio" else 1.2
 
 func _physics_process(delta: float) -> void:
 	lifetime += delta

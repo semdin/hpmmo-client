@@ -11,6 +11,10 @@ signal connection_failed
 signal server_disconnected_signal
 signal chat_message_received(sender_name: String, sender_house: String, message: String)
 signal remote_spell_cast(peer_id: int, spell_id: String, from_pos: Vector3, dir: Vector3)
+signal auth_register_result(success: bool, message: String)
+signal auth_login_result(success: bool, message: String, characters: Array)
+signal character_create_result(success: bool, message: String, char_data: Dictionary)
+signal character_select_result(success: bool, message: String, char_data: Dictionary)
 
 const DEFAULT_PORT: int = 7777
 const MAX_PLAYERS: int = 32
@@ -21,10 +25,16 @@ var is_dedicated_server: bool = false
 var is_connected_to_game: bool = false
 var _sync_timer: float = 0.0
 
-var local_player_name: String = "Harry"
+var local_player_name: String = "Wizard"
 var local_player_house: String = "Gryffindor"
+var local_account_id: int = 0
+var local_character_id: int = 0
+var local_character_data: Dictionary = {}
 var connected_players: Dictionary = {}
 var remote_states: Dictionary = {} # peer_id -> {pos, rot_y, mounted, hp, level}
+var peer_account_map: Dictionary = {} # peer_id -> account_id
+var peer_char_data_map: Dictionary = {} # peer_id -> full char_data
+var _auto_save_timer: float = 30.0
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_PREDELETE:
@@ -137,12 +147,32 @@ func _on_peer_connected(id: int) -> void:
 
 func _on_peer_disconnected(id: int) -> void:
 	print("[Network] Peer disconnected: ID %d" % id)
+	if multiplayer.is_server() and peer_char_data_map.has(id):
+		_save_peer_character(id)
+		peer_char_data_map.erase(id)
+		peer_account_map.erase(id)
 	if connected_players.has(id):
 		var p_info = connected_players[id]
 		print("[Server] Player left: %s [%s]" % [p_info.get("name", "Wizard"), p_info.get("house", "Gryffindor")])
 		connected_players.erase(id)
 	remote_states.erase(id)
 	emit_signal("player_disconnected_signal", id)
+
+func _save_peer_character(peer_id: int) -> void:
+	if not peer_char_data_map.has(peer_id):
+		return
+	var char_data: Dictionary = peer_char_data_map[peer_id]
+	if remote_states.has(peer_id):
+		var rs = remote_states[peer_id]
+		char_data["pos"] = [rs.pos.x, rs.pos.y, rs.pos.z]
+		char_data["rot_y"] = rs.rot_y
+		char_data["current_hp"] = rs.hp
+		char_data["level"] = rs.level
+	
+	DatabaseManager.save_character(char_data, func(resp):
+		if resp.get("success", false):
+			print("[Server DB] Auto-saved character '%s' (ID %d) to database" % [char_data.get("name", "Unknown"), char_data.get("id", 0)])
+	)
 
 func _on_connected_to_server() -> void:
 	is_connected_to_game = true
@@ -171,10 +201,17 @@ func _on_server_disconnected() -> void:
 func _process(delta: float) -> void:
 	if not is_connected_to_game or not multiplayer or not multiplayer.has_multiplayer_peer():
 		return
-	if is_dedicated_server:
+	
+	# Server: Periodic auto-save to PostgreSQL / SQLite (Every 30 seconds)
+	if multiplayer.is_server():
+		_auto_save_timer -= delta
+		if _auto_save_timer <= 0.0:
+			_auto_save_timer = 30.0
+			for p_id in peer_char_data_map.keys():
+				_save_peer_character(p_id)
 		return
 	
-	# 15 Hz transform broadcast from local player to server
+	# Client: 15 Hz transform broadcast from local player to server
 	_sync_timer -= delta
 	if _sync_timer <= 0.0:
 		_sync_timer = 1.0 / 15.0
@@ -259,3 +296,132 @@ func send_chat(message: String) -> void:
 		rpc_send_chat.rpc(local_player_name, local_player_house, message)
 	else:
 		emit_signal("chat_message_received", local_player_name, local_player_house, message)
+
+## -------------------------------------------------------------------
+## AUTHENTICATION & CHARACTER PERSISTENCE RPCs (PostgreSQL & SQLite)
+## -------------------------------------------------------------------
+
+func request_register(username: String, password: String) -> void:
+	if multiplayer.is_server():
+		DatabaseManager.register_account(username, password, func(res):
+			emit_signal("auth_register_result", res.get("success", false), res.get("message", ""))
+		)
+	else:
+		rpc_request_register.rpc_id(1, username, password)
+
+func request_login(username: String, password: String) -> void:
+	if multiplayer.is_server():
+		DatabaseManager.login_account(username, password, func(res):
+			var ok: bool = res.get("success", false)
+			var msg: String = res.get("message", "")
+			var chars: Array = res.get("characters", [])
+			if ok:
+				local_account_id = res.get("account_id", 0)
+			emit_signal("auth_login_result", ok, msg, chars)
+		)
+	else:
+		rpc_request_login.rpc_id(1, username, password)
+
+func request_create_character(char_name: String, house: String) -> void:
+	if multiplayer.is_server():
+		DatabaseManager.create_character(local_account_id, char_name, house, func(res):
+			var ok: bool = res.get("success", false)
+			var msg: String = res.get("message", "")
+			var c_data: Dictionary = res.get("character", {})
+			emit_signal("character_create_result", ok, msg, c_data)
+		)
+	else:
+		rpc_request_create_character.rpc_id(1, char_name, house)
+
+func request_select_character(char_id: int) -> void:
+	if multiplayer.is_server():
+		DatabaseManager.load_character(char_id, func(res):
+			var ok: bool = res.get("success", false)
+			var c_data: Dictionary = res.get("character", {})
+			if ok:
+				local_character_id = char_id
+				local_character_data = c_data
+				local_player_name = c_data.get("name", "Wizard")
+				local_player_house = c_data.get("house", "Gryffindor")
+			emit_signal("character_select_result", ok, res.get("message", ""), c_data)
+		)
+	else:
+		rpc_request_select_character.rpc_id(1, char_id)
+
+@rpc("any_peer", "reliable")
+func rpc_request_register(username: String, password: String) -> void:
+	var sender_id := multiplayer.get_remote_sender_id()
+	DatabaseManager.register_account(username, password, func(res):
+		rpc_register_result.rpc_id(sender_id, res.get("success", false), res.get("message", ""))
+	)
+
+@rpc("authority", "reliable")
+func rpc_register_result(success: bool, message: String) -> void:
+	emit_signal("auth_register_result", success, message)
+
+@rpc("any_peer", "reliable")
+func rpc_request_login(username: String, password: String) -> void:
+	var sender_id := multiplayer.get_remote_sender_id()
+	DatabaseManager.login_account(username, password, func(res):
+		var ok: bool = res.get("success", false)
+		var msg: String = res.get("message", "")
+		var chars: Array = res.get("characters", [])
+		if ok:
+			peer_account_map[sender_id] = res.get("account_id", 0)
+		rpc_login_result.rpc_id(sender_id, ok, msg, chars)
+	)
+
+@rpc("authority", "reliable")
+func rpc_login_result(success: bool, message: String, characters: Array) -> void:
+	if success:
+		print("[Network] Logged in successfully. Characters available: %d" % characters.size())
+	emit_signal("auth_login_result", success, message, characters)
+
+@rpc("any_peer", "reliable")
+func rpc_request_create_character(char_name: String, house: String) -> void:
+	var sender_id := multiplayer.get_remote_sender_id()
+	var acc_id: int = peer_account_map.get(sender_id, 0)
+	if acc_id <= 0:
+		rpc_create_character_result.rpc_id(sender_id, false, "Not logged in!", {})
+		return
+	DatabaseManager.create_character(acc_id, char_name, house, func(res):
+		var ok: bool = res.get("success", false)
+		var msg: String = res.get("message", "")
+		var c_data: Dictionary = res.get("character", {})
+		rpc_create_character_result.rpc_id(sender_id, ok, msg, c_data)
+	)
+
+@rpc("authority", "reliable")
+func rpc_create_character_result(success: bool, message: String, char_data: Dictionary) -> void:
+	emit_signal("character_create_result", success, message, char_data)
+
+@rpc("any_peer", "reliable")
+func rpc_request_select_character(char_id: int) -> void:
+	var sender_id := multiplayer.get_remote_sender_id()
+	DatabaseManager.load_character(char_id, func(res):
+		var ok: bool = res.get("success", false)
+		var msg: String = res.get("message", "")
+		var c_data: Dictionary = res.get("character", {})
+		if ok:
+			peer_char_data_map[sender_id] = c_data
+			var p_info := {
+				"name": c_data.get("name", "Wizard"),
+				"house": c_data.get("house", "Gryffindor"),
+				"level": c_data.get("level", 1),
+				"wand_tier": c_data.get("wand_tier", 0),
+				"char_id": char_id
+			}
+			connected_players[sender_id] = p_info
+			_sync_player_info.rpc(sender_id, p_info)
+		rpc_character_select_result.rpc_id(sender_id, ok, msg, c_data)
+	)
+
+@rpc("authority", "reliable")
+func rpc_character_select_result(success: bool, message: String, char_data: Dictionary) -> void:
+	if success:
+		local_character_id = char_data.get("id", 0)
+		local_character_data = char_data
+		local_player_name = char_data.get("name", "Wizard")
+		local_player_house = char_data.get("house", "Gryffindor")
+		print("[Network] Character loaded from DB: %s [%s] Level %d" % [local_player_name, local_player_house, char_data.get("level", 1)])
+	emit_signal("character_select_result", success, message, char_data)

@@ -12,14 +12,15 @@ multiplayer position/spell replication.
 ## 🎮 How to Play
 
 ### Launching
-- Double click `play.bat` or run `godot scenes/main/main_menu.tscn`.
+- **1-Click Official Launcher & Auto-Updater**: Double click `Launcher.bat` or run `python launcher/pottermetin_launcher.py`. Features real-time server ping, patch downloading, changelog dispatches, and quick solo/online launch.
+- Direct Game Launch: Double click `play.bat` or run `godot scenes/main/main_menu.tscn`.
 - Headless integration test:
   ```powershell
   godot --headless --path . res://scenes/test/test_scenario.tscn
   ```
-- Bake real PNG textures (already baked, re-run anytime):
+- Dedicated server headless start:
   ```powershell
-  godot --headless --path . -s tools/generate_assets.gd
+  godot --headless scenes/server/dedicated_server.tscn
   ```
 
 ### Controls (camera-relative — W is always AWAY from camera)
@@ -106,3 +107,30 @@ quest fanfare — generated as AudioStreamWAV.
 - Nimbus 2000 (+80% speed, mounted casting, wind trail)
 - Houses: Gryffindor fire/crit, Slytherin dark, Ravenclaw cooldown/mana, Hufflepuff HP/armor
 - Minimap, quest tracker, zone banners, boss bar, dialogue box, low-HP vignette
+
+## 🗄️ Database & Persistence Architecture (PostgreSQL + RAM + JSON)
+| Layer | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Persistence** | PostgreSQL (`server/schema.sql`) | Accounts, characters, levels, EXP, HP/MP, galleons, wand tier, inventory, quests, and ACID trade transactions. |
+| **Fallback** | SQLite (`server/pottermetin_server.db`) | Automatic seamless fallback if PostgreSQL server is inactive or offline. |
+| **Game Data** | JSON (`data/json/*.json`) | Spells, items, houses, and quests loaded directly into RAM on boot (`GameData`). |
+| **Realtime Combat** | Server RAM & ENet RPCs | 15 Hz movement broadcast, collision, spell impacts, and monolith damage calculated in memory without DB blocking. |
+
+## 🚀 Dedicated Server Deployment (Linux VPS: 213.250.145.75)
+1. **Package Server Files**:
+   Run `package_server.bat` on Windows to create `pottermetin_server.tar.gz`.
+2. **Transfer to VPS**:
+   ```bash
+   scp pottermetin_server.tar.gz root@213.250.145.75:~/
+   ```
+3. **Run Initial Setup on VPS**:
+   ```bash
+   bash ~/pottermetin/game/setup_server.sh
+   ```
+4. **Update Existing Server**:
+   ```bash
+   bash ~/pottermetin/game/update_server.sh
+   ```
+5. **Manage Systemd Services**:
+   - Game Server: `sudo systemctl status pottermetin` / `journalctl -u pottermetin -f`
+   - DB Microservice: `sudo systemctl status pottermetin-db` / `journalctl -u pottermetin-db -f`
