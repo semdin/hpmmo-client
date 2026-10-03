@@ -18,6 +18,8 @@ DatabaseManager="*res://scripts/server/db_manager.gd"
 NetworkManager="*res://scripts/autoload/network_manager.gd"
 AudioManager="*res://scripts/systems/audio_manager.gd"
 QuestManager="*res://scripts/systems/quest_manager.gd"
+SimNet="*res://addons/hpmmo_sim/net.gd"
+SimAuthority="*res://addons/hpmmo_sim/authority.gd"
 
 [display]
 

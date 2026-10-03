@@ -16,6 +16,7 @@
 #include <atomic>
 #include <chrono>
 #include <fstream>
+#include <algorithm>
 
 using namespace Gdiplus;
 
@@ -46,7 +47,9 @@ static AppConfig g_Config;
 static bool g_IsRegisterMode = false;
 static bool g_IsAuthenticated = false;
 static std::wstring g_AuthedUser = L"";
-static std::wstring g_AuthedPass = L"";
+// In-memory login session token (never logged, never written to disk). The
+// account password is never retained after authentication.
+static std::wstring g_AuthedToken = L"";
 
 static HWND g_hMainWnd = NULL;
 static HWND g_hTabLogin = NULL;
@@ -148,6 +151,20 @@ void SaveConfig() {
     }
 }
 
+// Extract a flat string field from a JSON response. The API only returns
+// simple fields the launcher needs ("token", "ticket", "message").
+std::string ExtractJsonString(const std::string& json, const std::string& key) {
+    size_t pos = json.find("\"" + key + "\"");
+    if (pos == std::string::npos) return "";
+    size_t colon = json.find(":", pos);
+    if (colon == std::string::npos) return "";
+    size_t q1 = json.find("\"", colon);
+    if (q1 == std::string::npos) return "";
+    size_t q2 = json.find("\"", q1 + 1);
+    if (q2 == std::string::npos) return "";
+    return json.substr(q1 + 1, q2 - q1 - 1);
+}
+
 // WinHTTP POST Request
 struct HttpResponse {
     bool success = false;
@@ -155,7 +172,8 @@ struct HttpResponse {
     std::string body;
 };
 
-HttpResponse HttpPost(const std::wstring& host, WORD port, const std::wstring& path, const std::string& jsonBody) {
+HttpResponse HttpPost(const std::wstring& host, WORD port, const std::wstring& path,
+                      const std::string& jsonBody, const std::wstring& bearerToken = L"") {
     HttpResponse resp;
     HINTERNET hSession = WinHttpOpen(L"HPMMO_Launcher/2.0",
                                      WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
@@ -180,9 +198,12 @@ HttpResponse HttpPost(const std::wstring& host, WORD port, const std::wstring& p
         return resp;
     }
 
-    LPCWSTR headers = L"Content-Type: application/json\r\n";
+    std::wstring headers = L"Content-Type: application/json\r\n";
+    if (!bearerToken.empty()) {
+        headers += L"Authorization: Bearer " + bearerToken + L"\r\n";
+    }
     BOOL bResults = WinHttpSendRequest(hRequest,
-                                       headers, (DWORD)-1L,
+                                       headers.c_str(), (DWORD)-1L,
                                        (LPVOID)jsonBody.c_str(), (DWORD)jsonBody.length(),
                                        (DWORD)jsonBody.length(), 0);
 
@@ -310,17 +331,54 @@ std::wstring FindGodotPath() {
     return L"godot.exe";
 }
 
-// Launch Game Process
-bool LaunchGame(bool soloMode, const std::wstring& username, const std::wstring& password) {
+// Build the child process environment for an online launch: the inherited
+// environment plus HPMMO_TICKET (single-use game ticket) and HPMMO_API_URL
+// (the API host the launcher authenticated against). The ticket is delivered
+// only here - never on the command line, in a log, or in a file.
+std::vector<wchar_t> BuildLaunchEnvironment(const std::wstring& ticket) {
+    std::vector<std::wstring> entries;
+    LPWCH current = GetEnvironmentStringsW();
+    if (current) {
+        for (LPWCH p = current; *p; p += wcslen(p) + 1) {
+            if (_wcsnicmp(p, L"HPMMO_TICKET=", 13) == 0) continue;
+            if (_wcsnicmp(p, L"HPMMO_API_URL=", 14) == 0) continue;
+            entries.emplace_back(p);
+        }
+        FreeEnvironmentStringsW(current);
+    }
+
+    entries.push_back(L"HPMMO_API_URL=http://" + g_Config.serverIp + L":" +
+                      std::to_wstring(g_Config.apiPort));
+    entries.push_back(L"HPMMO_TICKET=" + ticket);
+    std::sort(entries.begin(), entries.end());
+
+    std::vector<wchar_t> block;
+    for (const auto& entry : entries) {
+        block.insert(block.end(), entry.begin(), entry.end());
+        block.push_back(L'\0');
+    }
+    block.push_back(L'\0');
+    return block;
+}
+
+// Launch Game Process. Online launches receive the game ticket through the
+// child environment; the account password is never placed on the command line.
+bool LaunchGame(bool soloMode, const std::wstring& username, const std::wstring& ticket) {
     std::wstring godotPath = FindGodotPath();
     std::wstring cmd;
+    std::vector<wchar_t> envBlock;
+    LPVOID envPtr = NULL;
+    DWORD creationFlags = 0;
 
     if (soloMode) {
         cmd = L"\"" + godotPath + L"\" scenes/main/main_menu.tscn --solo";
     } else {
         cmd = L"\"" + godotPath + L"\" scenes/main/main_menu.tscn --user \"" +
-              username + L"\" --pass \"" + password + L"\" --ip \"" + g_Config.serverIp +
+              username + L"\" --ip \"" + g_Config.serverIp +
               L"\" --port " + std::to_wstring(g_Config.serverPort) + L" --autologin";
+        envBlock = BuildLaunchEnvironment(ticket);
+        envPtr = envBlock.data();
+        creationFlags = CREATE_UNICODE_ENVIRONMENT;
     }
 
     STARTUPINFOW si = { sizeof(si) };
@@ -328,12 +386,47 @@ bool LaunchGame(bool soloMode, const std::wstring& username, const std::wstring&
     std::vector<wchar_t> cmdBuffer(cmd.begin(), cmd.end());
     cmdBuffer.push_back(0);
 
-    if (CreateProcessW(NULL, cmdBuffer.data(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+    if (CreateProcessW(NULL, cmdBuffer.data(), NULL, NULL, FALSE, creationFlags, envPtr, NULL, &si, &pi)) {
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
         return true;
     }
     return false;
+}
+
+// Result of the asynchronous game-ticket request, delivered to the UI thread.
+struct TicketLaunchRequest {
+    bool ok = false;
+    std::wstring username;
+    std::wstring ticket;
+    std::wstring error;
+};
+
+// Request a single-use game ticket with the login token and hand the result to
+// the UI thread, which launches the game on success. Runs on a background
+// thread because the HTTP call blocks.
+void RequestTicketThenLaunch(const std::wstring& username, const std::wstring& token) {
+    std::thread([username, token]() {
+        HttpResponse res = HttpPost(g_Config.serverIp, (WORD)g_Config.apiPort,
+                                    L"/api/game-ticket", "{}", token);
+        TicketLaunchRequest* req = new TicketLaunchRequest();
+        req->username = username;
+        if (res.success && (res.statusCode == 200 || res.statusCode == 201)) {
+            std::string ticket = ExtractJsonString(res.body, "ticket");
+            if (!ticket.empty()) {
+                req->ok = true;
+                req->ticket = Utf8ToWide(ticket);
+            } else {
+                req->error = L"Sunucu gecerli bir oyun bileti dondurmedi. Lutfen tekrar deneyin.";
+            }
+        } else {
+            std::string message = ExtractJsonString(res.body, "message");
+            req->error = message.empty()
+                ? std::wstring(L"Oyun bileti alinamadi (sunucuya ulasilamiyor veya oturum gecersiz).")
+                : Utf8ToWide(message);
+        }
+        PostMessageW(g_hMainWnd, WM_USER + 101, 0, (LPARAM)req);
+    }).detach();
 }
 
 // UI Mode Switching
@@ -484,6 +577,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
             460, 305, 330, 85, hWnd, (HMENU)ID_BTN_PLAY, NULL, NULL);
         SendMessageW(g_hBtnPlay, WM_SETFONT, (WPARAM)g_hFontButton, TRUE);
+        EnableWindow(g_hBtnPlay, FALSE);
 
         g_hBtnSolo = CreateWindowW(L"BUTTON", L"🛡️ SOLO / ÇEVRİMDIŞI MOD",
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
@@ -541,23 +635,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             PerformAuthentication();
             break;
         case ID_BTN_PLAY: {
-            wchar_t userBuf[256] = {0};
-            wchar_t passBuf[256] = {0};
-            GetWindowTextW(g_hEdtUser, userBuf, 255);
-            GetWindowTextW(g_hEdtPass, passBuf, 255);
+            if (g_AuthedToken.empty()) {
+                g_StatusMsg = L"Oyuna baslamak icin once giris yapmalisiniz!";
+                g_StatusColor = RGB(255, 90, 90);
+                SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
+                break;
+            }
 
-            std::wstring userToLaunch = (wcslen(userBuf) > 0) ? userBuf : (g_IsAuthenticated ? g_AuthedUser : L"Wizard");
-            std::wstring passToLaunch = (wcslen(passBuf) > 0) ? passBuf : g_AuthedPass;
+            wchar_t userBuf[256] = {0};
+            GetWindowTextW(g_hEdtUser, userBuf, 255);
+
+            std::wstring userToLaunch = (wcslen(userBuf) > 0) ? userBuf : g_AuthedUser;
+            if (userToLaunch.empty()) userToLaunch = L"Wizard";
 
             g_Config.lastUsername = userToLaunch;
             SaveConfig();
 
-            LogMsg("Launching Game: user=" + WideToUtf8(userToLaunch));
-            if (LaunchGame(false, userToLaunch, passToLaunch)) {
-                ShowWindow(hWnd, SW_MINIMIZE);
-            } else {
-                MessageBoxW(hWnd, L"Godot motoru baslatilamadi! godot.exe yolunu kontrol edin.", L"Hata", MB_ICONERROR);
-            }
+            LogMsg("Launch requested: user=" + WideToUtf8(userToLaunch));
+            EnableWindow(g_hBtnPlay, FALSE);
+            g_StatusMsg = L"Oyun bileti aliniyor...";
+            g_StatusColor = RGB(240, 200, 80);
+            SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
+            RequestTicketThenLaunch(userToLaunch, g_AuthedToken);
             break;
         }
         case ID_BTN_SOLO: {
@@ -579,9 +678,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
         if (pResp->success && (pResp->statusCode == 200 || pResp->statusCode == 201)) {
             wchar_t userBuf[256] = {0};
-            wchar_t passBuf[256] = {0};
             GetWindowTextW(g_hEdtUser, userBuf, 255);
-            GetWindowTextW(g_hEdtPass, passBuf, 255);
 
             if (g_IsRegisterMode) {
                 g_StatusMsg = L"Hesabınız başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.";
@@ -590,13 +687,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             } else {
                 g_IsAuthenticated = true;
                 g_AuthedUser = userBuf;
-                g_AuthedPass = passBuf;
+                g_AuthedToken = Utf8ToWide(ExtractJsonString(pResp->body, "token"));
+                // The password is not needed anymore: drop it from the form so
+                // it is not retained for the launcher's lifetime.
+                SetWindowTextW(g_hEdtPass, L"");
 
-                g_StatusMsg = L"Giriş başarılı! 'OYUNA BAŞLA' butonuna basarak dünyayı keşfedin.";
-                g_StatusColor = RGB(100, 255, 120);
+                if (g_AuthedToken.empty()) {
+                    g_IsAuthenticated = false;
+                    g_StatusMsg = L"Sunucu oturum belirteci dondurmedi. Lutfen tekrar deneyin.";
+                    g_StatusColor = RGB(255, 80, 80);
+                } else {
+                    g_StatusMsg = L"Giriş başarılı! 'OYUNA BAŞLA' butonuna basarak dünyayı keşfedin.";
+                    g_StatusColor = RGB(100, 255, 120);
 
-                EnableWindow(g_hBtnPlay, TRUE);
-                SetFocus(g_hBtnPlay);
+                    EnableWindow(g_hBtnPlay, TRUE);
+                    SetFocus(g_hBtnPlay);
+                }
             }
         } else {
             std::string body = pResp->body;
@@ -615,6 +721,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
         SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
         delete pResp;
+        InvalidateRect(hWnd, NULL, FALSE);
+        return 0;
+    }
+
+    case WM_USER + 101: {
+        TicketLaunchRequest* pReq = (TicketLaunchRequest*)lParam;
+        if (!pReq) return 0;
+
+        EnableWindow(g_hBtnPlay, TRUE);
+        if (pReq->ok) {
+            if (LaunchGame(false, pReq->username, pReq->ticket)) {
+                ShowWindow(hWnd, SW_MINIMIZE);
+                g_StatusMsg = L"Oyun baslatildi. Iyi oyunlar!";
+                g_StatusColor = RGB(100, 255, 120);
+            } else {
+                g_StatusMsg = L"Godot motoru baslatilamadi! godot.exe yolunu kontrol edin.";
+                g_StatusColor = RGB(255, 80, 80);
+                MessageBoxW(hWnd, L"Godot motoru baslatilamadi! godot.exe yolunu kontrol edin.", L"Hata", MB_ICONERROR);
+            }
+        } else {
+            g_StatusMsg = pReq->error.empty() ? L"Oyun bileti alinamadi. Lutfen tekrar deneyin." : pReq->error;
+            g_StatusColor = RGB(255, 80, 80);
+        }
+
+        SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
+        delete pReq;
         InvalidateRect(hWnd, NULL, FALSE);
         return 0;
     }

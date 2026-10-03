@@ -53,8 +53,6 @@ assets/vfx/spark_01.png
 data/json/houses.json
 data/json/items.json
 data/json/quests.json
-data/json/safe_zones.json
-data/json/spells.json
 project.godot
 scenes/entities/loot/loot_drop.tscn
 scenes/entities/mobs/mob_acromantula.tscn
