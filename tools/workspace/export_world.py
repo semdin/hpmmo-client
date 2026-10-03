@@ -58,6 +58,20 @@ def main():
         wanted = [line.strip() for line in f if line.strip() and not line.startswith("#")]
 
     world = os.path.join(args.server, "world")
+    # Deterministic export: wipe previous contents (including Godot import
+    # artifacts extracted next to models) so removed sources never linger.
+    if os.path.isdir(world):
+        for root, dirs, names in os.walk(world, topdown=False):
+            for n in names:
+                p = os.path.join(root, n)
+                if os.path.relpath(p, world).replace("\\", "/") == "WORLD_EXPORT.json":
+                    continue
+                os.remove(p)
+            for d in dirs:
+                try:
+                    os.rmdir(os.path.join(root, d))
+                except OSError:
+                    pass
     exported = {}
     missing = []
     for rel in wanted:
