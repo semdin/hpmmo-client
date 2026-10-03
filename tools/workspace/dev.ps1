@@ -21,8 +21,8 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$client = Join-Path $root 'client'
-$server = Join-Path $root 'server'
+$clientRepo = Join-Path $root 'client'
+$serverRepo = Join-Path $root 'server'
 $lockPath = Join-Path $root 'workspace.lock.json'
 $python = 'python'
 
@@ -45,7 +45,7 @@ function Test-Contracts([switch]$Quiet) {
     foreach ($entry in $lock.contracts.PSObject.Properties) {
         $name = $entry.Name
         $want = $entry.Value.hash
-        foreach ($repo in @(@('client', $client), @('server', $server))) {
+        foreach ($repo in @(@('client', $clientRepo), @('server', $serverRepo))) {
             $rel = $entry.Value.($repo[0])
             if (-not $rel) { continue }
             $full = Join-Path $repo[1] $rel
@@ -66,19 +66,19 @@ function Test-Contracts([switch]$Quiet) {
 }
 
 function Invoke-ClientHarness {
-    $script = Join-Path $client 'tools\run_game_checks.ps1'
+    $script = Join-Path $clientRepo 'tools\run_game_checks.ps1'
     if (-not (Test-Path $script)) { throw "missing $script" }
     & powershell -ExecutionPolicy Bypass -File $script
     if ($LASTEXITCODE -ne 0) { throw 'client harness failed' }
 }
 
 function Invoke-ServerSmoke {
-    $svc = Join-Path $server 'services\db_service.py'
-    $world = Join-Path $server 'world'
+    $svc = Join-Path $serverRepo 'services\db_service.py'
+    $world = Join-Path $serverRepo 'world'
     Write-Host '[server] compile service'
     & $python -m py_compile $svc
     if ($LASTEXITCODE -ne 0) { throw 'service does not compile' }
-    $smoke = Join-Path $server 'tests\smoke_service.py'
+    $smoke = Join-Path $serverRepo 'tests\smoke_service.py'
     if (Test-Path $smoke) {
         Write-Host '[server] service smoke (temp sqlite, health + save-key rejection)'
         & $python $smoke
@@ -104,14 +104,14 @@ switch ($Command) {
         if ($lock) {
             Write-Host ("  client pin: {0}   server pin: {1}   godot: {2}" -f $lock.client_revision, $lock.server_revision, $lock.godot_version)
         }
-        Write-Host ("  client HEAD: {0}" -f (git -C $client rev-parse --short HEAD 2>$null))
-        Write-Host ("  server HEAD: {0}" -f (git -C $server rev-parse --short HEAD 2>$null))
+        Write-Host ("  client HEAD: {0}" -f (git -C $clientRepo rev-parse --short HEAD 2>$null))
+        Write-Host ("  server HEAD: {0}" -f (git -C $serverRepo rev-parse --short HEAD 2>$null))
         Write-Host '--- contracts ---'
         Test-Contracts | Out-Null
         Write-Host '--- client changes ---'
-        git -C $client status --short
+        git -C $clientRepo status --short
         Write-Host '--- server changes ---'
-        git -C $server status --short
+        git -C $serverRepo status --short
     }
     'test' {
         Invoke-ClientHarness
@@ -119,7 +119,7 @@ switch ($Command) {
         Write-Host 'workspace tests passed'
     }
     'build' {
-        $pkg = Join-Path $server 'deploy\package_server.ps1'
+        $pkg = Join-Path $serverRepo 'deploy\package_server.ps1'
         if (-not (Test-Path $pkg)) { throw "missing $pkg" }
         & powershell -ExecutionPolicy Bypass -File $pkg
         if ($LASTEXITCODE -ne 0) { throw 'server packaging failed' }
@@ -128,17 +128,17 @@ switch ($Command) {
     'start' {
         if ($Server) {
             $godot = Get-Godot
-            & $godot --path (Join-Path $server 'world') res://scenes/server/dedicated_server.tscn
+            & $godot --path (Join-Path $serverRepo 'world') res://scenes/server/dedicated_server.tscn
         }
         else {
-            $bat = Join-Path $client 'Launcher.bat'
-            if (Test-Path $bat) { & $bat } else { & (Get-Godot) --path $client }
+            $bat = Join-Path $clientRepo 'Launcher.bat'
+            if (Test-Path $bat) { & $bat } else { & (Get-Godot) --path $clientRepo }
         }
     }
     'sync-world' {
-        $tool = Join-Path $client 'tools\workspace\export_world.py'
+        $tool = Join-Path $clientRepo 'tools\workspace\export_world.py'
         if (-not (Test-Path $tool)) { throw "missing $tool" }
-        & $python $tool --client $client --server $server --root $root
+        & $python $tool --client $clientRepo --server $serverRepo --root $root
         if ($LASTEXITCODE -ne 0) { throw 'world export failed' }
     }
     'verify-contracts' {
