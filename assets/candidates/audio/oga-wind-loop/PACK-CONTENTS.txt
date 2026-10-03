@@ -1,0 +1,10 @@
+Wind Loop (oga-wind-loop)
+author: AntumDeluge (https://opengameart.org/users/antumdeluge)
+source page: https://opengameart.org/content/wind-loop
+downloaded file: https://opengameart.org/sites/default/files/wind-01_0.ogg (570178 bytes)
+license: Creative Commons Attribution 3.0 (CC-BY-3.0); https://creativecommons.org/licenses/by/3.0/
+format: Ogg Vorbis, channels=2, sample_rate=44100 Hz, nominal_bitrate=96000 bps
+notes: single-file ambience asset (no archive); downloaded with curl, no login required.
+files kept:
+      570178  wind-01_0.ogg
+              LICENSE.txt (provenance record)

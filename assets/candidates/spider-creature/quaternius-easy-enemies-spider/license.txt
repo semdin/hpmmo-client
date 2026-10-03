@@ -1,0 +1,28 @@
+Asset: "Spider" (low-poly, rigged, animated)
+Author: Quaternius (https://quaternius.com/, twitter @quaternius)
+Source page: https://poly.pizza/m/yRYJiAJyiM  (downloaded 2026-10-03)
+Direct file: https://static.poly.pizza/4259fbdb-afb5-4d40-9108-363625dd6b6e.glb
+
+License: CC0 1.0 Universal (Public Domain Dedication)
+License URL: https://creativecommons.org/publicdomain/zero/1.0/
+License text (local copy): cc0-1.0-legalcode.txt (downloaded from the URL above)
+
+Evidence on the source page:
+- The Poly Pizza model page states "Licence: CC0 1.0" and "Animated: true".
+- Page-embedded JSON (window.__SERVER_APP_STATE__): "Title":"Spider","Creator":{"Username":"Quaternius"},
+  "Type":"FBX","Licence":"CC0 1.0","Animated":true.
+- Quaternius's own site (https://quaternius.com/) states every pack is CC0; each pack page links
+  https://creativecommons.org/publicdomain/zero/1.0/.
+
+Origin pack identified: "LowPoly Animated Easy Enemies" by Quaternius
+(https://quaternius.itch.io/animated-easy-enemies — "FBX, OBJ and Blend formats and CC0 license";
+"Each enemy has a movement, attack, jump and death animation"; pack folder also mirrored on the author's
+Google Drive: https://drive.google.com/drive/folders/1VbJIslXPWK-1KybQN6yezZrfJcw608qe).
+The official Drive source files (Spider.blend/.fbx/.obj) were quota-blocked at download time — see
+../quaternius-spider-easyenemy/BLOCKED-DOWNLOAD.txt. The .glb here is the same model, converted from the
+pack's FBX (generator string in file: "FBX2glTF v0.9.7").
+
+File: spider.glb (glTF 2.0 binary, 449,008 bytes, sha256 d759e35f6cf5adc7eb7e3f70135cd2a808787fc36337a523015592ba840ccd6d)
+Stats: 2,712 triangles; 1 skin with 39 joints (4 three-segment leg chains per side plus thorax/abdomen/head);
+5 animation clips: Spider_Attack, Spider_Death, Spider_Idle, Spider_Jump, Spider_Walk; 2 flat-colour
+materials (near-black body, dark red); no images, no UVs.

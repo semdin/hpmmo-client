@@ -1,0 +1,12 @@
+Wind Loop ("wind-01_0.ogg")
+creator: Jonathan Shaw (InspectorJ) - https://freesound.org/people/InspectorJ/sounds/376415/
+uploaded to OpenGameArt by: AntumDeluge - https://opengameart.org/content/wind-loop
+source page: https://opengameart.org/content/wind-loop
+downloaded from: https://opengameart.org/sites/default/files/wind-01_0.ogg
+retrieved: 2026-10-03 (direct curl download, no login)
+license: Creative Commons Attribution 3.0 (CC-BY-3.0)
+license URL: https://creativecommons.org/licenses/by/3.0/
+attribution (REQUIRED): credit "Jonathan Shaw (InspectorJ)" with the freesound source link.
+  Crediting the OpenGameArt uploader (AntumDeluge) is optional.
+note: this receipt corrects an earlier copy that credited only the OGA uploader; the
+phase-2 adversarial verification identified the original creator on the source page.

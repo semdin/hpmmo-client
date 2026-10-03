@@ -1,0 +1,56 @@
+{
+ "id": "stone-brick-wall-001",
+ "name": "Stone Brick Wall 001",
+ "source_page": "https://polyhaven.com/a/stone_brick_wall_001",
+ "author": "Dimitrios Savva (photography), Rico Cilliers (processing)",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "license.html",
+   "bytes": 72324,
+   "sha256": "6f4f617c936d14d5a80db6a2ebec145c79277a760672501eef51bff7a0d4cbba"
+  },
+  {
+   "file": "license.txt",
+   "bytes": 827,
+   "sha256": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8"
+  },
+  {
+   "file": "stone_brick_wall_001_ao_2k.jpg",
+   "bytes": 909306,
+   "sha256": "c7d32d44ed9ae89505ae71ebc21639f315e4eef45ada730a31e284b552c08a78",
+   "pixels": "2048x2048",
+   "map": "ao"
+  },
+  {
+   "file": "stone_brick_wall_001_diff_2k.jpg",
+   "bytes": 1066112,
+   "sha256": "2374d49b7de8046226f67ff97eecc4f558ebe3372ec5b854f0211816af87c050",
+   "pixels": "2048x2048",
+   "map": "diff"
+  },
+  {
+   "file": "stone_brick_wall_001_disp_2k.jpg",
+   "bytes": 199430,
+   "sha256": "7a18366978076da95fad8a4f73534051935b88308df0b8e72982e35f6ec8e9ff",
+   "pixels": "2048x2048",
+   "map": "disp"
+  },
+  {
+   "file": "stone_brick_wall_001_nor_gl_2k.jpg",
+   "bytes": 1409900,
+   "sha256": "daa4abd418cc0bf1144c32e588fecbbd5f573e380a125a910f6c67b9725f20ab",
+   "pixels": "2048x2048",
+   "map": "nor_gl"
+  },
+  {
+   "file": "stone_brick_wall_001_rough_2k.jpg",
+   "bytes": 800557,
+   "sha256": "e9c46951e101fa19d773528d362960cf42f5b7532de92cda7b9a1389651ab854",
+   "pixels": "2048x2048",
+   "map": "rough"
+  }
+ ]
+}

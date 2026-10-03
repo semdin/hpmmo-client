@@ -1,0 +1,9 @@
+Poly Pizza model page: https://poly.pizza/m/y9KWOVG21R
+Downloaded GLB (CDN): https://static.poly.pizza/3186b8e9-afd5-4d48-846c-b2b530cd23e2.glb
+Model title: Hooded Adventurer
+Creator: Quaternius (quaternius.com)
+License as listed on the model page: CC0 1.0
+License statement source: embedded page state (window.__SERVER_APP_STATE__) on the model page,
+retrieved 2026-10-03 -> "Licence":"CC0 1.0", "Animated":true, "Tris":3412
+Model page tags/licence are shown on the page next to the Download button.
+Note: poly.pizza serves a converted GLB of the author's original FBX.
