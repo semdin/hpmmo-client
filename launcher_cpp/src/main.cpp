@@ -8,7 +8,9 @@
 #include <commctrl.h>
 #include <winhttp.h>
 #include <shlwapi.h>
+#include <shellapi.h>
 
+#include <cstdio>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -17,6 +19,9 @@
 #include <chrono>
 #include <fstream>
 #include <algorithm>
+#include <mutex>
+
+#include "updater.h"
 
 using namespace Gdiplus;
 
@@ -31,8 +36,17 @@ enum {
     ID_BTN_SOLO = 1007,
     ID_CHK_REMEMBER = 1008,
     ID_LBL_STATUS = 1009,
-    ID_TIMER_PING = 2001
+    ID_BTN_UPDATE = 1010,
+    ID_BTN_RECHECK = 1011,
+    ID_BTN_NOTES = 1012,
+    ID_TIMER_PING = 2001,
+    ID_TIMER_UPDATE = 2002
 };
+
+// Main-thread messages posted by updater workers.
+#define WM_UPDATER_CHECKED (WM_USER + 200)
+#define WM_UPDATER_STATUS (WM_USER + 201)
+#define WM_UPDATER_DONE (WM_USER + 202)
 
 // Application Configuration
 struct AppConfig {
@@ -59,8 +73,21 @@ static HWND g_hEdtPass = NULL;
 static HWND g_hBtnAuth = NULL;
 static HWND g_hBtnPlay = NULL;
 static HWND g_hBtnSolo = NULL;
+static HWND g_hBtnUpdate = NULL;
+static HWND g_hBtnRecheck = NULL;
+static HWND g_hBtnNotes = NULL;
 static HWND g_hChkRemember = NULL;
 static HWND g_hLblStatus = NULL;
+
+// Phase 7: updater state shared with the UI thread.
+static std::mutex g_UpdMutex;
+static hpmmo::CheckSummary g_UpdSummary;
+static std::wstring g_UpdLine1;
+static std::wstring g_UpdLine2;
+static std::wstring g_UpdProgress;
+static std::atomic<bool> g_UpdBusy{false};
+static std::atomic<bool> g_UpdCancel{false};
+static std::atomic<int> g_UpdLastCheckSeconds{0};
 
 static HFONT g_hFontTitle = NULL;
 static HFONT g_hFontHeading = NULL;
@@ -308,6 +335,160 @@ void CheckServerPing() {
     }
 }
 
+// ------------------------------------------------------- Phase 7 updater UI --
+
+static std::wstring g_UpdResult = L"";
+
+void PostUpdaterStatus(const std::wstring& text) {
+    if (g_hMainWnd) PostMessageW(g_hMainWnd, WM_UPDATER_STATUS, 0, (LPARAM)new std::wstring(text));
+}
+
+void RefreshUpdaterUi();
+
+void RunUpdaterCheck() {
+    if (g_UpdBusy.exchange(true)) return;
+    g_UpdCancel = false;
+    std::thread([]() {
+        hpmmo::CliOptions opts;
+        hpmmo::AppConfig cfg = hpmmo::Config();
+        hpmmo::CheckSummary sum = hpmmo::DoCheck(opts, cfg, &g_UpdCancel, PostUpdaterStatus);
+        {
+            std::lock_guard<std::mutex> lock(g_UpdMutex);
+            g_UpdSummary = sum;
+        }
+        g_UpdBusy = false;
+        if (g_hMainWnd) PostMessageW(g_hMainWnd, WM_UPDATER_CHECKED, 0, 0);
+    }).detach();
+    RefreshUpdaterUi();
+}
+
+void RunUpdaterUpdate() {
+    if (g_UpdBusy.exchange(true)) return;
+    g_UpdCancel = false;
+    std::thread([]() {
+        hpmmo::CliOptions opts;
+        hpmmo::AppConfig cfg = hpmmo::Config();
+        hpmmo::CommandResult res = hpmmo::DoUpdate(opts, cfg, &g_UpdCancel, PostUpdaterStatus);
+        std::wstring resultMsg;
+        {
+            hpmmo::JsonValue j;
+            std::string err;
+            if (hpmmo::JsonValue::Parse(res.json, j, err)) {
+                std::string msg = j.str("message");
+                if (msg.empty() && res.code == hpmmo::kExitSelfUpdateDone) {
+                    msg = "Launcher guncellemesi uygulaniyor; uygulama yeniden baslatilacak.";
+                }
+                resultMsg = Utf8ToWide(msg);
+            }
+        }
+        hpmmo::CheckSummary sum = hpmmo::DoCheck(opts, cfg, &g_UpdCancel, PostUpdaterStatus);
+        {
+            std::lock_guard<std::mutex> lock(g_UpdMutex);
+            g_UpdSummary = sum;
+            g_UpdResult = resultMsg;
+        }
+        g_UpdBusy = false;
+        if (g_hMainWnd) PostMessageW(g_hMainWnd, WM_UPDATER_DONE, (WPARAM)res.code, 0);
+    }).detach();
+    RefreshUpdaterUi();
+}
+
+void RefreshUpdaterUi() {
+    if (!g_hMainWnd) return;
+    bool busy = g_UpdBusy.load();
+    hpmmo::CheckSummary sum;
+    {
+        std::lock_guard<std::mutex> lock(g_UpdMutex);
+        sum = g_UpdSummary;
+    }
+    std::wstring stateLine = L"● Sunucu durumu bilinmiyor (kontrol icin 'Yeniden Kontrol Et')";
+    std::wstring infoLine;
+    if (sum.ok) {
+        std::string st = sum.state;
+        if (st == "MAINTENANCE") {
+            stateLine = L"● BAKIM: " + Utf8ToWide(sum.message);
+            if (!sum.until.empty()) {
+                int64_t until = 0;
+                if (hpmmo::ParseIso8601Utc(sum.until, until)) {
+                    int64_t left = until - hpmmo::UnixNowSeconds();
+                    if (left > 0) {
+                        stateLine += L" (~" + Utf8ToWide(hpmmo::FormatDuration(left)) + L" kaldi)";
+                    }
+                }
+            }
+        } else if (st == "ONLINE") {
+            stateLine = L"● CEVRIMICI";
+        } else if (st == "OFFLINE") {
+            stateLine = L"● CEVRIMDISI (sunucu yanit vermiyor)";
+        }
+        if (!sum.protocolOk) {
+            infoLine = L"⚠ " + Utf8ToWide(sum.error) + L" - guncelleme gerekli";
+        } else if (sum.selfUpdateRequired) {
+            infoLine = L"Launcher guncellemesi gerekli (GUNCELLE).";
+        } else if (sum.updateAvailable) {
+            infoLine = L"Yeni surum hazir: " + Utf8ToWide(sum.installedVersion) + L" → " +
+                       Utf8ToWide(sum.releaseVersion) + L"  (GUNCELLE)";
+        } else {
+            infoLine = L"Surum guncel: " + Utf8ToWide(sum.installedVersion.empty() ? "yok"
+                                                                                    : sum.installedVersion);
+        }
+    } else if (!sum.error.empty()) {
+        stateLine = L"● Baglanti hatasi";
+        infoLine = Utf8ToWide(sum.error) + L"  ('Yeniden Kontrol Et')";
+    }
+    if (!g_UpdResult.empty()) infoLine = g_UpdResult;
+    {
+        std::lock_guard<std::mutex> lock(g_UpdMutex);
+        g_UpdLine1 = stateLine;
+        g_UpdLine2 = infoLine;
+    }
+    bool canUpdate = sum.ok && (sum.updateAvailable || sum.selfUpdateRequired);
+    if (busy) {
+        // The Update button doubles as Cancel while a transfer is in flight.
+        SetWindowTextW(g_hBtnUpdate, L"İPTAL (CANCEL)");
+        EnableWindow(g_hBtnUpdate, TRUE);
+    } else {
+        SetWindowTextW(g_hBtnUpdate, L"GÜNCELLE (UPDATE)");
+        EnableWindow(g_hBtnUpdate, canUpdate ? TRUE : FALSE);
+    }
+    EnableWindow(g_hBtnRecheck, busy ? FALSE : TRUE);
+    EnableWindow(g_hBtnNotes, (!sum.releaseNotes.empty()) ? TRUE : FALSE);
+    if (busy) {
+        SetWindowTextW(g_hLblStatus, L"Guncelleme isleniyor...");
+        g_StatusColor = RGB(240, 200, 80);
+    } else if (canUpdate) {
+        SetWindowTextW(g_hLblStatus, (stateLine + L"  " + infoLine).c_str());
+        g_StatusColor = RGB(240, 200, 80);
+    }
+    InvalidateRect(g_hMainWnd, NULL, FALSE);
+}
+
+// Gate online play on the last check: maintenance, protocol mismatch and a
+// required launcher/self update all refuse with a clear message (no login loop).
+bool LaunchGateAllows(std::wstring& reason) {
+    hpmmo::CheckSummary sum;
+    {
+        std::lock_guard<std::mutex> lock(g_UpdMutex);
+        sum = g_UpdSummary;
+    }
+    if (!sum.ok) return true;  // no fresh data: keep the existing login flow
+    if (sum.selfUpdateRequired) {
+        reason = L"Launcher guncellemesi gerekli. Lutfen GUNCELLE ile guncelleyin.";
+        return false;
+    }
+    if (sum.state == "MAINTENANCE") {
+        reason = L"Sunucu bakimda: " + Utf8ToWide(sum.message) +
+                 L"\nBakim bitince tekrar deneyin.";
+        return false;
+    }
+    if (!sum.protocolOk) {
+        reason = L"Bu istemci sunucunun protokoluyle uyumlu degil:\n" + Utf8ToWide(sum.error) +
+                 L"\nLutfen launcher'i guncelleyin.";
+        return false;
+    }
+    return true;
+}
+
 // Locate Godot Executable
 std::wstring FindGodotPath() {
     const wchar_t* candidates[] = {
@@ -364,6 +545,14 @@ std::vector<wchar_t> BuildLaunchEnvironment(const std::wstring& ticket) {
 // Launch Game Process. Online launches receive the game ticket through the
 // child environment; the account password is never placed on the command line.
 bool LaunchGame(bool soloMode, const std::wstring& username, const std::wstring& ticket) {
+    // Prefer an activated, verified installation from the updater layout.
+    hpmmo::AppConfig updCfg = hpmmo::Config();
+    hpmmo::CliOptions updCli;
+    hpmmo::UpdaterPaths updPaths = hpmmo::ComputePaths(updCli, updCfg);
+    if (!updPaths.gameExe.empty()) {
+        if (hpmmo::LaunchInstalledGame(updPaths, updCfg, soloMode, username, ticket)) return true;
+    }
+
     std::wstring godotPath = FindGodotPath();
     std::wstring cmd;
     std::vector<wchar_t> envBlock;
@@ -584,15 +773,43 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             460, 410, 330, 44, hWnd, (HMENU)ID_BTN_SOLO, NULL, NULL);
         SendMessageW(g_hBtnSolo, WM_SETFONT, (WPARAM)g_hFontNormal, TRUE);
 
+        // Phase 7: updater controls (right card, below Solo).
+        g_hBtnUpdate = CreateWindowW(L"BUTTON", L"GÜNCELLE (UPDATE)",
+            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+            460, 462, 158, 34, hWnd, (HMENU)ID_BTN_UPDATE, NULL, NULL);
+        SendMessageW(g_hBtnUpdate, WM_SETFONT, (WPARAM)g_hFontSmall, TRUE);
+        EnableWindow(g_hBtnUpdate, FALSE);
+
+        g_hBtnRecheck = CreateWindowW(L"BUTTON", L"YENİDEN KONTROL ET (RETRY)",
+            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+            632, 462, 158, 34, hWnd, (HMENU)ID_BTN_RECHECK, NULL, NULL);
+        SendMessageW(g_hBtnRecheck, WM_SETFONT, (WPARAM)g_hFontSmall, TRUE);
+
+        g_hBtnNotes = CreateWindowW(L"BUTTON", L"SÜRÜM NOTLARI (RELEASE NOTES)",
+            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+            460, 500, 330, 30, hWnd, (HMENU)ID_BTN_NOTES, NULL, NULL);
+        SendMessageW(g_hBtnNotes, WM_SETFONT, (WPARAM)g_hFontSmall, TRUE);
+        EnableWindow(g_hBtnNotes, FALSE);
+
         // Status Label
         g_hLblStatus = CreateWindowW(L"STATIC", g_StatusMsg.c_str(),
             WS_CHILD | WS_VISIBLE | SS_LEFT,
-            60, 515, 730, 24, hWnd, (HMENU)ID_LBL_STATUS, NULL, NULL);
+            60, 575, 730, 24, hWnd, (HMENU)ID_LBL_STATUS, NULL, NULL);
         SendMessageW(g_hLblStatus, WM_SETFONT, (WPARAM)g_hFontSmall, TRUE);
 
         // Set ping check timer (every 5 seconds)
         SetTimer(hWnd, ID_TIMER_PING, 5000, NULL);
         std::thread(CheckServerPing).detach();
+
+        // Phase 7: initial release check (only when a release base is configured).
+        SetTimer(hWnd, ID_TIMER_UPDATE, 60000, NULL);
+        if (!hpmmo::Config().releaseBaseUrl.empty()) {
+            RunUpdaterCheck();
+        } else {
+            std::lock_guard<std::mutex> lock(g_UpdMutex);
+            g_UpdLine1 = L"● Güncelleme sunucusu yapılandırılmadı";
+            g_UpdLine2 = L"client_config.json içine release_base_url ekleyin.";
+        }
 
         return 0;
     }
@@ -600,6 +817,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
     case WM_TIMER: {
         if (wParam == ID_TIMER_PING) {
             std::thread(CheckServerPing).detach();
+        } else if (wParam == ID_TIMER_UPDATE) {
+            // Periodic re-check, but never while a transfer is in flight.
+            static int ticks = 0;
+            ticks++;
+            if (ticks >= 5 && !g_UpdBusy.load() && !hpmmo::Config().releaseBaseUrl.empty()) {
+                ticks = 0;
+                RunUpdaterCheck();
+            }
         }
         return 0;
     }
@@ -635,6 +860,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             PerformAuthentication();
             break;
         case ID_BTN_PLAY: {
+            std::wstring gateReason;
+            if (!LaunchGateAllows(gateReason)) {
+                g_StatusMsg = gateReason;
+                g_StatusColor = RGB(255, 90, 90);
+                SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
+                MessageBoxW(hWnd, gateReason.c_str(), L"Uyumluluk Kontrolü", MB_ICONWARNING);
+                break;
+            }
             if (g_AuthedToken.empty()) {
                 g_StatusMsg = L"Oyuna baslamak icin once giris yapmalisiniz!";
                 g_StatusColor = RGB(255, 90, 90);
@@ -667,7 +900,78 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             }
             break;
         }
+        case ID_BTN_UPDATE:
+            if (g_UpdBusy.load()) {
+                g_UpdCancel = true;
+                g_StatusMsg = L"Güncelleme iptal ediliyor...";
+                g_StatusColor = RGB(240, 200, 80);
+                SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
+            } else {
+                RunUpdaterUpdate();
+            }
+            break;
+        case ID_BTN_RECHECK:
+            RunUpdaterCheck();
+            break;
+        case ID_BTN_NOTES: {
+            std::lock_guard<std::mutex> lock(g_UpdMutex);
+            std::wstring notes = Utf8ToWide(g_UpdSummary.releaseNotes);
+            if (!notes.empty()) {
+                MessageBoxW(hWnd, notes.c_str(), L"Sürüm Notları", MB_ICONINFORMATION);
+            }
+            break;
         }
+        }
+        return 0;
+    }
+
+    case WM_UPDATER_CHECKED: {
+        RefreshUpdaterUi();
+        return 0;
+    }
+
+    case WM_UPDATER_STATUS: {
+        std::wstring* text = (std::wstring*)lParam;
+        if (text) {
+            {
+                std::lock_guard<std::mutex> lock(g_UpdMutex);
+                g_UpdProgress = *text;
+            }
+            SetWindowTextW(g_hLblStatus, text->c_str());
+            delete text;
+        }
+        return 0;
+    }
+
+    case WM_UPDATER_DONE: {
+        int code = (int)wParam;
+        {
+            std::lock_guard<std::mutex> lock(g_UpdMutex);
+            g_UpdProgress.clear();
+        }
+        if (code == hpmmo::kExitSelfUpdateDone) {
+            MessageBoxW(hWnd,
+                        L"Launcher güncellemesi indirildi ve doğrulandı.\n"
+                        L"Uygulama şimdi kapanacak; güncel sürüm otomatik olarak başlatılacak.",
+                        L"Launcher Güncellemesi", MB_ICONINFORMATION);
+            DestroyWindow(hWnd);
+            return 0;
+        }
+        RefreshUpdaterUi();
+        hpmmo::CheckSummary sum;
+        {
+            std::lock_guard<std::mutex> lock(g_UpdMutex);
+            sum = g_UpdSummary;
+        }
+        if (code == hpmmo::kExitOk) {
+            g_StatusMsg = L"Güncelleme tamamlandı.";
+            g_StatusColor = RGB(100, 255, 120);
+        } else {
+            g_StatusMsg = Utf8ToWide(sum.error);
+            g_StatusColor = RGB(255, 90, 90);
+        }
+        SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
+        InvalidateRect(hWnd, NULL, FALSE);
         return 0;
     }
 
@@ -785,13 +1089,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
         // Left Form Card Background
         SolidBrush cardBrush(Color(255, 24, 28, 42));
-        graphics.FillRectangle(&cardBrush, 45, 220, 370, 290);
+        graphics.FillRectangle(&cardBrush, 45, 220, 370, 330);
         Pen borderPen(Color(255, 45, 55, 80), 1.0f);
-        graphics.DrawRectangle(&borderPen, 45, 220, 370, 290);
+        graphics.DrawRectangle(&borderPen, 45, 220, 370, 330);
 
         // Right Info Card Background
-        graphics.FillRectangle(&cardBrush, 440, 220, 370, 290);
-        graphics.DrawRectangle(&borderPen, 440, 220, 370, 290);
+        graphics.FillRectangle(&cardBrush, 440, 220, 370, 330);
+        graphics.DrawRectangle(&borderPen, 440, 220, 370, 330);
 
         // GDI text for labels
         SetBkMode(hdc, TRANSPARENT);
@@ -829,23 +1133,57 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         TextOutW(hdc, 60, 280, L"Kullanıcı Adı (Username):", 25);
         TextOutW(hdc, 60, 350, L"Şifre (Password):", 17);
 
-        // Right Info Card Content
+        // Right Info Card Content: Phase 7 server state, release and notes.
         SelectObject(hdc, g_hFontHeading);
         SetTextColor(hdc, RGB(255, 220, 110));
         TextOutW(hdc, 460, 240, L"BÜYÜCÜ DÜNYASINA GİRİŞ", 23);
 
-        SelectObject(hdc, g_hFontSmall);
-        SetTextColor(hdc, RGB(170, 180, 200));
-        TextOutW(hdc, 460, 270, L"Hesabınızla giriş yapın ve doğrudan 3D Karakter", 47);
-        TextOutW(hdc, 460, 288, L"seçim podyumuna bağlanın (Hesap başı max 2 büyücü).", 50);
+        std::wstring line1, line2, progress;
+        hpmmo::CheckSummary sum;
+        {
+            std::lock_guard<std::mutex> lock(g_UpdMutex);
+            line1 = g_UpdLine1;
+            line2 = g_UpdLine2;
+            progress = g_UpdProgress;
+            sum = g_UpdSummary;
+        }
 
-        // Notice under Play Now
-        if (g_IsAuthenticated) {
+        SelectObject(hdc, g_hFontSmall);
+        if (sum.ok && sum.state == "MAINTENANCE") {
+            SetTextColor(hdc, RGB(255, 170, 60));
+        } else if (sum.ok) {
             SetTextColor(hdc, RGB(100, 255, 120));
-            TextOutW(hdc, 460, 465, L"✓ Kimlik doğrulandı! Oyuna bağlanmaya hazırsınız.", 47);
         } else {
             SetTextColor(hdc, RGB(220, 160, 70));
-            TextOutW(hdc, 460, 465, L"ℹ️ 'Oyuna Başla' butonu giriş yapılınca aktifleşir.", 50);
+        }
+        if (!line1.empty()) TextOutW(hdc, 460, 268, line1.c_str(), (int)line1.length());
+        SetTextColor(hdc, RGB(170, 180, 200));
+        if (!line2.empty()) TextOutW(hdc, 460, 288, line2.c_str(), (int)line2.length());
+        if (sum.ok) {
+            std::wstring meta = L"Sürüm: " +
+                                Utf8ToWide(sum.installedVersion.empty() ? "yok" : sum.installedVersion) +
+                                L" → " + Utf8ToWide(sum.releaseVersion) + L"   Protokol: " +
+                                Utf8ToWide(sum.serverVersion);
+            TextOutW(hdc, 460, 308, meta.c_str(), (int)meta.length());
+            if (!sum.releaseNotes.empty()) {
+                std::wstring notes = Utf8ToWide(sum.releaseNotes);
+                if (notes.size() > 62) notes = notes.substr(0, 60) + L"…";
+                SetTextColor(hdc, RGB(150, 160, 185));
+                TextOutW(hdc, 460, 328, notes.c_str(), (int)notes.length());
+            }
+        }
+        if (!progress.empty()) {
+            SetTextColor(hdc, RGB(240, 200, 80));
+            TextOutW(hdc, 460, 348, progress.c_str(), (int)progress.length());
+        }
+
+        // Notice under the updater buttons.
+        if (g_IsAuthenticated) {
+            SetTextColor(hdc, RGB(100, 255, 120));
+            TextOutW(hdc, 460, 538, L"✓ Kimlik doğrulandı! Oyuna bağlanmaya hazırsınız.", 47);
+        } else {
+            SetTextColor(hdc, RGB(220, 160, 70));
+            TextOutW(hdc, 460, 538, L"ℹ️ 'Oyuna Başla' butonu giriş yapılınca aktifleşir.", 50);
         }
 
         EndPaint(hWnd, &ps);
@@ -872,7 +1210,91 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
     return DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
+// Headless CLI modes: the GUI executable also answers --check/--update/...,
+// --print-cert-pin and the self-update helper so a single distributed binary
+// can act as its own updater bootstrap.
+static int RunHeadlessFromGuiArgs() {
+    int argcW = 0;
+    LPWSTR* argvW = CommandLineToArgvW(GetCommandLineW(), &argcW);
+    if (!argvW || argcW < 2) {
+        if (argvW) LocalFree(argvW);
+        return -1;  // no updater arguments: continue to the GUI
+    }
+    std::vector<std::string> narrow;
+    narrow.reserve(argcW);
+    for (int i = 0; i < argcW; i++) narrow.push_back(WideToUtf8(argvW[i]));
+    std::vector<char*> argv;
+    argv.reserve(argcW);
+    for (auto& s : narrow) argv.push_back(&s[0]);
+
+    hpmmo::CliOptions opts;
+    std::string err;
+    bool parsed = hpmmo::ParseCliArgs(argcW, argv.data(), opts, err);
+    bool postSelfUpdate = false;
+    for (int i = 1; i < argcW; i++) {
+        if (narrow[i] == "--post-self-update") postSelfUpdate = true;
+    }
+    LocalFree(argvW);
+    if (!parsed) return -1;
+
+    // A GUI-subsystem process only has console handles when the parent
+    // redirected them; otherwise reattach to the parent console so operator
+    // output is visible. Redirected pipes are left untouched.
+    HANDLE stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    bool haveStdout = stdoutHandle != NULL && stdoutHandle != INVALID_HANDLE_VALUE;
+    if (!haveStdout && AttachConsole(ATTACH_PARENT_PROCESS)) {
+        freopen("CONOUT$", "w", stdout);
+        freopen("CONOUT$", "w", stderr);
+    }
+
+    if (opts.command == "help") {
+        hpmmo::PrintUsage(stdout);
+        fflush(stdout);
+        return 0;
+    }
+    if (opts.helper.empty() && opts.command.empty()) return -1;
+    int code = 0;
+    if (opts.helper == "self-update-swap") {
+        code = hpmmo::RunSelfUpdateSwap(WideToUtf8(opts.helperPid), opts.helperTarget,
+                                        hpmmo::GetExePath(), opts.relaunch);
+    } else if (opts.helper == "print-cert-pin") {
+        code = hpmmo::RunPrintCertPin(opts.helperUrl);
+    } else {
+        hpmmo::CommandResult r = hpmmo::RunCliCommand(opts);
+        printf("%s\n", r.json.c_str());
+        fflush(stdout);
+        code = r.code;
+    }
+    (void)postSelfUpdate;
+    return code;
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
+    {
+        int headless = RunHeadlessFromGuiArgs();
+        if (headless >= 0) return headless;
+    }
+    // A relaunch after self-update continues into the GUI (unless the test
+    // harness asks the process to exit immediately).
+    {
+        int argcW = 0;
+        LPWSTR* argvW = CommandLineToArgvW(GetCommandLineW(), &argcW);
+        if (argvW) {
+            for (int i = 1; i < argcW; i++) {
+                if (_wcsicmp(argvW[i], L"--post-self-update") == 0) {
+                    hpmmo::SetLogPath(hpmmo::JoinPath(hpmmo::GetExeDir(), L"launcher.log"));
+                    hpmmo::LogMsg("[Launcher] restarted after self-update");
+                    wchar_t flag[8] = {0};
+                    if (GetEnvironmentVariableW(L"HPMMO_TEST_NO_GUI", flag, 8) > 0) {
+                        LocalFree(argvW);
+                        return 0;
+                    }
+                }
+            }
+            LocalFree(argvW);
+        }
+    }
+
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
@@ -894,7 +1316,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     int screenW = GetSystemMetrics(SM_CXSCREEN);
     int screenH = GetSystemMetrics(SM_CYSCREEN);
     int winW = 860;
-    int winH = 600;
+    int winH = 660;
     int posX = (screenW - winW) / 2;
     int posY = (screenH - winH) / 2;
 

@@ -1,0 +1,11 @@
+# Key material must never be committed. This directory documents custody only.
+*.pem
+*.key
+*.p12
+*.pfx
+*.ppk
+*.sig
+id_rsa*
+id_ed25519*
+.env
+.env.*

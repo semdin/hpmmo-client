@@ -1,0 +1,379 @@
+# HPMMO client release (plan.md Phase 7).
+#
+#   push to the `release` branch -> build + test + package + sign an immutable
+#                                   artifact and upload it to CI (no publish)
+#   manual dispatch             -> optionally publish that artifact to a
+#                                   channel (gated by the `client-release`
+#                                   environment: required reviewers)
+#
+# Rules encoded here (plan.md Phase 7 + server/docs/phase7-release-contract.md):
+#   * the launcher trusts a *signed* manifest, so nothing is published without
+#     `gen_manifest.py --verify` passing over the exact bytes;
+#   * the signing key comes from the HPMMO_CLIENT_SIGNING_KEY secret and the
+#     first step FAILS CLOSED when it is absent - an unsigned manifest must
+#     never exist, not even as a CI artifact;
+#   * the release identifier is the exact commit sha everywhere;
+#   * published artifacts are immutable: the publish job refuses to overwrite
+#     a file whose bytes differ;
+#   * feature branches can never publish: the workflow does not trigger on
+#     them, the publish job requires workflow_dispatch + publish=true, it
+#     re-checks the ref, and it sits behind the environment approval;
+#   * CLIENT_VERSION / CONTENT_VERSION are bumped HERE, in a reviewed change -
+#     never derived from a mutable file at build time.
+#
+# The signing key is never written to the workspace: it goes to $RUNNER_TEMP
+# with mode 600, and the runner discards it.
+name: client-release
+
+on:
+  push:
+    branches: [release]        # the designated client release branch
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Channel to publish to (a manual gate flips beta/release)'
+        type: choice
+        options: [dev, beta, release]
+        default: dev
+      publish:
+        description: 'Publish to the channel root on the release host (needs the client-release environment approval)'
+        type: boolean
+        default: false
+      release_id:
+        description: 'Commit sha to publish - must equal this commit (default: this commit)'
+        type: string
+        required: false
+      release_notes:
+        description: 'Release notes stored in the manifest'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  GODOT_VERSION: '4.7.2'
+  # --- the release identity: bump these in a reviewed change -----------------
+  CLIENT_VERSION: '0.7.0'
+  MIN_LAUNCHER_VERSION: '0.7.0'
+  PROTOCOL_VERSION: '4'
+  PROTOCOL_MIN: '4'
+  PROTOCOL_MAX: '4'
+  CONTENT_VERSION: '2026.10.04-1'
+  SERVER_VERSION: '0.7.0'
+  SCHEMA_VERSION: '4'
+  PLATFORM: 'windows-x86_64'
+  # The read-only root the status/release endpoint serves over HTTPS (Phase 7).
+  RELEASE_BASE_URL: 'https://213.250.145.75:8443/releases'
+  RELEASE_ROOT: '/srv/hpmmo/client-releases'
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Build, test, package and sign. No production access, no publish.
+  # ---------------------------------------------------------------------------
+  package:
+    name: build + package + sign (windows-x86_64)
+    runs-on: ubuntu-22.04
+    concurrency:
+      # Per ref: a newer push to the release branch replaces an obsolete build;
+      # builds on different refs never cancel each other.
+      group: client-build-${{ github.ref }}
+      cancel-in-progress: true
+    outputs:
+      release_id: ${{ steps.id.outputs.release_id }}
+      channel: ${{ steps.channel.outputs.channel }}
+      version: ${{ steps.id.outputs.version }}
+    steps:
+      - name: Require the signing key (fail closed)
+        env:
+          SIGNING_KEY: ${{ secrets.HPMMO_CLIENT_SIGNING_KEY }}
+        run: |
+          if [ -z "$SIGNING_KEY" ]; then
+            echo "::error::HPMMO_CLIENT_SIGNING_KEY is not set for this repository."
+            echo "Without it no manifest can be signed, and an unsigned manifest must never be published."
+            echo "Set the secret (see client/tools/release/keys/README.md) and re-run."
+            exit 1
+          fi
+          echo "signing key present (${#SIGNING_KEY} characters; value never printed)"
+
+      - uses: actions/checkout@v4
+
+      - name: Pin the release identifier and resolve the channel
+        id: id
+        run: |
+          sha="$(git rev-parse HEAD)"
+          echo "release_id=$sha" >> "$GITHUB_OUTPUT"
+          echo "version=$CLIENT_VERSION" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.release_id }}" ]; then
+            [ "${{ inputs.release_id }}" = "$sha" ] || {
+              echo "requested release id ${{ inputs.release_id }} is not this commit ($sha)" >&2
+              exit 1
+            }
+          fi
+
+      - name: Resolve the channel
+        id: channel
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "channel=${{ inputs.channel }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "channel=dev" >> "$GITHUB_OUTPUT"   # a push never flips a channel
+          fi
+
+      - name: Install the pinned toolchain (python + mingw + ninja)
+        # python3 for the release tools, mingw-w64 to cross-build the native
+        # launcher (launcher_cpp is a MinGW-style CMake project).
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3 ninja-build mingw-w64
+
+      - name: Fetch the pinned Godot engine and export templates
+        id: godot
+        run: |
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          curl -fsSL -o /tmp/godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q -o /tmp/godot.zip -d /tmp/godot
+          godot="/tmp/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          chmod +x "$godot"
+          # Export templates are what make this a release build: without them
+          # the export below fails and so does the job.
+          curl -fsSL -o /tmp/templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          mkdir -p "$HOME/.local/share/godot/export_templates"
+          rm -rf /tmp/templates "${HOME:?}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          unzip -q -o /tmp/templates.tpz -d /tmp/templates
+          mv /tmp/templates/templates "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          echo "path=$godot" >> "$GITHUB_OUTPUT"
+
+      - name: Build the build directory (client export + native launcher)
+        run: |
+          set -eu
+          build="build"
+          rm -rf "$build"
+          mkdir -p "$build/client" "$build/launcher/assets"
+
+          # 1. the game: a real export, not the source tree. The export preset
+          #    lives in tools/release/ so the release pipeline owns it; if the
+          #    project ever commits one of its own, that one wins.
+          if [ ! -f export_presets.cfg ]; then
+            cp tools/release/windows-desktop.export_presets.cfg export_presets.cfg
+          fi
+          # same invocation as client/tools/run_game_checks.ps1, which is the
+          # form proven to import this project headlessly
+          "${{ steps.godot.outputs.path }}" --headless --path . --editor --import --quit \
+            > /tmp/import.log 2>&1 || { tail -50 /tmp/import.log; exit 1; }
+          "${{ steps.godot.outputs.path }}" --headless --path . \
+            --export-release "Windows Desktop" "$PWD/$build/client/HPMMO.exe" \
+            || { echo "the Godot export failed" >&2; exit 1; }
+          test -f "$build/client/HPMMO.exe"
+          test -f "$build/client/HPMMO.pck"
+
+          # 2. the native launcher (Phase 7 makes it the single supported
+          #    distribution path; the package carries it for self-update).
+          cmake -S launcher_cpp -B launcher_cpp/build-mingw -G Ninja \
+            -DCMAKE_SYSTEM_NAME=Windows \
+            -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+            -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+            -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
+            -DCMAKE_BUILD_TYPE=Release
+          ninja -C launcher_cpp/build-mingw
+          cp launcher_cpp/build-mingw/HPMMO_Launcher.exe "$build/launcher/hpmmo_launcher.exe"
+          cp assets/branding/hpmmo_banner.jpg assets/branding/hpmmo_logo.jpg "$build/launcher/assets/"
+
+      - name: Package the artifact (refuses user data, caches and secrets)
+        run: |
+          python3 tools/release/package_client.py \
+            --build-dir build \
+            --client-version "${{ steps.id.outputs.version }}" \
+            --content-version "$CONTENT_VERSION" \
+            --platform "$PLATFORM" \
+            --out dist
+
+      - name: Prove the toolchain with a throwaway key (no secret involved)
+        # Signs the *real* artifact with a disposable key: a signature that
+        # verifies, and a single appended byte that is rejected. This is the
+        # pipeline checking its own output, before the release key is used.
+        run: |
+          set -eu
+          work="$(mktemp -d)"
+          trap 'rm -rf "$work"' EXIT
+          openssl genpkey -algorithm ed25519 -out "$work/disposable.key.pem"
+          openssl pkey -in "$work/disposable.key.pem" -pubout -out "$work/disposable.pub.pem"
+          zip="dist/hpmmo-client-${{ steps.id.outputs.version }}-$PLATFORM.zip"
+          python3 tools/release/gen_manifest.py --artifact "$zip" \
+            --channel dev --client-version "${{ steps.id.outputs.version }}" \
+            --min-launcher-version "${{ steps.id.outputs.version }}" \
+            --protocol-version "$PROTOCOL_VERSION" --protocol-min "$PROTOCOL_MIN" --protocol-max "$PROTOCOL_MAX" \
+            --content-version "$CONTENT_VERSION" --server-version "$SERVER_VERSION" \
+            --schema-version "$SCHEMA_VERSION" --platform "$PLATFORM" \
+            --base-url "$RELEASE_BASE_URL" --out "$work" --key "$work/disposable.key.pem"
+          python3 tools/release/gen_manifest.py --verify \
+            --manifest "$work/manifest.json" --pubkey "$work/disposable.pub.pem" --artifacts dist
+          printf ' ' >> "$work/manifest.json"
+          if python3 tools/release/gen_manifest.py --verify \
+               --manifest "$work/manifest.json" --pubkey "$work/disposable.pub.pem" --no-artifacts; then
+            echo "a tampered manifest verified - the signature is not actually checked" >&2
+            exit 1
+          fi
+          echo "throwaway-key rehearsal passed (sign, verify, tamper rejection)"
+
+      - name: Sign the manifest with the release key
+        env:
+          SIGNING_KEY: ${{ secrets.HPMMO_CLIENT_SIGNING_KEY }}
+        run: |
+          set -eu
+          key="$RUNNER_TEMP/hpmmo-client-release.key.pem"
+          umask 077
+          printf '%s\n' "$SIGNING_KEY" > "$key"
+          chmod 600 "$key"
+          notes="${{ inputs.release_notes }}"
+          [ -n "$notes" ] || notes="release ${{ steps.id.outputs.version }} (commit ${{ steps.id.outputs.release_id }})"
+          python3 tools/release/gen_manifest.py \
+            --artifact "dist/hpmmo-client-${{ steps.id.outputs.version }}-$PLATFORM.zip" \
+            --channel "${{ steps.channel.outputs.channel }}" \
+            --client-version "${{ steps.id.outputs.version }}" \
+            --min-launcher-version "$MIN_LAUNCHER_VERSION" \
+            --protocol-version "$PROTOCOL_VERSION" --protocol-min "$PROTOCOL_MIN" --protocol-max "$PROTOCOL_MAX" \
+            --content-version "$CONTENT_VERSION" --server-version "$SERVER_VERSION" \
+            --schema-version "$SCHEMA_VERSION" --platform "$PLATFORM" \
+            --base-url "$RELEASE_BASE_URL" \
+            --release-notes "$notes" --out dist --key "$key"
+          # The PUBLIC key travels with the release so the launcher pin change
+          # is visible in the record; the private key is never written anywhere
+          # outside $RUNNER_TEMP.
+          openssl pkey -in "$key" -pubout -out dist/release-signing.pub.pem
+          rm -f "$key"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hpmmo-client-${{ steps.id.outputs.release_id }}
+          path: |
+            dist/*.zip
+            dist/*.zip.sha256
+            dist/manifest.json
+            dist/manifest.json.sig
+            dist/manifest.json.keyid
+            dist/SHA256SUMS
+            dist/release-signing.pub.pem
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Release summary
+        if: always()
+        run: |
+          {
+            echo "### Client release"
+            echo "- release id: \`${{ steps.id.outputs.release_id }}\`"
+            echo "- channel: \`${{ steps.channel.outputs.channel }}\`"
+            echo "- client version: \`${{ steps.id.outputs.version }}\` / content \`$CONTENT_VERSION\`"
+            echo "- artifact: \`hpmmo-client-${{ steps.id.outputs.version }}-$PLATFORM.zip\`"
+            echo "- publish: a push only builds; flipping a channel needs the manual dispatch gate"
+            echo "- contract: see server/docs/phase7-release-contract.md"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ---------------------------------------------------------------------------
+  # Publish to the channel root: manual dispatch + environment approval only.
+  # ---------------------------------------------------------------------------
+  publish:
+    name: publish to channel
+    needs: [package]
+    if: github.event_name == 'workflow_dispatch' && inputs.publish
+    runs-on: ubuntu-22.04
+    environment:
+      name: client-release        # required reviewers: this is the manual gate
+      url: https://213.250.145.75:8443/releases/channels/${{ needs.package.outputs.channel }}/manifest.json
+    concurrency:
+      group: client-publish-${{ needs.package.outputs.channel }}
+      cancel-in-progress: false   # publishing flips what every launcher reads
+    steps:
+      - name: Only the release branch may publish
+        run: |
+          [ "$GITHUB_REF_NAME" = "release" ] || {
+            echo "refusal: $GITHUB_REF_NAME is not the release branch" >&2
+            exit 1
+          }
+
+      - uses: actions/checkout@v4
+
+      - name: Download the artifact that was built (never rebuild here)
+        uses: actions/download-artifact@v4
+        with:
+          name: hpmmo-client-${{ needs.package.outputs.release_id }}
+          path: dist
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.run_id }}
+
+      - name: Install the pinned toolchain
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq python3 openssl
+
+      - name: Re-verify the manifest and the artifact before they leave CI
+        env:
+          SIGNING_KEY: ${{ secrets.HPMMO_CLIENT_SIGNING_KEY }}
+        run: |
+          set -eu
+          umask 077
+          printf '%s\n' "$SIGNING_KEY" > "$RUNNER_TEMP/key.pem"
+          openssl pkey -in "$RUNNER_TEMP/key.pem" -pubout -out "$RUNNER_TEMP/hpmmo-client-release.pub.pem"
+          rm -f "$RUNNER_TEMP/key.pem"
+          python3 tools/release/gen_manifest.py --verify \
+            --manifest dist/manifest.json --pubkey "$RUNNER_TEMP/hpmmo-client-release.pub.pem" --artifacts dist
+          ( cd dist && sha256sum -c --strict --quiet SHA256SUMS )
+          echo "the artifact this job publishes is byte-identical to the one that was signed"
+
+      - name: Install the publish key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.HPMMO_DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.HPMMO_DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Copy the immutable artifact to the release root (never overwrite)
+        env:
+          HOST: ${{ secrets.HPMMO_DEPLOY_HOST }}
+          USER: ${{ secrets.HPMMO_DEPLOY_USER }}
+        run: |
+          set -eu
+          artifact="$(basename "$(ls dist/hpmmo-client-*.zip)")"
+          ssh -i ~/.ssh/id_ed25519 "$USER@$HOST" \
+            "mkdir -p '$RELEASE_ROOT' '$RELEASE_ROOT/channels/${{ needs.package.outputs.channel }}'"
+          remote_sum="$(ssh -i ~/.ssh/id_ed25519 "$USER@$HOST" \
+            "test -f '$RELEASE_ROOT/$artifact' && sha256sum '$RELEASE_ROOT/$artifact' | cut -d' ' -f1 || true")"
+          local_sum="$(cut -d' ' -f1 < "dist/$artifact.sha256")"
+          if [ -n "$remote_sum" ] && [ "$remote_sum" != "$local_sum" ]; then
+            echo "::error::$artifact is already published with different bytes ($remote_sum != $local_sum)." >&2
+            echo "Artifacts are immutable: bump the version; never overwrite a published file." >&2
+            exit 1
+          fi
+          scp -i ~/.ssh/id_ed25519 "dist/$artifact" "dist/$artifact.sha256" \
+            "$USER@$HOST:$RELEASE_ROOT/"
+          ssh -i ~/.ssh/id_ed25519 "$USER@$HOST" \
+            "cd '$RELEASE_ROOT' && sha256sum -c --strict --quiet '$artifact.sha256'"
+
+      - name: Flip the channel (the step the environment approval covers)
+        env:
+          HOST: ${{ secrets.HPMMO_DEPLOY_HOST }}
+          USER: ${{ secrets.HPMMO_DEPLOY_USER }}
+        run: |
+          set -eu
+          channel="${{ needs.package.outputs.channel }}"
+          scp -i ~/.ssh/id_ed25519 \
+            dist/manifest.json dist/manifest.json.sig dist/manifest.json.keyid dist/SHA256SUMS \
+            "$USER@$HOST:$RELEASE_ROOT/channels/$channel/"
+          echo "channel $channel now serves client ${{ needs.package.outputs.version }}"
+
+      - name: Verify the published channel over HTTPS
+        run: |
+          set -eu
+          channel="${{ needs.package.outputs.channel }}"
+          base="$RELEASE_BASE_URL/channels/$channel/manifest.json"
+          # The release certificate is self-signed and pinned by SPKI, so this
+          # fetch is a plain HTTPS GET; what proves authenticity is the
+          # signature check below, not the CA chain.
+          curl -fsSL --max-time 30 "$base" -o "$RUNNER_TEMP/published.json" \
+            || { echo "::error::$base did not answer - is the TLS release listener exposed yet?" >&2; exit 1; }
+          curl -fsSL --max-time 30 "$base.sig" -o "$RUNNER_TEMP/published.json.sig"
+          python3 tools/release/gen_manifest.py --verify \
+            --manifest "$RUNNER_TEMP/published.json" \
+            --pubkey "$RUNNER_TEMP/hpmmo-client-release.pub.pem" --artifacts dist
+          echo "the live channel serves the manifest this job signed"
