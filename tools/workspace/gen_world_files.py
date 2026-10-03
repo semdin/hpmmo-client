@@ -31,8 +31,11 @@ def build(client):
             if any(rel.startswith(x) for x in EXCLUDE_SCRIPTS_DIRS):
                 continue
             files.append(rel)
-    # Scenes needed by the world: server boot, world, entities, spells.
-    for sub in ("scenes/server", "scenes/world", "scenes/entities", "scenes/spells"):
+    # Scenes needed by the world: server boot, world, entities, spells, and the
+    # UI scenes that gameplay scripts/scenes hard-preload (floating text, HUD,
+    # inventory, ollivander) so parsing succeeds even though the dedicated
+    # server frees the CanvasLayer at startup.
+    for sub in ("scenes/server", "scenes/world", "scenes/entities", "scenes/spells", "scenes/ui"):
         for root, dirs, names in os.walk(os.path.join(client, sub)):
             for n in sorted(names):
                 if n.endswith(".tscn"):

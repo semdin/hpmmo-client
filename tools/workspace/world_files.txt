@@ -66,6 +66,10 @@ scenes/server/dedicated_server.tscn
 scenes/spells/bombarda_explosion.tscn
 scenes/spells/protego_shield.tscn
 scenes/spells/spell_projectile.tscn
+scenes/ui/floating_text.tscn
+scenes/ui/hud.tscn
+scenes/ui/inventory_ui.tscn
+scenes/ui/ollivander_ui.tscn
 scenes/world/game_world.tscn
 scripts/assets/material_kit.gd
 scripts/assets/model_factory.gd

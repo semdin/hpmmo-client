@@ -14,6 +14,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 from datetime import date
@@ -70,6 +71,14 @@ def main():
         exported[rel] = sha256(src)
     if missing:
         raise SystemExit("missing source files:\n  " + "\n  ".join(missing))
+
+    # The world boots the dedicated server, not the client menu.
+    pg = os.path.join(world, "project.godot")
+    text = open(pg, encoding="utf-8").read()
+    text = re.sub(r'run/main_scene="[^"]*"',
+                  'run/main_scene="res://scenes/server/dedicated_server.tscn"', text)
+    with open(pg, "w", encoding="utf-8", newline="\n") as f:
+        f.write(text)
 
     manifest = {
         "generated": str(date.today()),
