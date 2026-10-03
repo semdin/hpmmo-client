@@ -1,17 +1,17 @@
 {
  "generated": "2026-10-03",
  "source_repository": "hpmmo-server",
- "source_revision": "76c6a2e7133aafa204b0bbf1a1fc3dbd2af1e0fb",
+ "source_revision": "eb7711b954541a0728abcf1d01fa37b628d0e068",
  "note": "Generated from server/world/addons/hpmmo_sim by dev.ps1 sync-sim. Never edit these files in the client repository.",
  "files": {
-  "authority.gd": "e3f2a2e5ff45640a6ce18975cf7b98a650566b76e3a6e12a4eb668359579f5ae",
+  "authority.gd": "f317141afe45deeaa9d139568cd4db8d22662da7534ca7e6a5c95f824711c4f4",
   "authority.gd.uid": "7a0e9dcb17566e2f6c5c2fa8067b1a57a8a7cd14c568c6dab087475a8628bb0e",
   "data/combat.json": "29a50e07c05e5a4d00808bcc3f34db60b269b98912a9df8fbe5eced1dce0fa14",
   "data/loot_tables.json": "f1bf29f95e583c63123f918fd50229e3fc35b0b7b3fbba1e5ac82c317f25c1cf",
   "data/safe_zones.json": "b96a3f6f6ccbb12283295adddbdfba2ed2e04a9dde70a9dedd3fed0cc347d838",
   "data/spawn_tables.json": "6c8e04102a7f05a2ee94cd636813604698524885ecc7e3c4a6b7775320561d22",
   "data/spells.json": "4d5d5729cd874204883cb25b78505b32a9e6586518db62d1d5e8daacc2f51a19",
-  "net.gd": "768cbb168173c43cf68f1a716e7d2763b059bd9cd81e2add2111a4f13f0b8237",
+  "net.gd": "4022f5ca57f984c2c0ef6b95cfa8bf89cc4dbda624a6a810d9239ed3cc117b45",
   "net.gd.uid": "ff80510fc3b2fa320c34ddd81f5be5cbfc1201dc7d1a557f25c607ff6e5826d5",
   "persistence.gd": "9dbf583a7be4603e3120a739ed9657aaa4bb201c57e6e6a81d72fa3dce51a8e8",
   "persistence.gd.uid": "31e56826a6ef795fcabda9561a364dccdc5155ab64e3052980230faeaaab6247",
@@ -19,7 +19,7 @@
   "protocol.gd.uid": "a70d9ec3949b461eab839119233ada2d8d04e78dc04957eac0331779a7765ef3",
   "rules.gd": "f784aab17afeaaae30fd86527b249ee8fa7811ff85463f05a3f487c180493d18",
   "rules.gd.uid": "134b46a58d7033f250bd6c8ca999b72838f72833f27d3cbc77039939361326f5",
-  "snapshots.gd": "15101df991bede5b8819655c3a61352ce7874cb980327d38d078043a9195330a",
+  "snapshots.gd": "6b9e7dc84a9fc4204243c00fdd4402cc135d6b372d6e7a90988da4f591d9b5a2",
   "snapshots.gd.uid": "31a3aaa68eca08224dcfbaadcb73cff29d5b07a5bb998df20adb178d5e0eb776"
  }
 }

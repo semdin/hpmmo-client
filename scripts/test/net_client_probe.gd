@@ -477,58 +477,73 @@ func _run_protection() -> void:
 	player.global_position = courtyard
 	var record := SimAuthority.record_for(player)
 	var results := {}
-
-	# --- (1) delayed projectile from a mob into the courtyard.
 	var hp_before := int(player.current_hp)
-	record["hp"] = hp_before
-	var dir := (courtyard - mob.global_position).normalized()
-	mob.global_position = outside + Vector3(0, 0, 0)
-	SimAuthority.mob_projectile(mob, "stupefy", (courtyard - mob.global_position).normalized(), 500)
-	await get_tree().create_timer(1.2).timeout
-	results["projectile_into_zone"] = {"before": hp_before, "after": int(player.current_hp)}
-	player.current_hp = hp_before
 
-	# --- (2) the same projectile with the target OUTSIDE the zone (positive
-	# control): protection must be the only reason nothing landed above.
-	player.global_position = outside + Vector3(10, 0, 10)
+	# Geometry: the attacker stands just outside the courtyard edge so every
+	# attack below is comfortably in range; protection is the only variable.
+	var attacker_pos := Vector3(38.0, 0.5, 5.0)
+	var inside_pos := Vector3(4.0, 0.5, 5.0)
+	var outside_pos := Vector3(24.0, 0.5, 5.0)
+	mob.global_position = attacker_pos
+	SimAuthority.refresh_mob(mob)
+
+	# --- (1) a projectile that reaches a victim INSIDE the zone: the victim walks
+	# in while the bolt is in flight - the "delayed projectile" case.
+	player.global_position = outside_pos
 	record["hp"] = hp_before
-	SimAuthority.mob_projectile(mob, "stupefy", (player.global_position - mob.global_position).normalized(), 500)
+	player.set("current_hp", hp_before)
+	SimAuthority.mob_projectile(mob, "stupefy", (outside_pos - attacker_pos).normalized(), 120)
+	await get_tree().create_timer(0.25).timeout
+	player.global_position = inside_pos
+	await get_tree().create_timer(1.0).timeout
+	results["projectile_into_zone"] = {"before": hp_before, "after": int(player.current_hp)}
+
+	# The same shot, same distance, victim stays outside: proof the shot was real.
+	player.global_position = outside_pos
+	record["hp"] = hp_before
+	player.set("current_hp", hp_before)
+	SimAuthority.mob_projectile(mob, "stupefy", (outside_pos - attacker_pos).normalized(), 120)
 	await get_tree().create_timer(1.2).timeout
 	results["projectile_outside_zone"] = {"before": hp_before, "after": int(player.current_hp)}
 
-	# --- (3) burn ticks while the victim is inside a safe volume. The burn is
-	# applied to the mob while it stands outside, then the mob walks into the
-	# zone: the ticks that land inside must deal nothing.
-	mob.global_position = outside
-	record["hp"] = hp_before
-	SimAuthority.apply_damage(mob, 1, "incendio", player)     # starts the burn
+	# --- (2) burn ticks: a REAL incendio hit (damage + burn) on the mob, which
+	# then walks into the zone while the burn is still ticking.
+	player.global_position = outside_pos
+	mob.global_position = Vector3(28.0, 0.5, 5.0)
+	var mob_record := SimAuthority.record_for(mob)
+	mob_record["hp"] = int(mob.max_hp)
+	mob.set("current_hp", int(mob.max_hp))
+	SimAuthority.apply_spell_hit(mob, "incendio", player)
+	var burn_started := int(mob_record.get("burn_until_tick", 0)) > 0
 	var burn_before := int(mob.current_hp)
-	mob.global_position = courtyard
-	# Hold the mob still: its AI walks a displaced mob home (Phase 1), which
-	# would move it back out of the zone mid-measurement and make the assertion
-	# about pathing instead of about protection.
+	mob.global_position = inside_pos
 	mob.set_physics_process(false)
-	await get_tree().create_timer(3.5).timeout
-	results["burn_inside_zone"] = {"before": burn_before, "after": int(mob.current_hp)}
+	await get_tree().create_timer(2.4).timeout
+	results["burn_inside_zone"] = {"before": burn_before, "after": int(mob.current_hp),
+		"burn_started": burn_started}
 	mob.set_physics_process(true)
 
-	# --- (4) boss AoE from OUTSIDE whose circle covers a player standing INSIDE
-	# the zone: the attacker is legal, the victim is protected.
-	mob.global_position = outside
-	player.global_position = courtyard
+	# Burn control: the same hit, the mob left outside, must tick.
+	mob.global_position = Vector3(28.0, 0.5, 5.0)
+	mob_record["hp"] = int(mob.max_hp)
+	mob.set("current_hp", int(mob.max_hp))
+	SimAuthority.apply_spell_hit(mob, "incendio", player)
+	var burn_out_before := int(mob.current_hp)
+	await get_tree().create_timer(2.4).timeout
+	results["burn_outside_zone"] = {"before": burn_out_before, "after": int(mob.current_hp)}
+
+	# --- (3) boss AoE centred outside whose circle covers a player inside.
+	player.global_position = inside_pos
 	record["hp"] = hp_before
 	player.set("current_hp", hp_before)
-	var hits: Array = SimAuthority.mob_area_attack(mob, courtyard, 6.0, 800, "boss_slam")
-	await get_tree().process_frame
+	var hits: Array = SimAuthority.mob_area_attack(mob, Vector3(25.0, 0.5, 5.0), 30.0, 800, "boss_slam")
 	results["boss_aoe_over_zone"] = {"hits": hits.size(), "before": hp_before, "after": int(player.current_hp)}
 
-	# --- (5) positive control: the same slam, everything outside protection.
-	var far := Vector3(70, 0.5, 70)
-	player.global_position = far
+	# Same slam, same radius: the player simply stands outside the circle.
+	player.global_position = Vector3(80.0, 0.5, 80.0)
 	record["hp"] = hp_before
 	player.set("current_hp", hp_before)
-	var hits_out: Array = SimAuthority.mob_area_attack(mob, far, 6.0, 800, "boss_slam")
-	await get_tree().process_frame
+	var hits_out: Array = SimAuthority.mob_area_attack(mob, Vector3(80.0, 0.5, 80.0), 30.0, 800, "boss_slam")
 	results["boss_aoe_outside_zone"] = {"hits": hits_out.size(), "before": hp_before, "after": int(player.current_hp)}
 
 	_record("protection", results)
