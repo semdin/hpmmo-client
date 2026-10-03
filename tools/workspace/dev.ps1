@@ -72,17 +72,31 @@ function Invoke-ClientHarness {
     if ($LASTEXITCODE -ne 0) { throw 'client harness failed' }
 }
 
+function Invoke-ServiceBuild {
+    $cpp = Join-Path $serverRepo 'services\cpp'
+    $buildDir = Join-Path $cpp 'build'
+    if (-not (Test-Path (Join-Path $buildDir 'CMakeCache.txt'))) {
+        Write-Host '[server] configuring the C++ service (cmake + ninja + clang++)'
+        $cmakeArgs = @('-S', $cpp, '-B', $buildDir, '-G', 'Ninja', '-DCMAKE_CXX_COMPILER=clang++', '-DCMAKE_BUILD_TYPE=Release')
+        if ($env:HPMMO_PG_ROOT) { $cmakeArgs += "-DPG_ROOT=$env:HPMMO_PG_ROOT" }
+        & cmake @cmakeArgs | Out-Host
+        if ($LASTEXITCODE -ne 0) { throw 'cmake configure failed' }
+    }
+    & ninja -C $buildDir
+    if ($LASTEXITCODE -ne 0) { throw 'service build failed' }
+}
+
 function Invoke-ServerSmoke {
-    $svc = Join-Path $serverRepo 'services\db_service.py'
     $world = Join-Path $serverRepo 'world'
-    Write-Host '[server] compile service'
-    & $python -m py_compile $svc
-    if ($LASTEXITCODE -ne 0) { throw 'service does not compile' }
-    $smoke = Join-Path $serverRepo 'tests\smoke_service.py'
-    if (Test-Path $smoke) {
-        Write-Host '[server] service smoke (temp sqlite, health + save-key rejection)'
-        & $python $smoke
-        if ($LASTEXITCODE -ne 0) { throw 'service smoke failed' }
+    Invoke-ServiceBuild
+    Write-Host '[server] legacy python service compile (kept as fallback reference)'
+    & $python -m py_compile (Join-Path $serverRepo 'services\db_service.py')
+    if ($LASTEXITCODE -ne 0) { throw 'legacy service does not compile' }
+    $integration = Join-Path $serverRepo 'tests\integration_api.py'
+    if (Test-Path $integration) {
+        Write-Host '[server] Phase 4 integration tests (PostgreSQL + C++ service, self-contained)'
+        & $python $integration
+        if ($LASTEXITCODE -ne 0) { throw 'integration tests failed' }
     }
     if (Test-Path (Join-Path $world 'project.godot')) {
         $godot = Get-Godot
@@ -119,6 +133,7 @@ switch ($Command) {
         Write-Host 'workspace tests passed'
     }
     'build' {
+        Invoke-ServiceBuild
         $pkg = Join-Path $serverRepo 'deploy\package_server.ps1'
         if (-not (Test-Path $pkg)) { throw "missing $pkg" }
         & powershell -ExecutionPolicy Bypass -File $pkg
