@@ -260,7 +260,8 @@ def main():
         })
 
     # loose asset files that would otherwise be in no entry
-    char_tex = [t["path"] for t in audit["textures"] if t["path"].startswith("assets/models/characters/")
+    char_tex = [t["path"] for t in audit["textures"]
+                if t["path"].startswith(("assets/models/characters/", "assets/models/props/"))
                 and t["path"].endswith(".png") and ".import" not in t["path"]]
     if char_tex:
         assets.append({
