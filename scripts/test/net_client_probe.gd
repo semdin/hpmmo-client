@@ -10,7 +10,13 @@ extends Node
 ##
 ## Usage:
 ##   godot --headless --path client res://scenes/test/net_client_probe.tscn -- \
-##     --mode=agree|forged|protection --port=7777 --name=Alice --out=<file> [--seconds=25]
+##     --mode=agree|forged|protection|maintenance --port=7777 --name=Alice \
+##     --out=<file> [--seconds=25] [--admin-port=8082]
+##
+## The `maintenance` mode (Phase 6) joins, records every SimAuthority
+## maintenance signal, polls the admin API for the published state, keeps trying
+## to cast, and writes a transcript when the server disconnects it. Its token is
+## read from HPMMO_SERVICE_TOKEN and is never recorded or printed.
 
 const WORLD_SCENE = preload("res://scenes/world/game_world.tscn")
 
@@ -19,6 +25,7 @@ var port := 7777
 var probe_name := "Probe"
 var out_path := ""
 var duration := 25.0
+var admin_port := 0
 
 var world: Node3D = null
 var player: Node3D = null
@@ -50,11 +57,16 @@ var _done := false
 var _intent_frames := 0
 var _server_controlled_seen := false
 var _corrections := 0
+var _damage_events: Dictionary = {}
 var _stuck_timer := 0.0
 var _sidestep_timer := 0.0
 
 func _ready() -> void:
 	_parse_args()
+	# Counted in every mode: the protection assertions are written in terms of
+	# damage events actually delivered, so the counter must exist there too.
+	SimAuthority.entity_damaged.connect(func(uid: int, _amount: int, _hp: int, _spell: String, _attacker: int):
+		_damage_events[uid] = int(_damage_events.get(uid, 0)) + 1)
 	SimAuthority.configure(SimAuthority.Role.CLIENT if mode != "protection" else SimAuthority.Role.OFFLINE)
 	if mode == "protection":
 		_run_protection.call_deferred()
@@ -66,7 +78,12 @@ func _ready() -> void:
 	player = world.get("local_player")
 	SimNet.joined.connect(_on_joined)
 	SimNet.disconnected.connect(func(reason: String):
+		_disconnect_reason = reason
+		_left_server = true
+		_left_at = _t
 		_record("disconnected", {"reason": reason}))
+	if mode == "maintenance":
+		_setup_maintenance()
 	SimAuthority.entity_health.connect(_on_health)
 	SimAuthority.entity_died.connect(_on_died)
 	SimAuthority.entity_respawned.connect(_on_respawn)
@@ -100,6 +117,8 @@ func _parse_args() -> void:
 			out_path = arg.substr(6)
 		elif arg.begins_with("--seconds="):
 			duration = float(arg.substr(10))
+		elif arg.begins_with("--admin-port="):
+			admin_port = int(arg.substr(13))
 
 func _record(event: String, data: Dictionary) -> void:
 	data["event"] = event
@@ -111,8 +130,14 @@ func _record(event: String, data: Dictionary) -> void:
 
 func _on_joined(ok: bool, reason: String, _character: Dictionary) -> void:
 	_joined = ok
+	_join_reason = reason
 	_record("joined", {"ok": ok, "reason": reason, "uid": SimAuthority.local_uid})
 	if not ok:
+		if mode == "maintenance" and reason == "maintenance":
+			# Expected in this mode: the world is closed for maintenance.
+			_record("join_refused", {"reason": reason})
+			_finish_maintenance(0)
+			return
 		_finish(1)
 		return
 	_exp_start = int(player.current_exp) if player != null else -1
@@ -144,16 +169,21 @@ func _on_stats(uid: int, stats: Dictionary) -> void:
 		return
 	_exp_now = int(stats.get("exp", _exp_now))
 
-func _on_cast_ack(_cast_seq: int, _cast_id: int, ok: bool, reason: String) -> void:
+func _on_cast_ack(cast_seq: int, _cast_id: int, ok: bool, reason: String) -> void:
 	if ok:
 		_casts_accepted += 1
 	else:
 		_casts_rejected.append(reason)
 		_record("cast_rejected", {"reason": reason})
+	if mode == "maintenance":
+		_record_maintenance_cast(cast_seq, ok, reason)
 
 func _physics_process(delta: float) -> void:
 	_t += delta
 	if mode == "protection" or _done:
+		return
+	if mode == "maintenance":
+		_maintenance_tick(delta)
 		return
 	if not _joined:
 		return
@@ -457,6 +487,179 @@ func _finish_forged() -> void:
 
 var _origin_pos := Vector3.ZERO
 
+# ---------------------------------------------------------------- maintenance
+
+## Phase 6 probe: stay connected through a maintenance cycle and record what the
+## client is told, what the admin API publishes, and whether the freeze is real.
+## The service token comes from HPMMO_SERVICE_TOKEN and is never recorded.
+var _maint_events: Array = []
+var _maint_states: Array = []
+var _maint_status: Dictionary = {}
+var _maint_attempts: Array = []
+var _maint_attempt_by_seq: Dictionary = {}
+var _maint_poll_accum := 0.0
+var _maint_cast_accum := 0.0
+var _maint_cast_seq := 900000
+var _maint_http: HTTPRequest = null
+var _maint_http_pending := false
+var _maint_token := ""
+var _maint_unreachable := 0
+var _disconnect_reason := ""
+var _left_server := false
+var _left_at := -1.0
+var _join_reason := ""
+var _maint_finish_at := -1.0
+var _maint_flush_accum := 0.0
+
+## Rewrite the transcript so far (maintenance mode only; the file is small).
+func _flush_transcript() -> void:
+	if out_path == "" or _records.is_empty():
+		return
+	var file := FileAccess.open(out_path, FileAccess.WRITE)
+	if file == null:
+		return
+	for record in _records:
+		file.store_line(JSON.stringify(record))
+	file.close()
+
+func _setup_maintenance() -> void:
+	_maint_token = OS.get_environment("HPMMO_SERVICE_TOKEN").strip_edges()
+	SimAuthority.maintenance_event.connect(func(state: String, reason: String, seconds_remaining: int):
+		_maint_events.append({
+			"state": state, "reason": reason, "seconds_remaining": seconds_remaining,
+			"t": _t, "tick": SimAuthority.sim_tick,
+		})
+		_record("maintenance_event", {"state": state, "reason": reason,
+			"seconds_remaining": seconds_remaining})
+		if state == "DISCONNECTING" and _maint_finish_at < 0.0:
+			# The peers are about to be closed. Give the transport a moment to
+			# report it, then write the transcript even if it never does - the
+			# notice itself is the client-visible end of the session.
+			_maint_finish_at = _t + 2.5)
+	_maint_http = HTTPRequest.new()
+	add_child(_maint_http)
+	_maint_http.request_completed.connect(_on_admin_response)
+	_record("maintenance_probe", {"admin_port": admin_port, "token_present": _maint_token != ""})
+
+func _maintenance_tick(delta: float) -> void:
+	_poll_admin(delta)
+	# Maintenance mode rewrites its transcript while it runs, so the Python
+	# orchestrator can follow the probe (the other modes keep the single write
+	# at exit). This never touches _record/_finish.
+	_maint_flush_accum += delta
+	if _maint_flush_accum >= 0.5:
+		_maint_flush_accum = 0.0
+		_flush_transcript()
+	if _left_server and _left_at >= 0.0 and _t - _left_at >= 1.5:
+		_finish_maintenance(0)
+		return
+	if _maint_finish_at >= 0.0 and _t >= _maint_finish_at:
+		_finish_maintenance(0)
+		return
+	if _joined and not _left_server:
+		_maint_cast_accum += delta
+		if _maint_cast_accum >= 0.5:
+			_maint_cast_accum = 0.0
+			_attempt_maintenance_cast()
+	if _t >= duration:
+		_finish_maintenance(0)
+
+## The point of the mode: a cast attempted inside the frozen window must be
+## refused and must not cost mana. One attempt per half second covers every
+## state the cycle passes through.
+func _attempt_maintenance_cast() -> void:
+	if player == null or not is_instance_valid(player):
+		return
+	if not SimNet.is_client:
+		# The link is gone (the server disconnected us): there is nobody to ask,
+		# and the local authority must not be asked to adjudicate a cast.
+		return
+	_maint_cast_seq += 1
+	# A spell that actually costs mana (stupefy, 25), so "costs no mana" is a
+	# real measurement rather than a zero-cost no-op.
+	var attempt := {
+		"seq": _maint_cast_seq,
+		"spell": "stupefy",
+		"t": _t,
+		"state": String(_maint_status.get("state", "")),
+		"mana_before": int(player.current_mana),
+		"ok": null,
+		"reason": "",
+	}
+	_maint_attempts.append(attempt)
+	_maint_attempt_by_seq[_maint_cast_seq] = attempt
+	SimNet.submit_cast(player, "stupefy", player.global_position + Vector3(0, 1.0, -4.0), _maint_cast_seq)
+
+func _record_maintenance_cast(cast_seq: int, ok: bool, reason: String) -> void:
+	var attempt: Dictionary = _maint_attempt_by_seq.get(cast_seq, {})
+	if attempt.is_empty():
+		return
+	attempt["ok"] = ok
+	attempt["reason"] = reason
+	attempt["state_at_ack"] = String(_maint_status.get("state", ""))
+	# A mana cost would be pushed on the same reliable channel just before this
+	# answer, so the value is already authoritative here.
+	attempt["mana_after"] = int(player.current_mana) if player != null and is_instance_valid(player) else -1
+
+func _poll_admin(delta: float) -> void:
+	if _maint_http == null or admin_port <= 0 or _maint_token == "":
+		return
+	_maint_poll_accum += delta
+	if _maint_poll_accum < 0.1 or _maint_http_pending:
+		return
+	_maint_poll_accum = 0.0
+	var url := "http://127.0.0.1:%d/admin/state" % admin_port
+	var error := _maint_http.request(url, PackedStringArray(["X-Service-Token: " + _maint_token]))
+	if error == OK:
+		_maint_http_pending = true
+
+func _on_admin_response(_result: int, code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	_maint_http_pending = false
+	if code != 200:
+		_maint_unreachable += 1
+		return
+	var parsed: Variant = JSON.parse_string(body.get_string_from_utf8())
+	if not (parsed is Dictionary):
+		return
+	_maint_status = parsed
+	var state := String(parsed.get("state", ""))
+	if state == "" or (not _maint_states.is_empty() and String(_maint_states[-1]["state"]) == state):
+		return
+	_maint_states.append({
+		"state": state,
+		"t": _t,
+		"tick": SimAuthority.sim_tick,
+		"server_tick": int(parsed.get("tick", -1)),
+		"players": int(parsed.get("players", -1)),
+		"deadline_ms": int(parsed.get("deadline_ms", 0)),
+	})
+	_record("admin_state", {"state": state, "reason": parsed.get("reason", ""),
+		"players": parsed.get("players", -1), "deadline_ms": parsed.get("deadline_ms", 0)})
+
+func _finish_maintenance(code: int) -> void:
+	_done = true
+	var mana := -1
+	if player != null and is_instance_valid(player):
+		mana = int(player.current_mana)
+	var status := _maint_status.duplicate()
+	status.erase("history")
+	_record("final", {
+		"uid": SimAuthority.local_uid,
+		"joined": _joined,
+		"join_reason": _join_reason,
+		"admin_port": admin_port,
+		"token_present": _maint_token != "",
+		"states": _maint_states,
+		"events": _maint_events,
+		"casts": _maint_attempts,
+		"mana_at_finish": mana,
+		"admin_unreachable": _maint_unreachable,
+		"disconnect_reason": _disconnect_reason,
+		"duration": _t,
+		"last_status": status,
+	})
+	_finish(code)
+
 # ----------------------------------------------------------------- protection
 
 ## Exit check: a protected target cannot be damaged by a delayed projectile, a
@@ -485,7 +688,7 @@ func _run_protection() -> void:
 	var inside_pos := Vector3(4.0, 0.5, 5.0)
 	var outside_pos := Vector3(24.0, 0.5, 5.0)
 	mob.global_position = attacker_pos
-	SimAuthority.refresh_mob(mob)
+	_revive_attacker(mob)
 
 	# --- (1) a projectile that reaches a victim INSIDE the zone: the victim walks
 	# in while the bolt is in flight - the "delayed projectile" case.
@@ -498,11 +701,17 @@ func _run_protection() -> void:
 	await get_tree().create_timer(1.0).timeout
 	results["projectile_into_zone"] = {"before": hp_before, "after": int(player.current_hp)}
 
-	# The same shot, same distance, victim stays outside: proof the shot was real.
-	player.global_position = outside_pos
+	# The same shot with the victim outside protection: proof the shot was real.
+	# Attacker and victim stand 8 m apart on open ground, so the control turns on
+	# protection alone - not on whether a long ray happened to clear the terrain.
+	var yard_mob := Vector3(34.0, 0.5, 32.0)
+	var yard_victim := Vector3(26.0, 0.5, 32.0)
+	_revive_attacker(mob)
+	mob.global_position = yard_mob
+	player.global_position = yard_victim
 	record["hp"] = hp_before
 	player.set("current_hp", hp_before)
-	SimAuthority.mob_projectile(mob, "stupefy", (outside_pos - attacker_pos).normalized(), 120)
+	SimAuthority.mob_projectile(mob, "stupefy", (yard_victim - yard_mob).normalized(), 120)
 	await get_tree().create_timer(1.2).timeout
 	results["projectile_outside_zone"] = {"before": hp_before, "after": int(player.current_hp)}
 
@@ -518,37 +727,74 @@ func _run_protection() -> void:
 	var burn_before := int(mob.current_hp)
 	mob.global_position = inside_pos
 	mob.set_physics_process(false)
+	var uid_in := int(SimAuthority.record_for(mob).get("uid", 0))
+	var events_before_in := int(_damage_events.get(uid_in, 0))
 	await get_tree().create_timer(2.4).timeout
 	results["burn_inside_zone"] = {"before": burn_before, "after": int(mob.current_hp),
-		"burn_started": burn_started}
+		"burn_started": burn_started,
+		"events": int(_damage_events.get(uid_in, 0)) - events_before_in}
 	mob.set_physics_process(true)
 
 	# Burn control: the same hit, the mob left outside, must tick.
-	mob.global_position = Vector3(28.0, 0.5, 5.0)
+	_revive_attacker(mob)
+	mob.global_position = yard_mob
 	mob_record["hp"] = int(mob.max_hp)
 	mob.set("current_hp", int(mob.max_hp))
 	SimAuthority.apply_spell_hit(mob, "incendio", player)
 	var burn_out_before := int(mob.current_hp)
-	await get_tree().create_timer(2.4).timeout
-	results["burn_outside_zone"] = {"before": burn_out_before, "after": int(mob.current_hp)}
+	var uid_out := int(SimAuthority.record_for(mob).get("uid", 0))
+	var events_before_out := int(_damage_events.get(uid_out, 0))
+	await get_tree().create_timer(3.4).timeout
+	results["burn_outside_zone"] = {"before": burn_out_before, "after": int(mob.current_hp),
+		"burn_started": int(SimAuthority.record_for(mob).get("burn_until_tick", 0)) > 0,
+		"events": int(_damage_events.get(uid_out, 0)) - events_before_out,
+		"diag": {"burn_until": int(SimAuthority.record_for(mob).get("burn_until_tick", -1)),
+			"burn_next": int(SimAuthority.record_for(mob).get("burn_next_tick", -1)),
+			"sim_tick": SimAuthority.sim_tick, "dead": bool(SimAuthority.record_for(mob).get("dead", false)),
+			"record_uid": int(SimAuthority.record_for(mob).get("uid", 0)), "counted_uid": uid_out}}
 
 	# --- (3) boss AoE centred outside whose circle covers a player inside.
 	player.global_position = inside_pos
+	_revive_attacker(mob)
+	mob.global_position = Vector3(25.0, 0.5, 5.0)
 	record["hp"] = hp_before
 	player.set("current_hp", hp_before)
 	var hits: Array = SimAuthority.mob_area_attack(mob, Vector3(25.0, 0.5, 5.0), 30.0, 800, "boss_slam")
 	results["boss_aoe_over_zone"] = {"hits": hits.size(), "before": hp_before, "after": int(player.current_hp)}
 
 	# Same slam, same radius: the player simply stands outside the circle.
-	player.global_position = Vector3(80.0, 0.5, 80.0)
+	_revive_attacker(mob)
+	_revive_attacker(mob)
+	mob.global_position = yard_mob
+	player.global_position = yard_victim
 	record["hp"] = hp_before
 	player.set("current_hp", hp_before)
-	var hits_out: Array = SimAuthority.mob_area_attack(mob, Vector3(80.0, 0.5, 80.0), 30.0, 800, "boss_slam")
+	var hits_out: Array = SimAuthority.mob_area_attack(mob, yard_victim, 30.0, 800, "boss_slam")
 	results["boss_aoe_outside_zone"] = {"hits": hits_out.size(), "before": hp_before, "after": int(player.current_hp)}
 
 	_record("protection", results)
 	_done = true
 	_finish(0)
+
+## A dead mob cannot attack: every protection case starts from a live attacker,
+## otherwise the "positive control" would silently test nothing.
+func _revive_attacker(mob: Node3D) -> void:
+	if mob == null or not is_instance_valid(mob):
+		return
+	SimAuthority.refresh_mob(mob)
+	mob.set("state", 0)
+	SimAuthority.unregister_node(mob)
+	SimAuthority.register_mob(mob, 1, "probe")
+	mob_record = SimAuthority.record_for(mob)
+	# A big pool on purpose: if the probe's own incendio killed the attacker, the
+	# burn cases would measure nothing (a dead mob's burn never ticks), and the
+	# "inside the zone" case would pass for the wrong reason.
+	mob_record["max_hp"] = 100000
+	mob_record["hp"] = 100000
+	mob.set("max_hp", 100000)
+	mob.set("current_hp", 100000)
+
+var mob_record: Dictionary = {}
 
 func _nearest_mob() -> Node3D:
 	var best: Node3D = null
