@@ -29,7 +29,9 @@ def main():
     ap.add_argument("--root", required=True)
     args = ap.parse_args()
 
-    src = os.path.join(args.client, "scripts", "autoload", "network_manager.gd")
+    # The RPC surface lives in the SERVER-owned simulation package (Phase 5);
+    # the client consumes it from the synced copy.
+    src = os.path.join(args.server, "world", "addons", "hpmmo_sim", "net.gd")
     lines = open(src, encoding="utf-8").read().splitlines()
     rows = []
     pending = None
@@ -47,8 +49,14 @@ def main():
     body = [
         "# HPMMO Network Protocol Contract",
         "",
-        f"Generated from `scripts/autoload/network_manager.gd` (client revision pinned in workspace.lock.json).",
-        "Server owns this contract; regenerate with `client/tools/workspace/extract_protocol.py`.",
+        "Generated from `world/addons/hpmmo_sim/net.gd` in the server repository (the client runs a",
+        "hash-pinned copy of the same package). Regenerate with",
+        "`client/tools/workspace/extract_protocol.py`.",
+        "",
+        "Channels: 0 snapshots (unreliable), 1 events (reliable, authority only),",
+        "2 intents (reliable, client -> server), 3 input frames (unreliable, ordered).",
+        "A client's messages are intents: the server validates every one of them and answers with",
+        "its own state. `server_relay` is off, so clients cannot address each other.",
         "",
         "| RPC | Flags | Parameters |",
         "| --- | --- | --- |",
