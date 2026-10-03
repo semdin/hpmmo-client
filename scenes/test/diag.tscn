@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/test/diag.gd" id="1_d"]
+[ext_resource type="PackedScene" path="res://scenes/world/game_world.tscn" id="2_w"]
+
+[node name="Diag" type="Node"]
+script = ExtResource("1_d")
+
+[node name="GameWorld" parent="." instance=ExtResource("2_w")]

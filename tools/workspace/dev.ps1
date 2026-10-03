@@ -14,7 +14,7 @@ Commands:
 #>
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('status', 'test', 'build', 'start', 'sync-world', 'verify-contracts')]
+    [ValidateSet('status', 'test', 'build', 'start', 'sync-world', 'sync-sim', 'verify-contracts')]
     [string]$Command = 'status',
     [switch]$Client,
     [switch]$Server
@@ -36,6 +36,13 @@ function Get-Godot {
 function Read-Lock {
     if (Test-Path $lockPath) { return (Get-Content $lockPath -Raw | ConvertFrom-Json) }
     return $null
+}
+
+function Test-SimSync {
+    $syncTool = Join-Path $clientRepo 'tools\workspace\sync_sim.py'
+    if (-not (Test-Path $syncTool)) { return }
+    & $python $syncTool --client $clientRepo --server $serverRepo --root $root --check
+    if ($LASTEXITCODE -ne 0) { throw 'client simulation package drifted from the server copy (run: dev.ps1 sync-sim)' }
 }
 
 function Test-Contracts([switch]$Quiet) {
@@ -98,15 +105,22 @@ function Invoke-ServerSmoke {
         & $python $integration
         if ($LASTEXITCODE -ne 0) { throw 'integration tests failed' }
     }
+    $multiplayer = Join-Path $serverRepo 'tests\multiplayer_sim.py'
+    if (Test-Path $multiplayer) {
+        Write-Host '[server] Phase 5 multiplayer proof (world server + two headless clients)'
+        & $python $multiplayer --skip=forged,protection
+        if ($LASTEXITCODE -ne 0) { throw 'multiplayer agreement test failed' }
+    }
     if (Test-Path (Join-Path $world 'project.godot')) {
         $godot = Get-Godot
         Write-Host '[server] world import pass'
         & $godot --headless --path $world --editor --import --quit 2>&1 |
             Select-String -Pattern 'SCRIPT ERROR|ERROR:' | Select-Object -First 10
         if ($LASTEXITCODE -ne 0) { throw 'world import failed' }
+        Test-SimSync
         Write-Host '[server] world boot smoke (headless, 300 frames)'
-        & $godot --headless --path $world res://scenes/server/dedicated_server.tscn --quit-after 300 2>&1 |
-            Select-String -Pattern 'Dedicated Server|ERROR|SCRIPT' | Select-Object -First 20
+        & $godot --headless --path $world res://server/world_server.tscn --quit-after 300 2>&1 |
+            Select-String -Pattern 'WorldServer|ERROR|SCRIPT' | Select-Object -First 20
         if ($LASTEXITCODE -ne 0) { throw 'world boot smoke failed' }
     }
 }
@@ -149,6 +163,11 @@ switch ($Command) {
             $bat = Join-Path $clientRepo 'Launcher.bat'
             if (Test-Path $bat) { & $bat } else { & (Get-Godot) --path $clientRepo }
         }
+    }
+    'sync-sim' {
+        Write-Host '[workspace] syncing the simulation package server -> client'
+        & $python (Join-Path $clientRepo 'tools\workspace\sync_sim.py') --client $clientRepo --server $serverRepo --root $root
+        if ($LASTEXITCODE -ne 0) { throw 'sync-sim failed' }
     }
     'sync-world' {
         $tool = Join-Path $clientRepo 'tools\workspace\export_world.py'
