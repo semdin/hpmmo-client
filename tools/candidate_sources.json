@@ -574,5 +574,33 @@
   "verified": true,
   "verifier_note": "None material. (The site's '6K tris' display label is a rounding artifact; the actual 8,929 tris the researcher reported is correct.)",
   "curated": true
+ },
+ "quaternius-universal-base-characters": {
+  "name": "Quaternius Universal Base Characters [Standard]",
+  "author": "Quaternius",
+  "source_url": "https://quaternius.com (pack page for Universal Base Characters; archive supplied by the project owner 2026-10-03)",
+  "license": "CC0 1.0 Universal (Public Domain Dedication) - read from the in-archive License_Standard.txt",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "stats": "Godot/UE glTF: Superhero Male and Female fullbody + PBR texture sets (basecolor/normal/roughness, eyes, hair); hairstyles included in the pack; see tools/downloads/asset-audit.json for measured tris/joints/size",
+  "why": "The authentic CC0 source for the base-character line - resolves the Poly Pizza CC-BY-vs-CC0 discrepancy with the real archive, and provides textured PBR bodies on the same rig family as the UAL clip library.",
+  "gaps": "Standard (free) tier only - a subset of the model catalog; hairstyles not curated yet; 2k textures.",
+  "download_status": "downloaded",
+  "verified": true,
+  "verifier_note": "License verified directly from the in-archive License_Standard.txt (CC0 1.0) during curation 2026-10-03; archive content inspected (18 gltf, 48 png).",
+  "curated": true
+ },
+ "quaternius-rpg-items-icons": {
+  "name": "Quaternius Ultimate RPG Items Pack (icons subset)",
+  "author": "Quaternius",
+  "source_url": "https://quaternius.com (Ultimate RPG Items Pack; archive supplied by the project owner 2026-10-03)",
+  "license": "CC0 1.0 Universal (Public Domain Dedication) - read from the in-archive License.txt",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "stats": "107 PNG icons (potions, weapons, loot, rings, chests, parchment, UI glyphs); the full pack also contains 106 .blend/.fbx/.obj prop models (not curated)",
+  "why": "Fills the missing ui_icons gap with a coherent CC0 set in the same art family as the existing Quaternius/KayKit assets.",
+  "gaps": "Icons only curated; the 3D prop models convert via Blender at Phase 10; icon pixel sizes vary (see audit).",
+  "download_status": "downloaded",
+  "verified": true,
+  "verifier_note": "License verified from the in-archive License.txt (CC0 1.0) during curation 2026-10-03.",
+  "curated": true
  }
 }

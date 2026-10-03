@@ -31,6 +31,8 @@ CURATED = {
     "quaternius-adventurer-male": ["assets/candidates/character/quaternius-adventurer-male"],
     "quaternius-hooded-adventurer": ["assets/candidates/character/quaternius-hooded-adventurer"],
     "quaternius-universal-animation-library": ["assets/candidates/character/quaternius-universal-animation-library"],
+    "quaternius-universal-base-characters": ["assets/candidates/character/quaternius-universal-base-characters"],
+    "quaternius-rpg-items-icons": ["assets/candidates/props/rpg-items-icons"],
     "quaternius-easy-enemies-spider-glb": ["assets/candidates/spider-creature/quaternius-easy-enemies-spider"],
     "stone-brick-wall-001": ["assets/candidates/pbr-textures/stone-brick-wall-001"],
     "para-animated-particle-fx-1": ["assets/candidates/vfx-fire-energy/para-flipbooks"],
@@ -63,6 +65,8 @@ PURPOSE = {
     "quaternius-adventurer-male": "taller clothed hero body candidate (Phase 9); untextured",
     "quaternius-hooded-adventurer": "hooded caster/rogue hero candidate (Phase 9); untextured",
     "quaternius-universal-animation-library": "7-head mannequin + spell-cast/attack clip library; hero + monster base (Phase 9/11)",
+    "quaternius-universal-base-characters": "textured PBR base bodies (male/female) on the same rig family as the animation library (Phase 9)",
+    "quaternius-rpg-items-icons": "UI icon library (107 icons: potions, weapons, loot, glyphs) for the HUD/inventory (Phase 13)",
     "quaternius-easy-enemies-spider-glb": "rigged animated spider candidate to replace the procedural acromantula (Phase 11)",
     "stone-brick-wall-001": "castle wall PBR set, physically scaled (Phase 10)",
     "stone-tiles-02": "flagstone floor PBR set (Phase 10)",
@@ -120,6 +124,8 @@ IMPORT_NOTES = {
     "quaternius-universal-animation-library": "43 clips in the free Standard GLBs (itch advertises 120+ across paid tiers); 65-joint UE5-style rig with finger bones.",
     "quaternius-adventurer-male": "Untextured (flat materials, UVs present); 5 duplicated skins to merge at integration.",
     "quaternius-hooded-adventurer": "Untextured; sword is a separate non-skinned mesh to socket manually.",
+    "quaternius-universal-base-characters": "Godot/UE glTF variant; PBR basecolor/normal/roughness in the same folder; hairstyles shipped in the pack are not curated yet.",
+    "quaternius-rpg-items-icons": "2D PNG icons - usable directly; the pack's 106 .blend/.fbx/.obj props convert via Blender (installed, 5.2.2 LTS) at Phase 10.",
 }
 
 
