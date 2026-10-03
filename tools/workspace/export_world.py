@@ -86,13 +86,20 @@ def main():
     if missing:
         raise SystemExit("missing source files:\n  " + "\n  ".join(missing))
 
-    # The world boots the dedicated server, not the client menu.
+    # The world boots the dedicated server, not the client menu. Read/write
+    # with newline="" so the file's existing line endings survive the patch
+    # (a rewrite here would desync the recorded hash from git's checkout).
     pg = os.path.join(world, "project.godot")
-    text = open(pg, encoding="utf-8").read()
+    with open(pg, "r", encoding="utf-8", newline="") as f:
+        text = f.read()
     text = re.sub(r'run/main_scene="[^"]*"',
                   'run/main_scene="res://scenes/server/dedicated_server.tscn"', text)
-    with open(pg, "w", encoding="utf-8", newline="\n") as f:
+    with open(pg, "w", encoding="utf-8", newline="") as f:
         f.write(text)
+
+    # Hash the EXPORTED copies (identical to the sources except project.godot,
+    # which this tool patches) so a fresh clone re-hashes to zero drift.
+    exported = {rel: sha256(os.path.join(world, rel.replace("/", os.sep))) for rel in wanted}
 
     manifest = {
         "generated": str(date.today()),
