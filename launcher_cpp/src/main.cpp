@@ -166,16 +166,26 @@ void LoadConfig() {
 }
 
 void SaveConfig() {
-    std::ofstream file("client_config.json");
-    if (file.is_open()) {
-        file << "{\n";
-        file << "  \"server_ip\": \"" << WideToUtf8(g_Config.serverIp) << "\",\n";
-        file << "  \"server_port\": " << g_Config.serverPort << ",\n";
-        file << "  \"api_port\": " << g_Config.apiPort << ",\n";
-        file << "  \"last_username\": \"" << WideToUtf8(g_Config.lastUsername) << "\"\n";
-        file << "}\n";
-        file.close();
+    // The GUI owns four keys; everything else in client_config.json belongs to
+    // someone else (the Phase 7 updater keys release_base_url, status_url,
+    // release_channel, release_public_key, release_public_key_id and
+    // pinned_spki_sha256 are read by the updater CLI). Rewriting the file from
+    // scratch here used to delete them on the next Play click, silently
+    // un-wiring the updater. Preserve the whole object instead.
+    hpmmo::JsonValue root = hpmmo::JsonValue::Obj();
+    std::string existing;
+    if (hpmmo::ReadFileBytes(L"client_config.json", existing, 4u * 1024 * 1024)) {
+        hpmmo::JsonValue parsed;
+        std::string err;
+        if (hpmmo::JsonValue::Parse(existing, parsed, err) && parsed.isObject()) {
+            root = parsed;
+        }
     }
+    root.set("server_ip", hpmmo::JsonValue::Str(WideToUtf8(g_Config.serverIp)));
+    root.set("server_port", hpmmo::JsonValue::Int(g_Config.serverPort));
+    root.set("api_port", hpmmo::JsonValue::Int(g_Config.apiPort));
+    root.set("last_username", hpmmo::JsonValue::Str(WideToUtf8(g_Config.lastUsername)));
+    hpmmo::WriteFileAtomic(L"client_config.json", root.Dump() + "\n");
 }
 
 // Extract a flat string field from a JSON response. The API only returns

@@ -66,3 +66,64 @@ shipped - and only through a reviewed change that updates the launcher's pin.
 
 A manifest signed by an unknown key id must be treated as hostile, not as a
 prompt to fetch a new key.
+
+## Custody record: the provisioned release key (2026-10-04)
+
+The first real release key exists **only on the deployment host**, generated
+there with `openssl genpkey -algorithm ed25519` and never copied off it. No key
+material is in this repository, and none of the values below is secret.
+
+| Item | Value |
+| --- | --- |
+| Private key | `/root/hpmmo-keys/release.key` (mode 600, directory mode 700) |
+| Public key (PEM) | `/root/hpmmo-keys/release.pub.pem` (mode 644) |
+| Launcher pin `release_public_key` (base64 of the raw 32-byte public key) | `esKd/SD57YU8pPbapFWLGgLpdldYYCE+eqNNG6uKyDI=` |
+| Key id `release_public_key_id` = `sha256(DER SPKI)` | `b521bf434e299b1963781ec249a2882068a42d881ef86d8ee31c76f74458399b` |
+| TLS release certificate SPKI pin `pinned_spki_sha256` | `703a2267c7b37414632dc23d628eca31df70029581b5d19603f5589902a78fae` |
+
+The three public values are wired into `client/client_config.json`; the same
+values are what `deploy/tls/make_cert.sh` and `manifest.json.keyid` print.
+
+### Who holds it
+
+* **Custodian: the project owner** - the only person with root on the
+  deployment host (`ssh root@213.250.145.75`). The key file is readable by root
+  alone; the host's SSH login is therefore release-signing access.
+* A copy for CI (`HPMMO_CLIENT_SIGNING_KEY`, a GitHub Actions secret) is
+  **not yet provisioned**. Until it is, releases are signed on the host by an
+  operator (that is how the first release was published); `client-release.yml`
+  fails closed without the secret, so CI cannot publish an unsigned manifest.
+* The private key must never be printed, pasted into a chat, committed, or
+  copied into an artifact, a log, or a CI workspace.
+
+### Rotation
+
+1. Generate the new pair **on the host**, outside every working tree:
+   `openssl genpkey -algorithm ed25519 -out /root/hpmmo-keys/release-next.key`,
+   then derive its pin and key id with the two commands at the top of this
+   file.
+2. Ship a launcher release that pins the **new** public key **and** still
+   accepts the old key id during the overlap window (the launcher refuses a
+   manifest whose key id does not match its pin; a manifest cannot introduce
+   its own key).
+3. Add the new private key as `HPMMO_CLIENT_SIGNING_KEY` (or sign on the host),
+   re-publish every channel manifest with the new key, and record the new pin
+   in `client/client_config.json` alongside `pinned_spki_sha256` changes.
+4. After the overlap window closes, remove the old key from the launcher's pin
+   list and destroy the old private key
+   (`shred -u /root/hpmmo-keys/release.key` or delete the host volume).
+
+### If the key is lost or suspected compromised
+
+* **Lost, no evidence of use:** rotate as above; the old key can only sign
+  manifests nothing trusts once the launcher pin changes. The TLS certificate
+  is a *separate* key (see `deploy/tls/make_cert.sh`) and does not rotate with
+  it.
+* **Compromised:** treat every manifest signed under
+  `key_id b521bf434e299b19...` from that moment as hostile. Generate a new
+  pair, publish a new launcher that pins only the new key, re-sign the channel
+  manifests, and rotate the TLS certificate too if host access - not just the
+  key file - was involved (a new certificate means a new
+  `pinned_spki_sha256` and a launcher release that carries it).
+* A manifest signed by an unknown key id is **never** a reason to fetch a new
+  key over the network: it is a hostile manifest to be refused.

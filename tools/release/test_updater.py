@@ -819,19 +819,36 @@ def test_unsafe_archive(t: Path, server: ReleaseServer, signer: ed25519.Ed25519P
     check("zip-slip: nothing written outside", not (root.parent / "escape.txt").exists())
     check("zip-slip: no activation", not (root / "current.json").exists())
 
-    release2 = Release(rel, signer)
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
-        z.writestr("HPMMO.exe", b"GAME")
-        info = zipfile.ZipInfo("link.txt")
-        info.external_attr = (0o120777 << 16)
-        z.writestr(info, b"target")
-    release2.add_package("game-1.3.0.zip", buf.getvalue())
-    release2.write_manifest("1.3.0")
-    release2.write_status("ONLINE")
-    rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
-    check("zip-slip: symlink rejected", rc == 16, log)
-    check("zip-slip: message names the entry", bool(js and "symlink" in js.get("message", "")), str(js))
+    # A symlink entry carries its file type in the high 16 bits of
+    # external_attr, and archives normally record a UNIX "version made by" host
+    # byte (3) to explain that field. Python's zipfile picks the host byte from
+    # the machine it runs on (0 = MS-DOS on Windows, 3 = UNIX elsewhere), so a
+    # test that leaves it implicit builds a DIFFERENT archive on each platform
+    # and one that a launcher gating on the host byte reads differently. Pin
+    # both encodings explicitly: "extract a symlink as a regular file" is the
+    # failure this must never allow, whatever the host byte says, and the
+    # observed intermittent failure (an update that installed an MS-DOS-hosted
+    # symlink entry and reported ok:true) came from exactly that gate.
+    for host_byte, host in ((0, "ms-dos"), (3, "unix")):
+        version = "1.3.%d" % host_byte
+        release2 = Release(rel, signer)
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("HPMMO.exe", b"GAME")
+            info = zipfile.ZipInfo("link.txt")
+            info.create_system = host_byte
+            info.external_attr = (0o120777 << 16)
+            z.writestr(info, b"target")
+        release2.add_package("game-%s.zip" % version, buf.getvalue())
+        release2.write_manifest(version)
+        release2.write_status("ONLINE")
+        rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
+        where = "host %s" % host
+        check("zip-slip: symlink rejected (%s)" % where, rc == 16,
+              "rc=%d json=%s\n%s" % (rc, js, log))
+        check("zip-slip: message names the entry (%s)" % where,
+              bool(js and "symlink" in js.get("message", "")),
+              "rc=%d json=%s\n%s" % (rc, js, log))
 
     release3 = Release(rel, signer)
     release3.add_package("game-1.4.0.zip",
