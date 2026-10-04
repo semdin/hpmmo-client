@@ -68,6 +68,7 @@ scenes/ui/floating_text.tscn
 scenes/ui/hud.tscn
 scenes/ui/inventory_ui.tscn
 scenes/ui/ollivander_ui.tscn
+scenes/world/castle_interior.tscn
 scenes/world/game_world.tscn
 scripts/assets/material_kit.gd
 scripts/assets/model_factory.gd
@@ -97,9 +98,12 @@ scripts/ui/main_menu.gd
 scripts/ui/mmorpg_overlay.gd
 scripts/ui/ollivander_ui.gd
 scripts/world/castle_builder.gd
+scripts/world/castle_interior.gd
+scripts/world/castle_interior_builder.gd
 scripts/world/distant_ridges.gd
 scripts/world/encounter_director.gd
 scripts/world/game_world.gd
+scripts/world/map_controller.gd
 scripts/world/npc.gd
 scripts/world/safe_zone.gd
 scripts/world/training_dummy.gd
