@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/test/phase10_regression.gd" id="1_p10"]
+[ext_resource type="PackedScene" path="res://scenes/world/game_world.tscn" id="2_gw"]
+
+[node name="Phase10Regression" type="Node"]
+script = ExtResource("1_p10")
+
+[node name="GameWorld" parent="." instance=ExtResource("2_gw")]

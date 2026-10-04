@@ -1,0 +1,56 @@
+{
+ "id": "dark-wooden-planks",
+ "name": "Dark Wooden Planks",
+ "source_page": "https://polyhaven.com/a/dark_wooden_planks",
+ "author": "Amal Kumar",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "dark_wooden_planks_ao_2k.jpg",
+   "bytes": 1185013,
+   "sha256": "bbbe6f5aa7aa872450c42ec791cefe5950a9bf507f225a15508b809c296c28dc",
+   "pixels": "2048x2048",
+   "map": "ao"
+  },
+  {
+   "file": "dark_wooden_planks_diff_2k.jpg",
+   "bytes": 2884395,
+   "sha256": "527fa684c78d0a3b4fbfa87b9e2b48691215fcac8af0bf79fc6e01cefb4c4647",
+   "pixels": "2048x2048",
+   "map": "diff"
+  },
+  {
+   "file": "dark_wooden_planks_disp_2k.jpg",
+   "bytes": 505826,
+   "sha256": "eaff4666dd4aa4d7129b6829af59e61e69b104b618be61dbf18d76c7a7b24268",
+   "pixels": "2048x2048",
+   "map": "disp"
+  },
+  {
+   "file": "dark_wooden_planks_nor_gl_2k.jpg",
+   "bytes": 2930852,
+   "sha256": "047941a8e483d941abf6562270abd2c91d30d65e0a339fca0b1d3df125e92154",
+   "pixels": "2048x2048",
+   "map": "nor_gl"
+  },
+  {
+   "file": "dark_wooden_planks_rough_2k.jpg",
+   "bytes": 2737535,
+   "sha256": "fb11f1eee7a982da0272d38695097a1f4c2047bd21eae71361fdcb6d7723c0ed",
+   "pixels": "2048x2048",
+   "map": "rough"
+  },
+  {
+   "file": "license.html",
+   "bytes": 72324,
+   "sha256": "6f4f617c936d14d5a80db6a2ebec145c79277a760672501eef51bff7a0d4cbba"
+  },
+  {
+   "file": "license.txt",
+   "bytes": 827,
+   "sha256": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8"
+  }
+ ]
+}

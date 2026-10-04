@@ -1,0 +1,56 @@
+{
+ "id": "roof-slates-03",
+ "name": "Roof Slates 03",
+ "source_page": "https://polyhaven.com/a/roof_slates_03",
+ "author": "Rob Tuytel",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "license.html",
+   "bytes": 72324,
+   "sha256": "6f4f617c936d14d5a80db6a2ebec145c79277a760672501eef51bff7a0d4cbba"
+  },
+  {
+   "file": "license.txt",
+   "bytes": 827,
+   "sha256": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8"
+  },
+  {
+   "file": "roof_slates_03_ao_2k.jpg",
+   "bytes": 2772007,
+   "sha256": "bb9fead7c988e5ae9df406a7daa3bb6a2e10156dd41fa1f954a52d50ea15a426",
+   "pixels": "2048x2048",
+   "map": "ao"
+  },
+  {
+   "file": "roof_slates_03_diff_2k.jpg",
+   "bytes": 2083015,
+   "sha256": "955eb467fc609e4509c2354f0b88755ffa137dac352b651efed95026f4a6aa5c",
+   "pixels": "2048x2048",
+   "map": "diff"
+  },
+  {
+   "file": "roof_slates_03_disp_2k.jpg",
+   "bytes": 588742,
+   "sha256": "84e305c7d08f0de5b32de510377e01989197c4a0af22ba19a94a0b151c5075a0",
+   "pixels": "2048x2048",
+   "map": "disp"
+  },
+  {
+   "file": "roof_slates_03_nor_gl_2k.jpg",
+   "bytes": 2741713,
+   "sha256": "f797ad9756e6584736831cf07f79872440a6a4811c80f9bcedd3b20b05c7596d",
+   "pixels": "2048x2048",
+   "map": "nor_gl"
+  },
+  {
+   "file": "roof_slates_03_rough_2k.jpg",
+   "bytes": 49508,
+   "sha256": "bd583b73aa9c496f0d8012c2d6acaa704d6acce912d7de1d5af723bbeffa9942",
+   "pixels": "2048x2048",
+   "map": "rough"
+  }
+ ]
+}

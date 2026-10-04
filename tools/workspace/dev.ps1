@@ -93,8 +93,17 @@ function Invoke-ServiceBuild {
     if ($LASTEXITCODE -ne 0) { throw 'service build failed' }
 }
 
+function Test-WorldFileList {
+    # The declared world file set is generated from the client tree. If it goes
+    # stale, the export ships a world missing scripts its scenes preload - the
+    # server then fails to spawn a player. Cheaper to fail here.
+    & $python (Join-Path $clientRepo 'tools\workspace\gen_world_files.py') --client $clientRepo --check
+    if ($LASTEXITCODE -ne 0) { throw 'world file list is stale (run: python client/tools/workspace/gen_world_files.py --client client)' }
+}
+
 function Invoke-ServerSmoke {
     $world = Join-Path $serverRepo 'world'
+    Test-WorldFileList
     Invoke-ServiceBuild
     Write-Host '[server] legacy python service compile (kept as fallback reference)'
     & $python -m py_compile (Join-Path $serverRepo 'services\db_service.py')

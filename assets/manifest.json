@@ -2,11 +2,11 @@
  "schema": 1,
  "generated": "2026-10-04",
  "project": "HPMMO",
- "notes": "Phase 2 manifest. Measured fields come from tools/asset_audit.py; license fields were download- and adversarially-verified during Phase 2 research (see docs/art-direction.md section 8). Candidate assets are review-stage: excluded from release packaging until promoted. | Phase 9 (2026-10-04): hero and flight broom integrated; hero_final_art and broom_model entries updated with measured values, see docs/phase9-rig-and-sockets.md.",
+ "notes": "Phase 2 manifest. Measured fields come from tools/asset_audit.py; license fields were download- and adversarially-verified during Phase 2 research (see docs/art-direction.md section 8). Candidate assets are review-stage: excluded from release packaging until promoted. | Phase 9 (2026-10-04): hero and flight broom integrated; hero_final_art and broom_model entries updated with measured values, see docs/phase9-rig-and-sockets.md. Phase 10 added 11 project-authored PBR texture sets (Blender-authored, deterministic) and 37 project-authored Gothic kit modules, and promoted the four curated Poly Haven sets into assets/textures/pbr/. All Phase 10 art is recorded here with hashes, physical scale, texel density and map list; the game-side contract is client/scripts/assets/pbr_kit.gd.",
  "summary": {
-  "candidate": 35,
+  "candidate": 31,
   "placeholder": 5,
-  "integrated": 55,
+  "integrated": 107,
   "missing": 6
  },
  "assets": [
@@ -502,7 +502,7 @@
   },
   {
    "id": "asset-wizard-glb",
-   "purpose": "player hero (KayKit Mage, byte-identical to the shipped placeholder)",
+   "purpose": "player hero (KayKit Mage, byte-identical to the shipped placeholder) (Phase 9 shipped hero_wizard.glb; this placeholder stays for NPCs)",
    "status": "placeholder",
    "author": "KayKit (Kay Lousberg)",
    "source_url": "assets/ASSET_CREDITS.md",
@@ -2666,7 +2666,7 @@
   },
   {
    "id": "family-castle-baked-textures",
-   "purpose": "castle colour textures (256px)",
+   "purpose": "castle colour textures (256px) - RETIRED from the castle by Phase 10; the exterior and interior now use the PBR sets above. Kept on disk only as history.",
    "status": "placeholder",
    "author": "original (tools/generate_assets.gd)",
    "source_url": "tools/generate_assets.gd",
@@ -3081,34 +3081,32 @@
   },
   {
    "id": "dark-wooden-planks",
-   "purpose": "interior wood floor PBR set (Phase 10)",
-   "status": "candidate",
+   "purpose": "interior wood floor PBR set (Phase 10) - promoted into assets/textures/pbr/ and used by the Phase 10 material library",
+   "status": "integrated",
    "author": "Amal Kumar",
    "source_url": "https://polyhaven.com/a/dark_wooden_planks",
    "license": "CC0-1.0 (Public Domain Dedication)",
    "license_url": "https://polyhaven.com/license",
-   "license_file": "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/license.html",
+   "license_file": "assets/textures/pbr/dark_wooden_planks/license.txt",
    "attribution_required": false,
    "attribution_text": "",
    "local_paths": [
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/dark_wooden_planks_ao_2k.jpg",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/dark_wooden_planks_diff_2k.jpg",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/dark_wooden_planks_disp_2k.jpg",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/dark_wooden_planks_nor_gl_2k.jpg",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/dark_wooden_planks_rough_2k.jpg",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/license.html",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/license.txt",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/manifest.json"
+    "assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_ao_2k.jpg",
+    "assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_diff_2k.jpg",
+    "assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_disp_2k.jpg",
+    "assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_nor_gl_2k.jpg",
+    "assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_rough_2k.jpg",
+    "assets/textures/pbr/dark_wooden_planks/license.txt",
+    "assets/textures/pbr/dark_wooden_planks/manifest.json"
    ],
    "sha256": {
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/dark_wooden_planks_ao_2k.jpg": "bbbe6f5aa7aa872450c42ec791cefe5950a9bf507f225a15508b809c296c28dc",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/dark_wooden_planks_diff_2k.jpg": "527fa684c78d0a3b4fbfa87b9e2b48691215fcac8af0bf79fc6e01cefb4c4647",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/dark_wooden_planks_disp_2k.jpg": "eaff4666dd4aa4d7129b6829af59e61e69b104b618be61dbf18d76c7a7b24268",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/dark_wooden_planks_nor_gl_2k.jpg": "047941a8e483d941abf6562270abd2c91d30d65e0a339fca0b1d3df125e92154",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/dark_wooden_planks_rough_2k.jpg": "fb11f1eee7a982da0272d38695097a1f4c2047bd21eae71361fdcb6d7723c0ed",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/license.html": "6f4f617c936d14d5a80db6a2ebec145c79277a760672501eef51bff7a0d4cbba",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/license.txt": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8",
-    "tools/downloads/asset-candidates/wood-planks/dark-wooden-planks/manifest.json": "a9bc164c76bd6edb734807c255d0b915bd8ddf82c38d462ffa65a0d362b89f8a"
+    "assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_ao_2k.jpg": "bbbe6f5aa7aa872450c42ec791cefe5950a9bf507f225a15508b809c296c28dc",
+    "assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_diff_2k.jpg": "527fa684c78d0a3b4fbfa87b9e2b48691215fcac8af0bf79fc6e01cefb4c4647",
+    "assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_disp_2k.jpg": "eaff4666dd4aa4d7129b6829af59e61e69b104b618be61dbf18d76c7a7b24268",
+    "assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_nor_gl_2k.jpg": "047941a8e483d941abf6562270abd2c91d30d65e0a339fca0b1d3df125e92154",
+    "assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_rough_2k.jpg": "fb11f1eee7a982da0272d38695097a1f4c2047bd21eae71361fdcb6d7723c0ed",
+    "assets/textures/pbr/dark_wooden_planks/license.txt": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8",
+    "assets/textures/pbr/dark_wooden_planks/manifest.json": "a9bc164c76bd6edb734807c255d0b915bd8ddf82c38d462ffa65a0d362b89f8a"
    },
    "scale_m": "n/a (textures/audio)",
    "triangles": "n/a",
@@ -3138,7 +3136,10 @@
     "note": "None material. Reported tags are a subset of the API tags (API also lists wooden, scratched, worn, chipped)."
    },
    "gaps": "No nails/metal map; horizontal grain only (rotate UVs for door stiles); fixed plank pitch, needs UV scaling per prop; no matching beams or trim; 8-bit displacement.",
-   "acceptance": ""
+   "acceptance": "",
+   "physical_scale_m": 2.5,
+   "texel_density_px_per_m": 819.2,
+   "note": "Phase 10: physical scale chosen so courses/planks read at true size; at 2.5 m per 2k tile the texel density is 819 px/m, above the 256 px/m architecture budget, which is deliberate because the course height, not the wall area, is the readable feature."
   },
   {
    "id": "kaykit-dungeon-pack-1.1-gaps",
@@ -3406,9 +3407,9 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "Two minor stat slips: (1) ceiling_tile measures 4x4x0.35 units, so the 'tile thickness 0.15' note holds for floors but not the ceiling; (2) provenance cannot be hash-pinned to a public mirror (archive deleted; the GitHub mirror is v1.0), though the in-archive 1.1 CC0 license and the live itch page are consistent. Neither affects licensing or file validity. Repo side verified exact: assets/models/environment holds exactly 44 KayKit models (all walls/banners/pillars/chest/torch — no stairs/floors/railings/furniture) and wall.gltf.glb measures 4x4x1.0."
+    "note": "Two minor stat slips: (1) ceiling_tile measures 4x4x0.35 units, so the 'tile thickness 0.15' note holds for floors but not the ceiling; (2) provenance cannot be hash-pinned to a public mirror (archive deleted; the GitHub mirror is v1.0), though the in-archive 1.1 CC0 license and the live itch page are consistent. Neither affects licensing or file validity. Repo side verified exact: assets/models/environment holds exactly 44 KayKit models (all walls/banners/pillars/chest/torch \u2014 no stairs/floors/railings/furniture) and wall.gltf.glb measures 4x4x1.0."
    },
-   "gaps": "No animations, no skins, no LODs, no collision meshes, no damage/wear variants (those are the paid EXTRA tier). IMPORTANT: this 1.1 release ships its own 1024x1024 atlas (dungeon_texture.png, sha256 ceb331d6…) that differs from the atlas the repo's existing KayKit files reference (assets/models/environment/wall_dungeon_texture.png, 15,794 B, sha256 f9ae1825…) — the new pieces must be imported with this 1.1 atlas (each .gltf references 'dungeon_texture.png' relatively, so keep it beside them), or the whole Dungeon family should be re-imported from 1.1 so everything shares one material; otherwise expect UV/colour mismatch. KayKit's module is 4 units (not metres), so the Phase 2 unit decision applies: at the repo's current root_scale=1.0 the standard stair rises 5.1 units, and a 1.75-1.90 m character needs the agreed global scale. Does NOT include: potted plants, a suit of armour, a real multi-arm chandelier, or benches. Each .gltf needs its same-named .bin buffer beside it.",
+   "gaps": "No animations, no skins, no LODs, no collision meshes, no damage/wear variants (those are the paid EXTRA tier). IMPORTANT: this 1.1 release ships its own 1024x1024 atlas (dungeon_texture.png, sha256 ceb331d6\u2026) that differs from the atlas the repo's existing KayKit files reference (assets/models/environment/wall_dungeon_texture.png, 15,794 B, sha256 f9ae1825\u2026) \u2014 the new pieces must be imported with this 1.1 atlas (each .gltf references 'dungeon_texture.png' relatively, so keep it beside them), or the whole Dungeon family should be re-imported from 1.1 so everything shares one material; otherwise expect UV/colour mismatch. KayKit's module is 4 units (not metres), so the Phase 2 unit decision applies: at the repo's current root_scale=1.0 the standard stair rises 5.1 units, and a 1.75-1.90 m character needs the agreed global scale. Does NOT include: potted plants, a suit of armour, a real multi-arm chandelier, or benches. Each .gltf needs its same-named .bin buffer beside it.",
    "acceptance": ""
   },
   {
@@ -3731,7 +3732,7 @@
     "adversarially_verified": true,
     "note": "Full-kit entry count ('406 entries') and the site's '75 assets' label can no longer be reconciled since the zip was deleted; not material to the kept files."
    },
-   "gaps": "Different art style from KayKit (flat-shaded stone with a single shared colormap, no gradient atlas) — the plan's 'avoid mixing styles' rule applies, so treat these as alternates, not mix-ins. Tiny module: the stair is 0.67 units tall, so it needs a scale decision, and the wall segments do not match the KayKit 4-unit grid. No animations/LODs/collision. Textures/colormap.png must stay in its subfolder or the GLBs lose their texture.",
+   "gaps": "Different art style from KayKit (flat-shaded stone with a single shared colormap, no gradient atlas) \u2014 the plan's 'avoid mixing styles' rule applies, so treat these as alternates, not mix-ins. Tiny module: the stair is 0.67 units tall, so it needs a scale decision, and the wall segments do not match the KayKit 4-unit grid. No animations/LODs/collision. Textures/colormap.png must stay in its subfolder or the GLBs lose their texture.",
    "acceptance": ""
   },
   {
@@ -3800,7 +3801,7 @@
     "adversarially_verified": true,
     "note": "Scale claim is wrong: pottedPlant.glb renders ~0.54 units tall (raw accessor 0.536; root node scale 2x over a nested 0.5x plant node), not '0.12 units'. The 0.12 figure is the plant sub-mesh alone. plantSmall1-3 render ~0.14 units. Assets still valid; only the scale note needs fixing before the manifest uses it."
    },
-   "gaps": "Totally different look from KayKit: flat untextured colour, clean/modern rather than castle-carved, and the models are very small in raw units (pottedPlant is 0.12 units tall) so they must be scaled. No textures at all (0 images) means no shared atlas and no PBR — plan the material setup. No animations/LODs/collision. If plants must match the KayKit atlas look, use these only as a stand-in until a KayKit-style plant is authored.",
+   "gaps": "Totally different look from KayKit: flat untextured colour, clean/modern rather than castle-carved, and the models are very small in raw units (pottedPlant is 0.12 units tall) so they must be scaled. No textures at all (0 images) means no shared atlas and no PBR \u2014 plan the material setup. No animations/LODs/collision. If plants must match the KayKit atlas look, use these only as a stand-in until a KayKit-style plant is authored.",
    "acceptance": ""
   },
   {
@@ -4105,7 +4106,7 @@
     "adversarially_verified": true,
     "note": "None."
    },
-   "gaps": "No ambience or loops; only short one-shots (no long tails for large spells); no magic-specific whoosh/zap/chime — spell cast must be assembled from these layers plus UI sounds.",
+   "gaps": "No ambience or loops; only short one-shots (no long tails for large spells); no magic-specific whoosh/zap/chime \u2014 spell cast must be assembled from these layers plus UI sounds.",
    "acceptance": ""
   },
   {
@@ -5317,7 +5318,7 @@
     "adversarially_verified": true,
     "note": "CC-BY-3.0 is permissive with attribution. Corrected: the required credit is the original creator Jonathan Shaw (InspectorJ) per the source page; the local receipt was rewritten accordingly."
    },
-   "gaps": "License is CC-BY-3.0, NOT CC0 — shipping requires visible credit to AntumDeluge (recorded in LICENSE.txt); no license file ships from the site; loop seam not verified in a WAV editor; no other ambiences in this pack.",
+   "gaps": "License is CC-BY-3.0, NOT CC0 \u2014 shipping requires visible credit to AntumDeluge (recorded in LICENSE.txt); no license file ships from the site; loop seam not verified in a WAV editor; no other ambiences in this pack.",
    "acceptance": ""
   },
   {
@@ -5456,7 +5457,7 @@
     "adversarially_verified": true,
     "note": "Dimension claim is wrong: the glTF has a root node scale of 0.686, and Poly Haven's own API (api.polyhaven.com/info/lantern_chandelier_01) declares dimensions 579 x 575 x 878 mm, i.e. 0.58 x 0.57 x 0.88 m. The claimed '1.28 m tall' is the pre-scale accessor bbox (1.279 m) and ignores the node transform. Still metric and well under budget; only the number is off. Photoreal-vs-KayKit style caveat is correctly flagged."
    },
-   "gaps": "Photoreal PBR style versus the repo's KayKit gradient-atlas lowpoly look — plan.md Phase 2 explicitly warns against mixing realistic and cartoon assets, so treat this as a look-development candidate or a deliberate 'real light fixture' exception. No LODs and no collision; the glass needs alpha/transmission material setup in Godot; a Godot-side glow/light source still has to be authored (the model is geometry only).",
+   "gaps": "Photoreal PBR style versus the repo's KayKit gradient-atlas lowpoly look \u2014 plan.md Phase 2 explicitly warns against mixing realistic and cartoon assets, so treat this as a look-development candidate or a deliberate 'real light fixture' exception. No LODs and no collision; the glass needs alpha/transmission material setup in Godot; a Godot-side glow/light source still has to be authored (the model is geometry only).",
    "acceptance": ""
   },
   {
@@ -5589,7 +5590,7 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "One stat is wrong: the report says '54 nodes'; the GLB actually has 86 nodes (54 is KayKit's node count, likely copied across). Everything else in this candidate is accurate. Preview file named preview.jpg is really a PNG (magic 89 50 4E 47) — see category-level note."
+    "note": "One stat is wrong: the report says '54 nodes'; the GLB actually has 86 nodes (54 is KayKit's node count, likely copied across). Everything else in this candidate is accurate. Preview file named preview.jpg is really a PNG (magic 89 50 4E 47) \u2014 see category-level note."
    },
    "gaps": "No textures at all (11 flat materials; the original pack's texture atlas is not in the Poly Pizza conversion, though UVs and TEXCOORD_0 exist); no dedicated spellcast clip (melee/gun clips only); no LODs, no collision, no root motion; conversion duplicates the skin 5x (one per mesh) and 5 identical 62-joint skins must be merged before production use; textured original is Quaternius 'Ultimate Modular Men' whose Google Drive link is quota-blocked (manual); shoe/prop sockets not verified.",
    "acceptance": "tools/downloads/asset-review-neutral-hero-adventurer.png, tools/downloads/asset-review-final-hero-adventurer.png"
@@ -5720,7 +5721,7 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "The gaps field says '2 duplicated skins' — actually there are 4 identical 62-joint skins (Body, Head, Legs, Feet), i.e. the merge cost is double what was stated. Preview.jpg is really a PNG. Otherwise accurate."
+    "note": "The gaps field says '2 duplicated skins' \u2014 actually there are 4 identical 62-joint skins (Body, Head, Legs, Feet), i.e. the merge cost is double what was stated. Preview.jpg is really a PNG. Otherwise accurate."
    },
    "gaps": "Untextured (flat materials, UVs present); Sword mesh is a separate NON-skinned mesh (must be socketed to a hand bone manually); 2 duplicated skins; no spellcast clip; no LODs/collision/root motion; same Google-Drive-blocked textured original as the male Adventurer.",
    "acceptance": "tools/downloads/asset-review-neutral-hero-hooded.png, tools/downloads/asset-review-final-hero-hooded.png",
@@ -5989,7 +5990,7 @@
    "status": "integrated",
    "author": "Quaternius (quaternius.com)",
    "source_url": "https://quaternius.itch.io/universal-animation-library",
-   "license": "CC0 1.0 Universal (Public Domain Dedication) — license text shipped inside the archive",
+   "license": "CC0 1.0 Universal (Public Domain Dedication) \u2014 license text shipped inside the archive",
    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
    "license_file": "assets/candidates/character/quaternius-universal-animation-library/License.txt",
    "attribution_required": false,
@@ -6071,9 +6072,9 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "The itch page advertises '120+ animations' for the library, but the free Standard GLBs actually contain only 43 clips each — the researcher's 43 is what the downloaded artifact has, but a reader expecting the advertised 120+ from the free tier will be short (the rest sit in the paid Pro/Source tiers). No files are mislabeled; audio/other formats are not needed."
+    "note": "The itch page advertises '120+ animations' for the library, but the free Standard GLBs actually contain only 43 clips each \u2014 the researcher's 43 is what the downloaded artifact has, but a reader expecting the advertised 120+ from the free tier will be short (the rest sit in the paid Pro/Source tiers). No files are mislabeled; audio/other formats are not needed."
    },
-   "gaps": "Animation product, not a costumed hero: the included mesh is an untextured mannequin (2 flat materials, no skin/cloth textures, no robe); free Standard tier has 43 clips (the paid Pro tier, $9.99, has the larger set); 65-joint UE5-named rig differs from the 53-joint DEF- base mesh copy on Poly Pizza — pair it with its own mannequin or retarget deliberately; itch.io has no static URL (download needed a csrf + /download_url + /file/<id> session, reproduced in this run).",
+   "gaps": "Animation product, not a costumed hero: the included mesh is an untextured mannequin (2 flat materials, no skin/cloth textures, no robe); free Standard tier has 43 clips (the paid Pro tier, $9.99, has the larger set); 65-joint UE5-named rig differs from the 53-joint DEF- base mesh copy on Poly Pizza \u2014 pair it with its own mannequin or retarget deliberately; itch.io has no static URL (download needed a csrf + /download_url + /file/<id> session, reproduced in this run).",
    "acceptance": "tools/downloads/asset-review-neutral-hero-mannequin.png",
    "notes": "Retargeted with a documented bone map (hero_common.py BONE_MAP); the two Quaternius rigs disagree on bone names, bone axes and armature scale, so the transfer is done in world space per bone. Not shipped as-is."
   },
@@ -6167,34 +6168,32 @@
   },
   {
    "id": "roof-slates-03",
-   "purpose": "roof slate PBR set (Phase 10)",
-   "status": "candidate",
+   "purpose": "roof slate PBR set (Phase 10) - promoted into assets/textures/pbr/ and used by the Phase 10 material library",
+   "status": "integrated",
    "author": "Rob Tuytel",
    "source_url": "https://polyhaven.com/a/roof_slates_03",
    "license": "CC0-1.0 (Public Domain Dedication)",
    "license_url": "https://polyhaven.com/license",
-   "license_file": "tools/downloads/asset-candidates/roof-slate/roof-slates-03/license.html",
+   "license_file": "assets/textures/pbr/roof_slates_03/license.txt",
    "attribution_required": false,
    "attribution_text": "",
    "local_paths": [
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/license.html",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/license.txt",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/manifest.json",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/roof_slates_03_ao_2k.jpg",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/roof_slates_03_diff_2k.jpg",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/roof_slates_03_disp_2k.jpg",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/roof_slates_03_nor_gl_2k.jpg",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/roof_slates_03_rough_2k.jpg"
+    "assets/textures/pbr/roof_slates_03/license.txt",
+    "assets/textures/pbr/roof_slates_03/manifest.json",
+    "assets/textures/pbr/roof_slates_03/roof_slates_03_ao_2k.jpg",
+    "assets/textures/pbr/roof_slates_03/roof_slates_03_diff_2k.jpg",
+    "assets/textures/pbr/roof_slates_03/roof_slates_03_disp_2k.jpg",
+    "assets/textures/pbr/roof_slates_03/roof_slates_03_nor_gl_2k.jpg",
+    "assets/textures/pbr/roof_slates_03/roof_slates_03_rough_2k.jpg"
    ],
    "sha256": {
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/license.html": "6f4f617c936d14d5a80db6a2ebec145c79277a760672501eef51bff7a0d4cbba",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/license.txt": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/manifest.json": "dc5299a6fc3cfc467279ddc097ae3c542652dd97ccb9118d49294e3a09c638ac",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/roof_slates_03_ao_2k.jpg": "bb9fead7c988e5ae9df406a7daa3bb6a2e10156dd41fa1f954a52d50ea15a426",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/roof_slates_03_diff_2k.jpg": "955eb467fc609e4509c2354f0b88755ffa137dac352b651efed95026f4a6aa5c",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/roof_slates_03_disp_2k.jpg": "84e305c7d08f0de5b32de510377e01989197c4a0af22ba19a94a0b151c5075a0",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/roof_slates_03_nor_gl_2k.jpg": "f797ad9756e6584736831cf07f79872440a6a4811c80f9bcedd3b20b05c7596d",
-    "tools/downloads/asset-candidates/roof-slate/roof-slates-03/roof_slates_03_rough_2k.jpg": "bd583b73aa9c496f0d8012c2d6acaa704d6acce912d7de1d5af723bbeffa9942"
+    "assets/textures/pbr/roof_slates_03/license.txt": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8",
+    "assets/textures/pbr/roof_slates_03/manifest.json": "dc5299a6fc3cfc467279ddc097ae3c542652dd97ccb9118d49294e3a09c638ac",
+    "assets/textures/pbr/roof_slates_03/roof_slates_03_ao_2k.jpg": "bb9fead7c988e5ae9df406a7daa3bb6a2e10156dd41fa1f954a52d50ea15a426",
+    "assets/textures/pbr/roof_slates_03/roof_slates_03_diff_2k.jpg": "955eb467fc609e4509c2354f0b88755ffa137dac352b651efed95026f4a6aa5c",
+    "assets/textures/pbr/roof_slates_03/roof_slates_03_disp_2k.jpg": "84e305c7d08f0de5b32de510377e01989197c4a0af22ba19a94a0b151c5075a0",
+    "assets/textures/pbr/roof_slates_03/roof_slates_03_nor_gl_2k.jpg": "f797ad9756e6584736831cf07f79872440a6a4811c80f9bcedd3b20b05c7596d",
+    "assets/textures/pbr/roof_slates_03/roof_slates_03_rough_2k.jpg": "bd583b73aa9c496f0d8012c2d6acaa704d6acce912d7de1d5af723bbeffa9942"
    },
    "scale_m": "n/a (textures/audio)",
    "triangles": "n/a",
@@ -6224,7 +6223,10 @@
     "note": "None; the constant-white roughness finding is accurate."
    },
    "gaps": "Roughness map is constant white (mean 255, stddev 0.0, no variation) - use flat roughness ~0.8 in Godot; no ridge caps, hips or edge pieces (geometry needed); no metal flashing variant; 8-bit displacement.",
-   "acceptance": ""
+   "acceptance": "",
+   "physical_scale_m": 3.0,
+   "texel_density_px_per_m": 682.6666666666666,
+   "note": "Phase 10: physical scale chosen so courses/planks read at true size; at 3 m per 2k tile the texel density is 682 px/m, above the 256 px/m architecture budget, which is deliberate because the course height, not the wall area, is the readable feature."
   },
   {
    "id": "sinestesia-2d-explosions",
@@ -6340,34 +6342,32 @@
   },
   {
    "id": "stone-tiles-02",
-   "purpose": "flagstone floor PBR set (Phase 10)",
-   "status": "candidate",
+   "purpose": "flagstone floor PBR set (Phase 10) - promoted into assets/textures/pbr/ and used by the Phase 10 material library",
+   "status": "integrated",
    "author": "Charlotte Baglioni",
    "source_url": "https://polyhaven.com/a/stone_tiles_02",
    "license": "CC0-1.0 (Public Domain Dedication)",
    "license_url": "https://polyhaven.com/license",
-   "license_file": "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/license.html",
+   "license_file": "assets/textures/pbr/stone_tiles_02/license.txt",
    "attribution_required": false,
    "attribution_text": "",
    "local_paths": [
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/license.html",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/license.txt",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/manifest.json",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/stone_tiles_02_ao_2k.jpg",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/stone_tiles_02_diff_2k.jpg",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/stone_tiles_02_disp_2k.jpg",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/stone_tiles_02_nor_gl_2k.jpg",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/stone_tiles_02_rough_2k.jpg"
+    "assets/textures/pbr/stone_tiles_02/license.txt",
+    "assets/textures/pbr/stone_tiles_02/manifest.json",
+    "assets/textures/pbr/stone_tiles_02/stone_tiles_02_ao_2k.jpg",
+    "assets/textures/pbr/stone_tiles_02/stone_tiles_02_diff_2k.jpg",
+    "assets/textures/pbr/stone_tiles_02/stone_tiles_02_disp_2k.jpg",
+    "assets/textures/pbr/stone_tiles_02/stone_tiles_02_nor_gl_2k.jpg",
+    "assets/textures/pbr/stone_tiles_02/stone_tiles_02_rough_2k.jpg"
    ],
    "sha256": {
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/license.html": "6f4f617c936d14d5a80db6a2ebec145c79277a760672501eef51bff7a0d4cbba",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/license.txt": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/manifest.json": "6372a037ce6c73531f82e786e4fc3720cb3b82f9dd1fb977e2216c8f3f9e89b8",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/stone_tiles_02_ao_2k.jpg": "601434863e2885565314160e62c311b1859c27aa761220455f018d086f87442c",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/stone_tiles_02_diff_2k.jpg": "02e056f5f5fbcbd90212bd4c7b8c1e979a10685a3291b6b25b19eeeb84f7d410",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/stone_tiles_02_disp_2k.jpg": "5501abc25461e9920ae09aa61e6b6af015918b8c39588b4ab2355501472733f8",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/stone_tiles_02_nor_gl_2k.jpg": "badd9a55dbf1b53217408f49303286d8a93f5e7074c6869b6f53a9a547a6a6ce",
-    "tools/downloads/asset-candidates/stone-floor/stone-tiles-02/stone_tiles_02_rough_2k.jpg": "3b9e6650f97baa5e52fac3f5106666ee4c89c335440bc9255c2e1ab20b88de4c"
+    "assets/textures/pbr/stone_tiles_02/license.txt": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8",
+    "assets/textures/pbr/stone_tiles_02/manifest.json": "6372a037ce6c73531f82e786e4fc3720cb3b82f9dd1fb977e2216c8f3f9e89b8",
+    "assets/textures/pbr/stone_tiles_02/stone_tiles_02_ao_2k.jpg": "601434863e2885565314160e62c311b1859c27aa761220455f018d086f87442c",
+    "assets/textures/pbr/stone_tiles_02/stone_tiles_02_diff_2k.jpg": "02e056f5f5fbcbd90212bd4c7b8c1e979a10685a3291b6b25b19eeeb84f7d410",
+    "assets/textures/pbr/stone_tiles_02/stone_tiles_02_disp_2k.jpg": "5501abc25461e9920ae09aa61e6b6af015918b8c39588b4ab2355501472733f8",
+    "assets/textures/pbr/stone_tiles_02/stone_tiles_02_nor_gl_2k.jpg": "badd9a55dbf1b53217408f49303286d8a93f5e7074c6869b6f53a9a547a6a6ce",
+    "assets/textures/pbr/stone_tiles_02/stone_tiles_02_rough_2k.jpg": "3b9e6650f97baa5e52fac3f5106666ee4c89c335440bc9255c2e1ab20b88de4c"
    },
    "scale_m": "n/a (textures/audio)",
    "triangles": "n/a",
@@ -6397,38 +6397,39 @@
     "note": "None material. The reported tag list omits the API tag 'rocks' (harmless)."
    },
    "gaps": "Only downloaded set above the ~10 MB soft guideline (12.5 MB; still under the 40 MB category cap); no wet/dry variants; no matching steps or paving edging; single slab scale; 8-bit displacement.",
-   "acceptance": ""
+   "acceptance": "",
+   "physical_scale_m": 8.0,
+   "texel_density_px_per_m": 256.0,
+   "note": "Phase 10: physical scale chosen so courses/planks read at true size; at 8 m per 2k tile the texel density is 256 px/m, above the 256 px/m architecture budget, which is deliberate because the course height, not the wall area, is the readable feature."
   },
   {
    "id": "white-plaster-02",
-   "purpose": "interior plaster PBR set (Phase 10)",
-   "status": "candidate",
+   "purpose": "interior plaster PBR set (Phase 10) - promoted into assets/textures/pbr/ and used by the Phase 10 material library",
+   "status": "integrated",
    "author": "Rob Tuytel",
    "source_url": "https://polyhaven.com/a/white_plaster_02",
    "license": "CC0-1.0 (Public Domain Dedication)",
    "license_url": "https://polyhaven.com/license",
-   "license_file": "tools/downloads/asset-candidates/plaster/white-plaster-02/license.html",
+   "license_file": "assets/textures/pbr/white_plaster_02/license.txt",
    "attribution_required": false,
    "attribution_text": "",
    "local_paths": [
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/license.html",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/license.txt",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/manifest.json",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/white_plaster_02_ao_2k.jpg",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/white_plaster_02_diff_2k.jpg",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/white_plaster_02_disp_2k.jpg",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/white_plaster_02_nor_gl_2k.jpg",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/white_plaster_02_rough_2k.jpg"
+    "assets/textures/pbr/white_plaster_02/license.txt",
+    "assets/textures/pbr/white_plaster_02/manifest.json",
+    "assets/textures/pbr/white_plaster_02/white_plaster_02_ao_2k.jpg",
+    "assets/textures/pbr/white_plaster_02/white_plaster_02_diff_2k.jpg",
+    "assets/textures/pbr/white_plaster_02/white_plaster_02_disp_2k.jpg",
+    "assets/textures/pbr/white_plaster_02/white_plaster_02_nor_gl_2k.jpg",
+    "assets/textures/pbr/white_plaster_02/white_plaster_02_rough_2k.jpg"
    ],
    "sha256": {
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/license.html": "6f4f617c936d14d5a80db6a2ebec145c79277a760672501eef51bff7a0d4cbba",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/license.txt": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/manifest.json": "657c92aa7ea8fd1e6477c37be7bb96459eb29ea999e07a14234444e305e0e9c8",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/white_plaster_02_ao_2k.jpg": "4dd72e594056fae1653118bdc86638381c65605edcbdf37e6a27c762782d55fe",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/white_plaster_02_diff_2k.jpg": "0ca5245ba70777d3e41ff4566c9f8d363855461891802c55cb7dc0f6f85f084e",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/white_plaster_02_disp_2k.jpg": "7a477010377e267bbf3c650037f0659c9b5b0c7860f8056e0145600145ef66fc",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/white_plaster_02_nor_gl_2k.jpg": "083579b03a8f31ec1886512e5972f3b893610bf26a2098f97910e0f46745cdc9",
-    "tools/downloads/asset-candidates/plaster/white-plaster-02/white_plaster_02_rough_2k.jpg": "a3dc1911f6e25d88fdb0031fe0cfb602eec5496084c508774c60691bed087417"
+    "assets/textures/pbr/white_plaster_02/license.txt": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8",
+    "assets/textures/pbr/white_plaster_02/manifest.json": "657c92aa7ea8fd1e6477c37be7bb96459eb29ea999e07a14234444e305e0e9c8",
+    "assets/textures/pbr/white_plaster_02/white_plaster_02_ao_2k.jpg": "4dd72e594056fae1653118bdc86638381c65605edcbdf37e6a27c762782d55fe",
+    "assets/textures/pbr/white_plaster_02/white_plaster_02_diff_2k.jpg": "0ca5245ba70777d3e41ff4566c9f8d363855461891802c55cb7dc0f6f85f084e",
+    "assets/textures/pbr/white_plaster_02/white_plaster_02_disp_2k.jpg": "7a477010377e267bbf3c650037f0659c9b5b0c7860f8056e0145600145ef66fc",
+    "assets/textures/pbr/white_plaster_02/white_plaster_02_nor_gl_2k.jpg": "083579b03a8f31ec1886512e5972f3b893610bf26a2098f97910e0f46745cdc9",
+    "assets/textures/pbr/white_plaster_02/white_plaster_02_rough_2k.jpg": "a3dc1911f6e25d88fdb0031fe0cfb602eec5496084c508774c60691bed087417"
    },
    "scale_m": "n/a (textures/audio)",
    "triangles": "n/a",
@@ -6458,7 +6459,10 @@
     "note": "Minor labeling: 'tags: smooth, flat, even, wall, plaster-concrete, indoor, clean' mixes API tags (smooth/flat/even) with categories (wall, plaster-concrete, indoor, clean). No material impact."
    },
    "gaps": "Very clean/new - aged gothic look needs dirt/edge decals or vertex paint; no colored variants; 8-bit displacement; no corner/beam transition pieces.",
-   "acceptance": ""
+   "acceptance": "",
+   "physical_scale_m": 4.0,
+   "texel_density_px_per_m": 512.0,
+   "note": "Phase 10: physical scale chosen so courses/planks read at true size; at 4 m per 2k tile the texel density is 512 px/m, above the 256 px/m architecture budget, which is deliberate because the course height, not the wall area, is the readable feature."
   },
   {
    "id": "hero_final_art",
@@ -6771,6 +6775,1701 @@
    "blocks": "Phase 10+",
    "notes": "NPCs currently share the shared wizard rig",
    "acceptance": ""
+  },
+  {
+   "id": "phase10-stone-ashlar-01",
+   "purpose": "Authored ashlar masonry: castle walls, Great Hall, stair hall",
+   "status": "integrated",
+   "author": "HPMMO project - procedurally authored in Blender 5.2.2 (deterministic seeded fields)",
+   "source_url": "client/tools/blender/phase10_textures.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "assets/textures/pbr/stone_ashlar_01/PROVENANCE.txt",
+   "license_file": "assets/textures/pbr/stone_ashlar_01/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/textures/pbr/stone_ashlar_01/PROVENANCE.txt",
+    "assets/textures/pbr/stone_ashlar_01/stone_ashlar_01_albedo_2k.png",
+    "assets/textures/pbr/stone_ashlar_01/stone_ashlar_01_ao_2k.png",
+    "assets/textures/pbr/stone_ashlar_01/stone_ashlar_01_height_2k.png",
+    "assets/textures/pbr/stone_ashlar_01/stone_ashlar_01_normal_2k.png",
+    "assets/textures/pbr/stone_ashlar_01/stone_ashlar_01_rough_2k.png"
+   ],
+   "sha256": {
+    "assets/textures/pbr/stone_ashlar_01/PROVENANCE.txt": "c715da6adce3145a77ff3bb812cd16fe8812eef32b665b1cf35d2b549145fbad",
+    "assets/textures/pbr/stone_ashlar_01/stone_ashlar_01_albedo_2k.png": "43541ae588939222f43e9155c97aa8cd8a06878ce58280eb8892547754702433",
+    "assets/textures/pbr/stone_ashlar_01/stone_ashlar_01_ao_2k.png": "c6b57917db25e853be44d0bb33b43d7d74a8c41ef9f9054505d7858273f45688",
+    "assets/textures/pbr/stone_ashlar_01/stone_ashlar_01_height_2k.png": "bf5b152575af9d9fdf99940ca1d77c9903f57024c72c9e13d225eae7dc08680a",
+    "assets/textures/pbr/stone_ashlar_01/stone_ashlar_01_normal_2k.png": "e811076fece1a7d9d43bd93d323f163c9448017d36c04cd5c39be93fc65ae75a",
+    "assets/textures/pbr/stone_ashlar_01/stone_ashlar_01_rough_2k.png": "a131880dbc42a00ecf5357edfca52d502f66db246fb8b1ecf9932a16d6ff481c"
+   },
+   "texel_density_px_per_m": 256.0,
+   "physical_scale_m": 8.0,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough",
+     "ao",
+     "height"
+    ],
+    "resolution": "2048x2048",
+    "note": "albedo sRGB; normal/rough/ao/height linear data; normals generated from height, OpenGL (+Y); large coursed blocks, recessed joints, corner chips, rain staining"
+   },
+   "maps": "2k"
+  },
+  {
+   "id": "phase10-stone-ashlar-02",
+   "purpose": "Authored darker ashlar: dungeon/basement walls",
+   "status": "integrated",
+   "author": "HPMMO project - procedurally authored in Blender 5.2.2 (deterministic seeded fields)",
+   "source_url": "client/tools/blender/phase10_textures.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "assets/textures/pbr/stone_ashlar_02/PROVENANCE.txt",
+   "license_file": "assets/textures/pbr/stone_ashlar_02/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/textures/pbr/stone_ashlar_02/PROVENANCE.txt",
+    "assets/textures/pbr/stone_ashlar_02/stone_ashlar_02_albedo_1k.png",
+    "assets/textures/pbr/stone_ashlar_02/stone_ashlar_02_ao_1k.png",
+    "assets/textures/pbr/stone_ashlar_02/stone_ashlar_02_height_1k.png",
+    "assets/textures/pbr/stone_ashlar_02/stone_ashlar_02_normal_1k.png",
+    "assets/textures/pbr/stone_ashlar_02/stone_ashlar_02_rough_1k.png"
+   ],
+   "sha256": {
+    "assets/textures/pbr/stone_ashlar_02/PROVENANCE.txt": "5a9315878ca54a8e77129a8b0c5cb2b42e18b648ba177680f1f8f791252ae435",
+    "assets/textures/pbr/stone_ashlar_02/stone_ashlar_02_albedo_1k.png": "aa59c7d57a7fee17327c5b7209b61d2485f0ca697350fa159ec215dbc8c9e274",
+    "assets/textures/pbr/stone_ashlar_02/stone_ashlar_02_ao_1k.png": "f718c5b665f82c00c79f6f5346d17b575dc1de021970ae381becc27854ad3044",
+    "assets/textures/pbr/stone_ashlar_02/stone_ashlar_02_height_1k.png": "351873a8d4a63be2b99eeb5fa27bc6d76cecd202d31a53bfdaeac5997879f8f4",
+    "assets/textures/pbr/stone_ashlar_02/stone_ashlar_02_normal_1k.png": "19267425f4e5bc30b3694372dd068444fa9ab73bc1f3a31c8e3a2bdbecd60853",
+    "assets/textures/pbr/stone_ashlar_02/stone_ashlar_02_rough_1k.png": "62fc716b37b7eb73f4a2f690c1a2e4227dc36d18d34cd76d79c6db1dc207764b"
+   },
+   "texel_density_px_per_m": 256.0,
+   "physical_scale_m": 4.0,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough",
+     "ao",
+     "height"
+    ],
+    "resolution": "1024x1024",
+    "note": "albedo sRGB; normal/rough/ao/height linear data; normals generated from height, OpenGL (+Y); smaller battered blocks, heavy grime"
+   },
+   "maps": "1k"
+  },
+  {
+   "id": "phase10-floor-flagstone-01",
+   "purpose": "Authored flagstone floor: interior floors",
+   "status": "integrated",
+   "author": "HPMMO project - procedurally authored in Blender 5.2.2 (deterministic seeded fields)",
+   "source_url": "client/tools/blender/phase10_textures.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "assets/textures/pbr/floor_flagstone_01/PROVENANCE.txt",
+   "license_file": "assets/textures/pbr/floor_flagstone_01/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/textures/pbr/floor_flagstone_01/PROVENANCE.txt",
+    "assets/textures/pbr/floor_flagstone_01/floor_flagstone_01_albedo_2k.png",
+    "assets/textures/pbr/floor_flagstone_01/floor_flagstone_01_ao_2k.png",
+    "assets/textures/pbr/floor_flagstone_01/floor_flagstone_01_height_2k.png",
+    "assets/textures/pbr/floor_flagstone_01/floor_flagstone_01_normal_2k.png",
+    "assets/textures/pbr/floor_flagstone_01/floor_flagstone_01_rough_2k.png"
+   ],
+   "sha256": {
+    "assets/textures/pbr/floor_flagstone_01/PROVENANCE.txt": "c7920ce6eacb2ec673eaf926cf7ad305fdc4d6640f2ebc5324d8f77fc1d221b7",
+    "assets/textures/pbr/floor_flagstone_01/floor_flagstone_01_albedo_2k.png": "80a4cb12e5697f59a21694f45608b5b4bde6f7d0080013830e8698c7b0539497",
+    "assets/textures/pbr/floor_flagstone_01/floor_flagstone_01_ao_2k.png": "27c1344abfc85d6ade858a54f2f0d73767d08c746fff65f724622bff175cc461",
+    "assets/textures/pbr/floor_flagstone_01/floor_flagstone_01_height_2k.png": "42cb2f5db2d570be30ef51f1da9b85be1df52790f53f09bcd6df9000c8c1fef3",
+    "assets/textures/pbr/floor_flagstone_01/floor_flagstone_01_normal_2k.png": "c4b22c36af2cf5885802c4069afba234057c1e56ca2f6a7803c2a433318d2b01",
+    "assets/textures/pbr/floor_flagstone_01/floor_flagstone_01_rough_2k.png": "5022493e74e11df73f84a76626cb52ceea656dcde5f115045bf3fa5de94e32ab"
+   },
+   "texel_density_px_per_m": 256.0,
+   "physical_scale_m": 8.0,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough",
+     "ao",
+     "height"
+    ],
+    "resolution": "2048x2048",
+    "note": "albedo sRGB; normal/rough/ao/height linear data; normals generated from height, OpenGL (+Y); irregular slabs, traffic polish, dark joints"
+   },
+   "maps": "2k"
+  },
+  {
+   "id": "phase10-trim-sheet-01",
+   "purpose": "Authored trim sheet: moulding bands for plinth/string/cornice kit pieces",
+   "status": "integrated",
+   "author": "HPMMO project - procedurally authored in Blender 5.2.2 (deterministic seeded fields)",
+   "source_url": "client/tools/blender/phase10_textures.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "assets/textures/pbr/trim_sheet_01/PROVENANCE.txt",
+   "license_file": "assets/textures/pbr/trim_sheet_01/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/textures/pbr/trim_sheet_01/PROVENANCE.txt",
+    "assets/textures/pbr/trim_sheet_01/trim_sheet_01_albedo_1k.png",
+    "assets/textures/pbr/trim_sheet_01/trim_sheet_01_ao_1k.png",
+    "assets/textures/pbr/trim_sheet_01/trim_sheet_01_height_1k.png",
+    "assets/textures/pbr/trim_sheet_01/trim_sheet_01_normal_1k.png",
+    "assets/textures/pbr/trim_sheet_01/trim_sheet_01_rough_1k.png"
+   ],
+   "sha256": {
+    "assets/textures/pbr/trim_sheet_01/PROVENANCE.txt": "a6f757a82f93a287d95ea5fa88eec5ea6bbf6c5fcd173ad5f2cc915d189a9070",
+    "assets/textures/pbr/trim_sheet_01/trim_sheet_01_albedo_1k.png": "70f692d2662c52be940705bac20e945fabd5a8609eacf4286c76efe389e7fdc9",
+    "assets/textures/pbr/trim_sheet_01/trim_sheet_01_ao_1k.png": "5a52c45d5ea3f5bc4147796175a966821afd29439d9e67c07a34a33ca05d1fd3",
+    "assets/textures/pbr/trim_sheet_01/trim_sheet_01_height_1k.png": "282985088dddc2e377d3dfd586a63a8edd434838c7c9b1c9090d0d69cbf62313",
+    "assets/textures/pbr/trim_sheet_01/trim_sheet_01_normal_1k.png": "456c57aed95c6b918076c9f3f2b8f071e0923787be48534b5bf679feb097c8a6",
+    "assets/textures/pbr/trim_sheet_01/trim_sheet_01_rough_1k.png": "b2386f47e74dd1eba80d104a31a27147fc63e495978dea96963ac9770f698a79"
+   },
+   "texel_density_px_per_m": 256.0,
+   "physical_scale_m": 4.0,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough",
+     "ao",
+     "height"
+    ],
+    "resolution": "1024x1024",
+    "note": "albedo sRGB; normal/rough/ao/height linear data; normals generated from height, OpenGL (+Y); four horizontal moulding bands, box-projected UVs at 0.25/m"
+   },
+   "maps": "1k"
+  },
+  {
+   "id": "phase10-wood-timber-01",
+   "purpose": "Authored timber: furniture, doors, ladders, rafters",
+   "status": "integrated",
+   "author": "HPMMO project - procedurally authored in Blender 5.2.2 (deterministic seeded fields)",
+   "source_url": "client/tools/blender/phase10_textures.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "assets/textures/pbr/wood_timber_01/PROVENANCE.txt",
+   "license_file": "assets/textures/pbr/wood_timber_01/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/textures/pbr/wood_timber_01/PROVENANCE.txt",
+    "assets/textures/pbr/wood_timber_01/wood_timber_01_albedo_1k.png",
+    "assets/textures/pbr/wood_timber_01/wood_timber_01_height_1k.png",
+    "assets/textures/pbr/wood_timber_01/wood_timber_01_normal_1k.png",
+    "assets/textures/pbr/wood_timber_01/wood_timber_01_rough_1k.png"
+   ],
+   "sha256": {
+    "assets/textures/pbr/wood_timber_01/PROVENANCE.txt": "92ba78eb1eddbae42460380f88def0f8637967d94d21045eab41aff05df7b97e",
+    "assets/textures/pbr/wood_timber_01/wood_timber_01_albedo_1k.png": "2f3e30721696563fff270b7794542c94ab966eded73adc662bdbfe2e6f5615b1",
+    "assets/textures/pbr/wood_timber_01/wood_timber_01_height_1k.png": "30a27f46c3240057c58efc951162be99dca4975887f70c8787cf417ee4c13bc9",
+    "assets/textures/pbr/wood_timber_01/wood_timber_01_normal_1k.png": "7d1951417f6d46cf009661bbc9e411ebfabee1ff369e44a879b7c25baf1b149c",
+    "assets/textures/pbr/wood_timber_01/wood_timber_01_rough_1k.png": "09ec9354277f69b6939ab530f7b7aea1422f0bfb9523027c86ebf5f0c9cc4137"
+   },
+   "texel_density_px_per_m": 512.0,
+   "physical_scale_m": 2.0,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough",
+     "height"
+    ],
+    "resolution": "1024x1024",
+    "note": "albedo sRGB; normal/rough/ao/height linear data; normals generated from height, OpenGL (+Y); straight grain, knots, tool marks"
+   },
+   "maps": "1k"
+  },
+  {
+   "id": "phase10-metal-iron-01",
+   "purpose": "Authored forged iron: torch brackets, door bands, armour (the only metallic set)",
+   "status": "integrated",
+   "author": "HPMMO project - procedurally authored in Blender 5.2.2 (deterministic seeded fields)",
+   "source_url": "client/tools/blender/phase10_textures.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "assets/textures/pbr/metal_iron_01/PROVENANCE.txt",
+   "license_file": "assets/textures/pbr/metal_iron_01/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/textures/pbr/metal_iron_01/PROVENANCE.txt",
+    "assets/textures/pbr/metal_iron_01/metal_iron_01_albedo_512.png",
+    "assets/textures/pbr/metal_iron_01/metal_iron_01_height_512.png",
+    "assets/textures/pbr/metal_iron_01/metal_iron_01_normal_512.png",
+    "assets/textures/pbr/metal_iron_01/metal_iron_01_rough_512.png"
+   ],
+   "sha256": {
+    "assets/textures/pbr/metal_iron_01/PROVENANCE.txt": "fa7db2ff1337d72ab964b354eef870352555fa4628e254595b68653f0028be7b",
+    "assets/textures/pbr/metal_iron_01/metal_iron_01_albedo_512.png": "b4f55be17a793602c9156fb01a1d6da55fda2a0f1204ab9107d0b1dc54b6c1b1",
+    "assets/textures/pbr/metal_iron_01/metal_iron_01_height_512.png": "1113cc03d55c55125a194ff634d9f8e0f8941ad42cbe6d79fac31153d404ecc9",
+    "assets/textures/pbr/metal_iron_01/metal_iron_01_normal_512.png": "e209713ebe97c5a15ff75a37a6029fbaa9c52877d1507c4584c6b95c491b4362",
+    "assets/textures/pbr/metal_iron_01/metal_iron_01_rough_512.png": "9616b556cf37187a21362ca3afc7f19419531b21b8a1c43bcf29ede812d22261"
+   },
+   "texel_density_px_per_m": 512.0,
+   "physical_scale_m": 1.0,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough",
+     "height"
+    ],
+    "resolution": "512x512",
+    "note": "albedo sRGB; normal/rough/ao/height linear data; normals generated from height, OpenGL (+Y); pitted, scratched, semi-rough"
+   },
+   "maps": "512"
+  },
+  {
+   "id": "phase10-moss-01",
+   "purpose": "Authored moss decal (RGBA alpha): wall bases and damp floors",
+   "status": "integrated",
+   "author": "HPMMO project - procedurally authored in Blender 5.2.2 (deterministic seeded fields)",
+   "source_url": "client/tools/blender/phase10_textures.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "assets/textures/pbr/moss_01/PROVENANCE.txt",
+   "license_file": "assets/textures/pbr/moss_01/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/textures/pbr/moss_01/PROVENANCE.txt",
+    "assets/textures/pbr/moss_01/moss_01_albedo_1k.png",
+    "assets/textures/pbr/moss_01/moss_01_height_1k.png",
+    "assets/textures/pbr/moss_01/moss_01_normal_1k.png",
+    "assets/textures/pbr/moss_01/moss_01_rough_1k.png"
+   ],
+   "sha256": {
+    "assets/textures/pbr/moss_01/PROVENANCE.txt": "9adfda60c9ecef65fc967431fa80b3d183d942667feb4cbb2553c2579c687878",
+    "assets/textures/pbr/moss_01/moss_01_albedo_1k.png": "671e73b248f244e7743aa9783c559b49c5ed568341cf16ac79bbd154dae06269",
+    "assets/textures/pbr/moss_01/moss_01_height_1k.png": "a942bdd06a88b75a6eea024245cab94e5e6d0a1e0326e2f1135c77601ae8b32d",
+    "assets/textures/pbr/moss_01/moss_01_normal_1k.png": "ad8ffa7ad68bdfd4859987d8d26d00f032e79e77b4aa75e464c49381f75aede3",
+    "assets/textures/pbr/moss_01/moss_01_rough_1k.png": "44249e803054019a8efd0508c1b45a981dc97f43df388b5f973df81e9f4f7481"
+   },
+   "texel_density_px_per_m": 512.0,
+   "physical_scale_m": 2.0,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough",
+     "height"
+    ],
+    "resolution": "1024x1024",
+    "note": "albedo sRGB; normal/rough/ao/height linear data; normals generated from height, OpenGL (+Y); soft irregular alpha patch, blended not scissored"
+   },
+   "maps": "1k"
+  },
+  {
+   "id": "phase10-dirt-ground-01",
+   "purpose": "Authored trampled-earth decal (RGBA alpha): encounter clearings and routes",
+   "status": "integrated",
+   "author": "HPMMO project - procedurally authored in Blender 5.2.2 (deterministic seeded fields)",
+   "source_url": "client/tools/blender/phase10_textures.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "assets/textures/pbr/dirt_ground_01/PROVENANCE.txt",
+   "license_file": "assets/textures/pbr/dirt_ground_01/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/textures/pbr/dirt_ground_01/PROVENANCE.txt",
+    "assets/textures/pbr/dirt_ground_01/dirt_ground_01_albedo_1k.png",
+    "assets/textures/pbr/dirt_ground_01/dirt_ground_01_height_1k.png",
+    "assets/textures/pbr/dirt_ground_01/dirt_ground_01_normal_1k.png",
+    "assets/textures/pbr/dirt_ground_01/dirt_ground_01_rough_1k.png"
+   ],
+   "sha256": {
+    "assets/textures/pbr/dirt_ground_01/PROVENANCE.txt": "be6f30e6134bcc864730bff6b65056a68f772ff5c8ca05ffc2cb9ca48a5c763c",
+    "assets/textures/pbr/dirt_ground_01/dirt_ground_01_albedo_1k.png": "944a7a2c1645e074e2ca115b0bf1110bb4cd331e3f635f95be74fc61c1ce1716",
+    "assets/textures/pbr/dirt_ground_01/dirt_ground_01_height_1k.png": "cd4ae668a1567a119e45ea24f97f873843c43c795df275c132de303b8d654bb9",
+    "assets/textures/pbr/dirt_ground_01/dirt_ground_01_normal_1k.png": "fddbaca634278c6442951eb8cecb4969a7f2af3c4380bbc8bb1e194bf5e31a13",
+    "assets/textures/pbr/dirt_ground_01/dirt_ground_01_rough_1k.png": "ae1c54f202aa61052ac6f82250a4a64bc846c818d22d05ca33d3c2d5e8008b68"
+   },
+   "texel_density_px_per_m": 256.0,
+   "physical_scale_m": 4.0,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough",
+     "height"
+    ],
+    "resolution": "1024x1024",
+    "note": "albedo sRGB; normal/rough/ao/height linear data; normals generated from height, OpenGL (+Y); soft irregular alpha patch with pebbles"
+   },
+   "maps": "1k"
+  },
+  {
+   "id": "phase10-grass-ground-01",
+   "purpose": "Authored meadow ground: outdoor terrain and path verges",
+   "status": "integrated",
+   "author": "HPMMO project - procedurally authored in Blender 5.2.2 (deterministic seeded fields)",
+   "source_url": "client/tools/blender/phase10_textures.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "assets/textures/pbr/grass_ground_01/PROVENANCE.txt",
+   "license_file": "assets/textures/pbr/grass_ground_01/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/textures/pbr/grass_ground_01/PROVENANCE.txt",
+    "assets/textures/pbr/grass_ground_01/grass_ground_01_albedo_1k.png",
+    "assets/textures/pbr/grass_ground_01/grass_ground_01_ao_1k.png",
+    "assets/textures/pbr/grass_ground_01/grass_ground_01_height_1k.png",
+    "assets/textures/pbr/grass_ground_01/grass_ground_01_normal_1k.png",
+    "assets/textures/pbr/grass_ground_01/grass_ground_01_rough_1k.png"
+   ],
+   "sha256": {
+    "assets/textures/pbr/grass_ground_01/PROVENANCE.txt": "efe3d1a9b056ff54887c2035dd5fa0192e78a3d9480ea04d0f9b9478be84cce8",
+    "assets/textures/pbr/grass_ground_01/grass_ground_01_albedo_1k.png": "67f1ab2f90d7c68b216960dd34c4be251a2ef4ef53f5ee70712416eba1de064f",
+    "assets/textures/pbr/grass_ground_01/grass_ground_01_ao_1k.png": "24d194296f5358407d758fac45ff65028a3e1db71b8380a556ebe585b91a0e03",
+    "assets/textures/pbr/grass_ground_01/grass_ground_01_height_1k.png": "b3dfbbe7b070cfb74147e90a7fcb7a88f115803b21503ad3406afd083da48f5f",
+    "assets/textures/pbr/grass_ground_01/grass_ground_01_normal_1k.png": "90036172415b67750b40d3efbeabcc31414d5218a748332f1d7f0277ef78fae7",
+    "assets/textures/pbr/grass_ground_01/grass_ground_01_rough_1k.png": "e49e68ca46379c37b637643085f35d3f89ebb30dbac942e3dbca8a6a7dc7fcf7"
+   },
+   "texel_density_px_per_m": 256.0,
+   "physical_scale_m": 4.0,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough",
+     "ao",
+     "height"
+    ],
+    "resolution": "1024x1024",
+    "note": "albedo sRGB; normal/rough/ao/height linear data; normals generated from height, OpenGL (+Y); mottled green with clumps, blades and bare soil patches"
+   },
+   "maps": "1k"
+  },
+  {
+   "id": "phase10-foliage-leafcard-01",
+   "purpose": "Authored leaf card (RGBA alpha): tree and bush canopy",
+   "status": "integrated",
+   "author": "HPMMO project - procedurally authored in Blender 5.2.2 (deterministic seeded fields)",
+   "source_url": "client/tools/blender/phase10_textures.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "assets/textures/pbr/foliage_leafcard_01/PROVENANCE.txt",
+   "license_file": "assets/textures/pbr/foliage_leafcard_01/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/textures/pbr/foliage_leafcard_01/PROVENANCE.txt",
+    "assets/textures/pbr/foliage_leafcard_01/foliage_leafcard_01_albedo_512.png",
+    "assets/textures/pbr/foliage_leafcard_01/foliage_leafcard_01_normal_512.png"
+   ],
+   "sha256": {
+    "assets/textures/pbr/foliage_leafcard_01/PROVENANCE.txt": "df213bcb05d548cc0c5acddcc736d67758b6448c1c92fbe10f734f5ddd2db6e9",
+    "assets/textures/pbr/foliage_leafcard_01/foliage_leafcard_01_albedo_512.png": "89e6081cd455b9638d01c49837f0a552676ed3d603a0f9c8d2e73a5353ac5bd5",
+    "assets/textures/pbr/foliage_leafcard_01/foliage_leafcard_01_normal_512.png": "30cf1e4ed374a809b7cf663f4eb198aa9781e4171c81e05dced9805462db79fe"
+   },
+   "texel_density_px_per_m": 512.0,
+   "physical_scale_m": 1.0,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough"
+    ],
+    "resolution": "512x512",
+    "note": "albedo sRGB; normal/rough/ao/height linear data; normals generated from height, OpenGL (+Y); 58 leaf ellipses, transparent gaps, alpha-scissor"
+   },
+   "maps": "512"
+  },
+  {
+   "id": "phase10-grass-blade-01",
+   "purpose": "Authored grass blade card (RGBA alpha): instanced ground tufts",
+   "status": "integrated",
+   "author": "HPMMO project - procedurally authored in Blender 5.2.2 (deterministic seeded fields)",
+   "source_url": "client/tools/blender/phase10_textures.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "assets/textures/pbr/grass_blade_01/PROVENANCE.txt",
+   "license_file": "assets/textures/pbr/grass_blade_01/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/textures/pbr/grass_blade_01/PROVENANCE.txt",
+    "assets/textures/pbr/grass_blade_01/grass_blade_01_albedo_512.png"
+   ],
+   "sha256": {
+    "assets/textures/pbr/grass_blade_01/PROVENANCE.txt": "7df935b25b564fedbca24b021fc923c9bbb4e47eaf75378406946137bed45006",
+    "assets/textures/pbr/grass_blade_01/grass_blade_01_albedo_512.png": "9b4b123dc59f919588364b4012ad8b2b8c7b297050bc625396541abf3157e961"
+   },
+   "texel_density_px_per_m": 512.0,
+   "physical_scale_m": 1.0,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough"
+    ],
+    "resolution": "512x512",
+    "note": "albedo sRGB; normal/rough/ao/height linear data; normals generated from height, OpenGL (+Y); nine tapered blades on transparency"
+   },
+   "maps": "512"
+  },
+  {
+   "id": "phase10-kit-wall-module-4x6",
+   "purpose": "Gothic kit: coursed ashlar wall bay with plinth and cornice",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/wall_module_4x6.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/wall_module_4x6.glb": "9c95ffb399c11757f9ee633314fe7e22f62cfd4149bde5873fad438d141c3cea"
+   },
+   "scale_m": [
+    4.08,
+    6.0,
+    0.58
+   ],
+   "triangles": 132,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-wall-module-4x6-damaged",
+   "purpose": "Gothic kit: damaged wall bay with stepped rubble",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/wall_module_4x6_damaged.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/wall_module_4x6_damaged.glb": "eee7cafe6d98be95a76c6684de56d6b4e521a607b2f10dcd6e25a8e869b762be"
+   },
+   "scale_m": [
+    4.08,
+    6.0,
+    0.58
+   ],
+   "triangles": 308,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-corner-4x6",
+   "purpose": "Gothic kit: L corner with alternating quoins",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/corner_4x6.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/corner_4x6.glb": "e9a0d8db2daf5f540ec024d9b4304f459c553efd7e43632c7a4ef07853311032"
+   },
+   "scale_m": [
+    4.25,
+    6.0,
+    4.5
+   ],
+   "triangles": 352,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-arch-pointed-2-4x3-4",
+   "purpose": "Gothic kit: two-centred pointed arch surround for a 2.4 x 3.4 m opening",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/arch_pointed_2_4x3_4.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/arch_pointed_2_4x3_4.glb": "b4b4160956c0b87eb4a895aacc16d0eb0c0d9ccdeabc9ce4fd7e04d2b3b37484"
+   },
+   "scale_m": [
+    2.43,
+    3.6,
+    0.41
+   ],
+   "triangles": 1144,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-arch-arcade-6x5",
+   "purpose": "Gothic kit: clustered arcade arch for a 6 x 5 m opening",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/arch_arcade_6x5.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/arch_arcade_6x5.glb": "59155622eb2c40189f1cf09a18d7bfe7d55b7efc7239085da52e3541a73c8f13"
+   },
+   "scale_m": [
+    6.82,
+    5.69,
+    1.02
+   ],
+   "triangles": 1464,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-column-6",
+   "purpose": "Gothic kit: column with base, entasis shaft and capital",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/column_6.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/column_6.glb": "1536bc7d618fe6f17386f23a3592e1bfc265e96b5344385787a99e4336ca4725"
+   },
+   "scale_m": [
+    1.1,
+    5.97,
+    1.1
+   ],
+   "triangles": 1960,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-column-broken-2-2",
+   "purpose": "Gothic kit: broken column fragment (damaged/aged variant)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/column_broken_2_2.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/column_broken_2_2.glb": "42efbb21a9dcb6c99f1c07b054d6dc9eec80302fccb9fa4f8f142c084ce3b011"
+   },
+   "scale_m": [
+    1.1,
+    1.68,
+    1.1
+   ],
+   "triangles": 1546,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-buttress-1x6",
+   "purpose": "Gothic kit: stepped buttress with weathering slopes",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/buttress_1x6.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/buttress_1x6.glb": "28b3e37b43a4004ecd0f0c8e5f2b203e3f998804ec67685a41266dadd1caa306"
+   },
+   "scale_m": [
+    1.4,
+    6.7,
+    1.48
+   ],
+   "triangles": 308,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-window-lancet-2x4",
+   "purpose": "Gothic kit: lancet window with tracery and glazing",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/window_lancet_2x4.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/window_lancet_2x4.glb": "837cc2ee6ff9fe96d78d22c67562fd73325b4945be4cbbfc07f99115ff0671c8"
+   },
+   "scale_m": [
+    2.7,
+    4.74,
+    0.56
+   ],
+   "triangles": 1276,
+   "material_slots": [
+    "stone",
+    "glass"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-door-double-2-4x3",
+   "purpose": "Gothic kit: double door frame with banded leaves swung open",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/door_double_2_4x3.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/door_double_2_4x3.glb": "0331480356743319949afb06c3a4a6361ade2ba2e806bdff34e9899de86e2ddd"
+   },
+   "scale_m": [
+    2.88,
+    3.77,
+    1.21
+   ],
+   "triangles": 484,
+   "material_slots": [
+    "wood",
+    "iron",
+    "wood_dark"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-floor-flag-4",
+   "purpose": "Gothic kit: flagstone floor module for landings and dais",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/floor_flag_4.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/floor_flag_4.glb": "759d0133cdc505a9bb37c495f98dcfd4e43f54f283a80d487425146eebbe3770"
+   },
+   "scale_m": [
+    4.35,
+    0.15,
+    4.15
+   ],
+   "triangles": 132,
+   "material_slots": [
+    "stone_floor"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-stair-tread-0-2x4",
+   "purpose": "Gothic kit: stair tread with nosing, 0.20 m rise",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/stair_tread_0_2x4.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/stair_tread_0_2x4.glb": "787bce950958d9643f644df302df067d351648397f5d32253badcc8eefbb6261"
+   },
+   "scale_m": [
+    4.0,
+    0.2,
+    0.35
+   ],
+   "triangles": 88,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-balustrade-4",
+   "purpose": "Gothic kit: 4 m balustrade (plinth rail, balusters, handrail)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/balustrade_4.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/balustrade_4.glb": "71fbcde28abc749c44684c3df670808ad25ced799e70226967a4072219da6188"
+   },
+   "scale_m": [
+    4.0,
+    1.1,
+    0.26
+   ],
+   "triangles": 1508,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-newel-post-1-2",
+   "purpose": "Gothic kit: newel post with finial",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/newel_post_1_2.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/newel_post_1_2.glb": "63b429a2324b73d05dc67ce9d461e6c2b2836c8358d17247690c443f387b072c"
+   },
+   "scale_m": [
+    0.44,
+    1.26,
+    0.44
+   ],
+   "triangles": 446,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-roof-slope-4x6",
+   "purpose": "Gothic kit: slate roof slope with overlapping courses",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/roof_slope_4x6.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/roof_slope_4x6.glb": "4f48b54dc423147c6888fc8e853f785e81feeb3459fbbb084f429dd0703a54ce"
+   },
+   "scale_m": [
+    4.0,
+    6.05,
+    0.21
+   ],
+   "triangles": 132,
+   "material_slots": [
+    "slate"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-tower-cap-7",
+   "purpose": "Gothic kit: octagonal slate tower cap and spire",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/tower_cap_7.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/tower_cap_7.glb": "550ec650e33cd9f95c000e87149d67a2c6f966c7b1c893211c9291d2d928c3dc"
+   },
+   "scale_m": [
+    14.6,
+    4.1,
+    14.6
+   ],
+   "triangles": 766,
+   "material_slots": [
+    "slate"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-trim-band-4",
+   "purpose": "Gothic kit: string-course trim band (trim-sheet UVs)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/trim_band_4.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/trim_band_4.glb": "9bf0e8aaffe45f2d7bf2802cfe307bd27775ead1303f16c8ace77b7895a0f1f6"
+   },
+   "scale_m": [
+    4.0,
+    0.38,
+    0.48
+   ],
+   "triangles": 132,
+   "material_slots": [
+    "trim"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-rubble-pile-1",
+   "purpose": "Gothic kit: rubble pile (damaged/aged variant)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/rubble_pile_1.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/rubble_pile_1.glb": "364c97d284f5834cdc94b155a52d0365408edef9791ea7b9ea1dc367754154cd"
+   },
+   "scale_m": [
+    1.21,
+    0.53,
+    1.15
+   ],
+   "triangles": 220,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-long-table-8",
+   "purpose": "Prop: 8 m trestle table (Great Hall, library, study)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/long_table_8.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/long_table_8.glb": "7de7e660eff97fff374c4e2702b9c1a791bced2316687c483d6fc9f6064f0362"
+   },
+   "scale_m": [
+    7.6,
+    0.8,
+    1.62
+   ],
+   "triangles": 396,
+   "material_slots": [
+    "wood",
+    "wood_dark"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-bench-4",
+   "purpose": "Prop: 4 m bench",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/bench_4.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/bench_4.glb": "97a39f2750211760be96b2cddcda406e2f0b3620384a232f4f1d7d65bc195743"
+   },
+   "scale_m": [
+    3.8,
+    0.51,
+    0.42
+   ],
+   "triangles": 132,
+   "material_slots": [
+    "wood",
+    "wood_dark"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-bookshelf-4x3",
+   "purpose": "Prop: 4 m bookcase with shelved books (library)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/bookshelf_4x3.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/bookshelf_4x3.glb": "63264aa724afb82794040c60d9292c91ed09e9af3df9493ddecae3cdcf423176"
+   },
+   "scale_m": [
+    4.02,
+    3.13,
+    0.81
+   ],
+   "triangles": 3432,
+   "material_slots": [
+    "wood",
+    "books"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-ladder-3",
+   "purpose": "Prop: 3 m library ladder",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/ladder_3.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/ladder_3.glb": "cd9aebf9fe59ff3ad11f0401f53b9a15276d37374fb37190c5b3aa72f19e3928"
+   },
+   "scale_m": [
+    0.53,
+    3.0,
+    0.09
+   ],
+   "triangles": 396,
+   "material_slots": [
+    "wood"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-desk-1-6",
+   "purpose": "Prop: desk with lid and stool (classrooms, dungeon)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/desk_1_6.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/desk_1_6.glb": "d974e6fe02b580f84ec0b73cd1d1b5846210bb2c50ce6fa2507f8471ce41ebc8"
+   },
+   "scale_m": [
+    1.6,
+    1.01,
+    1.42
+   ],
+   "triangles": 220,
+   "material_slots": [
+    "wood",
+    "wood_dark"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-lectern-1",
+   "purpose": "Prop: lectern with book (classrooms, library)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/lectern_1.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/lectern_1.glb": "b382dace43a2032694e44c91723b4a52b9f28c8bb6508f6f75ffea3b0d280f76"
+   },
+   "scale_m": [
+    1.3,
+    0.9,
+    0.6
+   ],
+   "triangles": 176,
+   "material_slots": [
+    "wood",
+    "books"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-armour-stand-2",
+   "purpose": "Prop: suit of armour on a plinth (circulation, dais)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/armour_stand_2.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/armour_stand_2.glb": "43561285f43bcf3377ba1ab53824c647c661b0070b0151762ebdfdd8b023a041"
+   },
+   "scale_m": [
+    1.17,
+    2.3,
+    1.0
+   ],
+   "triangles": 1022,
+   "material_slots": [
+    "iron",
+    "cloth"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-banner-1-2x3",
+   "purpose": "Prop: hanging banner, cloth tinted per house",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/banner_1_2x3.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/banner_1_2x3.glb": "9fb212128ee7cb97b35628670bfe8817a9c61743490a68d9b6f24dbde9d49efe"
+   },
+   "scale_m": [
+    1.5,
+    3.14,
+    0.1
+   ],
+   "triangles": 176,
+   "material_slots": [
+    "cloth",
+    "wood"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-portrait-1x1-5",
+   "purpose": "Prop: gilt-framed portrait",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/portrait_1x1_5.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/portrait_1x1_5.glb": "ffc8ea696485e3e353addd820f3c7127ebf1e81c082baa0ae0a8ddfe1faebec0"
+   },
+   "scale_m": [
+    1.0,
+    1.5,
+    0.12
+   ],
+   "triangles": 88,
+   "material_slots": [
+    "wood_dark",
+    "books"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-candelabra-1-6",
+   "purpose": "Prop/fixture: three-branch floor candelabra",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/candelabra_1_6.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/candelabra_1_6.glb": "fd51ee58218c8390e6c13da88fee61cf1f957135ce6ab6bb2c9d476e1b211de8"
+   },
+   "scale_m": [
+    0.56,
+    1.64,
+    0.92
+   ],
+   "triangles": 816,
+   "material_slots": [
+    "iron",
+    "wax",
+    "flame"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-candle-cluster",
+   "purpose": "Prop/fixture: table candle cluster",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/candle_cluster.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/candle_cluster.glb": "2c0c1185af99a6c4e5168f56b7c6c920a6674db661a0700d4c5dccddbb439c52"
+   },
+   "scale_m": [
+    0.33,
+    0.35,
+    0.51
+   ],
+   "triangles": 448,
+   "material_slots": [
+    "wax",
+    "flame"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-tree-pine-8",
+   "purpose": "Vegetation: conifer, trunk plus leaf-card tiers (instanced)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/tree_pine_8.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/tree_pine_8.glb": "9a6a3253df7847429e5288b46d06318adc134a058b4edbae3fd680334a067631"
+   },
+   "scale_m": [
+    3.4,
+    8.7,
+    2.95
+   ],
+   "triangles": 208,
+   "material_slots": [
+    "wood_dark",
+    "foliage"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-tree-broad-8",
+   "purpose": "Vegetation: broadleaf, trunk, forks and leaf-card canopy (instanced)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/tree_broad_8.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/tree_broad_8.glb": "8609bde4f8853528b8ab470f4c8c1589652277a12bdcf7bdc9e51db94d605896"
+   },
+   "scale_m": [
+    4.4,
+    7.62,
+    4.8
+   ],
+   "triangles": 136,
+   "material_slots": [
+    "wood_dark",
+    "foliage"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-bush-1",
+   "purpose": "Vegetation: leaf-card bush (instanced)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/bush_1.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/bush_1.glb": "935756635e0f5f111f187767a91850182c33075da52d7239285c61f864892924"
+   },
+   "scale_m": [
+    1.15,
+    0.95,
+    1.01
+   ],
+   "triangles": 36,
+   "material_slots": [
+    "foliage"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-grass-clump-1",
+   "purpose": "Vegetation: crossed grass card (instanced)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/grass_clump_1.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/grass_clump_1.glb": "3af4db77124bb0f77202102d4fd87362642cc3ea2f579b7e20c8c6204f07d1cf"
+   },
+   "scale_m": [
+    1.0,
+    0.9,
+    1.0
+   ],
+   "triangles": 24,
+   "material_slots": [
+    "grass"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-rock-01",
+   "purpose": "Terrain kit: boulder variant A (instanced)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/rock_01.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/rock_01.glb": "e44cac1de9e13ea441516d1116e7ab2ace9903cfa77f37a2db906c5599278872"
+   },
+   "scale_m": [
+    2.28,
+    1.04,
+    2.22
+   ],
+   "triangles": 476,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-rock-02",
+   "purpose": "Terrain kit: boulder variant B (instanced)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/rock_02.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/rock_02.glb": "73deb1152061ca1f95101782952655571f43a0a99e465bad693bf3f9c612fc48"
+   },
+   "scale_m": [
+    2.28,
+    1.04,
+    2.18
+   ],
+   "triangles": 476,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-rock-03",
+   "purpose": "Terrain kit: boulder variant C (instanced)",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/rock_03.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/rock_03.glb": "a8cbd0fe9b05fbbbe675cbc3fe1ab32f87615e5fc3906e0a57fd9f0770c07e7e"
+   },
+   "scale_m": [
+    2.1,
+    1.04,
+    2.03
+   ],
+   "triangles": 476,
+   "material_slots": [
+    "stone"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase10-kit-plaque-0-8x0-5",
+   "purpose": "Prop: stone plaque for sealed-tower and room markers",
+   "status": "integrated",
+   "author": "HPMMO project - parametric bmesh authoring in Blender 5.2.2",
+   "source_url": "client/tools/blender/phase10_kit.py",
+   "license": "Project-original; dedicated to the project (CC0-equivalent for this repository)",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/gothic_kit/plaque_0_8x0_5.glb"
+   ],
+   "sha256": {
+    "assets/models/gothic_kit/plaque_0_8x0_5.glb": "638362197731c0f6f3339d3e0bbd4e0ea31d0a1a48905aa3a34be5c935e977be"
+   },
+   "scale_m": [
+    0.8,
+    0.5,
+    0.1
+   ],
+   "triangles": 88,
+   "material_slots": [
+    "trim"
+   ],
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
+   "lods": "engine-generated on import (meshes/generate_lods=true)",
+   "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
   }
  ],
  "rejected": [
@@ -6781,12 +8480,12 @@
   },
   {
    "id": "kenney-mini-characters",
-   "reason": "0.67 m blocky characters, 7 bones — fails the art direction",
+   "reason": "0.67 m blocky characters, 7 bones \u2014 fails the art direction",
    "source": "kenney.nl"
   },
   {
    "id": "quaternius-animated-base-character",
-   "reason": "Poly Pizza copy lists CC-BY 3.0 while the pack page says CC0 — license discrepancy; UAL (CC0) covers the same mannequin",
+   "reason": "Poly Pizza copy lists CC-BY 3.0 while the pack page says CC0 \u2014 license discrepancy; UAL (CC0) covers the same mannequin",
    "source": "poly.pizza"
   },
   {

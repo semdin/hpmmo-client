@@ -1,0 +1,56 @@
+{
+ "id": "white-plaster-02",
+ "name": "White Plaster 02",
+ "source_page": "https://polyhaven.com/a/white_plaster_02",
+ "author": "Rob Tuytel",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "license.html",
+   "bytes": 72324,
+   "sha256": "6f4f617c936d14d5a80db6a2ebec145c79277a760672501eef51bff7a0d4cbba"
+  },
+  {
+   "file": "license.txt",
+   "bytes": 827,
+   "sha256": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8"
+  },
+  {
+   "file": "white_plaster_02_ao_2k.jpg",
+   "bytes": 2141148,
+   "sha256": "4dd72e594056fae1653118bdc86638381c65605edcbdf37e6a27c762782d55fe",
+   "pixels": "2048x2048",
+   "map": "ao"
+  },
+  {
+   "file": "white_plaster_02_diff_2k.jpg",
+   "bytes": 2568315,
+   "sha256": "0ca5245ba70777d3e41ff4566c9f8d363855461891802c55cb7dc0f6f85f084e",
+   "pixels": "2048x2048",
+   "map": "diff"
+  },
+  {
+   "file": "white_plaster_02_disp_2k.jpg",
+   "bytes": 1007108,
+   "sha256": "7a477010377e267bbf3c650037f0659c9b5b0c7860f8056e0145600145ef66fc",
+   "pixels": "2048x2048",
+   "map": "disp"
+  },
+  {
+   "file": "white_plaster_02_nor_gl_2k.jpg",
+   "bytes": 3379814,
+   "sha256": "083579b03a8f31ec1886512e5972f3b893610bf26a2098f97910e0f46745cdc9",
+   "pixels": "2048x2048",
+   "map": "nor_gl"
+  },
+  {
+   "file": "white_plaster_02_rough_2k.jpg",
+   "bytes": 1604444,
+   "sha256": "a3dc1911f6e25d88fdb0031fe0cfb602eec5496084c508774c60691bed087417",
+   "pixels": "2048x2048",
+   "map": "rough"
+  }
+ ]
+}

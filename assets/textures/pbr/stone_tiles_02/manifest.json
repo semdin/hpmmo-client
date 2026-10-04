@@ -1,0 +1,56 @@
+{
+ "id": "stone-tiles-02",
+ "name": "Stone Tiles 02",
+ "source_page": "https://polyhaven.com/a/stone_tiles_02",
+ "author": "Charlotte Baglioni",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "license.html",
+   "bytes": 72324,
+   "sha256": "6f4f617c936d14d5a80db6a2ebec145c79277a760672501eef51bff7a0d4cbba"
+  },
+  {
+   "file": "license.txt",
+   "bytes": 827,
+   "sha256": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8"
+  },
+  {
+   "file": "stone_tiles_02_ao_2k.jpg",
+   "bytes": 2053378,
+   "sha256": "601434863e2885565314160e62c311b1859c27aa761220455f018d086f87442c",
+   "pixels": "2048x2048",
+   "map": "ao"
+  },
+  {
+   "file": "stone_tiles_02_diff_2k.jpg",
+   "bytes": 3487320,
+   "sha256": "02e056f5f5fbcbd90212bd4c7b8c1e979a10685a3291b6b25b19eeeb84f7d410",
+   "pixels": "2048x2048",
+   "map": "diff"
+  },
+  {
+   "file": "stone_tiles_02_disp_2k.jpg",
+   "bytes": 1240968,
+   "sha256": "5501abc25461e9920ae09aa61e6b6af015918b8c39588b4ab2355501472733f8",
+   "pixels": "2048x2048",
+   "map": "disp"
+  },
+  {
+   "file": "stone_tiles_02_nor_gl_2k.jpg",
+   "bytes": 3482959,
+   "sha256": "badd9a55dbf1b53217408f49303286d8a93f5e7074c6869b6f53a9a547a6a6ce",
+   "pixels": "2048x2048",
+   "map": "nor_gl"
+  },
+  {
+   "file": "stone_tiles_02_rough_2k.jpg",
+   "bytes": 2251026,
+   "sha256": "3b9e6650f97baa5e52fac3f5106666ee4c89c335440bc9255c2e1ab20b88de4c",
+   "pixels": "2048x2048",
+   "map": "rough"
+  }
+ ]
+}
