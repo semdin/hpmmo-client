@@ -12,7 +12,7 @@
 **Reference rows that must read correctly at gameplay distance (≈8 m, 65° FOV):**
 | Category | Should read as | Current state (baseline) |
 | --- | --- | --- |
-| Hero | adult human proportions, layered robe, believable face/hands | 2.2 m chibi, ~1.9 heads, oversized hat (`wizard.glb`) |
+| Hero | adult human proportions, layered robe, believable face/hands | Phase 9: hooded 1.877 m hero with 41 clips (`hero_wizard.glb`); the 2.2 m chibi is retired from the player (still used by NPCs) |
 | Monster | purposeful anatomy (chitin, joints, mouthparts) | ball + bead-jointed cylinder legs (`spider_rig.gd`) |
 | Stone | authored PBR masonry, correct block scale, edge wear | flat procedural brick shader, no PBR channels |
 | Fire | layered translucent flame + embers + smoke | white quad particles colored at runtime |
@@ -21,8 +21,8 @@
 
 - **1 unit = 1 meter** (glTF is authored in meters; Godot import scale stays **1.0**; no node rescaling except documented exception like the 0.75 Quaternius mobs).
 - **Adult characters: 1.75-1.90 m** crown height, **7-7.5 head** proportions. Measure crown (not hat/accessory) from feet.
-- Current placeholder measurements (Phase 0 GLB audit for crown/hat; head ratio measured from the same bind pose during Phase 2 — crown 2.203 m ÷ head 1.135 m ≈ 1.94 heads): **fails this standard; replaced in Phase 9**.
-- Character collision capsule follows the visible silhouette: expect ~r 0.35 / h 1.85 for the new hero (updates in Phase 9; today's capsule is r 0.45 / h 1.8 against a 2.7 m body).
+- **Phase 9 shipped hero:** `hero_wizard.glb` binds at **1.877 m** (measured in Godot), 62 joints, 6,404 tris, 5 material slots. The Phase 0 placeholder (KayKit Mage, 2.203 m crown ≈ 1.94 heads) is replaced; the retired file stays on disk because the NPCs and the character-select screen still use it.
+- Character collision capsule follows the visible silhouette: **shipped r 0.35 / h 1.85**, with the camera pivot at 1.55 m, the nameplate at 2.18 m and the loot reach at 4.9 m — all derived from `player.gd`'s Phase 9 body constants, not hardcoded per call site.
 - Architecture scale references: door 1.3 × 2.3 m clear; corridor 3.0 m clear; story height 4.0 m; stair rise/run 0.18/0.28 m (grand staircase 0.15/0.35, landings every 12 steps); railing 1.0 m; broom flight clearance ≥ 2.5 m above outdoor paths.
 - **Camera clearance:** the third-person spring arm is 8.0 m (wheel clamp 3-16 m, r 0.45 capsule). Interior rooms and corridors must allow ≥ 3 m of camera pull-back along the movement axis without clipping into geometry that reads as a wall; place colliders on all intended occluders so the spring arm resolves cleanly.
 - KayKit modular grid (already in the kit): 4 m primary wall tile, 2 m half pieces, 1 m thick blocks — new kit pieces must snap to this grid until Phase 10 replaces it wholesale.
@@ -32,7 +32,7 @@
 - **Forward axis: +Z** for characters and vehicles (the shipped rigs and the yaw math `atan2(x, z)` both assume it). Godot cameras look down local −Z; do not "fix" model yaw outside the model wrapper.
 - **Up: +Y.** Applied transforms: no un-applied scale, **no negative scales** (mirror by geometry), rotations applied in the source file.
 - **Root motion: none.** All locomotion is code-driven; author clips in place (the Quaternius UAL pack ships a separate `_RM` root-motion variant — use the in-place `Standard` GLBs; convert any `_RM` clip before adoption).
-- **Rig naming:** the consumed sockets today are `wizard/Rig/Skeleton3D/handslot_r` and the attachments `2H_Staff`, `Spellbook_open`, `Mage_Cape` (`player.gd`); `1H_Wand` exists inside the GLB but is not the socket the code uses. Keep KayKit-style socket naming; reserved new sockets for Phase 9: `Socket_Wand`, `MountRoot`, `SeatSocket`.
+- **Rig naming (Phase 9, shipped):** sockets are `BoneAttachment3D` nodes named `Socket_Wand`, `Socket_Hand_L/R`, `Socket_Foot_L/R`, `Socket_Torso`, `Socket_Head`, `Socket_Hips` on the hero skeleton, and the broom exports `MountRoot`, `SeatSocket`, `GripSocket`, `TailSocket`. One convention, documented in [`phase9-rig-and-sockets.md`](phase9-rig-and-sockets.md). The retired KayKit rig is still used by NPCs and the character-select screen.
 - **Animation clip naming:** `<Action>_<Variant>` (e.g. `Spellcast_Shoot`, `Running_A`); one-shot vs loop is authored as loop mode in the clip, never left to callers (the current player never sets loop modes — fixed alongside Phase 9 clips).
 - **Animation events:** method tracks named `fx:<effect_id>` / `sfx:<sound_id>` / `footstep:<surface>` at contact frames — Phase 9/12 consume these.
 - **UVs:** 0-1, no overlaps except explicitly mirrored islands; architecture kits share trim-sheet UV space.
@@ -43,7 +43,7 @@
 
 | Asset | LOD0 ceiling | Texture | Measured baseline |
 | --- | --- | --- | --- |
-| Hero | 25-45k tris | 2k, ≤ 4 slots | 5,683 tris / 41 joints / 76 clips |
+| Hero | 25-45k tris | 2k, ≤ 4 slots | Phase 9 hero: 6,404 tris / 62 joints / 41 clips / 5 slots (textures still flat constants; LODs outstanding) |
 | Ordinary monster | 8-20k tris | 1-2k | 5.9-7.4k tris / 43 joints / 14 clips (Quaternius) |
 | Boss | 25-50k tris | 2k | commander = reused Orc_Skull at 1.65× visual scale |
 | Architecture module | 0.2-3k tris/module, shared trim sheets | 2k sets, 256 px/m texel density (±15%) | 220-2,010 tris/module (KayKit) ✓ |

@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated": "2026-10-03",
+ "generated": "2026-10-04",
  "project": "HPMMO",
- "notes": "Phase 2 manifest. Measured fields come from tools/asset_audit.py; license fields were download- and adversarially-verified during Phase 2 research (see docs/art-direction.md section 8). Candidate assets are review-stage: excluded from release packaging until promoted.",
+ "notes": "Phase 2 manifest. Measured fields come from tools/asset_audit.py; license fields were download- and adversarially-verified during Phase 2 research (see docs/art-direction.md section 8). Candidate assets are review-stage: excluded from release packaging until promoted. | Phase 9 (2026-10-04): hero and flight broom integrated; hero_final_art and broom_model entries updated with measured values, see docs/phase9-rig-and-sockets.md.",
  "summary": {
-  "candidate": 37,
-  "placeholder": 3,
-  "integrated": 51,
-  "missing": 10
+  "candidate": 35,
+  "placeholder": 5,
+  "integrated": 55,
+  "missing": 6
  },
  "assets": [
   {
@@ -5651,8 +5651,8 @@
   },
   {
    "id": "quaternius-hooded-adventurer",
-   "purpose": "hooded caster/rogue hero candidate (Phase 9); untextured",
-   "status": "candidate",
+   "purpose": "Phase 9 hero body (hooded adventurer, 62-joint rig): promoted into assets/models/characters/hero_wizard.glb by tools/blender/build_hero.py",
+   "status": "integrated",
    "author": "Quaternius (quaternius.com)",
    "source_url": "https://poly.pizza/m/y9KWOVG21R",
    "license": "CC0 1.0 (\"Licence\":\"CC0 1.0\" in the model page state)",
@@ -5723,7 +5723,8 @@
     "note": "The gaps field says '2 duplicated skins' — actually there are 4 identical 62-joint skins (Body, Head, Legs, Feet), i.e. the merge cost is double what was stated. Preview.jpg is really a PNG. Otherwise accurate."
    },
    "gaps": "Untextured (flat materials, UVs present); Sword mesh is a separate NON-skinned mesh (must be socketed to a hand bone manually); 2 duplicated skins; no spellcast clip; no LODs/collision/root motion; same Google-Drive-blocked textured original as the male Adventurer.",
-   "acceptance": "tools/downloads/asset-review-neutral-hero-hooded.png, tools/downloads/asset-review-final-hero-hooded.png"
+   "acceptance": "tools/downloads/asset-review-neutral-hero-hooded.png, tools/downloads/asset-review-final-hero-hooded.png",
+   "notes": "Consumed, not copied: the shipped hero is this body with source transforms normalised, 14 material slots consolidated to 5, the sword/icosphere artifacts removed, and the UAL clips retargeted on top. Kept in candidates/ as provenance."
   },
   {
    "id": "quaternius-rpg-items-icons",
@@ -5984,8 +5985,8 @@
   },
   {
    "id": "quaternius-universal-animation-library",
-   "purpose": "7-head mannequin + spell-cast/attack clip library; hero + monster base (Phase 9/11)",
-   "status": "candidate",
+   "purpose": "Phase 9/11 animation source: jump/fall/land, spell casts, sitting and the driving reference pose were retargeted onto the hero rig",
+   "status": "integrated",
    "author": "Quaternius (quaternius.com)",
    "source_url": "https://quaternius.itch.io/universal-animation-library",
    "license": "CC0 1.0 Universal (Public Domain Dedication) — license text shipped inside the archive",
@@ -6073,7 +6074,8 @@
     "note": "The itch page advertises '120+ animations' for the library, but the free Standard GLBs actually contain only 43 clips each — the researcher's 43 is what the downloaded artifact has, but a reader expecting the advertised 120+ from the free tier will be short (the rest sit in the paid Pro/Source tiers). No files are mislabeled; audio/other formats are not needed."
    },
    "gaps": "Animation product, not a costumed hero: the included mesh is an untextured mannequin (2 flat materials, no skin/cloth textures, no robe); free Standard tier has 43 clips (the paid Pro tier, $9.99, has the larger set); 65-joint UE5-named rig differs from the 53-joint DEF- base mesh copy on Poly Pizza — pair it with its own mannequin or retarget deliberately; itch.io has no static URL (download needed a csrf + /download_url + /file/<id> session, reproduced in this run).",
-   "acceptance": "tools/downloads/asset-review-neutral-hero-mannequin.png"
+   "acceptance": "tools/downloads/asset-review-neutral-hero-mannequin.png",
+   "notes": "Retargeted with a documented bone map (hero_common.py BONE_MAP); the two Quaternius rigs disagree on bone names, bone axes and armature scale, so the transfer is done in world space per bone. Not shipped as-is."
   },
   {
    "id": "quaternius-universal-base-characters",
@@ -6460,49 +6462,129 @@
   },
   {
    "id": "hero_final_art",
-   "purpose": "textured, clothed grounded-fantasy hero replacing the chibi placeholder",
-   "status": "missing",
-   "author": "",
-   "source_url": "",
-   "license": "",
-   "license_url": "",
-   "license_file": "",
+   "purpose": "Phase 9 shipped hero: taller humanoid at 1.877 m bind height, 5 material slots, 62 bones, 41 clips, sockets and house-coloured materials",
+   "status": "integrated",
+   "author": "Body + native clips: Quaternius (CC0). Retarget and authored broom-riding clips: HPMMO Phase 9 build pipeline (tools/blender/build_hero.py, hero_common.py)",
+   "source_url": "https://poly.pizza/m/y9KWOVG21R (+ https://quaternius.itch.io/universal-animation-library)",
+   "license": "CC0 1.0 for the source packs; authored derivatives inherit CC0 1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "license_file": "assets/candidates/character/quaternius-hooded-adventurer/license.txt",
    "attribution_required": false,
-   "local_paths": [],
-   "sha256": {},
-   "scale_m": "",
-   "triangles": "",
-   "material_slots": "",
-   "textures": {},
-   "rig": {},
-   "collision": "",
-   "lods": "",
-   "blocks": "Phase 9",
-   "notes": "candidates: quaternius-adventurer-male, quaternius-universal-animation-library (both untextured); textured originals are manual-download (Google Drive quota / itch 122-280 MB)",
-   "acceptance": ""
+   "local_paths": [
+    "assets/models/characters/hero_wizard.glb",
+    "tools/blender/build_hero.py",
+    "tools/blender/hero_common.py"
+   ],
+   "sha256": {
+    "assets/models/characters/hero_wizard.glb": "2bc34c1fbf7c1aec1083755d82c9b83075ec2c256b3b1060f011dea22c58cd90"
+   },
+   "scale_m": [
+    1.649,
+    1.877,
+    0.375
+   ],
+   "triangles": 6404,
+   "material_slots": 5,
+   "textures": {
+    "channels": [],
+    "note": "flat PBR-constant materials (skin / robe / dark / leather / trim). No texture maps yet - a Phase 10 material pass is where cloth weave, skin and trim maps belong."
+   },
+   "rig": {
+    "skinned": true,
+    "joints": 62,
+    "clips": [
+     "Idle",
+     "Walk_A",
+     "Running_A",
+     "Walk_Back",
+     "Strafe_L",
+     "Strafe_R",
+     "Jump_Start",
+     "Fall",
+     "Land",
+     "Spellcast_Shoot",
+     "Spellcast_Raise",
+     "Spellcast_Shoot_Upper",
+     "Spellcast_Raise_Upper",
+     "Cast_Idle",
+     "Cast_Exit",
+     "Hit_A",
+     "Hit_B",
+     "Stun_Loop",
+     "Death_A",
+     "Revive",
+     "Interact",
+     "Melee_Chop_A",
+     "Melee_Chop_B",
+     "Roll",
+     "Emote_Wave",
+     "Sit_Enter",
+     "Sit_Chair_Idle",
+     "Sit_Exit",
+     "Drive_Reference",
+     "Mount_Broom",
+     "Dismount_Broom",
+     "Broom_Seated_Idle",
+     "Broom_Cruise",
+     "Broom_Accelerate",
+     "Broom_Bank_L",
+     "Broom_Bank_R",
+     "Broom_Climb",
+     "Broom_Dive",
+     "Broom_Brake",
+     "Broom_Takeoff",
+     "Broom_Land"
+    ],
+    "note": "native Quaternius clips (idle/walk/run/strafe/hit/death/melee) plus clips retargeted from the Universal Animation Library (jump/fall/land/cast/sit) plus broom-riding clips and stun/revive authored on the rig. No root motion: hips/leg offsets are posed in place."
+   },
+   "collision": "capsule r 0.35 / h 1.85 on the player scene (art-direction section 2)",
+   "lods": "none - LOD1/LOD2 not authored yet; recorded as an open deviation from the art-direction standard",
+   "blocks": "",
+   "notes": "Bind height 1.877 m measured in Godot; head-to-foot on the deployed rig 1.49 m (head bone to ankle). Socket convention and the UAL bone map are documented in docs/phase9-rig-and-sockets.md. House variation is a runtime material override on the Trim/Robe slots, not a second rig.",
+   "acceptance": "Phase 9 flight captures (tools/downloads/phase9-flight-*.png) plus the 51-check Phase 9 regression (tools/run_phase9_checks.ps1). Not 'accepted': the Phase 2 review-scene pass at gameplay distance has not been re-run."
   },
   {
    "id": "broom_model",
-   "purpose": "shaped broom (shaft, grip, bristles) with a seat socket",
-   "status": "missing",
-   "author": "",
-   "source_url": "",
-   "license": "",
+   "purpose": "Phase 9 flight broom: shaped tapered shaft with a carved nose, helical leather grip wrap, leather saddle, two foot pegs, metal ferrule and an 84-strand bristle bundle, with MountRoot / SeatSocket / GripSocket / TailSocket",
+   "status": "integrated",
+   "author": "Authored for this project (tools/blender/build_broom.py); procedural grain/straw/leather textures",
+   "source_url": "n/a - original work, no third-party asset",
+   "license": "Project-original (no third-party license); CC0-1.0 compatible",
    "license_url": "",
    "license_file": "",
    "attribution_required": false,
-   "local_paths": [],
-   "sha256": {},
-   "scale_m": "",
-   "triangles": "",
-   "material_slots": "",
-   "textures": {},
-   "rig": {},
-   "collision": "",
-   "lods": "",
-   "blocks": "Phase 9",
-   "notes": "current broom is two cylinder primitives",
-   "acceptance": ""
+   "local_paths": [
+    "assets/models/props/broom_flight.glb",
+    "tools/blender/build_broom.py"
+   ],
+   "sha256": {
+    "assets/models/props/broom_flight.glb": "ff4964b87f1eda25ff95dec2a102040b9f62efa1740dc57b377278c0fa916a3f"
+   },
+   "scale_m": [
+    0.439,
+    0.279,
+    2.275
+   ],
+   "triangles": 3012,
+   "material_slots": 4,
+   "textures": {
+    "channels": [
+     "albedo",
+     "roughness"
+    ],
+    "note": "generated 512/256 px wood, straw and leather base colour + wood roughness, packed in the GLB"
+   },
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": [],
+    "note": "rigid prop; sockets are exported empties, axes normalised in the client wrapper"
+   },
+   "collision": "none (presentation prop; no collider)",
+   "lods": "none",
+   "blocks": "",
+   "notes": "Authored +Z forward / +Y up (art-direction section 3), measured in Godot: nose +0.99 Z, bristles -1.29 Z, SeatSocket +0.18 Y. Measured, not assumed - the offline harness and the Phase 9 regression both assert the axis directions.",
+   "acceptance": "Measured axes + a 0.000 m seat gap to the rider's Socket_Hips in the Phase 9 regression and the flight captures."
   },
   {
    "id": "monster_variants_final",
@@ -6530,14 +6612,16 @@
   {
    "id": "vfx_trail_mesh",
    "purpose": "camera-aware tapered ribbon mesh for broom/projectile trails",
-   "status": "missing",
+   "status": "placeholder",
    "author": "",
    "source_url": "",
    "license": "",
    "license_url": "",
    "license_file": "",
    "attribution_required": false,
-   "local_paths": [],
+   "local_paths": [
+    "scripts/entities/broom_flight.gd"
+   ],
    "sha256": {},
    "scale_m": "",
    "triangles": "",
@@ -6547,7 +6631,7 @@
    "collision": "",
    "lods": "",
    "blocks": "Phase 12",
-   "notes": "author procedurally or in Blender (not installed)",
+   "notes": "A tapered textured ribbon driven by the broom socket's own velocity ships with the Phase 9 broom (ImmediateMesh strip + additive flame texture, width and colour scaled by speed/acceleration), plus wisp quads and sparse sparks. Projectile ribbons and the general camera-aware version remain Phase 12 work.",
    "acceptance": ""
   },
   {
@@ -6645,7 +6729,7 @@
   {
    "id": "character_equipment_variants",
    "purpose": "robe/hat/house-colour clothing variants",
-   "status": "missing",
+   "status": "placeholder",
    "author": "",
    "source_url": "",
    "license": "",
@@ -6662,7 +6746,7 @@
    "collision": "",
    "lods": "",
    "blocks": "Phase 9/13",
-   "notes": "requires the final hero first",
+   "notes": "House variation ships as a runtime material override (Robe darkened + Trim in the house primary colour) on the single hero rig - no duplicate rigs. Hat/robe/cloak equipment meshes do not exist yet; that part stays open for Phase 13.",
    "acceptance": ""
   },
   {
