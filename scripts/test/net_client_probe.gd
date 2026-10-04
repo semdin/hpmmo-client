@@ -71,6 +71,16 @@ var _forged_mob_uid := 0
 var _own_hp_before := -1
 var _forged_mob_died := false
 var _hack_until := 0.0
+## Forged probe: what the AUTHORITY did with the forged input, measured on the
+## server positions this client receives (its snapshots) and normalised by the
+## server ticks they span. The rendered body's per-frame step also carries the
+## frame duration and the client's reconciliation snap, so it cannot answer
+## "did the 50x vector teleport the body?" on its own.
+var _max_auth_step_per_tick := 0.0
+var _auth_step_samples := 0
+var _auth_step_ticks := 0
+var _auth_last_tick := -1
+var _auth_last_pos := Vector3.ZERO
 var _done := false
 var _intent_frames := 0
 var _server_controlled_seen := false
@@ -534,6 +544,10 @@ func _drive_forged() -> void:
 		_origin_pos = _last_pos
 		_max_step = 0.0
 		_pos_samples.clear()
+		_auth_last_tick = -1
+		_max_auth_step_per_tick = 0.0
+		_auth_step_samples = 0
+		_auth_step_ticks = 0
 		_sample_hp_call_deferred()
 
 func _data_refresh() -> void:
@@ -564,6 +578,23 @@ func _sample_position() -> void:
 		_max_step = step
 	_last_pos = pos
 	_pos_samples.append({"tick": SimAuthority.sim_tick, "x": pos.x, "z": pos.z})
+	# The authoritative half: only the server's positions for this body, keyed by
+	# the server tick each snapshot carried. A reconciliation snap never enters
+	# this number, and dividing by the ticks spanned keeps snapshot spacing (or a
+	# lossy profile) from looking like a bigger step.
+	var tick := int(SimAuthority.sim_tick)
+	var record: Dictionary = SimAuthority.entities.get(SimAuthority.local_uid, {})
+	var authority_pos: Variant = record.get("pos", null)
+	if authority_pos is Vector3 and tick > _auth_last_tick:
+		var auth_pos: Vector3 = authority_pos
+		if _auth_last_tick >= 0:
+			var ticks := tick - _auth_last_tick
+			_max_auth_step_per_tick = maxf(_max_auth_step_per_tick,
+				_auth_last_pos.distance_to(auth_pos) / float(ticks))
+			_auth_step_ticks += ticks
+			_auth_step_samples += 1
+		_auth_last_tick = tick
+		_auth_last_pos = auth_pos
 
 func _finish_forged() -> void:
 	_done = true
@@ -584,6 +615,12 @@ func _finish_forged() -> void:
 		"position_samples": _pos_samples.size(),
 		"distance_travelled": _origin_pos.distance_to(_last_pos),
 		"speed_limit_per_tick": HPRules.max_travel_distance(HPProtocol.SIM_DT),
+		"max_auth_step_per_tick": _max_auth_step_per_tick,
+		"auth_step_samples": _auth_step_samples,
+		"auth_step_ticks": _auth_step_ticks,
+		"sim_dt": HPProtocol.SIM_DT,
+		"walk_speed": HPRules.WALK_SPEED,
+		"mounted_speed": HPRules.MOUNTED_SPEED,
 	})
 	_finish(0)
 
