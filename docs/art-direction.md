@@ -13,7 +13,8 @@
 | Category | Should read as | Current state (baseline) |
 | --- | --- | --- |
 | Hero | adult human proportions, layered robe, believable face/hands | Phase 9: hooded 1.877 m hero with 41 clips (`hero_wizard.glb`); the 2.2 m chibi is retired from the player (still used by NPCs) |
-| Monster | purposeful anatomy (chitin, joints, mouthparts) | ball + bead-jointed cylinder legs (`spider_rig.gd`) |
+| Monster | purposeful anatomy (chitin, joints, mouthparts) | Phase 11: authored 48-bone acromantula (`acromantula.glb`) with cephalothorax, segmented abdomen, 8 five-segment leg chains, chelicerae/pedipalps and eight eyes; the ball-and-cylinder `spider_rig.gd` is retired from the ordinary spider |
+| Boss | distinctive silhouette + unique attacks, not "same model, more HP" | Phase 11: `boss_matriarch.glb` (spiked crown, egg sac, Slam/Spit patterns) and `boss_commander.glb` (hooded wizard with a banded staff, Cast_Area/Cast_Directional patterns); the scaled Orc_Skull placeholder is retired |
 | Stone | authored PBR masonry, correct block scale, edge wear | flat procedural brick shader, no PBR channels |
 | Fire | layered translucent flame + embers + smoke | white quad particles colored at runtime |
 
@@ -44,8 +45,8 @@
 | Asset | LOD0 ceiling | Texture | Measured baseline |
 | --- | --- | --- | --- |
 | Hero | 25-45k tris | 2k, ≤ 4 slots | Phase 9 hero: 6,404 tris / 62 joints / 41 clips / 5 slots (textures still flat constants; LODs outstanding) |
-| Ordinary monster | 8-20k tris | 1-2k | 5.9-7.4k tris / 43 joints / 14 clips (Quaternius) |
-| Boss | 25-50k tris | 2k | commander = reused Orc_Skull at 1.65× visual scale |
+| Ordinary monster | 8-20k tris | 1-2k | Phase 11 acromantula: 9,984 tris LOD0 + 4,992 LOD1 (one GLB) / 48 joints / 8 clips; the Quaternius minions remain 5.9-7.4k tris / 43 joints / 14 clips and are marked placeholders |
+| Boss | 25-50k tris | 2k | Phase 11 matriarch: 28,088 + 14,044 LOD1 / 49 joints / 9 clips; commander: 25,544 + 13,650 LOD1 / 19 joints / 9 clips |
 | Architecture module | 0.2-3k tris/module, shared trim sheets | 2k sets, 256 px/m texel density (±15%) | 220-2,010 tris/module (KayKit) ✓ |
 | Particle elements | 256-512 px source, 1-2k atlases | — | 2 stills 512² (Kenney) |
 | Audio | WAV masters, compressed playback | — | **zero audio files** |
@@ -208,3 +209,39 @@ halves vegetation and particle density; it auto-selects on Intel integrated grap
 **Evidence.** `tools/downloads/phase10-{neutral,final}-*.png` (same seven views, flat vs final lighting),
 `phase10-before-*.png` (the greybox at the same views), `phase10-perf-{before,after-high,after-low}.log`, and
 `tools/run_phase10_checks.ps1` (119 checks).
+
+## 12. Phase 11 — creature assets, packs and bosses (implemented 2026-10-05)
+
+**What changed.** The ordinary spider is no longer primitive geometry and the monsters are no longer only
+imported placeholders: three creature bodies were authored in Blender 5.2.2 by deterministic scripts and are
+integrated through the mob scenes, with the pack/boss AI rebuilt around them.
+
+| Asset | Script | LOD0 / LOD1 | Rig | Clips |
+| --- | --- | --- | --- | --- |
+| `acromantula.glb` (ordinary spider) | `tools/blender/build_spider.py` | 9,984 / 4,992 | 48 joints (8 × coxa/femur/patella/tibia/tarsus) | Idle, Walk (loop), Turn, Bite_Anticipation, Bite_Attack, Hit, Stun (loop), Death |
+| `boss_matriarch.glb` (solo boss) | `tools/blender/build_boss_matriarch.py` | 28,088 / 14,044 | 49 joints | Idle, Walk, Stun (loop), Hit, Death, Slam_Anticipation/Attack, Spit_Anticipation/Attack |
+| `boss_commander.glb` (escorted boss) | `tools/blender/build_boss_commander.py` | 25,544 / 13,650 | 19 joints | Idle, Walk, Stun (loop), Hit, Death, Cast_Directional_Anticipation/Attack, Cast_Area_Anticipation/Attack |
+
+**Anatomy and readability.** The spider was validated by the build script (eight leg chains, joint falloff
+weights, mirrored UV islands with zero overlapping texels outside them, bind-pose feet at y = 0.000 m) and by
+pose renders from a gameplay camera (`tools/downloads/spider-{idle,walk,death,detail}.png`). The matriarch
+sweeps every clip frame-by-frame against the ground plane (worst intrusion 3.5 cm, walk stance drift
+0.000 m) and implies a 0.82 m/s walk speed, which the boss now uses (`boss_overrides.matriarch.walk_speed`)
+so the gait does not skate. The commander's staff orientation is measured per combat key frame rather than
+eyeballed.
+
+**Materials.** Chitin/cloth/leather/wood are non-metallic (metallicFactor 0); each body carries albedo
+(sRGB), an OpenGL (+Y) tangent normal and a linear roughness map, packed inside the GLB. Material slots: 4 /
+4 / 4 (within the §3 budget).
+
+**LODs and collision.** LOD1 ships as a second skinned mesh in the same GLB; `mob_base._apply_lod` sets
+`visibility_range` 26 m at runtime (ordinary mobs use LOD1 only, per §4). Collision is authored capsules in
+the mob scenes - never the render mesh - with a second, larger proxy selected for bosses when FLAG_BOSS
+arrives on a client.
+
+**Still placeholder (named, not hidden).** The ordinary Inferi (`asset-Demon-gltf`) and Dark Snatcher
+(`asset-Ninja-gltf`) minion bodies remain Quaternius imports; they are marked `placeholder` in
+`assets/manifest.json` with the reason. `monster_variants_final` is updated to say exactly what is left.
+
+**Evidence.** `tools/downloads/spider-*.png`, `matriarch-*.png`, `commander-*.png`, the build scripts'
+validation blocks, and `server/tests/encounters_sim.py` (pack/boss/corpse/reward behaviour).

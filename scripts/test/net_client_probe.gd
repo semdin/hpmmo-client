@@ -102,6 +102,9 @@ var _walk_check_timer := 0.0
 
 ## Phase 8 map-transfer probe (mode `transfer`, see the transfer section below).
 var scenario := "observer"
+## The `--scenario=` argument as given; the encounter mode reads it too, so a
+## caller does not have to know which mode's variable it lands in.
+var scenario_arg := ""
 var transfer_portal := ""
 var roundtrips := 2
 var teleport_at := 4.0
@@ -140,12 +143,17 @@ var _visibility_at := -1.0
 
 func _ready() -> void:
 	_parse_args()
+	# `--scenario=` is shared with the transfer mode; in encounter mode it names
+	# the encounter scenario (this is what a caller passes).
+	if mode == "encounter" and scenario_arg != "":
+		encounter_scenario = scenario_arg
 	# Counted in every mode: the protection assertions are written in terms of
 	# damage events actually delivered, so the counter must exist there too.
 	SimAuthority.entity_damaged.connect(func(uid: int, _amount: int, _hp: int, _spell: String, _attacker: int):
 		_damage_events[uid] = int(_damage_events.get(uid, 0)) + 1)
 	var local_mode := mode in ["protection", "staircase_failure"] \
-		or (mode == "transfer" and scenario == "local")
+		or (mode == "transfer" and scenario == "local") \
+		or (mode == "encounter" and scenario == "local")
 	SimAuthority.configure(SimAuthority.Role.OFFLINE if local_mode else SimAuthority.Role.CLIENT)
 	if mode == "protection":
 		_run_protection.call_deferred()
@@ -155,6 +163,9 @@ func _ready() -> void:
 		return
 	if mode == "transfer" and scenario == "local":
 		_run_transfer_local.call_deferred()
+		return
+	if mode == "encounter" and scenario == "local":
+		_run_encounter_local.call_deferred()
 		return
 	player = null
 	world = WORLD_SCENE.instantiate()
@@ -171,12 +182,14 @@ func _ready() -> void:
 		_setup_maintenance()
 	if mode == "transfer":
 		_setup_transfer()
+	if mode == "encounter":
+		_setup_encounter()
 	SimAuthority.entity_health.connect(_on_health)
 	SimAuthority.entity_died.connect(_on_died)
 	SimAuthority.entity_respawned.connect(_on_respawn)
 	SimAuthority.stats_changed.connect(_on_stats)
-	SimAuthority.reward_granted.connect(func(_uid: int, character_id: int, exp: int, _galleons: int, _items: Array, op_id: String):
-		_rewards.append({"character_id": character_id, "exp": exp, "op_id": op_id}))
+	if not SimAuthority.reward_granted.is_connected(_on_reward):
+		SimAuthority.reward_granted.connect(_on_reward)
 	SimAuthority.cast_ack.connect(_on_cast_ack)
 	SimAuthority.entity_moved.connect(func(uid: int, _pos: Vector3, _rot: float, _flags: int):
 		if uid == SimAuthority.local_uid:
@@ -210,18 +223,35 @@ func _parse_args() -> void:
 			stair_role = arg.substr(13)
 		elif arg.begins_with("--scenario="):
 			scenario = arg.substr(11)
+			scenario_arg = scenario
 		elif arg.begins_with("--portal="):
 			transfer_portal = arg.substr(9)
 		elif arg.begins_with("--roundtrips="):
 			roundtrips = int(arg.substr(13))
 		elif arg.begins_with("--teleport-at="):
 			teleport_at = float(arg.substr(14))
+		elif arg.begins_with("--encounter="):
+			encounter_scenario = arg.substr(12)
+		elif arg.begins_with("--pack="):
+			encounter_pack = int(arg.substr(7))
+		elif arg.begins_with("--attack-at="):
+			attack_at = float(arg.substr(12))
 
 func _record(event: String, data: Dictionary) -> void:
 	data["event"] = event
 	data["t"] = _t
 	data["tick"] = SimAuthority.sim_tick
 	_records.append(data)
+
+## Reward events, deduplicated by operation id: "exactly once" is the rule under
+## test, so the transcript must not count the same grant twice.
+var _reward_ops: Dictionary = {}
+
+func _on_reward(_uid: int, character_id: int, exp: int, _galleons: int, _items: Array, op_id: String) -> void:
+	if _reward_ops.has(op_id):
+		return
+	_reward_ops[op_id] = true
+	_rewards.append({"character_id": character_id, "exp": exp, "op_id": op_id})
 
 # ------------------------------------------------------------------ agreement
 
@@ -280,6 +310,10 @@ func _on_cast_ack(cast_seq: int, _cast_id: int, ok: bool, reason: String) -> voi
 func _physics_process(delta: float) -> void:
 	_t += delta
 	if mode == "protection" or _done:
+		return
+	if mode == "encounter":
+		if player != null:
+			_encounter_tick(delta)
 		return
 	if mode == "maintenance":
 		_maintenance_tick(delta)
@@ -1742,6 +1776,489 @@ func _filter_check(peer: int, centre: Vector3) -> Dictionary:
 	SimAuthority.unregister_node(other)
 	other.queue_free()
 	return out
+
+# ------------------------------------------------------- encounters (Phase 11)
+
+## Real-server scenarios (`--mode=encounter --scenario=...`):
+##   reactive   stand beside an ordinary pack: proximity alone must not aggro;
+##              a valid hit must, and only for the attacked pack (positive
+##              control). Records the state every pack ever reached.
+##   boss       pull a boss: every telegraph (start/release tick and shape),
+##              every damage event on this player, the member/escort count and
+##              the recovery windows between attacks.
+##   lifecycle  kill a pack: exactly-once rewards per player, the corpse
+##              finishing its death animation and then fading, a dead mob never
+##              moving or attacking again, and the respawn anchor validated
+##              clear of the player camping the old one.
+##   local      in-process authority checks: template data, placement rules for
+##              every formation member, respawn cycles at different valid
+##              anchors, camped-respawn deferral, leash reset cancelling the
+##              pending reward, attack slots/separation, corpse and pool reset.
+var encounter_scenario := "reactive"
+var encounter_pack := 0
+var attack_at := 6.0
+var _engaged := false
+var _telegraphs: Array = []
+var _telegraph_ends: Dictionary = {}
+var _mob_damage: Array = []
+var _pack_seen: Dictionary = {}
+var _corpses: Dictionary = {}
+## Per-telegraph: what the CLIENT rendered from the server's timing/shape.
+var _telegraph_visuals: Dictionary = {}
+var _respawns: Array = []
+var _wiped_at := -1.0
+var _local_results: Dictionary = {}
+
+func _setup_encounter() -> void:
+	SimAuthority.mob_telegraph.connect(func(uid: int, data: Dictionary):
+		_telegraphs.append({"uid": uid, "tick": SimAuthority.sim_tick, "data": data}))
+	SimAuthority.mob_telegraph_end.connect(func(uid: int):
+		_telegraph_ends[uid] = int(_telegraph_ends.get(uid, 0)) + 1)
+	SimAuthority.encounter_reset.connect(func(pack_id: int, reason: String):
+		_record("encounter_reset", {"pack_id": pack_id, "reason": reason}))
+	if not SimAuthority.reward_granted.is_connected(_on_reward):
+		SimAuthority.reward_granted.connect(_on_reward)
+	SimAuthority.entity_damaged.connect(func(uid: int, amount: int, hp: int, spell_id: String, _attacker: int):
+		if uid == SimAuthority.local_uid:
+			_mob_damage.append({"tick": SimAuthority.sim_tick, "amount": amount, "hp": hp, "spell": spell_id}))
+
+func _encounter_tick(delta: float) -> void:
+	_sample_encounter()
+	match encounter_scenario:
+		"reactive":
+			if _t >= attack_at and not _engaged:
+				_engaged = true
+				_select_encounter_pack()
+				_attack_target()
+				_record("engage", {"tick": SimAuthority.sim_tick, "pack_id": _pack_id,
+					"player_pos": _pos_array(player.global_position)})
+			elif _engaged:
+				_attack_target()
+		"boss":
+			if _pack_id == 0:
+				_select_encounter_pack()
+			else:
+				_update_target()
+				_drive_to_target()
+				_attack_target()
+		"lifecycle":
+			if _pack_id == 0:
+				_select_encounter_pack()
+			elif _pack_wiped():
+				if _wiped_at < 0.0:
+					_wiped_at = _t
+					_record("pack_wiped", {"tick": SimAuthority.sim_tick, "pack_id": _pack_id,
+						"player_pos": _pos_array(player.global_position)})
+				_retreat_from_pack()
+			else:
+				_update_target()
+				_drive_to_target()
+				_attack_target()
+	if _t >= duration:
+		_finish_encounter()
+
+func _select_encounter_pack() -> void:
+	if encounter_pack > 0:
+		var members := _pack_members(encounter_pack)
+		if members.is_empty():
+			return   # not replicated to this client yet; try again next tick
+		_pack_id = encounter_pack
+		_pack_uids = members
+		_record("pack_selected", {"pack_id": _pack_id, "members": _pack_uids.duplicate()})
+	else:
+		_update_target()
+	if _pack_id != 0 and _target_uid == 0 and not _pack_uids.is_empty():
+		_set_target(int(_pack_uids[0]))
+
+## One sample per tick: the highest AI state every pack has reached, the view
+## node's position drift after death (a dead mob must not act again) and the
+## respawn anchor of a pack that came back.
+func _sample_encounter() -> void:
+	for uid in SimAuthority.entities.keys():
+		var record: Dictionary = SimAuthority.entities[uid]
+		if int(record.get("kind", 0)) != HPProtocol.Kind.MOB:
+			continue
+		var pack := int(record.get("pack_id", 0))
+		var state := int(record.get("state", 0))
+		var seen: Dictionary = _pack_seen.get(pack, {"states": {}, "chase_tick": -1, "attack_tick": -1,
+			"anticipation_tick": -1, "recovery_tick": -1, "boss": 0, "members": 0})
+		(seen["states"] as Dictionary)[state] = true
+		if state == HPProtocol.MobState.CHASE and int(seen["chase_tick"]) < 0:
+			seen["chase_tick"] = SimAuthority.sim_tick
+		if state == HPProtocol.MobState.ATTACK and int(seen["attack_tick"]) < 0:
+			seen["attack_tick"] = SimAuthority.sim_tick
+		if state == HPProtocol.MobState.ANTICIPATION and int(seen["anticipation_tick"]) < 0:
+			seen["anticipation_tick"] = SimAuthority.sim_tick
+		if state == HPProtocol.MobState.RECOVERY and int(seen["recovery_tick"]) < 0:
+			seen["recovery_tick"] = SimAuthority.sim_tick
+		if (int(record.get("flags", 0)) & HPProtocol.FLAG_BOSS) != 0:
+			seen["boss"] = int(uid)
+		seen["members"] = maxi(int(seen["members"]), _pack_members(pack).size())
+		_pack_seen[pack] = seen
+		var telegraph: Dictionary = record.get("telegraph", {})
+		if not telegraph.is_empty():
+			var view = record.get("node")
+			var warning = view.get("_warning") if view != null and is_instance_valid(view) else null
+			var entry: Dictionary = _telegraph_visuals.get(uid, {})
+			entry["start_tick"] = int(telegraph.get("start_tick", 0))
+			entry["release_tick"] = int(telegraph.get("release_tick", 0))
+			entry["kind"] = String(telegraph.get("kind", ""))
+			entry["mesh"] = warning != null
+			if warning != null and warning is MeshInstance3D:
+				var mesh := (warning as MeshInstance3D).mesh
+				entry["radius"] = float(mesh.top_radius) if mesh is CylinderMesh else -1.0
+				entry["at_center"] = (warning as MeshInstance3D).global_position.distance_to(
+					telegraph.get("center", Vector3.ZERO)) < 0.5
+			_telegraph_visuals[uid] = entry
+		var dead := bool(record.get("dead", false))
+		if dead and not _corpses.has(uid):
+			var node = record.get("node")
+			var anim := ""
+			var anim_len := 0.0
+			if node != null and is_instance_valid(node) and node.get("anim_player") != null:
+				anim = String(node.anim_player.current_animation)
+				if node.anim_player.has_animation(anim):
+					anim_len = node.anim_player.get_animation(anim).length
+			_corpses[uid] = {"death_tick": SimAuthority.sim_tick, "drift": 0.0, "hidden_tick": -1,
+				"anim": anim, "anim_len": anim_len, "playing_after": 0, "anims": [anim] if anim != "" else [],
+				"last_pos": record.get("pos", Vector3.ZERO)}
+		elif _corpses.has(uid):
+			var corpse: Dictionary = _corpses[uid]
+			var pos: Vector3 = record.get("pos", Vector3.ZERO)
+			# Drift is measured while the body is a corpse: a dead mob must not
+			# move. Once the pack respawns, the record stops accumulating.
+			# The first few samples cover the view catching up with the last
+			# replicated step; after that a corpse that moves is a bug.
+			corpse["settle"] = int(corpse.get("settle", 0)) + 1
+			if dead and int(corpse["settle"]) > 5 and not bool(corpse.get("revived", false)):
+				corpse["drift"] = float(corpse["drift"]) + (pos - (corpse["last_pos"] as Vector3)).length()
+			elif not dead:
+				corpse["revived"] = true
+			corpse["last_pos"] = pos
+			var node = record.get("node")
+			if node != null and is_instance_valid(node):
+				if not node.visible and int(corpse["hidden_tick"]) < 0:
+					corpse["hidden_tick"] = SimAuthority.sim_tick
+				if node.get("anim_player") != null and node.anim_player.is_playing():
+					corpse["playing_after"] = SimAuthority.sim_tick - int(corpse["death_tick"])
+					var playing := String(node.anim_player.current_animation)
+					var seen_anims: Array = corpse["anims"]
+					if playing != "" and not seen_anims.has(playing):
+						seen_anims.append(playing)
+						if playing.ends_with("Death"):
+							corpse["anim"] = playing
+	# A pack that was wiped and now has a live member again respawned: record the
+	# new anchor and where the player was standing at that moment.
+	if _pack_id != 0 and not _pack_uids.is_empty() and _wiped_at >= 0.0:
+		var alive: Array = []
+		for uid in _pack_uids:
+			if not _is_dead(int(uid)):
+				alive.append(int(uid))
+		if alive.size() > 0:
+			var anchor := Vector3.ZERO
+			for uid in alive:
+				anchor += SimAuthority.entities[uid].get("pos", Vector3.ZERO) as Vector3
+			anchor /= float(alive.size())
+			_respawns.append({"pack_id": _pack_id, "tick": SimAuthority.sim_tick,
+				"respawn_index": _respawns.size(),
+				"anchor": _pos_array(anchor),
+				"member_count": alive.size(),
+				"player_pos": _pos_array(player.global_position)})
+			_wiped_at = -1.0
+
+func _finish_encounter() -> void:
+	_done = true
+	_record("encounter", {
+		"scenario": encounter_scenario,
+		"pack_id": _pack_id,
+		"pack_uids": _pack_uids.duplicate(),
+		"packs_seen": _pack_seen,
+		"telegraphs": _telegraphs,
+		"telegraph_ends": _telegraph_ends,
+		"telegraph_visuals": _telegraph_visuals,
+		"damage_taken": _mob_damage,
+		"corpses": _corpses,
+		"respawns": _respawns,
+		"rewards": _rewards,
+		"casts_sent": _casts_sent,
+		"casts_accepted": _casts_accepted,
+		"player_hp": int(player.current_hp) if player != null else -1,
+		"player_pos": _pos_array(player.global_position) if player != null else [],
+		"visible_mobs": _mob_summary(),
+	})
+	_finish(0)
+
+## In-process Phase 11 checks. Drives the real authority and the real director;
+## the Python suite asserts on the recorded facts.
+func _run_encounter_local() -> void:
+	world = WORLD_SCENE.instantiate()
+	add_child(world)
+	await get_tree().create_timer(0.9).timeout
+	player = world.get("local_player")
+	var director = world.get_node_or_null("EncounterDirector")
+	if director == null or player == null:
+		_record("error", {"message": "no director or player"})
+		_finish(1)
+		return
+	_setup_encounter()
+	var results := {"data": HPRules.validate_encounters(), "templates": {},
+		"regions": {}, "cycles": {}, "cycle_valid": {}, "member_spread": [],
+		"refusals": {}, "camped": {}, "leash": {}, "slots": {}, "corpse": {}, "pool": {}}
+	# -- template data -------------------------------------------------------
+	for pack in director.packs:
+		results["templates"][String(pack.get("encounter_id", ""))] = {
+			"template": String(pack.get("template_id", "")),
+			"count": int(pack.get("count", 0)),
+			"escorts": int(pack.get("escorts", 0)),
+			"max_alive": int(pack.get("max_alive", 0)),
+			"boss": bool(pack.get("boss", false)),
+			"pack_id": int(pack.get("pack_id", 0)),
+		}
+	results["regions"] = {
+		"forest_w_count": HPRules.region_pack_count("forest_w"),
+		"forest_w_active": HPRules.active_encounters_for("forest_w").size(),
+		"authored": HPRules.encounter_list().size(),
+		"dormant": director.dormant.size(),
+	}
+	# Weighted region choice: the dormant encounter lists two weighted regions;
+	# 400 seeded draws must reach both of them.
+	var weighted: Dictionary = HPRules.encounter_by_id("enc_forest_w_acromantula_b")
+	var drawn: Dictionary = {}
+	if not weighted.is_empty():
+		for i in range(400):
+			var rng := RandomNumberGenerator.new()
+			rng.seed = 1000 + i
+			drawn[HPRules.resolve_encounter_zone(weighted, rng)] = true
+	results["weighted_zones"] = drawn.keys()
+	# -- placement refusals --------------------------------------------------
+	var pack0: Dictionary = director.packs[0]
+	results["refusals"]["hub"] = director._placement_refusal(Vector3(0.0, 0.1, 0.0), pack0)
+	# A point inside a Great Hall wall: the formation member must not be placed
+	# inside solid geometry (the harness proves this wall blocks movement).
+	results["refusals"]["wall"] = director._placement_refusal(Vector3(18.0, 0.1, -57.0), pack0)
+	results["refusals"]["lake"] = director._placement_refusal(Vector3(-38.0, 0.1, 30.0), pack0)
+	results["refusals"]["portal"] = director._placement_refusal(Vector3(0.0, 0.1, -40.0), pack0)
+	player.global_position = Vector3(60.0, 0.1, 55.0)
+	await get_tree().physics_frame
+	results["refusals"]["player"] = director._placement_refusal(Vector3(60.0, 0.1, 55.0), pack0)
+	player.global_position = Vector3(0.0, 0.5, 5.0)
+	await get_tree().physics_frame
+	# -- respawn cycles: 3- and 5-member packs, several cycles each -----------
+	for target_index in [0, 2]:
+		var ids: Array = []
+		for cycle in range(3):
+			var pack: Dictionary = director.packs[target_index]
+			var members: Array = pack["members"]
+			for member in members:
+				if is_instance_valid(member):
+					member.take_damage(1000000, "test", player)
+			await get_tree().physics_frame
+			pack["timer"] = 0.01
+			await get_tree().create_timer(0.25).timeout
+			var anchor: Vector3 = pack.get("anchor", Vector3.INF)
+			ids.append({"anchor": anchor, "spawns": int(pack.get("spawns", 0))})
+			var valid := anchor.is_finite() and not HPRules.is_spawn_blocked(anchor)
+			var spread := 999.0
+			var points: Array = []
+			for member in pack["members"]:
+				if not is_instance_valid(member):
+					continue
+				points.append(member.global_position)
+				valid = valid and not HPRules.is_spawn_blocked(member.global_position)
+				valid = valid and HPRules.exclusion_at(member.global_position) == ""
+			for i in range(points.size()):
+				for j in range(i + 1, points.size()):
+					spread = minf(spread, (points[i] as Vector3).distance_to(points[j]))
+			results["cycle_valid"]["%d_%d" % [target_index, cycle]] = valid
+			results["member_spread"].append(spread)
+		results["cycles"][str(target_index)] = ids
+	# -- camped respawn defers ----------------------------------------------
+	var camp_pack: Dictionary = director.packs[0]
+	var camp_members: Array = camp_pack["members"]
+	for member in camp_members:
+		if is_instance_valid(member):
+			member.take_damage(1000000, "test", player)
+	await get_tree().physics_frame
+	var saved_area: Rect2 = camp_pack["area"]
+	camp_pack["area"] = Rect2(-2.0, -2.0, 4.0, 4.0)
+	player.global_position = Vector3(0.0, 0.1, 0.0)
+	await get_tree().physics_frame
+	camp_pack["timer"] = 0.01
+	await get_tree().create_timer(0.25).timeout
+	var alive := 0
+	for member in camp_members:
+		if is_instance_valid(member) and member.state != member.State.DEAD:
+			alive += 1
+	results["camped"] = {"alive": alive, "deferred": bool(camp_pack.get("deferred", false)),
+		"timer": float(camp_pack.get("timer", -1.0))}
+	camp_pack["area"] = saved_area
+	player.global_position = Vector3(0.0, 0.5, 5.0)
+	camp_pack["timer"] = 0.01
+	await get_tree().create_timer(0.3).timeout
+	# -- leash reset cancels the pending reward ------------------------------
+	# Open ground well outside every safe zone and exclusion: the player and the
+	# mob must both be in a place where combat is legal.
+	var leash_pack: Dictionary = director.packs[1]
+	var leash_mob = leash_pack["members"][0]
+	var ground := Vector3(60.0, 0.1, 60.0)
+	player.current_hp = player.max_hp
+	player.global_position = ground
+	for member in leash_pack["members"]:
+		if is_instance_valid(member):
+			member.global_position = ground
+			member.pack_anchor = ground
+			member.spawn_point = ground
+	await get_tree().physics_frame
+	leash_mob.aggro_on(player)
+	leash_mob.take_damage(10, "basic_cast", player)
+	await get_tree().physics_frame
+	var log_before: int = (SimAuthority.record_for(leash_mob).get("damage_log", []) as Array).size()
+	var chasing: bool = leash_mob.state in [leash_mob.State.CHASE, leash_mob.State.ATTACK]
+	# Break the leash: the pack anchor jumps 40 m away, past the 26 m leash.
+	leash_mob.pack_anchor = ground + Vector3(40.0, 0.0, 0.0)
+	var went_home := false
+	var leash_trace: Array = []
+	for _i in range(90):
+		await get_tree().physics_frame
+		if _i % 10 == 0:
+			leash_trace.append({"state": int(leash_mob.state), "phase": int(leash_mob.attack_phase),
+				"dist": leash_mob.global_position.distance_to(leash_mob.pack_anchor),
+				"leash": leash_mob.leash_distance,
+				"has_target": leash_mob.target_player != null,
+				"valid": leash_mob._valid_target(),
+				"hp": int(leash_mob.current_hp)})
+		if leash_mob.state == leash_mob.State.RETURN:
+			went_home = true
+			break
+	var log_after: int = (SimAuthority.record_for(leash_mob).get("damage_log", []) as Array).size()
+	var resets := 0
+	for record in _records:
+		if String(record.get("event", "")) == "encounter_reset":
+			resets += 1
+	# Now finish the mob off with NO eligible attacker: if the leash reset really
+	# cancelled the player's earlier contribution, this kill pays nobody.
+	leash_mob.pack_anchor = ground
+	leash_mob.spawn_point = ground
+	leash_mob.global_position = ground
+	await get_tree().create_timer(0.2).timeout
+	var rewards_before := _rewards.size()
+	SimAuthority.apply_damage(leash_mob, 1000000, "test", null)
+	await get_tree().physics_frame
+	results["leash_trace"] = leash_trace
+	results["leash"] = {"pack_id": int(leash_pack.get("pack_id", 0)),
+		"log_before": log_before, "log_after": log_after, "chasing": chasing, "went_home": went_home,
+		"resets": resets, "rewards_before": rewards_before, "rewards_after": _rewards.size(),
+		"new_rewards": _rewards.slice(rewards_before)}
+	player.global_position = Vector3(0.0, 0.5, 5.0)
+	await get_tree().physics_frame
+	# Positive control: the same kill WITH the player's contribution on the log
+	# does pay (proving the check above is not passing because rewards are off).
+	var control_pack: Dictionary = director.packs[3]
+	var control_mob = control_pack["members"][0]
+	player.global_position = control_mob.global_position + Vector3(1, 0, 0)
+	await get_tree().physics_frame
+	SimAuthority.apply_damage(control_mob, 5, "basic_cast", player)
+	await get_tree().physics_frame
+	var rewards_control := _rewards.size()
+	SimAuthority.apply_damage(control_mob, 1000000, "test", null)
+	await get_tree().physics_frame
+	results["leash"]["control_paid"] = _rewards.size() > rewards_control
+	# -- attack slots and separation ----------------------------------------
+	var slot_pack: Dictionary = director.packs[2]
+	player.global_position = Vector3(-68.0, 0.1, -40.0)
+	var slot_index := 0
+	for member in slot_pack["members"]:
+		if is_instance_valid(member):
+			member._respawn()
+			var i := slot_index
+			slot_index += 1
+			member.global_position = Vector3(-68.0, 0.1, -40.0) + Vector3(cos(TAU * float(i) / 5.0), 0.0, sin(TAU * float(i) / 5.0)) * 6.0
+			member.pack_anchor = Vector3(-68.0, 0.1, -40.0)
+			member.spawn_point = Vector3(-68.0, 0.1, -40.0)
+			member.aggro_on(player)
+	var max_in_range := 0
+	var min_gap := 999.0
+	var samples := 0
+	for _i in range(180):
+		await get_tree().physics_frame
+		var in_range := 0
+		var positions: Array = []
+		for member in slot_pack["members"]:
+			if not is_instance_valid(member):
+				continue
+			positions.append(member.global_position)
+			if member.global_position.distance_to(player.global_position) <= member.attack_range + 0.5:
+				in_range += 1
+		max_in_range = maxi(max_in_range, in_range)
+		for i in range(positions.size()):
+			for j in range(i + 1, positions.size()):
+				min_gap = minf(min_gap, (positions[i] as Vector3).distance_to(positions[j]))
+		samples += 1
+	results["slots"] = {"max_in_range": max_in_range, "members": slot_pack["members"].size(),
+		"min_gap": min_gap, "samples": samples,
+		"attack_slots": int(HPRules.pack_tuning("attack_slots", 3.0))}
+	# -- corpse + pool reset -------------------------------------------------
+	var corpse_pack: Dictionary = director.packs[0]
+	var victim = corpse_pack["members"][0]
+	player.global_position = Vector3(0.0, 0.5, 5.0)
+	await get_tree().create_timer(0.2).timeout
+	var death_pos: Vector3 = victim.global_position
+	victim.take_damage(1000000, "test", player)
+	await get_tree().physics_frame
+	var death_tick := SimAuthority.sim_tick
+	var max_drift := 0.0
+	var attacked_after_death := false
+	var anim_after_death := String(victim.anim_player.current_animation) if is_instance_valid(victim) and victim.anim_player else ""
+	# Long enough to cover the death clip AND the fade that follows it.
+	for _i in range(260):
+		await get_tree().physics_frame
+		if is_instance_valid(victim) and victim.state != victim.State.DEAD:
+			attacked_after_death = true
+		if is_instance_valid(victim):
+			max_drift = maxf(max_drift, victim.global_position.distance_to(death_pos))
+	results["corpse"] = {"max_drift": max_drift, "acted_after_death": attacked_after_death,
+		"state_dead": int(victim.state) == int(victim.State.DEAD) if is_instance_valid(victim) else false,
+		"corpse_lifetime": float(victim._corpse_lifetime) if is_instance_valid(victim) else -1.0,
+		"hidden": not victim.visible if is_instance_valid(victim) else false,
+		"anim": anim_after_death,
+		"has_player": is_instance_valid(victim) and victim.anim_player != null,
+		"clips": victim.anim_player.get_animation_list() if is_instance_valid(victim) and victim.anim_player else [],
+		"death_clip_len": victim.anim_player.get_animation("Death").length if is_instance_valid(victim) and victim.anim_player and victim.anim_player.has_animation("Death") else -1.0,
+		"anim_len": float(victim.anim_player.get_animation(victim.anim_player.current_animation).length) if is_instance_valid(victim) and victim.anim_player and victim.anim_player.current_animation != "" else -1.0,
+		"ticks_observed": SimAuthority.sim_tick - death_tick}
+	victim._respawn()
+	for _i in range(6):
+		await get_tree().physics_frame
+	var record := SimAuthority.record_for(victim)
+	results["pool"] = {"hp": int(victim.current_hp), "max_hp": int(victim.max_hp),
+		"hp_full": int(victim.current_hp) == int(victim.max_hp),
+		"state_idle": int(victim.state) == int(victim.State.IDLE),
+		"target_cleared": victim.target_player == null,
+		"attack_cleared": victim.attack_phase == 0 and victim._windup == 0.0,
+		"telegraph_cleared": not record.has("telegraph"),
+		"log_cleared": (record.get("damage_log", []) as Array).is_empty(),
+		"targetable": victim.is_in_group("targetable"),
+		"warning_cleared": victim._warning == null}
+	_local_results = results
+	_record("encounter_local", results)
+	_done = true
+	_finish(0)
+
+## Walk away from the pack under test (the lifecycle scenario vacates the old
+## anchor so a respawn is allowed to happen somewhere clear of the corpse).
+func _retreat_from_pack() -> void:
+	var reference: Vector3 = SimAuthority.entities.get(_target_uid, {}).get("pos", SPAWN_REFERENCE)
+	var away := player.global_position - reference
+	away.y = 0.0
+	if away.length() < 1.0:
+		away = Vector3(0, 0, 1)
+	_intent_frames += 1
+	SimNet.forced_intent = {
+		"move": Vector2(0, -1),
+		"yaw": rad_to_deg(atan2(-away.x, -away.z)),
+		"jump": false,
+		"descend": false,
+	}
 
 # ---------------------------------------------------------------------- common
 

@@ -2,11 +2,11 @@
  "schema": 1,
  "generated": "2026-10-04",
  "project": "HPMMO",
- "notes": "Phase 2 manifest. Measured fields come from tools/asset_audit.py; license fields were download- and adversarially-verified during Phase 2 research (see docs/art-direction.md section 8). Candidate assets are review-stage: excluded from release packaging until promoted. | Phase 9 (2026-10-04): hero and flight broom integrated; hero_final_art and broom_model entries updated with measured values, see docs/phase9-rig-and-sockets.md. Phase 10 added 11 project-authored PBR texture sets (Blender-authored, deterministic) and 37 project-authored Gothic kit modules, and promoted the four curated Poly Haven sets into assets/textures/pbr/. All Phase 10 art is recorded here with hashes, physical scale, texel density and map list; the game-side contract is client/scripts/assets/pbr_kit.gd.",
+ "notes": "Phase 2 manifest. Measured fields come from tools/asset_audit.py; license fields were download- and adversarially-verified during Phase 2 research (see docs/art-direction.md section 8). Candidate assets are review-stage: excluded from release packaging until promoted. | Phase 9 (2026-10-04): hero and flight broom integrated; hero_final_art and broom_model entries updated with measured values, see docs/phase9-rig-and-sockets.md. Phase 10 added 11 project-authored PBR texture sets (Blender-authored, deterministic) and 37 project-authored Gothic kit modules, and promoted the four curated Poly Haven sets into assets/textures/pbr/. All Phase 10 art is recorded here with hashes, physical scale, texel density and map list; the game-side contract is client/scripts/assets/pbr_kit.gd. | Phase 11 (2026-10-05): authored spider (phase11-acromantula) and both boss bodies (phase11-boss-matriarch, phase11-boss-commander) recorded with measured tris/joints/clips/LODs; the Quaternius Inferi and Dark Snatcher minions are marked placeholders.",
  "summary": {
   "candidate": 31,
-  "placeholder": 5,
-  "integrated": 107,
+  "placeholder": 7,
+  "integrated": 108,
   "missing": 6
  },
  "assets": [
@@ -2200,7 +2200,7 @@
   {
    "id": "asset-Demon-gltf",
    "purpose": "monster visual (used by mob scenes)",
-   "status": "integrated",
+   "status": "placeholder",
    "author": "Quaternius",
    "source_url": "assets/ASSET_CREDITS.md",
    "license": "CC0 1.0",
@@ -2246,12 +2246,13 @@
    },
    "collision": "none (scene/generated)",
    "lods": "none",
-   "acceptance": "docs/baseline-captures/baseline-enemy-assets.png"
+   "acceptance": "docs/baseline-captures/baseline-enemy-assets.png",
+   "placeholder_reason": "Placeholder after Phase 11: the spider and both bosses are authored (phase11-*), this Quaternius ghoul body is not. Still shipped as the ordinary Inferi visual."
   },
   {
    "id": "asset-Ninja-gltf",
    "purpose": "monster visual (used by mob scenes)",
-   "status": "integrated",
+   "status": "placeholder",
    "author": "Quaternius",
    "source_url": "assets/ASSET_CREDITS.md",
    "license": "CC0 1.0",
@@ -2297,7 +2298,8 @@
    },
    "collision": "none (scene/generated)",
    "lods": "none",
-   "acceptance": "docs/baseline-captures/baseline-enemy-assets.png"
+   "acceptance": "docs/baseline-captures/baseline-enemy-assets.png",
+   "placeholder_reason": "Placeholder after Phase 11: the spider and both bosses are authored (phase11-*), this Quaternius ninja body is not. Still shipped as the ordinary Dark Snatcher visual (the boss uses boss_commander.glb)."
   },
   {
    "id": "asset-Orc_Skull-gltf",
@@ -3407,9 +3409,9 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "Two minor stat slips: (1) ceiling_tile measures 4x4x0.35 units, so the 'tile thickness 0.15' note holds for floors but not the ceiling; (2) provenance cannot be hash-pinned to a public mirror (archive deleted; the GitHub mirror is v1.0), though the in-archive 1.1 CC0 license and the live itch page are consistent. Neither affects licensing or file validity. Repo side verified exact: assets/models/environment holds exactly 44 KayKit models (all walls/banners/pillars/chest/torch \u2014 no stairs/floors/railings/furniture) and wall.gltf.glb measures 4x4x1.0."
+    "note": "Two minor stat slips: (1) ceiling_tile measures 4x4x0.35 units, so the 'tile thickness 0.15' note holds for floors but not the ceiling; (2) provenance cannot be hash-pinned to a public mirror (archive deleted; the GitHub mirror is v1.0), though the in-archive 1.1 CC0 license and the live itch page are consistent. Neither affects licensing or file validity. Repo side verified exact: assets/models/environment holds exactly 44 KayKit models (all walls/banners/pillars/chest/torch — no stairs/floors/railings/furniture) and wall.gltf.glb measures 4x4x1.0."
    },
-   "gaps": "No animations, no skins, no LODs, no collision meshes, no damage/wear variants (those are the paid EXTRA tier). IMPORTANT: this 1.1 release ships its own 1024x1024 atlas (dungeon_texture.png, sha256 ceb331d6\u2026) that differs from the atlas the repo's existing KayKit files reference (assets/models/environment/wall_dungeon_texture.png, 15,794 B, sha256 f9ae1825\u2026) \u2014 the new pieces must be imported with this 1.1 atlas (each .gltf references 'dungeon_texture.png' relatively, so keep it beside them), or the whole Dungeon family should be re-imported from 1.1 so everything shares one material; otherwise expect UV/colour mismatch. KayKit's module is 4 units (not metres), so the Phase 2 unit decision applies: at the repo's current root_scale=1.0 the standard stair rises 5.1 units, and a 1.75-1.90 m character needs the agreed global scale. Does NOT include: potted plants, a suit of armour, a real multi-arm chandelier, or benches. Each .gltf needs its same-named .bin buffer beside it.",
+   "gaps": "No animations, no skins, no LODs, no collision meshes, no damage/wear variants (those are the paid EXTRA tier). IMPORTANT: this 1.1 release ships its own 1024x1024 atlas (dungeon_texture.png, sha256 ceb331d6…) that differs from the atlas the repo's existing KayKit files reference (assets/models/environment/wall_dungeon_texture.png, 15,794 B, sha256 f9ae1825…) — the new pieces must be imported with this 1.1 atlas (each .gltf references 'dungeon_texture.png' relatively, so keep it beside them), or the whole Dungeon family should be re-imported from 1.1 so everything shares one material; otherwise expect UV/colour mismatch. KayKit's module is 4 units (not metres), so the Phase 2 unit decision applies: at the repo's current root_scale=1.0 the standard stair rises 5.1 units, and a 1.75-1.90 m character needs the agreed global scale. Does NOT include: potted plants, a suit of armour, a real multi-arm chandelier, or benches. Each .gltf needs its same-named .bin buffer beside it.",
    "acceptance": ""
   },
   {
@@ -3732,7 +3734,7 @@
     "adversarially_verified": true,
     "note": "Full-kit entry count ('406 entries') and the site's '75 assets' label can no longer be reconciled since the zip was deleted; not material to the kept files."
    },
-   "gaps": "Different art style from KayKit (flat-shaded stone with a single shared colormap, no gradient atlas) \u2014 the plan's 'avoid mixing styles' rule applies, so treat these as alternates, not mix-ins. Tiny module: the stair is 0.67 units tall, so it needs a scale decision, and the wall segments do not match the KayKit 4-unit grid. No animations/LODs/collision. Textures/colormap.png must stay in its subfolder or the GLBs lose their texture.",
+   "gaps": "Different art style from KayKit (flat-shaded stone with a single shared colormap, no gradient atlas) — the plan's 'avoid mixing styles' rule applies, so treat these as alternates, not mix-ins. Tiny module: the stair is 0.67 units tall, so it needs a scale decision, and the wall segments do not match the KayKit 4-unit grid. No animations/LODs/collision. Textures/colormap.png must stay in its subfolder or the GLBs lose their texture.",
    "acceptance": ""
   },
   {
@@ -3801,7 +3803,7 @@
     "adversarially_verified": true,
     "note": "Scale claim is wrong: pottedPlant.glb renders ~0.54 units tall (raw accessor 0.536; root node scale 2x over a nested 0.5x plant node), not '0.12 units'. The 0.12 figure is the plant sub-mesh alone. plantSmall1-3 render ~0.14 units. Assets still valid; only the scale note needs fixing before the manifest uses it."
    },
-   "gaps": "Totally different look from KayKit: flat untextured colour, clean/modern rather than castle-carved, and the models are very small in raw units (pottedPlant is 0.12 units tall) so they must be scaled. No textures at all (0 images) means no shared atlas and no PBR \u2014 plan the material setup. No animations/LODs/collision. If plants must match the KayKit atlas look, use these only as a stand-in until a KayKit-style plant is authored.",
+   "gaps": "Totally different look from KayKit: flat untextured colour, clean/modern rather than castle-carved, and the models are very small in raw units (pottedPlant is 0.12 units tall) so they must be scaled. No textures at all (0 images) means no shared atlas and no PBR — plan the material setup. No animations/LODs/collision. If plants must match the KayKit atlas look, use these only as a stand-in until a KayKit-style plant is authored.",
    "acceptance": ""
   },
   {
@@ -4106,7 +4108,7 @@
     "adversarially_verified": true,
     "note": "None."
    },
-   "gaps": "No ambience or loops; only short one-shots (no long tails for large spells); no magic-specific whoosh/zap/chime \u2014 spell cast must be assembled from these layers plus UI sounds.",
+   "gaps": "No ambience or loops; only short one-shots (no long tails for large spells); no magic-specific whoosh/zap/chime — spell cast must be assembled from these layers plus UI sounds.",
    "acceptance": ""
   },
   {
@@ -5318,7 +5320,7 @@
     "adversarially_verified": true,
     "note": "CC-BY-3.0 is permissive with attribution. Corrected: the required credit is the original creator Jonathan Shaw (InspectorJ) per the source page; the local receipt was rewritten accordingly."
    },
-   "gaps": "License is CC-BY-3.0, NOT CC0 \u2014 shipping requires visible credit to AntumDeluge (recorded in LICENSE.txt); no license file ships from the site; loop seam not verified in a WAV editor; no other ambiences in this pack.",
+   "gaps": "License is CC-BY-3.0, NOT CC0 — shipping requires visible credit to AntumDeluge (recorded in LICENSE.txt); no license file ships from the site; loop seam not verified in a WAV editor; no other ambiences in this pack.",
    "acceptance": ""
   },
   {
@@ -5457,7 +5459,7 @@
     "adversarially_verified": true,
     "note": "Dimension claim is wrong: the glTF has a root node scale of 0.686, and Poly Haven's own API (api.polyhaven.com/info/lantern_chandelier_01) declares dimensions 579 x 575 x 878 mm, i.e. 0.58 x 0.57 x 0.88 m. The claimed '1.28 m tall' is the pre-scale accessor bbox (1.279 m) and ignores the node transform. Still metric and well under budget; only the number is off. Photoreal-vs-KayKit style caveat is correctly flagged."
    },
-   "gaps": "Photoreal PBR style versus the repo's KayKit gradient-atlas lowpoly look \u2014 plan.md Phase 2 explicitly warns against mixing realistic and cartoon assets, so treat this as a look-development candidate or a deliberate 'real light fixture' exception. No LODs and no collision; the glass needs alpha/transmission material setup in Godot; a Godot-side glow/light source still has to be authored (the model is geometry only).",
+   "gaps": "Photoreal PBR style versus the repo's KayKit gradient-atlas lowpoly look — plan.md Phase 2 explicitly warns against mixing realistic and cartoon assets, so treat this as a look-development candidate or a deliberate 'real light fixture' exception. No LODs and no collision; the glass needs alpha/transmission material setup in Godot; a Godot-side glow/light source still has to be authored (the model is geometry only).",
    "acceptance": ""
   },
   {
@@ -5590,7 +5592,7 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "One stat is wrong: the report says '54 nodes'; the GLB actually has 86 nodes (54 is KayKit's node count, likely copied across). Everything else in this candidate is accurate. Preview file named preview.jpg is really a PNG (magic 89 50 4E 47) \u2014 see category-level note."
+    "note": "One stat is wrong: the report says '54 nodes'; the GLB actually has 86 nodes (54 is KayKit's node count, likely copied across). Everything else in this candidate is accurate. Preview file named preview.jpg is really a PNG (magic 89 50 4E 47) — see category-level note."
    },
    "gaps": "No textures at all (11 flat materials; the original pack's texture atlas is not in the Poly Pizza conversion, though UVs and TEXCOORD_0 exist); no dedicated spellcast clip (melee/gun clips only); no LODs, no collision, no root motion; conversion duplicates the skin 5x (one per mesh) and 5 identical 62-joint skins must be merged before production use; textured original is Quaternius 'Ultimate Modular Men' whose Google Drive link is quota-blocked (manual); shoe/prop sockets not verified.",
    "acceptance": "tools/downloads/asset-review-neutral-hero-adventurer.png, tools/downloads/asset-review-final-hero-adventurer.png"
@@ -5721,7 +5723,7 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "The gaps field says '2 duplicated skins' \u2014 actually there are 4 identical 62-joint skins (Body, Head, Legs, Feet), i.e. the merge cost is double what was stated. Preview.jpg is really a PNG. Otherwise accurate."
+    "note": "The gaps field says '2 duplicated skins' — actually there are 4 identical 62-joint skins (Body, Head, Legs, Feet), i.e. the merge cost is double what was stated. Preview.jpg is really a PNG. Otherwise accurate."
    },
    "gaps": "Untextured (flat materials, UVs present); Sword mesh is a separate NON-skinned mesh (must be socketed to a hand bone manually); 2 duplicated skins; no spellcast clip; no LODs/collision/root motion; same Google-Drive-blocked textured original as the male Adventurer.",
    "acceptance": "tools/downloads/asset-review-neutral-hero-hooded.png, tools/downloads/asset-review-final-hero-hooded.png",
@@ -5990,7 +5992,7 @@
    "status": "integrated",
    "author": "Quaternius (quaternius.com)",
    "source_url": "https://quaternius.itch.io/universal-animation-library",
-   "license": "CC0 1.0 Universal (Public Domain Dedication) \u2014 license text shipped inside the archive",
+   "license": "CC0 1.0 Universal (Public Domain Dedication) — license text shipped inside the archive",
    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
    "license_file": "assets/candidates/character/quaternius-universal-animation-library/License.txt",
    "attribution_required": false,
@@ -6072,9 +6074,9 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "The itch page advertises '120+ animations' for the library, but the free Standard GLBs actually contain only 43 clips each \u2014 the researcher's 43 is what the downloaded artifact has, but a reader expecting the advertised 120+ from the free tier will be short (the rest sit in the paid Pro/Source tiers). No files are mislabeled; audio/other formats are not needed."
+    "note": "The itch page advertises '120+ animations' for the library, but the free Standard GLBs actually contain only 43 clips each — the researcher's 43 is what the downloaded artifact has, but a reader expecting the advertised 120+ from the free tier will be short (the rest sit in the paid Pro/Source tiers). No files are mislabeled; audio/other formats are not needed."
    },
-   "gaps": "Animation product, not a costumed hero: the included mesh is an untextured mannequin (2 flat materials, no skin/cloth textures, no robe); free Standard tier has 43 clips (the paid Pro tier, $9.99, has the larger set); 65-joint UE5-named rig differs from the 53-joint DEF- base mesh copy on Poly Pizza \u2014 pair it with its own mannequin or retarget deliberately; itch.io has no static URL (download needed a csrf + /download_url + /file/<id> session, reproduced in this run).",
+   "gaps": "Animation product, not a costumed hero: the included mesh is an untextured mannequin (2 flat materials, no skin/cloth textures, no robe); free Standard tier has 43 clips (the paid Pro tier, $9.99, has the larger set); 65-joint UE5-named rig differs from the 53-joint DEF- base mesh copy on Poly Pizza — pair it with its own mannequin or retarget deliberately; itch.io has no static URL (download needed a csrf + /download_url + /file/<id> session, reproduced in this run).",
    "acceptance": "tools/downloads/asset-review-neutral-hero-mannequin.png",
    "notes": "Retargeted with a documented bone map (hero_common.py BONE_MAP); the two Quaternius rigs disagree on bone names, bone axes and armature scale, so the transfer is done in world space per bone. Not shipped as-is."
   },
@@ -6610,7 +6612,7 @@
    "collision": "",
    "lods": "",
    "blocks": "Phase 11",
-   "notes": "Quaternius set is the only existing option; spider candidate obtained",
+   "notes": "Phase 11 delivered the spider (phase11-acromantula) and both boss bodies (phase11-boss-matriarch, phase11-boss-commander). Still missing: authored ordinary minion bodies to replace the Quaternius placeholders (asset-Demon-gltf = Inferi, asset-Ninja-gltf = Dark Snatcher).",
    "acceptance": ""
   },
   {
@@ -8470,6 +8472,205 @@
    "collision": "authored proxies placed by the game (client/scripts/world/castle_interior_builder.gd, outdoor_terrain.gd); the GLB ships render geometry only",
    "lods": "engine-generated on import (meshes/generate_lods=true)",
    "visual_acceptance": "tools/downloads/phase10-final-*.png at gameplay distance"
+  },
+  {
+   "id": "phase11-acromantula",
+   "purpose": "Phase 11 ordinary monster: anatomically readable eight-legged giant spider - cephalothorax, segmented abdomen, 8 articulated five-segment leg chains (coxa/femur/patella/tibia/tarsus), chelicerae with fangs, pedipalps and eight eyes - rigged, animated and textured for gameplay",
+   "status": "integrated",
+   "author": "Authored for this project (tools/blender/build_spider.py); procedural textures packed in the GLB",
+   "source_url": "n/a - original work, no third-party asset",
+   "license": "Project-original (no third-party asset); CC0-1.0 compatible",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/monsters/acromantula.glb",
+    "tools/blender/build_spider.py"
+   ],
+   "sha256": {
+    "assets/models/monsters/acromantula.glb": "0ff2ad19d8bc558ac7eb88a4886c5a6f2e4f8ac7da40b11f7d038fdc56aa12c6"
+   },
+   "scale_m": [
+    2.278,
+    0.674,
+    2.423
+   ],
+   "triangles": "14976 across LOD0 + LOD1 (one GLB, two skinned meshes)",
+   "material_slots": 4,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough"
+    ],
+    "note": "3 images packed in the GLB (albedo sRGB, normal OpenGL +Y Non-Color, roughness Non-Color)"
+   },
+   "rig": {
+    "skinned": true,
+    "joints": 48,
+    "clips": [
+     "Bite_Anticipation",
+     "Bite_Attack",
+     "Death",
+     "Hit",
+     "Idle",
+     "Stun",
+     "Turn",
+     "Walk"
+    ],
+    "clips_note": "Idle/Walk loop, Turn, Bite_Anticipation, Bite_Attack, Hit, Stun loop, Death (1.79 s collapse; a dead spider holds the corpse pose instead of walking)",
+    "root_motion": "none (all clips authored in place)"
+   },
+   "collision": "authored capsule proxies in scenes/entities/mobs/mob_acromantula.tscn (r 0.95 h 1.9, plus a boss proxy r 1.5 h 3.0); render meshes are never colliders",
+   "lods": "LOD1 = 4,992 tris (50%) shipped as a second skinned mesh in the same GLB; mob_base._apply_lod sets visibility_range 26 m at runtime",
+   "materials": [
+    "Acromantula_Chitin",
+    "Acromantula_Membrane",
+    "Acromantula_Eyes",
+    "Acromantula_Fang"
+   ],
+   "materials_note": "chitin / membrane / eyes (emissive) / fangs",
+   "acceptance": "build_spider.py validation block (8 leg chains, 48 bones, 0 overlapping texels outside the mirrored leg islands, bind-pose min y 0.000 m), pose renders tools/downloads/spider-{idle,walk,death,detail}.png, and the pack/boss/corpse behaviour asserted by server/tests/encounters_sim.py",
+   "evidence": [
+    "tools/downloads/spider-idle.png",
+    "tools/downloads/spider-walk.png",
+    "tools/downloads/spider-death.png",
+    "tools/downloads/spider-detail.png"
+   ],
+   "scale_source": "tools/asset_audit.py world-space bind-pose AABB (metres)"
+  },
+  {
+   "id": "phase11-boss-matriarch",
+   "purpose": "Phase 11 solo boss (Acromantula Matriarch): a distinct giant-spider composition - spiked carapace crown, barbed legs, egg sac, glowing eye cluster - with its own directional (Spit) and area (Slam) attack animations alongside the shared clips",
+   "status": "integrated",
+   "author": "Authored for this project (tools/blender/build_boss_matriarch.py); procedural textures packed in the GLB",
+   "source_url": "n/a - original work, no third-party asset",
+   "license": "Project-original (no third-party asset); CC0-1.0 compatible",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/monsters/boss_matriarch.glb",
+    "tools/blender/build_boss_matriarch.py"
+   ],
+   "sha256": {
+    "assets/models/monsters/boss_matriarch.glb": "b0c9db000323fa01897f4399f000ba775a5336b7d1ca5430db7e8814459e5fbb"
+   },
+   "scale_m": [
+    3.251,
+    1.004,
+    2.202
+   ],
+   "triangles": "42132 across LOD0 + LOD1 (one GLB, two skinned meshes)",
+   "material_slots": 4,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough"
+    ],
+    "note": "3 images packed in the GLB (albedo sRGB, normal OpenGL +Y Non-Color, roughness Non-Color)"
+   },
+   "rig": {
+    "skinned": true,
+    "joints": 49,
+    "clips": [
+     "Death",
+     "Hit",
+     "Idle",
+     "Slam_Anticipation",
+     "Slam_Attack",
+     "Spit_Anticipation",
+     "Spit_Attack",
+     "Stun",
+     "Walk"
+    ],
+    "clips_note": "Idle/Walk/Stun loop, Hit, Death (2.2 s), Slam_Anticipation/Attack and Spit_Anticipation/Attack - the anticipation clips are the telegraph the client renders from the authority's release tick",
+    "root_motion": "none (all clips authored in place)"
+   },
+   "collision": "the boss proxy capsule in mob_acromantula.tscn (r 1.5 h 3.0) is selected by mob_base._apply_boss_visual when FLAG_BOSS arrives",
+   "lods": "LOD1 = 14,044 tris (50%) in the same GLB; visibility_range set at runtime",
+   "materials": [
+    "Matriarch_Chitin",
+    "Matriarch_Membrane",
+    "Matriarch_Eyes",
+    "Matriarch_FangSac"
+   ],
+   "materials_note": "armoured chitin / membrane / eyes (emissive) / fangs + egg sac",
+   "acceptance": "build_boss_matriarch.py validation block (49 bones, 9 clips, span 3.25 m, frame-swept ground contact, IK residual 0.000 m, deterministic rebuild), renders tools/downloads/matriarch-*.png, and the solo-boss checks in encounters_sim.py",
+   "evidence": [
+    "tools/downloads/matriarch-idle.png",
+    "tools/downloads/matriarch-slam.png",
+    "tools/downloads/matriarch-dead.png"
+   ],
+   "scale_source": "tools/asset_audit.py world-space bind-pose AABB (metres)"
+  },
+  {
+   "id": "phase11-boss-commander",
+   "purpose": "Phase 11 escorted boss (Dark Snatcher Commander): a hooded dark wizard with a banded staff and a hard silhouette, replacing the scaled Orc_Skull placeholder, with its own directional (Cast_Directional) and area (Cast_Area) attack animations",
+   "status": "integrated",
+   "author": "Authored for this project (tools/blender/build_boss_commander.py); procedural textures packed in the GLB",
+   "source_url": "n/a - original work, no third-party asset",
+   "license": "Project-original (no third-party asset); CC0-1.0 compatible",
+   "license_url": "",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/monsters/boss_commander.glb",
+    "tools/blender/build_boss_commander.py"
+   ],
+   "sha256": {
+    "assets/models/monsters/boss_commander.glb": "fcbb03ede6a052c91d8920a54b1e3d0c85332ef6c5a460ae7c333140c911ce24"
+   },
+   "scale_m": [
+    1.028,
+    2.307,
+    0.819
+   ],
+   "triangles": "39194 across LOD0 + LOD1 (one GLB, two skinned meshes)",
+   "material_slots": 4,
+   "textures": {
+    "channels": [
+     "albedo",
+     "normal",
+     "rough"
+    ],
+    "note": "3 images packed in the GLB (albedo sRGB, normal OpenGL +Y Non-Color, roughness Non-Color)"
+   },
+   "rig": {
+    "skinned": true,
+    "joints": 19,
+    "clips": [
+     "Cast_Area_Anticipation",
+     "Cast_Area_Attack",
+     "Cast_Directional_Anticipation",
+     "Cast_Directional_Attack",
+     "Death",
+     "Hit",
+     "Idle",
+     "Stun",
+     "Walk"
+    ],
+    "clips_note": "Idle/Walk/Stun loop, Hit, Death (2.0 s), Cast_Directional_Anticipation/Attack and Cast_Area_Anticipation/Attack (the area telegraph is a two-handed overhead slam)",
+    "root_motion": "none (all clips authored in place)"
+   },
+   "collision": "the boss proxy capsule in mob_darksnatcher.tscn (r 0.62 h 2.24); the ordinary body keeps its own capsule and the two are swapped by mob_base",
+   "lods": "LOD1 = 13,650 tris (53%) in the same GLB; visibility_range set at runtime",
+   "materials": [
+    "Commander_Robe",
+    "Commander_Trim",
+    "Commander_Staff",
+    "Commander_Eyes"
+   ],
+   "materials_note": "robe cloth / leather+metal trim / staff wood+metal / glowing eyes",
+   "acceptance": "build_boss_commander.py validation block (19 bones, 9 clips, 2.20 m, staff orientation measured per combat key frame, deterministic rebuild), renders tools/downloads/commander-*.png, and the escorted-boss (exactly two escorts) checks in encounters_sim.py",
+   "evidence": [
+    "tools/downloads/commander-idle.png",
+    "tools/downloads/commander-area.png",
+    "tools/downloads/commander-directional.png",
+    "tools/downloads/commander-dead.png"
+   ],
+   "scale_source": "tools/asset_audit.py world-space bind-pose AABB (metres)"
   }
  ],
  "rejected": [
@@ -8480,12 +8681,12 @@
   },
   {
    "id": "kenney-mini-characters",
-   "reason": "0.67 m blocky characters, 7 bones \u2014 fails the art direction",
+   "reason": "0.67 m blocky characters, 7 bones — fails the art direction",
    "source": "kenney.nl"
   },
   {
    "id": "quaternius-animated-base-character",
-   "reason": "Poly Pizza copy lists CC-BY 3.0 while the pack page says CC0 \u2014 license discrepancy; UAL (CC0) covers the same mannequin",
+   "reason": "Poly Pizza copy lists CC-BY 3.0 while the pack page says CC0 — license discrepancy; UAL (CC0) covers the same mannequin",
    "source": "poly.pizza"
   },
   {
