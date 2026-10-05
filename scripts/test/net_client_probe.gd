@@ -1022,7 +1022,10 @@ func _nearest_mob() -> Node3D:
 ##   rider_logout  ride, then drop the connection mid-flight
 
 const STAIRCASE_SCENE = preload("res://scenes/world/castle/staircase.tscn")
-const STAIR_DEV_ORIGIN := Vector3(150.0, 0.0, 120.0)
+## Inside the Phase 10 flat core and clear of the encounter regions. The old
+## (150, 0, 120) is in the hill ring the terrain pass raises, and the hillside
+## there intersects the upper flight and the landings.
+const STAIR_DEV_ORIGIN := Vector3(90.0, 0.0, -15.0)
 
 func _staircase_origin() -> Vector3:
 	var raw := OS.get_environment("HPMMO_DEV_STAIRCASE")
@@ -1108,6 +1111,11 @@ func _staircase_tick(_delta: float) -> void:
 		_finish_staircase()
 
 func _sample_stair() -> void:
+	if not staircase.replica_active:
+		# No authoritative state has arrived yet: sampling now would report the
+		# replica's default `docked` as fact, and a client whose first publish
+		# lands after another's would "disagree" with it for a heartbeat.
+		return
 	var tick := int(SimAuthority.sim_tick)
 	if not _stair_samples.is_empty() and int(_stair_samples[-1]["tick"]) == tick:
 		return
@@ -1131,14 +1139,31 @@ func _deck_point(tick: int, along: float) -> Vector3:
 	var z: float = staircase.run_length() * along
 	return staircase.platform_world_transform(tick) * Vector3(0.0, z * staircase.slope() + 0.05, z)
 
+## The waiting spot in front of the ground dock's foot, on the ground: inside
+## the authority's boarding-approach volume (deck space z in [-3, 1.5]) but
+## outside `on_deck` (which starts at z = 0.2), so a rider can wait "at the
+## gate" without ever standing on a locked deck.
+func _dock_wait_point() -> Vector3:
+	return staircase.global_transform * (staircase.dock_origin(0) + Vector3(0.0, 0.05, -1.0))
+
 func _stair_ride_tick() -> void:
 	var tick := int(SimAuthority.sim_tick)
 	if not bool(_stair_ride.get("aboard", false)):
-		# Board only while the authority says boarding is allowed.
-		if not staircase.entry_allowed() or staircase.dock_index != 0:
-			SimNet.forced_intent = {}
+		if not staircase.replica_active:
+			# No authoritative state yet: walk to the waiting spot, decide nothing.
+			_walk_toward(_dock_wait_point())
 			return
-		if staircase.on_deck(player.global_position, tick, 3.2, 0.9):
+		# Boarding decisions use the AUTHORITY's position, not the prediction: the
+		# client body runs ahead of the server body, and stopping on the deck one
+		# or two ticks early leaves the server body off it when the platform
+		# leaves - the rider then falls through with it (the bug this replaces:
+		# the probe boarded on the prediction, the server never collected it).
+		# The walk-in point (1.2 m up the run) is a margin over the collection
+		# edge (0.2 m), so by the time the client stops the server body is aboard.
+		var docked_here: bool = staircase.entry_allowed() and staircase.dock_index == 0
+		var auth := _auth_pos()
+		if docked_here and staircase.on_deck(auth, tick, 2.4, 0.8) \
+				and staircase.to_deck_space(auth, tick).z >= 1.2:
 			_stair_ride["aboard"] = true
 			_stair_ride["boarded_tick"] = tick
 			_stair_ride["board_y"] = player.global_position.y
@@ -1148,7 +1173,11 @@ func _stair_ride_tick() -> void:
 			_stair_ride["max_above_deck"] = -99.0
 			SimNet.forced_intent = {}
 			return
-		_walk_toward(_deck_point(tick, 0.35))
+		# Wait at the foot while the platform is elsewhere or locked; walk up the
+		# deck only once it is docked here. The old route sprinted for a point on
+		# the moving deck from 12 m away the moment the gates opened and lost the
+		# race against the scaled dwell every time.
+		_walk_toward(_deck_point(tick, 0.35) if docked_here else _dock_wait_point())
 		return
 	# Aboard: stand still and let the platform carry the body.
 	SimNet.forced_intent = {}
@@ -1176,7 +1205,12 @@ func _stair_busy_tick() -> void:
 	if int(_stair_walk.get("last_locked_tick", -1)) != tick:
 		_stair_walk["last_locked_tick"] = tick
 		_stair_walk["locked_ticks"] = int(_stair_walk.get("locked_ticks", 0)) + 1
-	_walk_toward(_deck_point(tick, 0.35))
+	# Walk to the boarding edge at the ground dock and press against the closed
+	# gate. Chasing the current deck point instead (the old route) walked the
+	# body to the flat spot under a raised deck, where the boarding volume does
+	# not reach, so the authority never had a reason to send the "locked"
+	# notice this check is about.
+	_walk_toward(_dock_wait_point())
 	_stair_walk["tried"] = true
 	if staircase.on_deck(player.global_position, tick):
 		_stair_walk["ever_on_deck_while_locked"] = true

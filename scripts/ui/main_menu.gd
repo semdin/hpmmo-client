@@ -268,17 +268,36 @@ func _on_enter_world_pressed() -> void:
 	if selected_char_id <= 0:
 		select_status_label.text = "Please select a character first!"
 		return
-	
+
 	select_status_label.text = "Loading character into Hogwarts Valley..."
 	enter_world_btn.disabled = true
 	for c in characters_cache:
 		if int(c.get("id", 0)) == selected_char_id:
-			NetworkManager.local_character_data = c
-			NetworkManager.local_player_name = c.get("name", "Wizard")
-			NetworkManager.local_player_house = c.get("house", "Gryffindor")
+			# The world session is already joined (by `_enter_world_with_session`);
+			# this is what binds it to the chosen character server-side, with the
+			# server proving ownership through the account service (D14-1).
+			NetworkManager.select_character(c)
 			break
+	var result: Dictionary = await NetworkManager.bind_selected_character()
+	if not bool(result.get("ok", false)):
+		enter_world_btn.disabled = false
+		select_status_label.text = "Could not start that character: %s" % _bind_reason_text(String(result.get("reason", "")))
+		return
 	if is_inside_tree() and get_tree():
 		get_tree().change_scene_to_file("res://scenes/world/game_world.tscn")
+
+func _bind_reason_text(reason: String) -> String:
+	match reason:
+		"character_not_found":
+			return "that character was not found on this account."
+		"character_in_session":
+			return "that character is already in another session."
+		"already_bound":
+			return "this session is already bound to another character."
+		"not_joined", "timeout", "no_character_selected":
+			return "the world server did not answer. Try again."
+		_:
+			return reason
 
 func _on_character_select_result(success: bool, message: String, _char_data: Dictionary) -> void:
 	enter_world_btn.disabled = false

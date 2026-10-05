@@ -74,7 +74,10 @@ var _attempts := 0
 var _mount_timer := 0.0
 var _transfer_sent := false
 var _transfer_ok := false
+var _castle_done := false
+var _castle_done_at := 0.0
 var _ride_aboard := false
+var _ride_done := false
 var _staircase_reported := false
 var _ride_low := 0.0
 var _ride_high := 0.0
@@ -198,22 +201,37 @@ func _on_character_created(created: Dictionary) -> void:
 # --------------------------------------------------------------------- 2. join
 
 func _step_join() -> void:
-	NetworkManager.local_character_data = character
-	NetworkManager.local_player_name = String(character.get("name", "Journey"))
-	NetworkManager.local_player_house = String(character.get("house", "Gryffindor"))
-	SimNet.joined.connect(func(ok: bool, reason: String, payload: Dictionary):
-		if not ok:
-			_fail("join", reason)
-			_finish(1)
-			return
-		_pass("join", "world accepted the session token")
-		_record("join", {"uid": SimAuthority.local_uid, "character_id": character.get("id", 0)})
-		_step_enter_world.call_deferred()
-	, CONNECT_ONE_SHOT)
+	# The choice is recorded before the join so a reconnect would re-bind the
+	# same character; the binding itself happens after the join is accepted.
+	NetworkManager.select_character(character)
+	SimNet.joined.connect(_on_joined, CONNECT_ONE_SHOT)
 	var error := NetworkManager.join_game(ip, port)
 	if error != OK:
 		_fail("join", "join_game error %d" % error)
 		_finish(1)
+
+func _on_joined(ok: bool, reason: String, _payload: Dictionary) -> void:
+	if not ok:
+		_fail("join", reason)
+		_finish(1)
+		return
+	_pass("join", "world accepted the session token")
+	_record("join", {"uid": SimAuthority.local_uid, "character_id": character.get("id", 0)})
+	# Bind the session to the character the player picked, through the same
+	# NetworkManager call the selection UI uses. The server proves the character
+	# belongs to the session's account before binding; a refusal is a journey
+	# failure, not something to ignore (Phase 14 D14-1).
+	var result: Dictionary = await NetworkManager.bind_selected_character()
+	if not bool(result.get("ok", false)):
+		_fail("bind_character", String(result.get("reason", "refused")))
+		_finish(1)
+		return
+	var bound: Dictionary = result.get("character", {})
+	_record("bind", {"character_id": int(bound.get("id", 0)), "exp": int(bound.get("exp", 0)),
+		"level": int(bound.get("level", 0)), "map_id": String(bound.get("map_id", ""))})
+	_pass("bind_character", "session bound to '%s' (id %s, exp %s)" % [
+		String(bound.get("name", "?")), str(bound.get("id", "?")), str(bound.get("exp", "?"))])
+	_step_enter_world.call_deferred()
 
 # ------------------------------------------------------------- 3. enter world
 
@@ -399,6 +417,13 @@ func _step_castle() -> void:
 	var record: Dictionary = SimAuthority.entities.get(SimAuthority.local_uid, {})
 	var map_id := String(record.get("map_id", "grounds"))
 	if map_id == "grounds":
+		if _castle_done:
+			# The castle has been entered, ridden and left: the journey's next
+			# step is the logout. (Without this flag the grounds branch walks
+			# straight back to the door and requests entry again - an endless
+			# re-entry loop that never reaches the logout.)
+			_goto("logout")
+			return
 		if _transfer_sent and not _transfer_ok:
 			# The request went out; wait for the commit to move the body.
 			if _t - _step_t > 25.0:
@@ -437,17 +462,44 @@ func _step_castle() -> void:
 		_fail("castle_route", "interior route timed out")
 		_goto("logout")
 		return
-	if staircase != null:
+	if staircase != null and not _ride_done:
 		var dock := int(staircase.get("dock_index"))
-		if _t - _step_t < 60.0 and staircase.get("entry_allowed") and dock == 0:
-			var deck := _deck_point(SimAuthority.sim_tick, 0.4)
-			if _auth_pos().distance_to(deck) > 1.6:
-				_walk_toward(deck)
+		var tick := int(SimAuthority.sim_tick)
+		var docked_here: bool = staircase.get("entry_allowed") and dock == 0
+		if _t - _step_t < 90.0:
+			# Wait AT the boarding edge while the platform is elsewhere or
+			# locked, and only then walk up the deck - the route the staircase
+			# probe uses. Sprinting for a point on the moving deck from across
+			# the hall loses the race, and boarding on the client's prediction
+			# leaves the server body off the deck when it moves (the probe
+			# measured both).
+			var auth := _auth_pos()
+			var deck_space: Vector3 = staircase.call("to_deck_space", auth, tick)
+			# "At the foot" means IN FRONT of the run's start, in the deck's own
+			# frame: the deck point's flat position is reachable under the
+			# raised ramp too, and a body that stops there (or approaches the
+			# foot from above, under the ramp) can never be collected. Only a
+			# body in front of the foot walks up the ramp - which is how the
+			# staircase probe boards.
+			var in_front := deck_space.z < 0.2 and absf(deck_space.x) < 2.5
+			if docked_here and bool(staircase.call("on_deck", auth, tick, 2.4, 0.8)) \
+					and deck_space.z >= 1.2:
+				SimNet.forced_intent = {}
+				_ride_aboard = true
+				_ride_low = auth.y
+				_ride_high = auth.y
 				return
-			SimNet.forced_intent = {}
-			_ride_aboard = true
-			_ride_low = _auth_pos().y
-			_ride_high = _auth_pos().y
+			if not in_front:
+				# The straight line from the vestibule passes UNDER the flight
+				# and wedges against the ramp's toe (it descends to the floor at
+				# the foot), so the walker must go around the shaft: east
+				# corridor, then the apron in front of the ground dock.
+				if _walk_castle_route():
+					return
+			if docked_here and in_front:
+				_walk_toward(_deck_point(tick, 0.35))
+			else:
+				_walk_toward(_dock_wait_point())
 			return
 	# No staircase (or its window passed): leave through the vestibule exit.
 	var exit_centre := _portal_center(HPMaps.portal("vestibule_exit"))
@@ -458,7 +510,15 @@ func _step_castle() -> void:
 	if not _transfer_sent:
 		_transfer_sent = true
 		_step_t = _t
-		SimNet.request_transfer(player, "vestibule_exit", "grounds")
+		var result := SimNet.request_transfer(player, "vestibule_exit", "grounds")
+		_record("transfer_request", {"reason": String(result.get("reason", ""))})
+		SimAuthority.transfer_committed.connect(func(_peer: int, _token: int, granted: String, pos: Vector3, _spawn: String):
+			if granted == "grounds":
+				_castle_done = true
+				_castle_done_at = _t
+				_transfer_sent = false
+				_pass("castle_exit", "return transfer committed to %s at %s" % [granted, str(pos.round())])
+		, CONNECT_ONE_SHOT)
 	if _t - _step_t > 25.0:
 		_fail("castle_exit", "return transfer timed out")
 		_goto("logout")
@@ -474,12 +534,23 @@ func _ride_tick() -> void:
 		_pass("staircase", "rode the moving staircase %.1f m of vertical travel" % (_ride_high - _ride_low))
 		_record("staircase", {"low": _ride_low, "high": _ride_high, "dock": int(staircase.get("dock_index"))})
 		_ride_aboard = false
+		_ride_done = true
 		_step_t = _t
+		# The rider is now on an upper landing; walk back to the vestibule exit
+		# (the route may drop it into the hall, which is a short fall onto the
+		# ground floor, not a fall rescue).
+		return
 
 # ------------------------------------------------------------------ 8. logout
 
 func _step_logout() -> void:
 	if not _alive():
+		return
+	# The exit commit lands a frame or two before the client's replica shows the
+	# new position: sampling the logout state immediately would compare a stale
+	# interior position against the (correct) save and fail by the map's height.
+	if _castle_done and _t - _castle_done_at < 1.5:
+		SimNet.forced_intent = {}
 		return
 	var record: Dictionary = SimAuthority.entities.get(SimAuthority.local_uid, {})
 	_state_at_logout = {
@@ -488,10 +559,13 @@ func _step_logout() -> void:
 		"exp": int(record.get("exp", 0)),
 		"hp": int(record.get("hp", 0)),
 		"level": int(record.get("level", 0)),
+		"galleons": int(record.get("galleons", 0)),
+		"inventory": player.get("inventory").size() if player != null and is_instance_valid(player) else 0,
 		"character_id": int(character.get("id", 0)),
 	}
 	_record("state_at_logout", {"map": _state_at_logout["map"], "pos": str(_state_at_logout["pos"].round()),
-		"exp": _state_at_logout["exp"], "level": _state_at_logout["level"]})
+		"exp": _state_at_logout["exp"], "level": _state_at_logout["level"],
+		"galleons": _state_at_logout["galleons"], "inventory": _state_at_logout["inventory"]})
 	NetworkManager.disconnect_game()
 	_goto("verify_save")
 	_step_t = _t
@@ -505,20 +579,42 @@ func _step_verify_save() -> void:
 			_finish(1)
 			return
 		var loaded: Dictionary = res.get("character", {})
+		# The service returns the position as `pos: [x, y, z]`; accept the offline
+		# pos_x/y/z spelling too so either shape is read correctly.
 		var pos := Vector3(float(loaded.get("pos_x", 0.0)), float(loaded.get("pos_y", 0.0)), float(loaded.get("pos_z", 0.0)))
+		if loaded.get("pos") is Array and (loaded["pos"] as Array).size() == 3:
+			var saved: Array = loaded["pos"]
+			pos = Vector3(float(saved[0]), float(saved[1]), float(saved[2]))
 		var expected: Vector3 = _state_at_logout["pos"]
-		var same_map := true
 		var distance := pos.distance_to(expected)
 		var exp_ok := int(loaded.get("exp", -1)) >= int(_state_at_logout["exp"])
+		var level_ok := int(loaded.get("level", 0)) >= int(_state_at_logout["level"])
+		var map_ok := String(loaded.get("map_id", "")) == String(_state_at_logout["map"])
+		var gold_ok := int(loaded.get("galleons", -1)) >= int(_state_at_logout["galleons"])
+		var inventory: Array = loaded.get("inventory", [])
 		_record("reload", {"pos": str(pos.round()), "exp": int(loaded.get("exp", -1)),
+			"level": int(loaded.get("level", 0)), "map_id": String(loaded.get("map_id", "")),
+			"galleons": int(loaded.get("galleons", -1)), "inventory": inventory.size(),
 			"distance": distance, "expected": str(expected.round())})
 		if not exp_ok:
 			_fail("logout_state", "reloaded exp %d is below the session's %d" % [int(loaded.get("exp", -1)), int(_state_at_logout["exp"])])
+		elif not level_ok:
+			_fail("logout_state", "reloaded level %d is below the session's %d" % [int(loaded.get("level", 0)), int(_state_at_logout["level"])])
+		elif not map_ok:
+			_fail("logout_state", "reloaded map '%s' against the session's '%s'" % [
+				String(loaded.get("map_id", "")), String(_state_at_logout["map"])])
 		elif distance > 8.0:
 			_fail("logout_state", "reloaded position is %.1f m from the logout position" % distance)
+		elif not gold_ok:
+			_fail("logout_state", "reloaded galleons %d are below the session's %d" % [
+				int(loaded.get("galleons", -1)), int(_state_at_logout["galleons"])])
+		elif inventory.size() < int(_state_at_logout["inventory"]):
+			_fail("logout_state", "reloaded inventory has %d entries against the session's %d" % [
+				inventory.size(), int(_state_at_logout["inventory"])])
 		else:
-			_pass("logout_state", "character reloaded: exp %d, position %.1f m from logout" % [
-				int(loaded.get("exp", -1)), distance])
+			_pass("logout_state", "character reloaded: exp %d, level %d, map %s, %d item stack(s), position %.1f m from logout" % [
+				int(loaded.get("exp", -1)), int(loaded.get("level", 0)), String(loaded.get("map_id", "")),
+				inventory.size(), distance])
 		_finish(0)
 	)
 
@@ -655,6 +751,39 @@ func _deck_point(tick: int, along: float) -> Vector3:
 	var slope: float = staircase.call("slope")
 	var transform: Transform3D = staircase.call("platform_world_transform", tick)
 	return transform * Vector3(0.0, run * along * slope + 0.05, run * along)
+
+## The waiting spot in front of the ground dock's foot, on the floor: inside the
+## authority's boarding-approach volume but outside `on_deck`, so the rider can
+## wait "at the gate" while the platform is away or locked.
+func _dock_wait_point() -> Vector3:
+	return staircase.global_transform * (staircase.call("dock_origin", 0) + Vector3(0.0, 0.05, -1.0))
+
+## Walk around the grand staircase hall to the ground dock's apron: arrival
+## plate -> east corridor -> apron. The staircase's own landing plates define
+## this ring; the straight line from the vestibule crosses the shaft and cannot
+## reach the foot. Returns false once the apron waypoint is reached, so the
+## caller can switch to the waiting/boarding logic.
+var _castle_route_index := 0
+
+func _walk_castle_route() -> bool:
+	var route: Array = [
+		staircase.global_transform * Vector3(0.0, 0.05, 12.0),
+		staircase.global_transform * Vector3(19.0, 0.05, 10.0),
+		staircase.global_transform * Vector3(19.0, 0.05, -10.0),
+		staircase.global_transform * Vector3(0.0, 0.05, -10.0),
+	]
+	if _castle_route_index >= route.size():
+		return false
+	var target: Vector3 = route[_castle_route_index]
+	var flat := target - _auth_pos()
+	flat.y = 0.0
+	if flat.length() < 2.0:
+		_castle_route_index += 1
+		if _castle_route_index >= route.size():
+			return false
+		target = route[_castle_route_index]
+	_walk_toward(target)
+	return true
 
 # ---------------------------------------------------------------- main loop
 
