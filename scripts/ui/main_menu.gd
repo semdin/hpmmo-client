@@ -4,6 +4,16 @@ extends Control
 ## Authentication (PostgreSQL/SQLite), Character Selection, Character Creation, & Solo Mode
 
 # Panels
+## Account-service (HTTP API) port. Resolved once, in this order:
+##   1. an explicit `--api-port=N` on the command line;
+##   2. `HPMMO_API_URL` from the launcher handoff (the autoload already applied it,
+##      so its port is kept);
+##   3. `api_port` in client_config.json;
+##   4. the documented default, 8081.
+## It used to be the literal 8081 inside the `--ip` handling, which silently
+## ignored both the config key and the launcher's own URL.
+var api_port: int = 0
+
 @onready var auth_panel: Control = $AuthPanel
 @onready var char_select_panel: Control = $CharSelectPanel
 @onready var char_create_panel: Control = $CharCreatePanel
@@ -382,6 +392,13 @@ func _on_solo_pressed() -> void:
 	if is_inside_tree() and get_tree():
 		get_tree().change_scene_to_file("res://scenes/world/game_world.tscn")
 
+## The account-service port, resolved with the documented default.
+func _resolve_api_port() -> int:
+	if api_port <= 0:
+		api_port = 8081
+	return api_port
+
+
 func _load_client_config() -> void:
 	var paths = ["res://client_config.json", "user://client_config.json"]
 	for p in paths:
@@ -392,7 +409,14 @@ func _load_client_config() -> void:
 				if json_res is Dictionary:
 					var s_ip: String = str(json_res.get("server_ip", "213.250.145.75"))
 					var a_port: int = int(json_res.get("api_port", 8081))
-					DatabaseManager.api_base_url = "http://%s:%d" % [s_ip, a_port]
+					# Precedence: an explicit --api-port, then the launcher's
+					# HPMMO_API_URL (the autoload already applied it), then this
+					# file. Overwriting an already-resolved URL here used to
+					# discard the launcher handoff's port.
+					if api_port == 0:
+						api_port = a_port
+						if OS.get_environment("HPMMO_API_URL").strip_edges().is_empty():
+							DatabaseManager.api_base_url = "http://%s:%d" % [s_ip, api_port]
 					if json_res.has("server_ip") and ip_input:
 						ip_input.text = s_ip
 					if json_res.has("server_port") and port_input:
@@ -413,6 +437,12 @@ func _handle_cmdline_args() -> void:
 	var pass_val := ""
 	var should_autologin := false
 
+	# The account-service port first, so `--ip` anywhere on the line uses the
+	# value the caller asked for instead of the one resolved before it.
+	for arg in args:
+		if arg.begins_with("--api-port="):
+			api_port = int(arg.substr("--api-port=".length()))
+
 	for i in range(args.size()):
 		var arg = args[i]
 		if arg == "--user" and i + 1 < args.size():
@@ -422,7 +452,11 @@ func _handle_cmdline_args() -> void:
 		elif (arg == "--server" or arg == "--ip") and i + 1 < args.size():
 			if ip_input:
 				ip_input.text = args[i + 1]
-			DatabaseManager.api_base_url = "http://%s:8081" % args[i + 1]
+			# Only the host changes here: the port comes from --api-port, the
+			# launcher URL or the config (see api_port above), never a literal.
+			DatabaseManager.api_base_url = "http://%s:%d" % [args[i + 1], _resolve_api_port()]
+		elif arg.begins_with("--api-port="):
+			api_port = int(arg.substr("--api-port=".length()))
 		elif arg == "--port" and i + 1 < args.size():
 			if port_input:
 				port_input.text = args[i + 1]

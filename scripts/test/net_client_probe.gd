@@ -33,6 +33,10 @@ extends Node
 ##              then prove the body can move and request again
 ##   mounted    mount, then request entry into a flight-prohibited map
 ##   roundtrips alternate between two maps N times
+##   stand      enter the interior like happy, then hold still and sample the
+##              server's height (`--stand-seconds`, default 4) and walk straight
+##              ahead and sample again (`--walk-seconds`, default 3); the map's
+##              collision must keep the body on the interior floor
 ##   local      in-process authority checks (dead, pending, bad token, ...)
 
 const WORLD_SCENE = preload("res://scenes/world/game_world.tscn")
@@ -140,6 +144,20 @@ var _samples: Array = []
 var _local_samples: Array = []
 var _auth_samples: Array = []
 var _visibility_at := -1.0
+## `stand` scenario (interior-collision regression): after the transfer commits,
+## hold still and sample the authoritative height, then walk a few metres and
+## sample again. Both halves can be disabled with `--stand-seconds` /
+## `--walk-seconds` so the two claims are measured by their own run.
+var stand_seconds := 4.0
+var walk_seconds := 3.0
+var _stand_started := false
+var _stand_start := 0.0
+var _stand_samples: Array = []
+var _walk_started := false
+var _walk_start := 0.0
+var _walk_from := Vector3.ZERO
+var _walk_samples: Array = []
+var _next_sample_at := 0.0
 
 func _ready() -> void:
 	_parse_args()
@@ -228,6 +246,10 @@ func _parse_args() -> void:
 			transfer_portal = arg.substr(9)
 		elif arg.begins_with("--roundtrips="):
 			roundtrips = int(arg.substr(13))
+		elif arg.begins_with("--stand-seconds="):
+			stand_seconds = float(arg.substr(16))
+		elif arg.begins_with("--walk-seconds="):
+			walk_seconds = float(arg.substr(15))
 		elif arg.begins_with("--teleport-at="):
 			teleport_at = float(arg.substr(14))
 		elif arg.begins_with("--encounter="):
@@ -1432,6 +1454,8 @@ func _transfer_tick(_delta: float) -> void:
 			_mounted_tick()
 		"roundtrips":
 			_roundtrip_tick()
+		"stand":
+			_stand_tick()
 		_:
 			_single_transfer_tick()
 	if _t >= duration:
@@ -1450,6 +1474,71 @@ func _single_transfer_tick() -> void:
 		return
 	SimNet.forced_intent = {}
 	_send_transfer_request(portal)
+
+## Interior-collision regression (bug: entering the castle must not drop the body
+## to the outdoor ground). Enters through the door with the real handshake, then
+## holds still and samples the SERVER's height for `stand_seconds`, then walks
+## straight ahead for `walk_seconds` and samples again. The authority must keep
+## the body on the interior floor in both halves; maps_sim.py asserts the samples.
+func _stand_tick() -> void:
+	if _phase == 0:
+		_single_transfer_tick()
+		return
+	if _phase != 2 or _commit_at < 0.0:
+		return   # refused, expired, or the commit has not landed yet
+	if not _stand_started:
+		# The commit message and the first reconciliation snapshot are a few
+		# frames apart; the window starts once the body is really in the
+		# destination's y-band, so the sample set is about standing, not about
+		# the transfer's own placement frame.
+		var local_y := player.global_position.y if player != null and is_instance_valid(player) else 0.0
+		if (_auth_pos().y < 185.0 or local_y < 185.0) and _t - _commit_at < 3.0:
+			return
+		_stand_started = true
+		_stand_start = _t
+		SimNet.forced_intent = {}
+	if stand_seconds > 0.0 and not _walk_started and _t - _stand_start < stand_seconds:
+		_sample_hold(_stand_samples)
+		return
+	if not _walk_started:
+		_walk_started = true
+		_walk_start = _t
+		_walk_from = player.global_position if player != null and is_instance_valid(player) else _auth_pos()
+		SimNet.forced_intent = {"move": Vector2(0, -1), "yaw": 0.0, "jump": false, "descend": false}
+	if walk_seconds <= 0.0 or _t - _walk_start >= walk_seconds:
+		SimNet.forced_intent = {}
+		_finish_stand()
+		return
+	_sample_hold(_walk_samples)
+
+## One (t, server position, local position, on-floor) sample, throttled so the
+## transcript stays small while a fall cannot hide between samples.
+func _sample_hold(into: Array) -> void:
+	if _t < _next_sample_at:
+		return
+	_next_sample_at = _t + 0.1
+	var local: Array = []
+	var on_floor := false
+	if player != null and is_instance_valid(player):
+		local = _pos_array(player.global_position)
+		on_floor = bool(player.is_on_floor())
+	into.append({"t": snappedf(_t, 0.01), "auth": _pos_array(_auth_pos()),
+		"local": local, "floor": on_floor})
+
+func _finish_stand() -> void:
+	var moved := 0.0
+	if player != null and is_instance_valid(player):
+		moved = Vector2(player.global_position.x - _walk_from.x,
+			player.global_position.z - _walk_from.z).length()
+	_record("stand_report", {
+		"stand_seconds": stand_seconds,
+		"walk_seconds": walk_seconds,
+		"commit_pos": _pos_array(_commit_pos),
+		"stand_samples": _stand_samples,
+		"walk_samples": _walk_samples,
+		"walk_distance": moved,
+	})
+	_finish_transfer()
 
 func _expire_tick() -> void:
 	if _phase == 0:
