@@ -1,12 +1,1 @@
-{
-  "server_ip": "213.250.145.75",
-  "server_port": 7777,
-  "api_port": 8081,
-  "last_username": "mehmet",
-  "release_base_url": "https://213.250.145.75:8443/releases/channels/dev",
-  "status_url": "https://213.250.145.75:8443/status",
-  "release_channel": "dev",
-  "release_public_key": "esKd/SD57YU8pPbapFWLGgLpdldYYCE+eqNNG6uKyDI=",
-  "release_public_key_id": "b521bf434e299b1963781ec249a2882068a42d881ef86d8ee31c76f74458399b",
-  "pinned_spki_sha256": "703a2267c7b37414632dc23d628eca31df70029581b5d19603f5589902a78fae"
-}
+{"api_port":8081,"last_username":"mehmet","pinned_spki_sha256":"703a2267c7b37414632dc23d628eca31df70029581b5d19603f5589902a78fae","release_base_url":"https://213.250.145.75:8443/releases/channels/dev","release_channel":"dev","release_public_key":"esKd/SD57YU8pPbapFWLGgLpdldYYCE+eqNNG6uKyDI=","release_public_key_id":"b521bf434e299b1963781ec249a2882068a42d881ef86d8ee31c76f74458399b","server_ip":"213.250.145.75","server_port":7777,"status_url":"https://213.250.145.75:8443/status"}
