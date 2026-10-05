@@ -13,19 +13,8 @@ if exist "launcher_cpp\build\HPMMO_Launcher.exe" (
     exit /b 0
 )
 
-:: Fallback to python launcher if native binary is missing
-where pythonw >nul 2>nul
-if %errorlevel% equ 0 (
-    start "" pythonw launcher\hpmmo_launcher.py
-    exit /b 0
-)
-
-where python >nul 2>nul
-if %errorlevel% equ 0 (
-    start "" python launcher\hpmmo_launcher.py
-    exit /b 0
-)
-
-echo [WARNING] HPMMO_Launcher.exe or Python not found.
-echo Launching HPMMO directly...
+echo [ERROR] HPMMO_Launcher.exe not found. Please build it:
+echo   cmake -S launcher_cpp -B launcher_cpp/build -G Ninja
+echo   ninja -C launcher_cpp/build
+echo Falling back to direct launch...
 call play.bat

@@ -34,8 +34,10 @@ target_link_libraries(hpmmo_core PUBLIC
 target_compile_options(hpmmo_core PRIVATE -O2)
 
 # GUI launcher (unchanged distribution path, now updater-aware).
+# app.rc embeds the exe/taskbar/titlebar icon + version info.
 add_executable(HPMMO_Launcher WIN32
     src/main.cpp
+    app.rc
 )
 target_link_libraries(HPMMO_Launcher PRIVATE
     hpmmo_core

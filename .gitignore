@@ -8,7 +8,6 @@
 *.zip
 
 # Launcher & Browser Caches
-launcher/.cache/
 .cache/
 
 # C++ Build Artifacts
