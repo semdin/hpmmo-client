@@ -2,12 +2,12 @@
  "schema": 1,
  "generated": "2026-10-04",
  "project": "HPMMO",
- "notes": "Phase 2 manifest. Measured fields come from tools/asset_audit.py; license fields were download- and adversarially-verified during Phase 2 research (see docs/art-direction.md section 8). Candidate assets are review-stage: excluded from release packaging until promoted. | Phase 9 (2026-10-04): hero and flight broom integrated; hero_final_art and broom_model entries updated with measured values, see docs/phase9-rig-and-sockets.md. Phase 10 added 11 project-authored PBR texture sets (Blender-authored, deterministic) and 37 project-authored Gothic kit modules, and promoted the four curated Poly Haven sets into assets/textures/pbr/. All Phase 10 art is recorded here with hashes, physical scale, texel density and map list; the game-side contract is client/scripts/assets/pbr_kit.gd. | Phase 11 (2026-10-05): authored spider (phase11-acromantula) and both boss bodies (phase11-boss-matriarch, phase11-boss-commander) recorded with measured tris/joints/clips/LODs; the Quaternius Inferi and Dark Snatcher minions are marked placeholders.",
+ "notes": "Phase 2 manifest. Measured fields come from tools/asset_audit.py; license fields were download- and adversarially-verified during Phase 2 research (see docs/art-direction.md section 8). Candidate assets are review-stage: excluded from release packaging until promoted. | Phase 9 (2026-10-04): hero and flight broom integrated; hero_final_art and broom_model entries updated with measured values, see docs/phase9-rig-and-sockets.md. Phase 10 added 11 project-authored PBR texture sets (Blender-authored, deterministic) and 37 project-authored Gothic kit modules, and promoted the four curated Poly Haven sets into assets/textures/pbr/. All Phase 10 art is recorded here with hashes, physical scale, texel density and map list; the game-side contract is client/scripts/assets/pbr_kit.gd. | Phase 11 (2026-10-05): authored spider (phase11-acromantula) and both boss bodies (phase11-boss-matriarch, phase11-boss-commander) recorded with measured tris/joints/clips/LODs; the Quaternius Inferi and Dark Snatcher minions are marked placeholders. | Phase 12 (2026-10-05): every missing VFX inventory item is now project-original art authored by tools/blender/phase12_vfx.py (four coherent 64-frame flipbooks, ripple/rune/mark/lightning atlases, glow/noise/flow/distortion/streak/fracture textures) and tools/blender/phase12_meshes.py (trail ribbon, shield shell, projectile core, shards); the whole sound library is original synthesis from tools/audio/synth_phase12.py. The two Kenney stills remain as particle ingredients, not effects. No VFX or audio entry remains missing or placeholder. Phase 12 also closed the two VFX/audio gaps Phase 2 had left open: vfx_distortion_flow (distortion + flow data textures) and sfx_room_tone (Great Hall / library / dungeon room tones) are now integrated. | Phase 12 (2026-10-05): every missing VFX inventory item is now project-original art authored by tools/blender/phase12_vfx.py (four coherent 64-frame flipbooks, ripple/rune/mark/lightning atlases, glow/noise/flow/distortion/streak/fracture textures) and tools/blender/phase12_meshes.py (trail ribbon, shield shell, projectile core, shards); the whole sound library is original synthesis from tools/audio/synth_phase12.py. The two Kenney stills remain as particle ingredients, not effects. No VFX or audio entry remains missing or placeholder.",
  "summary": {
   "candidate": 31,
-  "placeholder": 7,
-  "integrated": 108,
-  "missing": 6
+  "placeholder": 6,
+  "integrated": 132,
+  "missing": 4
  },
  "assets": [
   {
@@ -6617,8 +6617,47 @@
   },
   {
    "id": "vfx_trail_mesh",
-   "purpose": "camera-aware tapered ribbon mesh for broom/projectile trails",
-   "status": "placeholder",
+   "purpose": "camera-aware tapered strip driven by a sample history (broom trail, projectile ribbon, Expelliarmus)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "scripts/entities/broom_flight.gd",
+    "assets/vfx/meshes/trail_ribbon.glb",
+    "tools/blender/phase12_meshes.py",
+    "tools/blender/phase12_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/trail_ribbon.glb": "01e4bea59e0df7c3154abff43f30c56e2f6eee4cc6854689c601efdcda0c43e8"
+   },
+   "scale_m": "",
+   "triangles": 48,
+   "material_slots": "",
+   "textures": {},
+   "rig": {},
+   "collision": "",
+   "lods": "",
+   "blocks": "Phase 12",
+   "notes": "A tapered textured ribbon driven by the broom socket's own velocity ships with the Phase 9 broom (ImmediateMesh strip + additive flame texture, width and colour scaled by speed/acceleration), plus wisp quads and sparse sparks. Projectile ribbons and the general camera-aware version remain Phase 12 work.",
+   "acceptance": "tools/blender/phase12_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the Phase 12 checks",
+   "generator": "tools/blender/phase12_meshes.py (Blender 5.2.2)",
+   "vertices": 50,
+   "uv": "U along the length (0 emitter -> 1 tip), V across (0..1)",
+   "bounds_m": [
+    1.0,
+    0.06,
+    1.0
+   ],
+   "taper_profile": "alpha = max(0.02, (1-t)^1.35), authored into vertex colour alpha"
+  },
+  {
+   "id": "vfx_distortion_flow",
+   "purpose": "distortion/flow data textures delivered: distortion_512 (RG vector + magnitude) and noise_flow_512 (flow vector + tileable noise), project-original, authored by tools/blender/phase12_vfx.py; consumed by the shield's flowing field",
+   "status": "integrated",
    "author": "",
    "source_url": "",
    "license": "",
@@ -6626,7 +6665,9 @@
    "license_file": "",
    "attribution_required": false,
    "local_paths": [
-    "scripts/entities/broom_flight.gd"
+    "assets/vfx/tex/distortion_512.png",
+    "assets/vfx/tex/noise_flow_512.png",
+    "tools/blender/phase12_vfx.py"
    ],
    "sha256": {},
    "scale_m": "",
@@ -6637,43 +6678,26 @@
    "collision": "",
    "lods": "",
    "blocks": "Phase 12",
-   "notes": "A tapered textured ribbon driven by the broom socket's own velocity ships with the Phase 9 broom (ImmediateMesh strip + additive flame texture, width and colour scaled by speed/acceleration), plus wisp quads and sparse sparks. Projectile ribbons and the general camera-aware version remain Phase 12 work.",
-   "acceptance": ""
-  },
-  {
-   "id": "vfx_distortion_flow",
-   "purpose": "distortion/flow data textures for heat haze and shields",
-   "status": "missing",
-   "author": "",
-   "source_url": "",
-   "license": "",
-   "license_url": "",
-   "license_file": "",
-   "attribution_required": false,
-   "local_paths": [],
-   "sha256": {},
-   "scale_m": "",
-   "triangles": "",
-   "material_slots": "",
-   "textures": {},
-   "rig": {},
-   "collision": "",
-   "lods": "",
-   "blocks": "Phase 12",
    "notes": "no free verified source in this pass",
-   "acceptance": ""
+   "acceptance": "",
+   "resolved_by": "vfx_distortion / vfx_noise_flow (Phase 12)"
   },
   {
    "id": "sfx_room_tone",
-   "purpose": "interior ambience/room-tone loops (Great Hall, library, dungeon)",
-   "status": "missing",
+   "purpose": "interior room tones delivered as original synthesis: the Great Hall (large reverberant bed), the library (tight dry tone with a clock and paper rustle) and the dungeon (wet stone with water drips), plus fire and candle beds",
+   "status": "integrated",
    "author": "",
    "source_url": "",
    "license": "",
    "license_url": "",
    "license_file": "",
    "attribution_required": false,
-   "local_paths": [],
+   "local_paths": [
+    "assets/audio/ambience/great_hall.wav",
+    "assets/audio/ambience/library.wav",
+    "assets/audio/ambience/dungeon.wav",
+    "tools/audio/synth_phase12.py"
+   ],
    "sha256": {},
    "scale_m": "",
    "triangles": "",
@@ -6684,7 +6708,8 @@
    "lods": "",
    "blocks": "Phase 12.5",
    "notes": "Kenney/oGA candidate pass found no verified CC0 room tones",
-   "acceptance": ""
+   "acceptance": "",
+   "resolved_by": "amb_great_hall / amb_library / amb_dungeon (Phase 12)"
   },
   {
    "id": "music_beds",
@@ -8671,6 +8696,734 @@
     "tools/downloads/commander-dead.png"
    ],
    "scale_source": "tools/asset_audit.py world-space bind-pose AABB (metres)"
+  },
+  {
+   "id": "vfx_flame_loop",
+   "purpose": "Loaning flame plume flipbook: Incendio sustain, Ultimate tail, torches",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/flame_loop_8x8_2k.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/flame_loop_8x8_2k.png": "d521ae0ea5e4eb2aa4334207c840306b16a22fc30fbdb8417f866770d1dfb991"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 64,
+   "loop": true,
+   "fps": 30,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 256,
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "padding_px": 4,
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "alpha",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_flame_loop.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-flame_loop_8x8_2k.png"
+   ]
+  },
+  {
+   "id": "vfx_fire_burst",
+   "purpose": "Non-looping directional fire burst: Incendio cast/impact",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/fire_burst_8x8_2k.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/fire_burst_8x8_2k.png": "b0da57bc4c52f020c856b61f0ea4e61597c39edee27272448e7202fa8783c5e8"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 64,
+   "loop": false,
+   "fps": 40,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 256,
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "padding_px": 4,
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "alpha",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_fire_burst.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-fire_burst_8x8_2k.png"
+   ]
+  },
+  {
+   "id": "vfx_smoke_puff",
+   "purpose": "Evolving soft smoke: Incendio extinguish, Bombarda dust, Ultimate tail",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/smoke_puff_8x8_2k.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/smoke_puff_8x8_2k.png": "021717d121e18be4b1689d843d14589ae260134ad55b942cfcd12c58dd8a1428"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 64,
+   "loop": false,
+   "fps": 24,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 256,
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "padding_px": 4,
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "alpha",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_smoke_puff.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-smoke_puff_8x8_2k.png"
+   ]
+  },
+  {
+   "id": "vfx_energy_impact",
+   "purpose": "Irregular magical impact: every projectile hit and the Ultimate strike",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/energy_impact_8x8_2k.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/energy_impact_8x8_2k.png": "edc2227fb7de53edb390e39976827d166cba2de4b448c1a8925abc28e085d5dd"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 64,
+   "loop": false,
+   "fps": 40,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 256,
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "padding_px": 4,
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_energy_impact.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-energy_impact_8x8_2k.png"
+   ]
+  },
+  {
+   "id": "vfx_shield_ripple",
+   "purpose": "Local shield impact ripple with a fracture tail: Protego hit response",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/shield_ripple_4x4_1k.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/shield_ripple_4x4_1k.png": "8458b01400a74fc20dc9bc9f0853ab23541ee38513c6e8fd76385c6688061b4b"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 16,
+   "loop": false,
+   "fps": 24,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 256,
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "padding_px": 4,
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_shield_ripple.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-shield_ripple_4x4_1k.png"
+   ]
+  },
+  {
+   "id": "vfx_soft_glow",
+   "purpose": "Soft radial glow used by muzzle flashes, ember sprites and impact cores",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/soft_glow_512.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/soft_glow_512.png": "0f67291eb3eb7bb21dc31a6edcdc270ce3deb53626bb005c4facda393d98bc29"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 512,
+   "sheet_px": [
+    512,
+    512
+   ],
+   "padding_px": 0,
+   "alpha": "straight",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_soft_glow.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-soft_glow_512.png"
+   ]
+  },
+  {
+   "id": "vfx_noise_flow",
+   "purpose": "Tileable flow + noise data for the shield's flowing field and streak scroll",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/noise_flow_512.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/noise_flow_512.png": "af773990f91e9f0dae93b2152e8280968e6fe4a52d38e40a1e119264fb37894e"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 512,
+   "sheet_px": [
+    512,
+    512
+   ],
+   "padding_px": 0,
+   "alpha": "none (A=1)",
+   "colour_space": "linear data",
+   "blend_default": "n/a (data)",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_noise_flow.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-noise_flow_512.png"
+   ],
+   "channel_convention": "R,G = normalised flow vector, B = tileable value noise",
+   "tiling": "tileable on both axes"
+  },
+  {
+   "id": "vfx_noise_erosion",
+   "purpose": "Tileable erosion noise for the shield's expiration dissolve",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/noise_erosion_512.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/noise_erosion_512.png": "c35f0c385f6cc65b09a556ee528ea9349d2c57d102c7ddf8c15645ab46c99ac3"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 512,
+   "sheet_px": [
+    512,
+    512
+   ],
+   "padding_px": 0,
+   "alpha": "none (A=1)",
+   "colour_space": "linear data",
+   "blend_default": "n/a (data)",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_noise_erosion.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-noise_erosion_512.png"
+   ],
+   "tiling": "tileable on both axes"
+  },
+  {
+   "id": "vfx_distortion",
+   "purpose": "Heat-haze/refraction vector data (available to the distortion layer)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/distortion_512.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/distortion_512.png": "3930f153318e4de19a95210830982195694cd543ce9bea732ab094ac49d32d93"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 512,
+   "sheet_px": [
+    512,
+    512
+   ],
+   "padding_px": 0,
+   "alpha": "none (A=1)",
+   "colour_space": "linear data",
+   "blend_default": "n/a (data)",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_distortion.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-distortion_512.png"
+   ],
+   "channel_convention": "R,G = distortion vector, B = magnitude",
+   "tiling": "tileable on both axes"
+  },
+  {
+   "id": "vfx_energy_streak",
+   "purpose": "Tapered streak mask for projectile trails, the Expelliarmus ribbon and the broom trail",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/energy_streak_1024x256.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/energy_streak_1024x256.png": "5b9b62157d9461943eb379e17e50a01cae11aa6721d30444a6ec87fe8554ac90"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 1024,
+   "sheet_px": [
+    1024,
+    256
+   ],
+   "padding_px": 0,
+   "alpha": "straight",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_energy_streak.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-energy_streak_1024x256.png"
+   ]
+  },
+  {
+   "id": "vfx_shield_fracture",
+   "purpose": "Fracture mask drawn over the ward as it expires",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/shield_fracture_512.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/shield_fracture_512.png": "47f65b36a07fc7403a38e019bc651d1782656ddafcf277255f71219f0becd795"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 512,
+   "sheet_px": [
+    512,
+    512
+   ],
+   "padding_px": 0,
+   "alpha": "straight (mask)",
+   "colour_space": "linear data (white mask)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_shield_fracture.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-shield_fracture_512.png"
+   ]
+  },
+  {
+   "id": "vfx_ground_marks",
+   "purpose": "Scorch, dust ring, fragment spray and cracked ring ground marks",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/ground_marks_2x2_1k.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/ground_marks_2x2_1k.png": "ed6f31f65444f213c69ed271706cd1860514d2711e34d138b79387307b489f6e"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 4,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 512,
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "padding_px": 4,
+   "alpha": "straight (mask)",
+   "colour_space": "linear data (white mask)",
+   "blend_default": "alpha",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_ground_marks.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-ground_marks_2x2_1k.png"
+   ]
+  },
+  {
+   "id": "vfx_rune_masks",
+   "purpose": "Restrained rune/telegraph masks: boss warning, ward glyph, countdown",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/rune_masks_2x2_1k.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/rune_masks_2x2_1k.png": "493ef2f30990569f7ab28028c2151e84f22ca880b00d14d8174dfddd02903b13"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 4,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 512,
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "padding_px": 4,
+   "alpha": "straight (mask)",
+   "colour_space": "linear data (white mask)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_rune_masks.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-rune_masks_2x2_1k.png"
+   ]
+  },
+  {
+   "id": "vfx_lightning_branches",
+   "purpose": "Irregular branching energy masks for the Ultimate strike",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/lightning_branches_2x2_1k.png",
+    "tools/blender/phase12_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/lightning_branches_2x2_1k.png": "b8f26af8e55be811c6d0f9d58c13027c4eda30569209a72141678f9d95c0c9de"
+   },
+   "generator": "tools/blender/phase12_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 4,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 512,
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "padding_px": 4,
+   "alpha": "straight (mask)",
+   "colour_space": "linear data (white mask)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "phase12 metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/phase12-atlas-vfx_lightning_branches.png, and run_phase12_checks.ps1",
+   "evidence": [
+    "tools/downloads/phase12-atlas-lightning_branches_2x2_1k.png"
+   ]
+  },
+  {
+   "id": "vfx_shield_mesh",
+   "purpose": "Protego shell - the one effect where a solid surface is intentional; scaled to the 1.8 m ward radius at runtime",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/shield_shell.glb",
+    "tools/blender/phase12_meshes.py",
+    "tools/blender/phase12_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/shield_shell.glb": "d765fa52b30601875bdbb6fcc4a4398deadb860f433da0007db2bf4da4938661"
+   },
+   "generator": "tools/blender/phase12_meshes.py (Blender 5.2.2)",
+   "triangles": 952,
+   "vertices": 478,
+   "uv": "spherical (u around, v top to bottom)",
+   "bounds_m": [
+    2.0,
+    2.0,
+    2.0
+   ],
+   "acceptance": "tools/blender/phase12_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the Phase 12 checks",
+   "radius_m": 1.0
+  },
+  {
+   "id": "vfx_projectile_mesh",
+   "purpose": "subtle carrier core inside projectile streaks (replaces the placeholder sphere)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/projectile_core.glb",
+    "tools/blender/phase12_meshes.py",
+    "tools/blender/phase12_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/projectile_core.glb": "c0bd46ff58a8a760c1bf950af0c94b44bc75941ffd7fd96a503fa1d65e231a3e"
+   },
+   "generator": "tools/blender/phase12_meshes.py (Blender 5.2.2)",
+   "triangles": 64,
+   "vertices": 34,
+   "uv": "cylindrical wrap",
+   "bounds_m": [
+    0.5,
+    0.5,
+    2.224
+   ],
+   "acceptance": "tools/blender/phase12_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the Phase 12 checks"
+  },
+  {
+   "id": "vfx_shard_meshes",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/shards.glb",
+    "tools/blender/phase12_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/shards.glb": "a05e0f221ffcde25492fc4b6c671c4ab06b10f69ecfd28f1df507eddfc243ca0"
+   },
+   "generator": "tools/blender/phase12_meshes.py (Blender 5.2.2)",
+   "triangles": 8,
+   "vertices": 6,
+   "uv": "",
+   "bounds_m": [
+    0.1108,
+    0.0952,
+    0.1395
+   ],
+   "acceptance": "tools/blender/phase12_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the Phase 12 checks"
+  },
+  {
+   "id": "vfx_shard_meshes",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/shards.glb",
+    "tools/blender/phase12_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/shards.glb": "a05e0f221ffcde25492fc4b6c671c4ab06b10f69ecfd28f1df507eddfc243ca0"
+   },
+   "generator": "tools/blender/phase12_meshes.py (Blender 5.2.2)",
+   "triangles": 8,
+   "vertices": 6,
+   "uv": "",
+   "bounds_m": [
+    0.0826,
+    0.1104,
+    0.1844
+   ],
+   "acceptance": "tools/blender/phase12_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the Phase 12 checks"
+  },
+  {
+   "id": "vfx_shard_meshes",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/shards.glb",
+    "tools/blender/phase12_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/shards.glb": "a05e0f221ffcde25492fc4b6c671c4ab06b10f69ecfd28f1df507eddfc243ca0"
+   },
+   "generator": "tools/blender/phase12_meshes.py (Blender 5.2.2)",
+   "triangles": 8,
+   "vertices": 6,
+   "uv": "",
+   "bounds_m": [
+    0.102,
+    0.1056,
+    0.2934
+   ],
+   "acceptance": "tools/blender/phase12_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the Phase 12 checks"
+  },
+  {
+   "id": "vfx_shard_meshes",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/shards.glb",
+    "tools/blender/phase12_meshes.py",
+    "tools/blender/phase12_meshes.py",
+    "tools/blender/phase12_meshes.py",
+    "tools/blender/phase12_meshes.py",
+    "tools/blender/phase12_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/shards.glb": "a05e0f221ffcde25492fc4b6c671c4ab06b10f69ecfd28f1df507eddfc243ca0"
+   },
+   "generator": "tools/blender/phase12_meshes.py (Blender 5.2.2)",
+   "triangles": 8,
+   "vertices": 6,
+   "uv": "",
+   "bounds_m": [
+    0.1214,
+    0.1118,
+    0.2684
+   ],
+   "acceptance": "tools/blender/phase12_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the Phase 12 checks"
+  },
+  {
+   "id": "sfx_spell_library",
+   "purpose": "Phase 12 sound library: distinct cast/travel/impact/sustain/end variants for all seven spells, surface footsteps, robe movement, mount/dismount, broom wind, landing, spider movement/bites/death, boss attacks and death, UI feedback, map transitions, exterior wind and birds, interior room tones (Great Hall / library / dungeon), fire and candle beds, distant activity and the moving-stair mechanism",
+   "status": "integrated",
+   "author": "HPMMO project (original synthesis)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/audio/CREDITS-phase12.md",
+   "license_file": "assets/audio/CREDITS-phase12.md",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/audio/",
+    "tools/audio/synth_phase12.py",
+    "tools/audio/tune_imports.py"
+   ],
+   "generator": "tools/audio/synth_phase12.py (Python standard library, seeded 20261005)",
+   "sound_count": 84,
+   "buses": [
+    "Music",
+    "SFX",
+    "UI",
+    "Ambience"
+   ],
+   "import_policy": "loop beds import with the forward loop flag and IMA-ADPCM; everything over two seconds stays compressed; enforced by tools/audio/tune_imports.py --check",
+   "acceptance": "run_phase12_checks.ps1 (every stage's sound exists and is distinct, every loop imports as a loop, buses and volume controls present, limiter and priority keys configured) and tools/downloads/phase12-check.log",
+   "evidence": [
+    "assets/audio/sound_library.json",
+    "tools/downloads/phase12-check.log"
+   ]
   }
  ],
  "rejected": [

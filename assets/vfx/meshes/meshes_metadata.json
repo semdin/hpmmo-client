@@ -1,0 +1,129 @@
+{
+ "schema": 1,
+ "generator": "client/tools/blender/phase12_meshes.py",
+ "blender": "5.2.2",
+ "generated": "2026-10-05",
+ "units": "metres; glTF +Y up; untextured (the game assigns materials)",
+ "provenance": "project-original authored geometry; no imported or third-party mesh",
+ "meshes": [
+  {
+   "name": "TrailRibbon",
+   "vertices": 50,
+   "triangles": 48,
+   "has_uv": true,
+   "bounds_m": [
+    1.0,
+    0.06,
+    1.0
+   ],
+   "id": "vfx_trail_mesh",
+   "file": "meshes/trail_ribbon.glb",
+   "bytes": 5216,
+   "uv": "U along the length (0 emitter -> 1 tip), V across (0..1)",
+   "taper_profile": "alpha = max(0.02, (1-t)^1.35), authored into vertex colour alpha",
+   "forward": "+Z (length), width in X, authored sag -Y",
+   "authored": "tools/blender/phase12_meshes.py",
+   "purpose": "camera-aware tapered strip driven by a sample history (broom trail, projectile ribbon, Expelliarmus)"
+  },
+  {
+   "name": "ShieldShell",
+   "vertices": 478,
+   "triangles": 952,
+   "has_uv": true,
+   "bounds_m": [
+    2.0,
+    2.0,
+    2.0
+   ],
+   "id": "vfx_shield_mesh",
+   "file": "meshes/shield_shell.glb",
+   "bytes": 69360,
+   "uv": "spherical (u around, v top to bottom)",
+   "radius_m": 1.0,
+   "authored": "tools/blender/phase12_meshes.py",
+   "purpose": "Protego shell - the one effect where a solid surface is intentional; scaled to the 1.8 m ward radius at runtime"
+  },
+  {
+   "name": "ProjectileCore",
+   "vertices": 34,
+   "triangles": 64,
+   "has_uv": true,
+   "bounds_m": [
+    0.5,
+    0.5,
+    2.224
+   ],
+   "id": "vfx_projectile_mesh",
+   "file": "meshes/projectile_core.glb",
+   "bytes": 5960,
+   "uv": "cylindrical wrap",
+   "forward": "+Z",
+   "authored": "tools/blender/phase12_meshes.py",
+   "purpose": "subtle carrier core inside projectile streaks (replaces the placeholder sphere)"
+  },
+  {
+   "name": "Shard_A",
+   "vertices": 6,
+   "triangles": 8,
+   "has_uv": true,
+   "bounds_m": [
+    0.1108,
+    0.0952,
+    0.1395
+   ],
+   "id": "vfx_shard_meshes",
+   "file": "meshes/shards.glb",
+   "bytes": 6428,
+   "authored": "tools/blender/phase12_meshes.py",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)"
+  },
+  {
+   "name": "Shard_B",
+   "vertices": 6,
+   "triangles": 8,
+   "has_uv": true,
+   "bounds_m": [
+    0.0826,
+    0.1104,
+    0.1844
+   ],
+   "id": "vfx_shard_meshes",
+   "file": "meshes/shards.glb",
+   "bytes": 6428,
+   "authored": "tools/blender/phase12_meshes.py",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)"
+  },
+  {
+   "name": "Shard_C",
+   "vertices": 6,
+   "triangles": 8,
+   "has_uv": true,
+   "bounds_m": [
+    0.102,
+    0.1056,
+    0.2934
+   ],
+   "id": "vfx_shard_meshes",
+   "file": "meshes/shards.glb",
+   "bytes": 6428,
+   "authored": "tools/blender/phase12_meshes.py",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)"
+  },
+  {
+   "name": "Shard_D",
+   "vertices": 6,
+   "triangles": 8,
+   "has_uv": true,
+   "bounds_m": [
+    0.1214,
+    0.1118,
+    0.2684
+   ],
+   "id": "vfx_shard_meshes",
+   "file": "meshes/shards.glb",
+   "bytes": 6428,
+   "authored": "tools/blender/phase12_meshes.py",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)"
+  }
+ ]
+}

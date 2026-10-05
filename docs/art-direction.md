@@ -138,9 +138,9 @@ Candidates obtained for: spider (rigged+animated GLB), flipbooks (fire/smoke/ene
 | `hero_final_art` | textured, clothed, grounded-fantasy hero + full clip set | Phase 9 | candidates are untextured; textured originals are manual-download (Quaternius itch 122-280 MB or Drive-blocked) — decide: manual download, texture the candidate ourselves, or commission |
 | `broom_model` | shaped broom (shaft/grip/bristles) + seat socket | Phase 9 | current: two cylinder primitives |
 | `monster_variants_final` | grounded dark-wizard + inferi matching the hero style | Phase 11 | spider candidate secured; rest still Quaternius placeholders |
-| `vfx_trail_mesh` | camera-aware tapered ribbon (broom/projectile trails) | Phase 12 | author procedurally or in Blender (not installed) |
-| `vfx_distortion_flow` | distortion/flow data textures (heat haze, shield flow) | Phase 12 | no verified free source found |
-| `sfx_room_tone` | interior ambience loops (Great Hall, library, dungeon) | Phase 12.5 | no verified CC0 room tones found |
+| `vfx_trail_mesh` | camera-aware tapered ribbon (broom/projectile trails) | **closed Phase 12** | authored by `tools/blender/phase12_meshes.py` (`trail_ribbon.glb`, taper in vertex colour alpha) |
+| `vfx_distortion_flow` | distortion/flow data textures (heat haze, shield flow) | **closed Phase 12** | `vfx_distortion` / `vfx_noise_flow`, authored by `tools/blender/phase12_vfx.py` |
+| `sfx_room_tone` | interior ambience loops (Great Hall, library, dungeon) | **closed Phase 12** | `amb_great_hall` / `amb_library` / `amb_dungeon`, original synthesis |
 | `music_beds` | long-form menu/exploration/combat music | Phase 12.5 | jingles only so far |
 | `ui_icons` | spell/item/status icons in one style | Phase 13 | UI currently uses text |
 | `character_equipment_variants` | robe/hat/house variants | Phase 9/13 | needs the final hero first |
@@ -245,3 +245,106 @@ arrives on a client.
 
 **Evidence.** `tools/downloads/spider-*.png`, `matriarch-*.png`, `commander-*.png`, the build scripts'
 validation blocks, and `server/tests/encounters_sim.py` (pack/boss/corpse/reward behaviour).
+
+## 13. Phase 12 - spell VFX, the broom trail, the boss warning and sound (implemented 2026-10-05)
+
+**What changed.** The seven spells, the broom trail and the boss warning are now layered, animated
+effects built from a published inventory instead of spheres, rings and cylinders, and the game has a
+soundscape. The two Kenney stills remain what they always were - particle ingredients - and are now
+only that.
+
+### 13.1 VFX source art (`client/tools/blender/phase12_vfx.py`, Blender 5.2.2, headless)
+
+Every image is **project-original** and **simulated, not sampled**: each animated atlas is one
+continuous band-limited field in (x, y, t) sampled at consecutive frames, so the frames are consecutive
+samples of the same structures - authored order, consistent motion, no popping. The looping atlas is
+periodic in t, so frame 63 blends into frame 0. The method is stated in the metadata: this is the
+plan's "simulate them" route, not 64 unrelated stills.
+
+| Asset | Format | Frames / loop | Notes |
+| --- | --- | --- | --- |
+| `vfx_flame_loop` | 8x8, 2048, 256 px cells | 64 @ 30 fps, looping | flame plume: soot-to-core ramp, eroded tips, hot root |
+| `vfx_fire_burst` | 8x8, 2048 | 64 @ 40 fps, one-shot | expanding front pulled about by the turbulence |
+| `vfx_smoke_puff` | 8x8, 2048 | 64 @ 24 fps, one-shot | grey lit smoke, two turbulence scales, dissolving |
+| `vfx_energy_impact` | 8x8, 2048 | 64 @ 40 fps, one-shot | irregular fronts, radial jets, spiky core |
+| `vfx_shield_ripple` | 4x4, 1024 | 16 @ 24 fps, one-shot | two-wave ripple plus an appearing fracture |
+| `vfx_ground_marks` | 2x2, 1024 | 4 static | scorch, dust ring, fragment spray, cracked ring |
+| `vfx_rune_masks` | 2x2, 1024 | 4 static masks | telegraph circle, countdown ring, directional lune, ward glyph |
+| `vfx_lightning_branches` | 2x2, 1024 | 4 static masks | recursive branching strikes |
+| `vfx_soft_glow`, `vfx_noise_flow`, `vfx_noise_erosion`, `vfx_distortion` | 512 | single | glow; flow+noise; erosion; distortion data |
+| `vfx_energy_streak` | 1024x256 | single | tapered streak for trails and ribbons |
+| `vfx_shield_fracture` | 512 | single | ward fracture mask |
+
+**Published per-atlas metadata** (`assets/vfx/metadata.json`, generated with the art) records frame
+count, grid, frame order (row-major from the top-left cell), FPS, loop flag, alpha convention
+(straight, linear), padding, colour space and the temporal method. **Base colour is sRGB-encoded;
+masks, flow, erosion and distortion are raw linear data**, and the shaders declare the colour space
+per sampler. **Blend mode is chosen per layer** (see the composition table) - smoke is alpha-blended
+grey, never additive white light.
+
+**Padding and mipmap bleeding.** Every cell carries a 4 px zero-alpha, zero-colour gutter and the
+content fades to zero before it, so no mip level can carry one cell's content into its neighbour.
+Both the generator and `run_phase12_checks.ps1` assert the gutter is empty on the shipped file.
+
+### 13.2 VFX meshes (`client/tools/blender/phase12_meshes.py`)
+
+`trail_ribbon.glb` (48 tris; U along the length 0->1, V across; authored taper `max(0.02,(1-t)^1.35)`
+in vertex colour alpha), `shield_shell.glb` (952 tris, UV sphere - the one place a solid surface is
+correct), `projectile_core.glb` (64 tris, faceted teardrop carrier) and `shards.glb`
+(Shard_A..D, 8 tris each). All project-original, all UV-mapped, all under the low-poly budget.
+
+### 13.3 Composition (`client/scripts/spells/vfx_library.gd`)
+
+The spell-by-spell table from plan.md 12.3 lives in one place and the effect scenes build from it -
+there is no second copy. Per spell: cast / travel / impact / sustain / end as the spell needs them.
+Incendio is a **cone burst plus a server-timed burn** (no travel stage: `spells.json` says
+`delivery: cone`), Protego **sustains a mesh shell** while its rule stays "reflect projectiles, reduce
+other damage by 60%", and the boss warning's ground mask is the authoritative hit area.
+
+**Quality variants.** `low` drops the optional layers and every dynamic light, halves particle counts,
+steps the flipbooks at half rate and shrinks the non-core layers; `medium` is a partial reduction;
+`high` is the full composition. The **core layer of every stage survives at every level**, which is
+what keeps the gameplay information readable - asserted per spell and per stage.
+
+### 13.4 Runtime (`client/scripts/spells/spell_effect.gd`, `skill_fx.gd`, `boss_warning.gd`, `broom_trail.gd`)
+
+* Emission origins sit on the **actual animated wand socket** (`player.socket("Socket_Wand")`, bound
+  to `Wrist.R`), are pulled out of geometry for near-wall launches, and are guarded against
+  zero-length and vertical aims.
+* Effects are presentation: they never touch hp, mana, exp, cooldowns or rewards, and a rejected cast
+  removes only its own predicted feedback (registered by cast sequence).
+* Every effect finishes or cancels on death, cast interruption, map transfer, network rejection and
+  shutdown; an effect whose caster died or was freed cancels itself.
+* The **boss warning is driven by the telegraph's authority ticks** (`start_tick` -> `release_tick`
+  from `MSG_TELEGRAPH`), and an authority body inside a client process draws the same warning a
+  connected client sees, so single-player shows it too.
+* The broom trail reads its taper profile from the authored ribbon and samples the broom's own
+  `TailSocket` positions; braking and dismount clear it.
+
+### 13.5 Sound (`client/tools/audio/synth_phase12.py` + `tune_imports.py`)
+
+84 sounds, all **project-original synthesis** (Python standard library, seeded 20261005, no external
+sample and no generator). Provenance: `assets/audio/CREDITS-phase12.md`. Coverage: distinct
+cast/travel/impact/sustain/end variants for all seven spells; five surfaces of footsteps; robe
+movement; mount/dismount; broom wind; landing; spider movement/bite/death; boss attacks/death; UI
+feedback; map transitions; exterior wind and birds; fire and candle beds; distant activity; the
+moving-stair mechanism; and **acoustically distinct Great Hall (large reverberant), library (tight,
+dry) and dungeon (wet stone, drips)** beds.
+
+`AudioManager` (rewritten) provides Music/SFX/UI/Ambience buses with independent, persisted volumes; a
+24-voice spatial pool with attenuation plus a non-positional pool for beds and UI; a limiter on the
+SFX bus and a reserved slice of the voice pool for warning-priority cues so combat warnings stay
+audible under heavy spell combinations; interior/exterior reverb treatment per zone; and per-play
+pitch/gain variation. Footsteps are driven by the rig's own `footstep:<surface>` animation events.
+Looping beds import with the forward loop flag and IMA-ADPCM (QOA carries no loop points - the exact
+trap `tune_imports.py` exists to prevent); long non-looping files stay compressed.
+
+### 13.6 Evidence
+
+`tools/run_phase12_checks.ps1` (448 checks against the live game), the captures
+`tools/downloads/phase12-<spell>-<context>[-impact].png` for daylight / dark interior / group fight
+per spell, `phase12-broom-trail.png`, `phase12-boss-warning.png`, and the atlas sheets themselves
+(`phase12-atlas-*.png`). `assets/manifest.json` records every entry with hashes, measured fields and
+acceptance. **Nothing in the Phase 12 inventory is placeholder or missing**; the four entries still
+listed as missing (`music_beds`, `ui_icons`, `npc_variants`, `monster_variants_final`) belong to other
+phases.

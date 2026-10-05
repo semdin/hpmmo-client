@@ -1,0 +1,320 @@
+{
+ "schema": 1,
+ "generator": "client/tools/blender/phase12_vfx.py",
+ "blender": "5.2.2",
+ "seed": 20261005,
+ "generated": "2026-10-05",
+ "alpha_convention": "straight (non-premultiplied) alpha; alpha is coverage and is linear; RGB of colour atlases is sRGB-encoded; masks/normals/flow are raw linear data",
+ "padding": "every atlas cell carries a 4 px zero-alpha, zero-colour gutter and its content fades to zero before it, so mipmapping cannot bleed one cell's content into its neighbour",
+ "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+ "assets": [
+  {
+   "id": "vfx_flame_loop",
+   "file": "atlases/flame_loop_8x8_2k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 256,
+   "frames": 64,
+   "fps": 30,
+   "loop": true,
+   "colour": true,
+   "blend": "alpha",
+   "purpose": "Looping flame plume (Incendio sustain, torches, Ultimate tail)",
+   "path": "atlases/flame_loop_8x8_2k.png",
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "cell_px": 256,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "alpha",
+   "generator": "tools/blender/phase12_vfx.py",
+   "seed": 20266445,
+   "note": "Simulated sequence: one continuous band-limited field sampled at 64 consecutive times (periodic in t, so frame 63 blends into frame 0). Not independent stills."
+  },
+  {
+   "id": "vfx_fire_burst",
+   "file": "atlases/fire_burst_8x8_2k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 256,
+   "frames": 64,
+   "fps": 40,
+   "loop": false,
+   "colour": true,
+   "blend": "alpha",
+   "purpose": "Non-looping directional fire burst (Incendio cast/impact)",
+   "path": "atlases/fire_burst_8x8_2k.png",
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "cell_px": 256,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "alpha",
+   "generator": "tools/blender/phase12_vfx.py",
+   "seed": 20266445,
+   "note": "Simulated one-shot: one continuous band-limited field sampled at 64 consecutive times; first and last frames are empty."
+  },
+  {
+   "id": "vfx_smoke_puff",
+   "file": "atlases/smoke_puff_8x8_2k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 256,
+   "frames": 64,
+   "fps": 24,
+   "loop": false,
+   "colour": true,
+   "blend": "alpha",
+   "purpose": "Evolving soft smoke / dust (Incendio tail, Bombarda dust)",
+   "path": "atlases/smoke_puff_8x8_2k.png",
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "cell_px": 256,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "alpha",
+   "generator": "tools/blender/phase12_vfx.py",
+   "seed": 20266445,
+   "note": "Simulated one-shot: one continuous band-limited field sampled at 64 consecutive times; first and last frames are empty."
+  },
+  {
+   "id": "vfx_energy_impact",
+   "file": "atlases/energy_impact_8x8_2k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 256,
+   "frames": 64,
+   "fps": 40,
+   "loop": false,
+   "colour": true,
+   "blend": "additive",
+   "purpose": "Irregular magical impact (all projectile hits, Ultimate strike)",
+   "path": "atlases/energy_impact_8x8_2k.png",
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "cell_px": 256,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "additive",
+   "generator": "tools/blender/phase12_vfx.py",
+   "seed": 20266445,
+   "note": "Simulated one-shot: one continuous band-limited field sampled at 64 consecutive times; first and last frames are empty."
+  },
+  {
+   "id": "vfx_shield_ripple",
+   "file": "atlases/shield_ripple_4x4_1k.png",
+   "cols": 4,
+   "rows": 4,
+   "cell": 256,
+   "frames": 16,
+   "fps": 24,
+   "loop": false,
+   "colour": true,
+   "blend": "additive",
+   "purpose": "Local shield impact ripple + fracture (Protego hit response)",
+   "path": "atlases/shield_ripple_4x4_1k.png",
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "cell_px": 256,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "additive",
+   "generator": "tools/blender/phase12_vfx.py",
+   "seed": 20265629,
+   "note": "Simulated one-shot: one continuous band-limited field sampled at 16 consecutive times; first and last frames are empty."
+  },
+  {
+   "id": "vfx_soft_glow",
+   "path": "tex/soft_glow_512.png",
+   "size_px": [
+    512,
+    512
+   ],
+   "colour_space": "sRGB (RGB), linear (A)",
+   "alpha": "straight",
+   "blend_default": "additive",
+   "frames": 1,
+   "loop": false,
+   "purpose": "Soft radial opacity/glow; core flashes, muzzle glow, ember sprites"
+  },
+  {
+   "id": "vfx_noise_flow",
+   "path": "tex/noise_flow_512.png",
+   "size_px": [
+    512,
+    512
+   ],
+   "colour_space": "linear data",
+   "channel_convention": "R,G = normalised flow vector, B = tileable value noise",
+   "tiling": "tileable on both axes",
+   "alpha": "none (A=1)",
+   "blend_default": "n/a (data)",
+   "frames": 1,
+   "loop": false,
+   "purpose": "Directional flow + tileable noise for shield flow and streak scroll"
+  },
+  {
+   "id": "vfx_noise_erosion",
+   "path": "tex/noise_erosion_512.png",
+   "size_px": [
+    512,
+    512
+   ],
+   "colour_space": "linear data",
+   "tiling": "tileable on both axes",
+   "alpha": "none (A=1)",
+   "blend_default": "n/a (data)",
+   "frames": 1,
+   "loop": false,
+   "purpose": "Dissolve / erosion noise for shield expiration and effect fade"
+  },
+  {
+   "id": "vfx_distortion",
+   "path": "tex/distortion_512.png",
+   "size_px": [
+    512,
+    512
+   ],
+   "colour_space": "linear data",
+   "channel_convention": "R,G = distortion vector, B = magnitude",
+   "tiling": "tileable on both axes",
+   "alpha": "none (A=1)",
+   "blend_default": "n/a (data)",
+   "frames": 1,
+   "loop": false,
+   "purpose": "Heat-haze / refraction distortion input (screen-space grabber)"
+  },
+  {
+   "id": "vfx_energy_streak",
+   "path": "tex/energy_streak_1024x256.png",
+   "size_px": [
+    1024,
+    256
+   ],
+   "colour_space": "sRGB (RGB), linear (A)",
+   "alpha": "straight",
+   "blend_default": "additive",
+   "frames": 1,
+   "loop": false,
+   "purpose": "Tapered streak / trail mask for projectiles, Expelliarmus ribbon, broom trail"
+  },
+  {
+   "id": "vfx_shield_fracture",
+   "path": "tex/shield_fracture_512.png",
+   "size_px": [
+    512,
+    512
+   ],
+   "colour_space": "linear data (white mask)",
+   "alpha": "straight (mask)",
+   "blend_default": "additive",
+   "frames": 1,
+   "loop": false,
+   "purpose": "Fracture mask for the Protego shell on expiration"
+  },
+  {
+   "id": "vfx_ground_marks",
+   "path": "atlases/ground_marks_2x2_1k.png",
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "cell_px": 512,
+   "cols": 2,
+   "rows": 2,
+   "frames": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_names": [
+    "scorch",
+    "dust_ring",
+    "fragment_spray",
+    "cracked_ring"
+   ],
+   "padding_px": 4,
+   "loop": false,
+   "fps": 0,
+   "colour_space": "linear data (white mask)",
+   "alpha": "straight (mask)",
+   "blend_default": "alpha",
+   "generator": "tools/blender/phase12_vfx.py",
+   "seed": 20261005,
+   "purpose": "Scorch, dust, fragment and cracked-ring ground marks (Bombarda, Incendio, Ultimate)"
+  },
+  {
+   "id": "vfx_rune_masks",
+   "path": "atlases/rune_masks_2x2_1k.png",
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "cell_px": 512,
+   "cols": 2,
+   "rows": 2,
+   "frames": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_names": [
+    "telegraph_circle",
+    "countdown_ring",
+    "directional_lune",
+    "ward_glyph"
+   ],
+   "padding_px": 4,
+   "loop": false,
+   "fps": 0,
+   "colour_space": "linear data (white mask)",
+   "alpha": "straight (mask)",
+   "blend_default": "additive",
+   "generator": "tools/blender/phase12_vfx.py",
+   "seed": 20261005,
+   "purpose": "Restrained rune/telegraph masks (boss warning, shield ward, ground marks)"
+  },
+  {
+   "id": "vfx_lightning_branches",
+   "path": "atlases/lightning_branches_2x2_1k.png",
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "cell_px": 512,
+   "cols": 2,
+   "rows": 2,
+   "frames": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_names": [
+    "branch_a",
+    "branch_b",
+    "branch_c",
+    "branch_double"
+   ],
+   "padding_px": 4,
+   "loop": false,
+   "fps": 0,
+   "colour_space": "linear data (white mask)",
+   "alpha": "straight (mask)",
+   "blend_default": "additive",
+   "generator": "tools/blender/phase12_vfx.py",
+   "seed": 20261005,
+   "purpose": "Irregular branching energy masks (Ultimate lightning)"
+  }
+ ]
+}
