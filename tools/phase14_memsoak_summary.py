@@ -81,6 +81,36 @@ def main():
     last_third = mean(ys[-max(1, n // 3):])
     print(f"mean of first third {first_third:.2f} MiB -> last third {last_third:.2f} MiB "
           f"({last_third - first_third:+.2f} MiB)")
+    # the drift after the first 10 minutes, where the acceptance also started
+    # reading it (cache warm-up excluded)
+    steady = [r for r in rows if r["t"] >= 600.0]
+    if len(steady) > 10:
+        sx = [r["t"] for r in steady]
+        sy = [r["static_mib"] for r in steady]
+        smx, smy = mean(sx), mean(sy)
+        sden = sum((x - smx) ** 2 for x in sx)
+        sslope = sum((x - smx) * (y - smy) for x, y in zip(sx, sy)) / sden if sden else 0.0
+        print(f"after t=600s ({len(steady)} samples): slope {sslope * 3600:.2f} MiB/hour, "
+              f"{sy[0]:.2f} -> {sy[-1]:.2f} MiB")
+    # like-for-like: the acceptance compared the first and last ten samples with
+    # the entity count low (quiet phase). Same comparison here, and a
+    # phase-controlled one (each phase's samples in the first vs second half).
+    quiet = [r for r in rows if r.get("entities", 0) <= 3]
+    if len(quiet) >= 6:
+        head, tail = quiet[:10], quiet[-10:]
+        print(f"quiet samples (entities<=3): first {len(head)} mean "
+              f"{mean([r['static_mib'] for r in head]):.2f} MiB, last {len(tail)} mean "
+              f"{mean([r['static_mib'] for r in tail]):.2f} MiB "
+              f"({mean([r['static_mib'] for r in tail]) - mean([r['static_mib'] for r in head]):+.2f} MiB)")
+    half = xs[-1] / 2.0
+    print(f"\n{'phase':>10} {'n1/n2':>7} {'first half MiB':>15} {'second half MiB':>16} {'delta':>8}")
+    for phase in sorted(set(r["phase"] for r in rows)):
+        early = [r["static_mib"] for r in rows if r["phase"] == phase and r["t"] < half]
+        late = [r["static_mib"] for r in rows if r["phase"] == phase and r["t"] >= half]
+        if not early or not late:
+            continue
+        print(f"{phase:>10} {len(early):>3}/{len(late):<3} {mean(early):>15.2f} "
+              f"{mean(late):>16.2f} {mean(late) - mean(early):>+8.2f}")
     if final:
         print("\nframe histogram: " + json.dumps(final.get("frame_hist", {})))
         print(f"frames={final.get('frames')} spikes(>= {final.get('spike_ms_threshold')}ms)="

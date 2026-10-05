@@ -12,11 +12,12 @@ param(
     [int]$Seconds = 1800,
     [int]$Port = 7791,
     [switch]$Windowed,
-    [string]$Name = 'MemSoak'
+    [string]$Name = 'MemSoak',
+    [string]$ClientTree = 'C:\Users\mehme\hpmmo-measure\client'
 )
 $ErrorActionPreference = 'Stop'
 $ROOT = 'C:\Users\mehme\Desktop\sem\projects\game'
-$FROZEN_C = 'C:\Users\mehme\hpmmo-measure\client'
+$FROZEN_C = $ClientTree
 $FROZEN_S = 'C:\Users\mehme\hpmmo-measure\server-world\world'
 $GODOT = 'C:\Users\mehme\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64_console.exe'
 $OUT = Join-Path $ROOT 'client\tools\downloads'
