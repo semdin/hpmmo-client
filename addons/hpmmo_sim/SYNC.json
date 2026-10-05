@@ -1,12 +1,12 @@
 {
  "generated": "2026-10-05",
  "source_repository": "hpmmo-server",
- "source_revision": "2e683700afd4f465efcb892bc39cd178577b08cf",
+ "source_revision": "1d770d97538a1ef4287fb7160de0c560d9b32341",
  "note": "Generated from server/world/addons/hpmmo_sim by dev.ps1 sync-sim. Never edit these files in the client repository.",
  "files": {
   "admin.gd": "dc391f49f650ea0d217d13dbc93cc8dac8b605b7c5dabaaa0b68a6d06ba3199d",
   "admin.gd.uid": "24f7c90288473ecc7fc5b60d2297064b566af1f7cb466a6dfa15da52c1d0fda7",
-  "authority.gd": "917d83bdcdc833e589b53e79f91d9cf5d19bddcf96ddad16fa60b7b8cc4f0ad5",
+  "authority.gd": "f4778d3c30e0289ad4a093f4e22901c7a6e7fae21dcef40e19b05eae45142551",
   "authority.gd.uid": "7a0e9dcb17566e2f6c5c2fa8067b1a57a8a7cd14c568c6dab087475a8628bb0e",
   "data/combat.json": "29a50e07c05e5a4d00808bcc3f34db60b269b98912a9df8fbe5eced1dce0fa14",
   "data/loot_tables.json": "f1bf29f95e583c63123f918fd50229e3fc35b0b7b3fbba1e5ac82c317f25c1cf",
@@ -16,7 +16,7 @@
   "data/spells.json": "4d5d5729cd874204883cb25b78505b32a9e6586518db62d1d5e8daacc2f51a19",
   "maps.gd": "c07fea9d6df9962eac5f8d3d2c5e991097c10f4807d945f7e9130c5311dd29ab",
   "maps.gd.uid": "1b4f9df15a20c39f1260abd49a6be28bd92c53929dcb06f54a683b058d56d071",
-  "net.gd": "e46de6272e876248922979a2e7a4a7745a0af1a75e6a54ad43a914935d3751b2",
+  "net.gd": "46e70c3b54454ed4e2b5b47928c73336975f01b098a667d20a31fbf44b4106cb",
   "net.gd.uid": "ff80510fc3b2fa320c34ddd81f5be5cbfc1201dc7d1a557f25c607ff6e5826d5",
   "persistence.gd": "a4679767f5b4106a8c1577a361f81b826efb0eca835dffb7af5d4c64f93dde50",
   "persistence.gd.uid": "31e56826a6ef795fcabda9561a364dccdc5155ab64e3052980230faeaaab6247",
