@@ -392,8 +392,26 @@ func _on_solo_pressed() -> void:
 	if is_inside_tree() and get_tree():
 		get_tree().change_scene_to_file("res://scenes/world/game_world.tscn")
 
-## The account-service port, resolved with the documented default.
+## The port carried by an account-service URL, or 0 when it does not carry one.
+func _api_port_from_url(url: String) -> int:
+	var trimmed := url.strip_edges()
+	if trimmed.is_empty():
+		return 0
+	var colon := trimmed.rfind(":")
+	if colon < 0:
+		return 0
+	var tail := trimmed.substr(colon + 1)
+	if not tail.is_valid_int():
+		return 0
+	return int(tail)
+
+
+## The account-service port, resolved with the documented default. The URL the
+## autoload already resolved (HPMMO_API_URL, set by the launcher) is the first
+## authority: it is the address the launcher actually authenticated against.
 func _resolve_api_port() -> int:
+	if api_port <= 0:
+		api_port = _api_port_from_url(DatabaseManager.api_base_url)
 	if api_port <= 0:
 		api_port = 8081
 	return api_port
@@ -409,14 +427,14 @@ func _load_client_config() -> void:
 				if json_res is Dictionary:
 					var s_ip: String = str(json_res.get("server_ip", "213.250.145.75"))
 					var a_port: int = int(json_res.get("api_port", 8081))
-					# Precedence: an explicit --api-port, then the launcher's
-					# HPMMO_API_URL (the autoload already applied it), then this
-					# file. Overwriting an already-resolved URL here used to
-					# discard the launcher handoff's port.
+					# Precedence: an explicit --api-port, then the port of the URL
+					# the autoload resolved (the launcher handoff), then this
+					# file's api_port, then 8081.
+					if api_port == 0:
+						api_port = _api_port_from_url(DatabaseManager.api_base_url)
 					if api_port == 0:
 						api_port = a_port
-						if OS.get_environment("HPMMO_API_URL").strip_edges().is_empty():
-							DatabaseManager.api_base_url = "http://%s:%d" % [s_ip, api_port]
+						DatabaseManager.api_base_url = "http://%s:%d" % [s_ip, api_port]
 					if json_res.has("server_ip") and ip_input:
 						ip_input.text = s_ip
 					if json_res.has("server_port") and port_input:

@@ -185,6 +185,11 @@ def main():
     print("[launcher] release served at %s" % server.base)
 
     install_root = out / "install"
+    if install_root.exists():
+        # Always install from scratch: a same-version package with different
+        # bytes is correctly "already current" to the launcher, so re-running
+        # against a dirty root would silently test the OLD package.
+        shutil.rmtree(install_root)
     common = tu.common_args(install_root, server.base, pin, pub_b64)
     try:
         # 3. install with the distributed launcher's own updater ------------
@@ -210,10 +215,11 @@ def main():
 
     # 4. bring up the account stack and launch the installed game ----------
     import phase14_stack as stackmod
-    # The packaged game computes its account-service URL from `--ip` as
-    # `http://<ip>:8081` (main_menu.gd), so a launcher-path test has to serve the
-    # API on 8081 - exactly what the launcher does in production.
-    stack = stackmod.Stack(str(out), api_port=8081)
+    # A NON-DEFAULT account-service port on purpose: the launcher hands the game
+    # the API URL in HPMMO_API_URL, and the client must honour that port instead
+    # of a hardcoded 8081. Nothing listens on 8081 in this run, so the check can
+    # only pass if the wiring is right (Phase 14 fix, see the report).
+    stack = stackmod.Stack(str(out))
     launched = None
     try:
         stack.start()
@@ -257,10 +263,13 @@ def main():
               "ticket" in text.lower() or "session" in text.lower(), "")
         check("the game auto-logged in", "Auto-login requested" in text, "")
         check("the game joined the world server", "connected as peer" in text or "join sent" in text, "")
-        check("the world scene loaded", "[GameWorld]" in text, "")
+        # The world scene's own confirmation has to come from the server side:
+        # the client's stdout is block-buffered when redirected, so "[GameWorld]"
+        # may still be sitting in the buffer when the run ends. A roster line in
+        # the world server log is the authoritative proof that the body exists.
         world_log = open(stack.world_log_path, "r", encoding="utf-8", errors="replace").read()
         check("the server registered a session-bound player",
-              "uid" in world_log and "join" in world_log, "")
+              "uid" in world_log and "players=1" in world_log, "")
         (out / "launch.json").write_text(json.dumps(result["checks"], indent=2))
         print("LAUNCHER LAUNCH RESULT: %d checks, %d failures" % (
             len(result["checks"]), sum(1 for c in result["checks"] if not c["ok"])))
