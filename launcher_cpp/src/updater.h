@@ -1,4 +1,4 @@
-// HPMMO launcher updater (Phase 7): CHECK -> COMPARE -> DOWNLOAD -> VERIFY ->
+// HPMMO launcher updater (Release pipeline): CHECK -> COMPARE -> DOWNLOAD -> VERIFY ->
 // STAGE -> ACTIVATE -> LAUNCH, plus repair and launcher self-update.
 #pragma once
 

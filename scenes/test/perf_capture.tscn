@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/test/perf_capture.gd" id="1_p14p"]
+[ext_resource type="PackedScene" path="res://scenes/world/game_world.tscn" id="2_gw"]
+
+[node name="PerfCapture" type="Node"]
+script = ExtResource("1_p14p")
+
+[node name="GameWorld" parent="." instance=ExtResource("2_gw")]

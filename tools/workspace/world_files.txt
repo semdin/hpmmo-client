@@ -321,6 +321,7 @@ scripts/ui/floating_text.gd
 scripts/ui/game_settings.gd
 scripts/ui/hud.gd
 scripts/ui/inventory_ui.gd
+scripts/ui/item_tooltip.gd
 scripts/ui/main_menu.gd
 scripts/ui/maintenance_ui.gd
 scripts/ui/mmorpg_overlay.gd
@@ -332,6 +333,9 @@ scripts/ui/state_binder.gd
 scripts/ui/travel_feedback.gd
 scripts/ui/ui_focus.gd
 scripts/ui/ui_layout.gd
+scripts/ui/ui_slot.gd
+scripts/ui/ui_theme.gd
+scripts/ui/ui_window.gd
 scripts/world/castle/magical_staircase.gd
 scripts/world/castle_builder.gd
 scripts/world/castle_interior.gd

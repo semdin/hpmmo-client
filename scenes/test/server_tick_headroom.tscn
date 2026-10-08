@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/test/server_tick_headroom.gd" id="1_p14t"]
+
+[node name="ServerTickHeadroom" type="Node"]
+script = ExtResource("1_p14t")

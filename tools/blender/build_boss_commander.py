@@ -1,4 +1,4 @@
-"""Build the Phase 11 boss creature: the Dark Snatcher Commander.
+"""Build the boss creature: the Dark Snatcher Commander.
 
 A purpose-built, rigged, animated, textured dark-wizard boss that replaces the
 scaled Quaternius `Orc_Skull` placeholder. Everything is generated here -- there
@@ -7,7 +7,7 @@ is no downloaded source art: the mesh is lofted from authored profiles, the
 deltas, and the three maps (albedo / OpenGL normal / roughness) are generated
 into one 1024 atlas and packed into the GLB.
 
-Conventions (client/docs/art-direction.md sections 2-3)
+Conventions
   * 1 unit = 1 metre, forward +Z in Godot = -Y in Blender (the exporter maps
     Blender -Y -> glTF +Z), up +Y in Godot = +Z in Blender.
   * Bind pose stands on z = 0; the crown (the hood peak) measures ~2.20 m.

@@ -1,4 +1,4 @@
-# HPMMO client release (plan.md Phase 7).
+# HPMMO client release.
 #
 #   push to the `release` branch -> build + test + package + sign an immutable
 #                                   artifact and upload it to CI (no publish)
@@ -6,7 +6,7 @@
 #                                   channel (gated by the `client-release`
 #                                   environment: required reviewers)
 #
-# Rules encoded here (plan.md Phase 7 + server/docs/phase7-release-contract.md):
+# Rules encoded here (Release pipeline + server/docs/release-contract.md):
 #   * the launcher trusts a *signed* manifest, so nothing is published without
 #     `gen_manifest.py --verify` passing over the exact bytes;
 #   * the signing key comes from the HPMMO_CLIENT_SIGNING_KEY secret and the
@@ -65,7 +65,7 @@ env:
   SERVER_VERSION: '0.7.0'
   SCHEMA_VERSION: '4'
   PLATFORM: 'windows-x86_64'
-  # The read-only root the status/release endpoint serves over HTTPS (Phase 7).
+  # The read-only root the status/release endpoint serves over HTTPS (Release pipeline).
   RELEASE_BASE_URL: 'https://213.250.145.75:8443/releases'
   RELEASE_ROOT: '/srv/hpmmo/client-releases'
 
@@ -169,7 +169,7 @@ jobs:
           test -f "$build/client/HPMMO.exe"
           test -f "$build/client/HPMMO.pck"
 
-          # 2. the native launcher (Phase 7 makes it the single supported
+          # 2. the native launcher (Release pipeline makes it the single supported
           #    distribution path; the package carries it for self-update).
           cmake -S launcher_cpp -B launcher_cpp/build-mingw -G Ninja \
             -DCMAKE_SYSTEM_NAME=Windows \
@@ -269,7 +269,7 @@ jobs:
             echo "- client version: \`${{ steps.id.outputs.version }}\` / content \`$CONTENT_VERSION\`"
             echo "- artifact: \`hpmmo-client-${{ steps.id.outputs.version }}-$PLATFORM.zip\`"
             echo "- publish: a push only builds; flipping a channel needs the manual dispatch gate"
-            echo "- contract: see server/docs/phase7-release-contract.md"
+            echo "- contract: see server/docs/release-contract.md"
           } >> "$GITHUB_STEP_SUMMARY"
 
   # ---------------------------------------------------------------------------

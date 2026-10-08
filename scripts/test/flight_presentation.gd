@@ -1,6 +1,6 @@
 extends Node
 
-## Phase 9 flight presentation. Runs the real game world, mounts the local
+## Rig flight presentation. Runs the real game world, mounts the local
 ## player and captures the rider from the front, the side and the rear, plus a
 ## banking turn and a landing, as PNGs in tools/downloads/.
 ##
@@ -33,10 +33,10 @@ func _ready() -> void:
 	player.visuals.rotation.y = 0.0
 	await get_tree().create_timer(0.8).timeout
 
-	await _capture(camera, "phase9-flight-front", Vector3(0, 3.9, 24.4), Vector3(0, 3.9, 20.0))
-	await _capture(camera, "phase9-flight-side", Vector3(4.4, 3.8, 20.0), Vector3(0, 3.9, 20.0))
-	await _capture(camera, "phase9-flight-rear", Vector3(0, 3.9, 15.6), Vector3(0, 3.9, 20.0))
-	await _capture(camera, "phase9-flight-three-quarter", Vector3(3.2, 4.6, 23.2), Vector3(0, 3.7, 20.0))
+	await _capture(camera, "flight-front", Vector3(0, 3.9, 24.4), Vector3(0, 3.9, 20.0))
+	await _capture(camera, "flight-side", Vector3(4.4, 3.8, 20.0), Vector3(0, 3.9, 20.0))
+	await _capture(camera, "flight-rear", Vector3(0, 3.9, 15.6), Vector3(0, 3.9, 20.0))
+	await _capture(camera, "flight-three-quarter", Vector3(3.2, 4.6, 23.2), Vector3(0, 3.7, 20.0))
 
 	# A banking turn: hold left so the phase and the lean both respond.
 	Input.action_press("move_left")
@@ -44,7 +44,7 @@ func _ready() -> void:
 	var phase_mid: int = player.mount_phase()
 	var clip_mid: String = player.hero_anim.current_clip if player.hero_anim else ""
 	print("TURN phase=%d clip=%s bank=%.3f" % [phase_mid, clip_mid, player.visuals.rotation.z])
-	await _capture(camera, "phase9-flight-turn", Vector3(3.0, 4.4, 23.4), Vector3(0, 3.6, 20.0))
+	await _capture(camera, "flight-turn", Vector3(3.0, 4.4, 23.4), Vector3(0, 3.6, 20.0))
 	Input.action_release("move_left")
 	await get_tree().create_timer(0.6).timeout
 
@@ -55,7 +55,7 @@ func _ready() -> void:
 	if player.hero_anim:
 		player.hero_anim.play_oneshot("Broom_Land")
 	await get_tree().create_timer(0.35).timeout
-	await _capture(camera, "phase9-flight-landing", Vector3(3.0, 2.2, 22.8), Vector3(0, 1.5, 20.0))
+	await _capture(camera, "flight-landing", Vector3(3.0, 2.2, 22.8), Vector3(0, 1.5, 20.0))
 
 	# Measurements for the report: what the deployed rig actually spans.
 	var head_socket: Node3D = player.socket("Socket_Head")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Export the server world copy from the client Godot project (plan.md Phase 3).
+"""Export the server world copy from the client Godot project.
 
-The server repository owns the authoritative world; until Phase 5 inverts
+The server repository owns the authoritative world; until the authority inverts
 ownership, the world is an EXPORTED, hash-pinned snapshot of the client
 project (never a manual copy): this tool copies the declared file set from
 client/ into server/world/, writes WORLD_EXPORT.json with per-file sha256 and
@@ -22,7 +22,7 @@ from datetime import date
 HERE = os.path.dirname(os.path.abspath(__file__))
 FILE_LIST = os.path.join(HERE, "world_files.txt")
 # Client-owned content contracts. The gameplay contracts (spells, safe zones)
-# are server-owned since Phase 5 and pinned by sync_sim.py instead.
+# are server-owned since the authority handover and pinned by sync_sim.py instead.
 CONTRACTS = [
     "data/json/items.json",
     "data/json/houses.json",

@@ -1,0 +1,8 @@
+OpenGameArt "496 pixel art icons for medieval/fantasy RPG"
+Author: gnola14
+Source: https://opengameart.org/content/496-pixel-art-icons-for-medievalfantasy-rpg
+Licence: CC0 1.0 Universal (Public Domain Dedication)
+         https://creativecommons.org/publicdomain/zero/1.0/
+No attribution is required. Retrieved 2026-10-06; the archive carries no
+licence file of its own, so the statement above is the page's "License(s)"
+field, verified on the page itself.

@@ -9,4 +9,4 @@ license URL: https://creativecommons.org/licenses/by/3.0/
 attribution (REQUIRED): credit "Jonathan Shaw (InspectorJ)" with the freesound source link.
   Crediting the OpenGameArt uploader (AntumDeluge) is optional.
 note: this receipt corrects an earlier copy that credited only the OGA uploader; the
-phase-2 adversarial verification identified the original creator on the source page.
+adversarial verification identified the original creator on the source page.

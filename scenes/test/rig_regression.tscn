@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/world/game_world.tscn" id="1_world"]
+[ext_resource type="Script" path="res://scripts/test/rig_regression.gd" id="2_test"]
+
+[node name="RigRegression" type="Node"]
+script = ExtResource("2_test")
+
+[node name="GameWorld" parent="." instance=ExtResource("1_world")]

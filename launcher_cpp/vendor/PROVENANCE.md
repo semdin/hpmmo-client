@@ -1,6 +1,6 @@
 # Vendored dependency provenance
 
-Pinned third-party sources for the Phase 7 C++ launcher updater. Every file is
+Pinned third-party sources for the release pipeline C++ launcher updater. Every file is
 copied byte-for-byte from the upstream revision and hash-pinned here.
 
 | file | bytes | sha256 |

@@ -109,7 +109,7 @@ static HWND g_hChkRemember = NULL;
 static HWND g_hChkShowPw = NULL;
 static HWND g_hLblStatus = NULL;
 
-// Phase 7: updater state shared with the UI thread.
+// the release pipeline: updater state shared with the UI thread.
 static std::mutex g_UpdMutex;
 static hpmmo::CheckSummary g_UpdSummary;
 static std::wstring g_UpdLine1;
@@ -132,6 +132,23 @@ static HBRUSH g_hBrushEdit = NULL;
 static ULONG_PTR g_gdiplusToken = 0;
 static Image* g_pBannerImg = nullptr;
 static Image* g_pLogoImg = nullptr;
+
+// ---- Optional UI kit art (client/assets/ui, nine-patch PNGs)
+// The launcher is GDI+, so the kit would be blitted as nine-patch PNGs rather
+// than as Godot styleboxes. The art is not shipped: every pointer stays null and
+// each draw site falls back to the flat rounded-rect chrome, which is what the
+// client theme looks like too.
+static Image* g_UiFrame = nullptr;      // ornate window frame
+static Image* g_UiInset = nullptr;      // recessed input bed
+static Image* g_UiRibbon = nullptr;     // red title ribbon
+static Image* g_UiDivider = nullptr;    // gold rule
+static Image* g_UiCoin = nullptr;
+static Image* g_UiBtn[4] = {nullptr, nullptr, nullptr, nullptr};  // normal, hover, pressed, disabled
+// These match the borders such a kit draws, so the stretch strips stay flat and
+// the corners never smear.
+static const int kBtnMargin = 8;
+static const int kFrameMargin = 16;
+static const int kInsetMargin = 8;
 
 static std::atomic<int> g_ServerPingMs{-1};
 static std::atomic<bool> g_ServerOnline{false};
@@ -180,6 +197,71 @@ static void StrokeRoundedRect(Graphics& g, const Rect& rc, int radius,
     path.CloseFigure();
     Pen pen(color, width);
     g.DrawPath(&pen, &path);
+}
+
+// ---- Generated UI kit helpers ----
+
+// The exe runs from either the workspace root or launcher_cpp/, so probe the
+// same relative roots the banner and logo already use.
+static Image* LoadUiImage(const wchar_t* file) {
+    const wchar_t* roots[] = {
+        L"assets\\ui\\", L"..\\assets\\ui\\", L"..\\..\\assets\\ui\\",
+    };
+    for (const wchar_t* root : roots) {
+        std::wstring path = std::wstring(root) + file;
+        Image* img = Image::FromFile(path.c_str());
+        if (img && img->GetLastStatus() == Ok) return img;
+        delete img;
+    }
+    return nullptr;
+}
+
+static void LoadUiKit() {
+    g_UiFrame   = LoadUiImage(L"frame_window.png");
+    g_UiInset   = LoadUiImage(L"frame_inset.png");
+    g_UiRibbon  = LoadUiImage(L"ribbon_title.png");
+    g_UiDivider = LoadUiImage(L"divider_ornate.png");
+    g_UiCoin    = LoadUiImage(L"coin.png");
+    g_UiBtn[0]  = LoadUiImage(L"button_normal.png");
+    g_UiBtn[1]  = LoadUiImage(L"button_hover.png");
+    g_UiBtn[2]  = LoadUiImage(L"button_pressed.png");
+    g_UiBtn[3]  = LoadUiImage(L"button_grey.png");
+}
+
+static void FreeUiKit() {
+    Image** all[] = {&g_UiFrame, &g_UiInset, &g_UiRibbon, &g_UiDivider, &g_UiCoin,
+                     &g_UiBtn[0], &g_UiBtn[1], &g_UiBtn[2], &g_UiBtn[3]};
+    for (Image** p : all) { delete *p; *p = nullptr; }
+}
+
+// Stretch a nine-patch into `r`. The middle strips take the slack, so the
+// corner ornaments keep their proportions at any window size - the same thing
+// StyleBoxTexture does on the Godot side.
+static void DrawNinePatch(Graphics& g, Image* img, int margin, const Rect& r) {
+    if (!img || img->GetLastStatus() != Ok) return;
+    const int iw = (int)img->GetWidth(), ih = (int)img->GetHeight();
+    if (iw <= 0 || ih <= 0) return;
+    int mh = margin, mv = margin;
+    if (2 * mh >= iw) mh = iw / 3;
+    if (2 * mv >= ih) mv = ih / 3;
+
+    const int w = r.Width, h = r.Height;
+    const int cw = (mh < w / 2) ? mh : w / 2;
+    const int ch = (mv < h / 2) ? mv : h / 2;
+
+    const int sx[3] = {0, mh, iw - mh};
+    const int sw[3] = {mh, iw - 2 * mh, mh};
+    const int dx[3] = {r.X, r.X + cw, r.X + w - cw};
+    const int dw[3] = {cw, w - 2 * cw, cw};
+    const int sy[3] = {0, mv, ih - mv};
+    const int sh[3] = {mv, ih - 2 * mv, mv};
+    const int dy[3] = {r.Y, r.Y + ch, r.Y + h - ch};
+    const int dh[3] = {ch, h - 2 * ch, ch};
+
+    for (int col = 0; col < 3; ++col)
+        for (int row = 0; row < 3; ++row)
+            g.DrawImage(img, Rect(dx[col], dy[row], dw[col], dh[row]),
+                        sx[col], sy[row], sw[col], sh[row], UnitPixel);
 }
 
 struct BtnLook {
@@ -294,13 +376,24 @@ static void DrawOwnerButton(LPDRAWITEMSTRUCT di) {
     }
 
     Rect rc(1, 1, w - 2, h - 2);
-    FillRoundedRect(g, rc, look.radius, look.top, look.bottom);
-    Color edge = look.edge;
-    if (hover && !pressed) edge = Color(255, 255, 230, 150);
-    StrokeRoundedRect(g, rc, look.radius, edge, (id == ID_BTN_PLAY) ? 1.5f : 1.0f);
+    Image* plate = disabled ? g_UiBtn[3]
+                 : pressed  ? g_UiBtn[2]
+                 : hover    ? g_UiBtn[1]
+                            : g_UiBtn[0];
+    if (!plate) plate = g_UiBtn[0];
+    if (plate) {
+        // Painted plate from the kit. `g` is already translated to the button's
+        // top-left, so the destination rect starts at the origin.
+        DrawNinePatch(g, plate, kBtnMargin, Rect(0, 0, w, h));
+    } else {
+        FillRoundedRect(g, rc, look.radius, look.top, look.bottom);
+        Color edge = look.edge;
+        if (hover && !pressed) edge = Color(255, 255, 230, 150);
+        StrokeRoundedRect(g, rc, look.radius, edge, (id == ID_BTN_PLAY) ? 1.5f : 1.0f);
+    }
 
-    // Top gloss highlight for primary buttons.
-    if (!disabled && (id == ID_BTN_AUTH || id == ID_BTN_PLAY)) {
+    // Top gloss highlight for primary buttons (only on the fallback chrome).
+    if (!plate && !disabled && (id == ID_BTN_AUTH || id == ID_BTN_PLAY)) {
         GraphicsPath gloss;
         gloss.AddArc(rc.X + 3, rc.Y + 2, (rc.Width - 6), (rc.Height), 180, 90);
         gloss.AddArc(rc.X + 3, rc.Y + 2, (rc.Width - 6), (rc.Height), 270, 90);
@@ -528,7 +621,7 @@ void LoadConfig() {
 
 void SaveConfig() {
     // The GUI owns four keys; everything else in client_config.json belongs to
-    // someone else (the Phase 7 updater keys release_base_url, status_url,
+    // someone else (the release pipeline updater keys release_base_url, status_url,
     // release_channel, release_public_key, release_public_key_id and
     // pinned_spki_sha256 are read by the updater CLI). Rewriting the file from
     // scratch here used to delete them on the next Play click, silently
@@ -707,7 +800,7 @@ void CheckServerPing() {
     InvalidatePill();
 }
 
-// ------------------------------------------------------- Phase 7 updater UI --
+// ------------------------------------------------------- the release pipeline updater UI --
 
 static std::wstring g_UpdResult = L"";
 
@@ -1160,7 +1253,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_OWNERDRAW,
             472, 464, 352, 42, hWnd, (HMENU)ID_BTN_SOLO, NULL, NULL);
 
-        // Phase 7: updater controls (right card, below Solo).
+        // the release pipeline: updater controls (right card, below Solo).
         g_hBtnUpdate = CreateWindowW(L"BUTTON", L"Güncelle",
             WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_OWNERDRAW,
             472, 514, 112, 34, hWnd, (HMENU)ID_BTN_UPDATE, NULL, NULL);
@@ -1187,7 +1280,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         SetTimer(hWnd, ID_TIMER_ANIM, 100, NULL);
         std::thread(CheckServerPing).detach();
 
-        // Phase 7: initial release check (only when a release base is configured).
+        // the release pipeline: initial release check (only when a release base is configured).
         SetTimer(hWnd, ID_TIMER_UPDATE, 60000, NULL);
         if (!hpmmo::Config().releaseBaseUrl.empty()) {
             RunUpdaterCheck();
@@ -1527,10 +1620,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         // Frosted cards (rounded, translucent so the artwork breathes through).
         Rect leftCard(Layout::LeftX, Layout::CardY, Layout::LeftW, Layout::CardH);
         Rect rightCard(Layout::RightX, Layout::CardY, Layout::RightW, Layout::CardH);
-        FillRoundedRect(graphics, leftCard, 16, Color(238, 26, 32, 47), Color(238, 17, 22, 33));
-        StrokeRoundedRect(graphics, leftCard, 16, Color(255, 52, 63, 88));
-        FillRoundedRect(graphics, rightCard, 16, Color(238, 26, 32, 47), Color(238, 17, 22, 33));
-        StrokeRoundedRect(graphics, rightCard, 16, Color(255, 52, 63, 88));
+        if (g_UiFrame) {
+            DrawNinePatch(graphics, g_UiFrame, kFrameMargin, leftCard);
+            DrawNinePatch(graphics, g_UiFrame, kFrameMargin, rightCard);
+        } else {
+            FillRoundedRect(graphics, leftCard, 16, Color(238, 26, 32, 47), Color(238, 17, 22, 33));
+            StrokeRoundedRect(graphics, leftCard, 16, Color(255, 52, 63, 88));
+            FillRoundedRect(graphics, rightCard, 16, Color(238, 26, 32, 47), Color(238, 17, 22, 33));
+            StrokeRoundedRect(graphics, rightCard, 16, Color(255, 52, 63, 88));
+        }
 
         // Input field chrome: filled rounded bed + border (gold when focused).
         for (int i = 0; i < 2; i++) {
@@ -1542,10 +1640,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             Rect chrome(er.left - 3, er.top - 3,
                         (er.right - er.left) + 6, (er.bottom - er.top) + 6);
             bool focused = (GetFocus() == hed);
-            FillRoundedRect(graphics, chrome, 9, Color(255, 12, 16, 25), Color(255, 16, 21, 32));
-            StrokeRoundedRect(graphics, chrome, 9,
-                              focused ? Color(255, 232, 190, 90) : Color(255, 62, 74, 104),
-                              focused ? 1.6f : 1.0f);
+            if (g_UiInset) {
+                DrawNinePatch(graphics, g_UiInset, kInsetMargin, chrome);
+                if (focused) {
+                    Pen glow(Color(255, 232, 190, 110), 1.6f);
+                    graphics.DrawRectangle(&glow, chrome);
+                }
+            } else {
+                FillRoundedRect(graphics, chrome, 9, Color(255, 12, 16, 25), Color(255, 16, 21, 32));
+                StrokeRoundedRect(graphics, chrome, 9,
+                                  focused ? Color(255, 232, 190, 90) : Color(255, 62, 74, 104),
+                                  focused ? 1.6f : 1.0f);
+            }
         }
 
         SetBkMode(hdc, TRANSPARENT);
@@ -1563,23 +1669,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
         // Title block (left of pill, with soft drop shadow for legibility).
         const int tx = (g_pLogoImg ? 98 : 40);
+        if (g_UiRibbon) {
+            // A nine-patch band behind the title only: the rounded ends stay
+            // crisp where a single stretched DrawImage smears the whole ribbon.
+            DrawNinePatch(graphics, g_UiRibbon, 8, Rect(tx - 18, 10, 430, 48));
+        }
         auto shadowText = [&](int x, int y, const wchar_t* s, int n) {
             SetTextColor(hdc, RGB(0, 0, 0));
             TextOutW(hdc, x + 1, y + 2, s, n);
         };
+        // Title and tagline are stacked with fixed rows so they never overlap;
+        // each row is sized to the font above it.
         SelectObject(hdc, g_hFontTitle);
-        shadowText(tx, 22, L"HOGWARTS MMORPG", 15);
-        SetTextColor(hdc, RGB(246, 230, 155));
-        TextOutW(hdc, tx, 22, L"HOGWARTS MMORPG", 15);
+        shadowText(tx, 20, L"HOGWARTS MMORPG", 15);
+        SetTextColor(hdc, RGB(240, 216, 120));
+        TextOutW(hdc, tx, 20, L"HOGWARTS MMORPG", 15);
 
         SelectObject(hdc, g_hFontHeading);
-        shadowText(tx + 2, 62, L"Çevrimiçi Büyücülük Evreni", 25);
-        SetTextColor(hdc, RGB(222, 188, 80));
-        TextOutW(hdc, tx + 2, 62, L"Çevrimiçi Büyücülük Evreni", 25);
+        shadowText(tx + 2, 66, L"Çevrimiçi Büyücülük Evreni", 25);
+        SetTextColor(hdc, RGB(208, 180, 88));
+        TextOutW(hdc, tx + 2, 66, L"Çevrimiçi Büyücülük Evreni", 25);
 
         SelectObject(hdc, g_hFontSmall);
-        SetTextColor(hdc, RGB(170, 180, 202));
-        TextOutW(hdc, tx + 2, 92, L"v2.0.0  •  Forward+  •  15 Hz Tick  •  ACID DB", 43);
+        SetTextColor(hdc, RGB(162, 172, 198));
+        TextOutW(hdc, tx + 2, 96, L"v2.0.0  •  Forward+  •  15 Hz Tick  •  ACID DB", 43);
 
         // Server status pill (top-right, frosted).
         {
@@ -1826,6 +1939,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
 
     GdiplusStartupInput gdiplusStartupInput;
     GdiplusStartup(&g_gdiplusToken, &gdiplusStartupInput, NULL);
+    LoadUiKit();
 
     LoadConfig();
 
@@ -1874,6 +1988,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
         DispatchMessageW(&msg);
     }
 
+    FreeUiKit();
     GdiplusShutdown(g_gdiplusToken);
     WSACleanup();
     return (int)msg.wParam;

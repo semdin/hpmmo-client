@@ -25,7 +25,7 @@ bool NeedsValue(const char* flag, int i, int argc) {
 
 void PrintUsage(void* file) {
     FILE* f = (FILE*)file;
-    fprintf(f, "HPMMO launcher updater (Phase 7)\n\n");
+    fprintf(f, "HPMMO launcher updater (Release pipeline)\n\n");
     fprintf(f, "Usage: HPMMO_UpdaterCLI <command> [options]\n\n");
     fprintf(f, "Commands:\n");
     fprintf(f, "  --check         Fetch status+manifest, compare versions, print one JSON line\n");

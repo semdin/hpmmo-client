@@ -6,7 +6,7 @@ Canonical source: client/tools/workspace/dev.ps1 - this root copy is generated.
 Commands:
   .\dev.ps1 status             pinned revisions, contract-hash check, repo states
   .\dev.ps1 test               client check harness; server service compile + world boot smoke
-  .\dev.ps1 build              server deployable package into server\dist (client export = Phase 7)
+  .\dev.ps1 build              server deployable package into server\dist (client export = the release pipeline)
   .\dev.ps1 start -Client      launch the game
   .\dev.ps1 start -Server      launch the dedicated server world (headless)
   .\dev.ps1 sync-world         re-export server\world from the client project + refresh workspace.lock.json
@@ -110,13 +110,13 @@ function Invoke-ServerSmoke {
     if ($LASTEXITCODE -ne 0) { throw 'legacy service does not compile' }
     $integration = Join-Path $serverRepo 'tests\integration_api.py'
     if (Test-Path $integration) {
-        Write-Host '[server] Phase 4 integration tests (PostgreSQL + C++ service, self-contained)'
+        Write-Host '[server] persistence integration tests (PostgreSQL + C++ service, self-contained)'
         & $python $integration
         if ($LASTEXITCODE -ne 0) { throw 'integration tests failed' }
     }
     $multiplayer = Join-Path $serverRepo 'tests\multiplayer_sim.py'
     if (Test-Path $multiplayer) {
-        Write-Host '[server] Phase 5 multiplayer proof (world server + two headless clients)'
+        Write-Host '[server] multiplayer proof (world server + two headless clients)'
         & $python $multiplayer --skip=forged,protection
         if ($LASTEXITCODE -ne 0) { throw 'multiplayer agreement test failed' }
     }
@@ -161,7 +161,7 @@ switch ($Command) {
         if (-not (Test-Path $pkg)) { throw "missing $pkg" }
         & powershell -ExecutionPolicy Bypass -File $pkg
         if ($LASTEXITCODE -ne 0) { throw 'server packaging failed' }
-        Write-Host 'server package written to server\dist (client export templates are Phase 7)'
+        Write-Host 'server package written to server\dist (client export templates are the release pipeline)'
     }
     'start' {
         if ($Server) {

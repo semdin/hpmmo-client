@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Throwaway probe (Phase 14): which Performance monitors this engine build
+## Throwaway probe (Release gates): which Performance monitors this engine build
 ## actually exposes, so the perf scene reads real constants instead of guessed
 ## ones. Prints the value of each monitor it can name.
 

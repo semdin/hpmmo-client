@@ -1,10 +1,10 @@
-"""Author the Phase 9 flight broom (plan.md Phase 9, broom tasks).
+"""Author the rig flight broom (broom tasks).
 
 Not a scaled primitive: a shaped, slightly-curved shaft with a wrapped leather
 grip, two foot pegs, a metal ferrule, a leather seat pad and a flared bristle
 bundle, with generated base-colour/roughness textures packed into the GLB.
 
-Authoring convention (art-direction.md section 3, "forward +Z for vehicles"):
+Authoring convention "forward +Z for vehicles":
   Blender is Z-up / -Y-forward, and the glTF exporter maps Blender -Y -> glTF +Z,
   so a nose authored towards -Y lands at +Z in Godot. Up stays +Y in Godot.
 

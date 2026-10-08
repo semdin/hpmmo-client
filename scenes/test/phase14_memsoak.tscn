@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://scripts/test/phase14_memsoak.gd" id="1_p14m"]
-
-[node name="Phase14MemSoak" type="Node"]
-script = ExtResource("1_p14m")

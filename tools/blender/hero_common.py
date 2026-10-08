@@ -1,4 +1,4 @@
-"""Shared helpers for the Phase 9 hero build: import, socket convention, and a
+"""Shared helpers for the rig hero build: import, socket convention, and a
 rest-delta retargeter (Quaternius UAL -> Quaternius Universal Base rigs).
 
 Both packs are Quaternius, but the base characters use `UpperArm.L` style names

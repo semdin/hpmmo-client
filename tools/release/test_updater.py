@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 7 native launcher updater tests.
+"""Release pipeline native launcher updater tests.
 
 Runs the headless launcher CLI (HPMMO_UpdaterCLI.exe) against a local HTTPS
 release server with a self-signed, pinned certificate and fake signed releases.

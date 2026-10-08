@@ -1,6 +1,6 @@
 extends Node
 
-## Headless client probe for the Phase 5 multiplayer tests (test-only; not part
+## Headless client probe for the multiplayer tests (test-only; not part
 ## of the world export and not part of the 93-check single-player harness).
 ##
 ## It is a REAL client: same transport, same intents, same reconciliation as the
@@ -13,12 +13,12 @@ extends Node
 ##     --mode=agree|forged|protection|maintenance|transfer --port=7777 --name=Alice \
 ##     --out=<file> [--seconds=25] [--admin-port=8082] [--scenario=observer]
 ##
-## The `maintenance` mode (Phase 6) joins, records every SimAuthority
+## The `maintenance` mode (Maintenance surface) joins, records every SimAuthority
 ## maintenance signal, polls the admin API for the published state, keeps trying
 ## to cast, and writes a transcript when the server disconnects it. Its token is
 ## read from HPMMO_SERVICE_TOKEN and is never recorded or printed.
 ##
-## The `transfer` mode (Phase 8) drives the server-authorized map exchange with
+## The `transfer` mode (Map transfer) drives the server-authorized map exchange with
 ## `--scenario=`:
 ##   observer   stay put and report the map plus every entity this client was
 ##              sent (cross-map invisibility needs two of these, one per map)
@@ -92,7 +92,7 @@ var _corrections := 0
 var _damage_events: Dictionary = {}
 var _stuck_timer := 0.0
 var _sidestep_timer := 0.0
-## Phase 8 staircase probe (mode `staircase`, see _staircase_* below).
+## staircase probe (mode `staircase`, see _staircase_* below).
 var stair_role := "observe"
 var staircase: Node3D = null
 var _stair_samples: Array = []
@@ -104,7 +104,7 @@ var _stair_despawns: Array = []
 var _walk_check_pos := Vector3.ZERO
 var _walk_check_timer := 0.0
 
-## Phase 8 map-transfer probe (mode `transfer`, see the transfer section below).
+## map-transfer probe (mode `transfer`, see the transfer section below).
 var scenario := "observer"
 ## The `--scenario=` argument as given; the encounter mode reads it too, so a
 ## caller does not have to know which mode's variable it lands in.
@@ -684,7 +684,7 @@ var _origin_pos := Vector3.ZERO
 
 # ---------------------------------------------------------------- maintenance
 
-## Phase 6 probe: stay connected through a maintenance cycle and record what the
+## Maintenance surface probe: stay connected through a maintenance cycle and record what the
 ## client is told, what the admin API publishes, and whether the freeze is real.
 ## The service token comes from HPMMO_SERVICE_TOKEN and is never recorded.
 var _maint_events: Array = []
@@ -1007,7 +1007,7 @@ func _nearest_mob() -> Node3D:
 			best = node
 	return best
 
-# ------------------------------------------------------- staircase (Phase 8)
+# ------------------------------------------------------- staircase (Map transfer)
 
 ## Exit check: two independent clients must see the same staircase position and
 ## state at the same tick. This probe is a real client: it joins, loads the
@@ -1022,7 +1022,7 @@ func _nearest_mob() -> Node3D:
 ##   rider_logout  ride, then drop the connection mid-flight
 
 const STAIRCASE_SCENE = preload("res://scenes/world/castle/staircase.tscn")
-## Inside the Phase 10 flat core and clear of the encounter regions. The old
+## Inside the art pass flat core and clear of the encounter regions. The old
 ## (150, 0, 120) is in the hill ring the terrain pass raises, and the hillside
 ## there intersects the upper flight and the landings.
 const STAIR_DEV_ORIGIN := Vector3(90.0, 0.0, -15.0)
@@ -1278,7 +1278,7 @@ func _finish_staircase() -> void:
 	})
 	_finish(0)
 
-# --------------------------------------------- staircase failure cases (Phase 8)
+# --------------------------------------------- staircase failure cases (Map transfer)
 
 ## Death, disconnect/logout and a map transfer while a rider is between floors
 ## must land the body on a valid landing. Runs the authority in process and
@@ -1379,7 +1379,7 @@ func _stair_contains(point: Vector3) -> bool:
 
 # ------------------------------------------------------------------- transfer
 ##
-## Phase 8 map transfer (plan.md): drives the real client API
+## map transfer: drives the real client API
 ## (`SimNet.request_transfer` / `mark_transfer_ready`) and records every
 ## transfer/map signal the server emits. The map controller that ships with the
 ## client performs the load and the readiness acknowledgement; this probe
@@ -1900,7 +1900,7 @@ func _filter_check(peer: int, centre: Vector3) -> Dictionary:
 	other.queue_free()
 	return out
 
-# ------------------------------------------------------- encounters (Phase 11)
+# ------------------------------------------------------- encounters (Creature pass)
 
 ## Real-server scenarios (`--mode=encounter --scenario=...`):
 ##   reactive   stand beside an ordinary pack: proximity alone must not aggro;
@@ -2111,7 +2111,7 @@ func _finish_encounter() -> void:
 	})
 	_finish(0)
 
-## In-process Phase 11 checks. Drives the real authority and the real director;
+## In-process creature checks. Drives the real authority and the real director;
 ## the Python suite asserts on the recorded facts.
 func _run_encounter_local() -> void:
 	world = WORLD_SCENE.instantiate()

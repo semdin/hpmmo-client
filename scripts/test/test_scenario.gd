@@ -75,7 +75,7 @@ func _ready() -> void:
 		check(pack.members.size() == pack.count, "Encounter has its configured 3/5 pack or boss composition")
 		for member in pack.members:
 			check(member.spawn_point.distance_to(member.global_position) < 8, "Spawn anchor is assigned before mob ready")
-	# Phase 1: ordinary mobs are reactive; protected volumes gate damage.
+	# Ordinary mobs are reactive; protected volumes gate damage.
 	# Fixed staging point far from every authored volume keeps these checks
 	# deterministic regardless of the random pack anchors.
 	var staging := Vector3(-70, 0.1, 20)

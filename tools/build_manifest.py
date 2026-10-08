@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build assets/manifest.json from the audit + curated provenance (plan.md Phase 2).
+"""Build assets/manifest.json from the audit + curated provenance.
 
 Inputs:
   tools/downloads/asset-audit.json   (run tools/asset_audit.py first — measured stats/hashes)
@@ -7,12 +7,13 @@ Inputs:
 Output:
   assets/manifest.json
 
-Every entry carries the fields plan.md Phase 2 requires: id, purpose, status,
+Every entry carries the fields requires: id, purpose, status,
 author/source URL, license + license URL + local license copy, attribution,
 local paths with sha256, scale, polygons, material slots, texture channels,
 rig, animations, collision, LODs, acceptance evidence.
 """
 
+import glob
 import hashlib
 import json
 import os
@@ -51,7 +52,7 @@ CURATED = {
     "kenney-furniture-kit": ["assets/candidates/modular-kit/kenney-furniture-kit"],
     "polyhaven-chandelier-lantern-01": ["assets/candidates/modular-kit/polyhaven-chandelier-lantern-01"],
     "polyhaven-potted-plant-04": ["assets/candidates/modular-kit/polyhaven-potted-plant-04"],
-    # Verified but kept outside the repo (re-fetchable CC0; promote at Phase 10):
+    # Verified but kept outside the repo (re-fetchable CC0; promote at the art pass):
     "stone-tiles-02": ["tools/downloads/asset-candidates/stone-floor/stone-tiles-02"],
     "dark-wooden-planks": ["tools/downloads/asset-candidates/wood-planks/dark-wooden-planks"],
     "white-plaster-02": ["tools/downloads/asset-candidates/plaster/white-plaster-02"],
@@ -59,39 +60,47 @@ CURATED = {
     "kenney-interface-sounds": ["tools/downloads/asset-candidates/audio/kenney-interface-sounds"],
     "kenney-music-jingles": ["tools/downloads/asset-candidates/audio/kenney-music-jingles"],
     "oga-fireplace-loop": ["tools/downloads/asset-candidates/audio/oga-fireplace-loop"],
+    # UI kit sources (UI redesign). Only the licence texts are copied
+    # into assets/ui/LICENSES; the packs themselves stay re-fetchable.
+    "kenney-fantasy-ui-borders": ["tools/downloads/asset-candidates/kenney-fantasy-ui-borders"],
+    "kenney-ui-pack": ["tools/downloads/asset-candidates/kenney-ui-pack"],
+    "oga-rpg-icons-496": ["tools/downloads/asset-candidates/oga-rpg-icons-496"],
 }
 
 PURPOSE = {
-    "quaternius-adventurer-male": "taller clothed hero body candidate (Phase 9); untextured",
-    "quaternius-hooded-adventurer": "hooded caster/rogue hero candidate (Phase 9); untextured",
-    "quaternius-universal-animation-library": "7-head mannequin + spell-cast/attack clip library; hero + monster base (Phase 9/11)",
-    "quaternius-universal-base-characters": "textured PBR base bodies (male/female) on the same rig family as the animation library (Phase 9)",
-    "quaternius-rpg-items-icons": "UI icon library (107 icons: potions, weapons, loot, glyphs) for the HUD/inventory (Phase 13)",
-    "quaternius-easy-enemies-spider-glb": "rigged animated spider candidate to replace the procedural acromantula (Phase 11)",
-    "stone-brick-wall-001": "castle wall PBR set, physically scaled (Phase 10)",
-    "stone-tiles-02": "flagstone floor PBR set (Phase 10)",
-    "dark-wooden-planks": "interior wood floor PBR set (Phase 10)",
-    "white-plaster-02": "interior plaster PBR set (Phase 10)",
-    "roof-slates-03": "roof slate PBR set (Phase 10)",
-    "para-animated-particle-fx-1": "coherent 64-frame flipbook library (fire/smoke/energy) (Phase 12)",
-    "mikodrak-spell-fx": "per-spell frame sequences for cast/impact layers (Phase 12)",
-    "sinestesia-2d-explosions": "explosion atlases for Bombarda/Ultimate impacts (Phase 12)",
-    "calinou-lightning": "lightning bolt elements for the Ultimate (Phase 12)",
-    "cethiel-angel-shield": "shield ripple frames for Protego (Phase 12)",
+    "quaternius-adventurer-male": "taller clothed hero body candidate (Rig); untextured",
+    "quaternius-hooded-adventurer": "hooded caster/rogue hero candidate (Rig); untextured",
+    "quaternius-universal-animation-library": "7-head mannequin + spell-cast/attack clip library; hero + monster base (the rig and creature passes)",
+    "quaternius-universal-base-characters": "textured PBR base bodies (male/female) on the same rig family as the animation library (Rig)",
+    "quaternius-rpg-items-icons": "3D-rendered item icon candidate (107 icons: potions, weapons, loot); held back from the UI pass because the free spell/staff icons next to it are pixel art and mixing the two styles in one bag reads as an accident",
+    "kenney-fantasy-ui-borders": "ornate frame/panel masks for the window, inset, tooltip, button and slot family (Interface)",
+    "kenney-ui-pack": "round button art for the close and minimap controls (Interface)",
+    "oga-rpg-icons-496": "spell, equipment, potion and material icons - one CC0 family for the whole icon set (Interface)",
+    "quaternius-easy-enemies-spider-glb": "rigged animated spider candidate to replace the procedural acromantula (Creature pass)",
+    "stone-brick-wall-001": "castle wall PBR set, physically scaled (Art pass)",
+    "stone-tiles-02": "flagstone floor PBR set (Art pass)",
+    "dark-wooden-planks": "interior wood floor PBR set (Art pass)",
+    "white-plaster-02": "interior plaster PBR set (Art pass)",
+    "roof-slates-03": "roof slate PBR set (Art pass)",
+    "para-animated-particle-fx-1": "coherent 64-frame flipbook library (fire/smoke/energy) (Spell effects)",
+    "mikodrak-spell-fx": "per-spell frame sequences for cast/impact layers (Spell effects)",
+    "sinestesia-2d-explosions": "explosion atlases for Bombarda/Ultimate impacts (Spell effects)",
+    "calinou-lightning": "lightning bolt elements for the Ultimate (Spell effects)",
+    "cethiel-angel-shield": "shield ripple frames for Protego (Spell effects)",
     "codemanu-pixel-fx": "compact pixel FX sheets (fallback/UI-scale effects)",
-    "kenney-impact-sounds": "footsteps (5 surfaces), impacts, glass/metal (Phase 12.5)",
-    "kenney-rpg-audio": "footsteps, cloth, doors, books, coins (Phase 12.5)",
-    "oga-wind-loop": "exterior wind ambience loop (Phase 12.5)",
-    "oga-fireplace-loop": "fireplace ambience loop (Phase 12.5)",
-    "kenney-interface-sounds": "UI clicks/selects/errors (Phase 12.5)",
-    "kenney-music-jingles": "quest/level-up jingles (Phase 12.5)",
-    "kaykit-dungeon-pack-1.1-gaps": "stair/floor/railing gap pieces for the castle kit (Phase 8/10)",
-    "kaykit-furniture-bits-1.0": "books, bookshelves, tables, seating, lamps (Phase 10)",
-    "kaykit-halloween-bits-1.0": "candelabras, hanging lanterns, gothic arches, benches (Phase 10)",
-    "kenney-castle-kit": "stone stairs + rail + tower arch pieces (Phase 8/10)",
-    "kenney-furniture-kit": "potted plants, bookcases, benches, stairs (Phase 10)",
-    "polyhaven-chandelier-lantern-01": "ornate lantern chandelier prop, 1k PBR (Phase 10)",
-    "polyhaven-potted-plant-04": "potted plant prop, 1k PBR, metric scale (Phase 10)",
+    "kenney-impact-sounds": "footsteps (5 surfaces), impacts, glass/metal (the spell-effect follow-up)",
+    "kenney-rpg-audio": "footsteps, cloth, doors, books, coins (the spell-effect follow-up)",
+    "oga-wind-loop": "exterior wind ambience loop (the spell-effect follow-up)",
+    "oga-fireplace-loop": "fireplace ambience loop (the spell-effect follow-up)",
+    "kenney-interface-sounds": "UI clicks/selects/errors (the spell-effect follow-up)",
+    "kenney-music-jingles": "quest/level-up jingles (the spell-effect follow-up)",
+    "kaykit-dungeon-pack-1.1-gaps": "stair/floor/railing gap pieces for the castle kit (the castle art pass)",
+    "kaykit-furniture-bits-1.0": "books, bookshelves, tables, seating, lamps (Art pass)",
+    "kaykit-halloween-bits-1.0": "candelabras, hanging lanterns, gothic arches, benches (Art pass)",
+    "kenney-castle-kit": "stone stairs + rail + tower arch pieces (the castle art pass)",
+    "kenney-furniture-kit": "potted plants, bookcases, benches, stairs (Art pass)",
+    "polyhaven-chandelier-lantern-01": "ornate lantern chandelier prop, 1k PBR (Art pass)",
+    "polyhaven-potted-plant-04": "potted plant prop, 1k PBR, metric scale (Art pass)",
 }
 
 REJECTED = [
@@ -125,7 +134,7 @@ IMPORT_NOTES = {
     "quaternius-adventurer-male": "Untextured (flat materials, UVs present); 5 duplicated skins to merge at integration.",
     "quaternius-hooded-adventurer": "Untextured; sword is a separate non-skinned mesh to socket manually.",
     "quaternius-universal-base-characters": "Godot/UE glTF variant; PBR basecolor/normal/roughness in the same folder; hairstyles shipped in the pack are not curated yet.",
-    "quaternius-rpg-items-icons": "2D PNG icons - usable directly; the pack's 106 .blend/.fbx/.obj props convert via Blender (installed, 5.2.2 LTS) at Phase 10.",
+    "quaternius-rpg-items-icons": "2D PNG icons - usable directly; the pack's 106 .blend/.fbx/.obj props convert via Blender (installed, 5.2.2 LTS) at the art pass.",
 }
 
 
@@ -206,11 +215,11 @@ def main():
         if "characters/wizard" in p:
             entry["purpose"] = "player hero (KayKit Mage, byte-identical to the shipped placeholder)"
             entry["status"] = "placeholder"
-            entry["acceptance"] = "docs/baseline-captures/baseline-gameplay-hud.png, tools/downloads/asset-review-actors-neutral.png"
+            entry["acceptance"] = "tools/downloads/asset-review-actors-neutral.png"
         elif "monsters/" in p:
             entry["purpose"] = "monster visual (used by mob scenes)"
             entry["status"] = "integrated"
-            entry["acceptance"] = "docs/baseline-captures/baseline-enemy-assets.png"
+            entry["acceptance"] = ""
         elif "props/" in p:
             entry["purpose"] = "unused wand/spellbook GLTF prop (broken texture reference)"
             entry["status"] = "candidate"
@@ -221,7 +230,7 @@ def main():
         else:
             entry["purpose"] = "modular environment piece (KayKit dungeon kit)"
             entry["status"] = "integrated"
-            entry["acceptance"] = "docs/baseline-captures/baseline-castle-exterior.png"
+            entry["acceptance"] = ""
         if "monsters/" in p:
             entry["license_file"] = "assets/models/monsters/License.txt"
         elif "characters/" in p:
@@ -256,7 +265,7 @@ def main():
             "textures": {"channels": ["albedo"], "note": "1024x1024 shared atlas"},
             "rig": {"skinned": False, "joints": 0, "clips": []},
             "collision": "none (generated in castle_builder)", "lods": "none",
-            "acceptance": "docs/baseline-captures/baseline-castle-exterior.png, tools/downloads/asset-review-surfaces-neutral.png",
+            "acceptance": "tools/downloads/asset-review-surfaces-neutral.png",
         })
 
     # loose asset files that would otherwise be in no entry
@@ -299,6 +308,37 @@ def main():
             "rig": {}, "collision": "n/a", "lods": "n/a", "acceptance": "",
         })
 
+    # UI kit family (UI redesign). Declared by hand because the baseline
+    # audit predates assets/ui. The frames, insets, buttons and slots are tinted
+    # Kenney "Fantasy UI Borders" masks; the round controls come from Kenney
+    # "UI Pack"; the icons are one CC0 set. Everything else is drawn by
+    # tools/ui/standard_kit.py.
+    ui_files = sorted(set(
+        glob.glob(os.path.join(ROOT, "assets", "ui", "*.png"))
+        + glob.glob(os.path.join(ROOT, "assets", "ui", "icons", "*.png"))
+    ))
+    ui_paths = [os.path.relpath(p, ROOT).replace("\\", "/") for p in ui_files
+                if "preview" not in os.path.basename(p).lower()]
+    if ui_paths:
+        assets.append({
+            "id": "family-ui-kit",
+            "purpose": "window/inset/button/slot/bars/icon kit for the HUD, bag, menu and launcher",
+            "status": "integrated",
+            "author": "Kenney (Kenney.nl), gnola14 (OpenGameArt); procedural shapes are original work",
+            "source_url": "assets/ui/LICENSES",
+            "license": "CC0 1.0 Universal (Public Domain Dedication)",
+            "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "license_file": "assets/ui/LICENSES/kenney-fantasy-ui-borders.txt, assets/ui/LICENSES/kenney-ui-pack.txt, assets/ui/LICENSES/oga-rpg-icons-496.txt",
+            "attribution_required": False, "local_paths": ui_paths,
+            "sha256": {p: sha256(os.path.join(ROOT, p)) for p in ui_paths},
+            "scale_m": "n/a", "triangles": "n/a",
+            "material_slots": "one 64x64 texture per spell/item id (assets/ui/icons/icon_<id>.png)",
+            "textures": {"channels": ["albedo+alpha"],
+                         "note": "nine-patch margins are measured off the masks: 16 px frame window, 8 px small frames, 0 for round buttons"},
+            "rig": {}, "collision": "n/a", "lods": "n/a",
+            "acceptance": "",
+        })
+
     # texture families
     castle_tex = [t["path"] for t in audit["textures"] if t["path"].startswith("assets/textures/") and t["path"].endswith(".png")]
     if castle_tex:
@@ -309,9 +349,9 @@ def main():
             "attribution_required": False, "local_paths": castle_tex,
             "sha256": {t["path"]: t.get("sha256", "") for t in audit["textures"] if t["path"] in castle_tex},
             "scale_m": "n/a", "triangles": "n/a", "material_slots": "n/a",
-            "textures": {"channels": ["albedo"], "note": "256x256; referenced by no code (dead); replaced in Phase 10"},
+            "textures": {"channels": ["albedo"], "note": "256x256; referenced by no code (dead); replaced in the art pass"},
             "rig": {"skinned": False, "joints": 0, "clips": []}, "collision": "n/a", "lods": "n/a",
-            "acceptance": "docs/baseline-captures/baseline-castle-exterior.png (current look)",
+            "acceptance": " (current look)",
         })
     env_palette = [t["path"] for t in audit["textures"] if "models/environment" in t["path"]]
     if env_palette:
@@ -419,16 +459,15 @@ def main():
 
     # --- genuinely missing -------------------------------------------------------
     missing = [
-        ("hero_final_art", "textured, clothed grounded-fantasy hero replacing the chibi placeholder", "Phase 9", "candidates: quaternius-adventurer-male, quaternius-universal-animation-library (both untextured); textured originals are manual-download (Google Drive quota / itch 122-280 MB)"),
-        ("broom_model", "shaped broom (shaft, grip, bristles) with a seat socket", "Phase 9", "current broom is two cylinder primitives"),
-        ("monster_variants_final", "grounded dark-wizard and inferi models matching the hero style", "Phase 11", "Quaternius set is the only existing option; spider candidate obtained"),
-        ("vfx_trail_mesh", "camera-aware tapered ribbon mesh for broom/projectile trails", "Phase 12", "author procedurally or in Blender (not installed)"),
-        ("vfx_distortion_flow", "distortion/flow data textures for heat haze and shields", "Phase 12", "no free verified source in this pass"),
-        ("sfx_room_tone", "interior ambience/room-tone loops (Great Hall, library, dungeon)", "Phase 12.5", "Kenney/oGA candidate pass found no verified CC0 room tones"),
-        ("music_beds", "music for menu/exploration/combat", "Phase 12.5", "Kenney jingles are stings only; no long-form beds secured"),
-        ("ui_icons", "spell/item/status icons in one style", "Phase 13", "current UI uses text and emoji-ish glyphs"),
-        ("character_equipment_variants", "robe/hat/house-colour clothing variants", "Phase 9/13", "requires the final hero first"),
-        ("npc_variants", "distinct NPC bodies (professor, shopkeeper, groundskeeper)", "Phase 10+", "NPCs currently share the shared wizard rig"),
+        ("hero_final_art", "textured, clothed grounded-fantasy hero replacing the chibi placeholder", "rig", "candidates: quaternius-adventurer-male, quaternius-universal-animation-library (both untextured); textured originals are manual-download (Google Drive quota / itch 122-280 MB)"),
+        ("broom_model", "shaped broom (shaft, grip, bristles) with a seat socket", "rig", "current broom is two cylinder primitives"),
+        ("monster_variants_final", "grounded dark-wizard and inferi models matching the hero style", "creature", "Quaternius set is the only existing option; spider candidate obtained"),
+        ("vfx_trail_mesh", "camera-aware tapered ribbon mesh for broom/projectile trails", "vfx", "author procedurally or in Blender (not installed)"),
+        ("vfx_distortion_flow", "distortion/flow data textures for heat haze and shields", "vfx", "no free verified source in this pass"),
+        ("sfx_room_tone", "interior ambience/room-tone loops (Great Hall, library, dungeon)", "vfx", "Kenney/oGA candidate pass found no verified CC0 room tones"),
+        ("music_beds", "music for menu/exploration/combat", "vfx", "Kenney jingles are stings only; no long-form beds secured"),
+        ("character_equipment_variants", "robe/hat/house-colour clothing variants", "rig/ui", "requires the final hero first"),
+        ("npc_variants", "distinct NPC bodies (professor, shopkeeper, groundskeeper)", "art+", "NPCs currently share the shared wizard rig"),
     ]
     for mid, purpose, phase, note in missing:
         assets.append({
@@ -447,7 +486,7 @@ def main():
         "schema": 1,
         "generated": str(date.today()),
         "project": "HPMMO",
-        "notes": "Phase 2 manifest. Measured fields come from tools/asset_audit.py; license fields were download- and adversarially-verified during Phase 2 research (see docs/art-direction.md section 8). Candidate assets are review-stage: excluded from release packaging until promoted.",
+        "notes": "Asset audit manifest. Measured fields come from tools/asset_audit.py; license fields were download- and adversarially-verified during the audit research. Candidate assets are review-stage: excluded from release packaging until promoted.",
         "summary": summary,
         "assets": assets,
         "rejected": REJECTED,

@@ -63,32 +63,6 @@ material = SubResource("StandardMaterial3D_spark")
 radius = 0.05
 height = 0.1
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
-bg_color = Color(0.08, 0.09, 0.14, 0.88)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.85, 0.7, 0.25, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-shadow_color = Color(0, 0, 0, 0.5)
-shadow_size = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_gold"]
-bg_color = Color(0.35, 0.25, 0.1, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.85, 0.3, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
 [node name="CharacterSelect" type="Node3D"]
 script = ExtResource("1_cs")
 
@@ -218,7 +192,7 @@ offset_top = -140.0
 offset_right = 320.0
 offset_bottom = 140.0
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+theme_type_variation = &"WindowFrame"
 
 [node name="Margin" type="MarginContainer" parent="CanvasLayer/InfoCard"]
 layout_mode = 2
@@ -285,7 +259,7 @@ alignment = 1
 [node name="EnterWorldBtn" type="Button" parent="CanvasLayer/BottomBar"]
 custom_minimum_size = Vector2(240, 50)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_gold")
+theme_type_variation = &"PrimaryButton"
 text = "⚔️ OYUNA GİR (ENTER WORLD)"
 
 [node name="NewCharBtn" type="Button" parent="CanvasLayer/BottomBar"]
@@ -306,7 +280,7 @@ offset_right = 260.0
 offset_bottom = 180.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+theme_type_variation = &"WindowFrame"
 
 [node name="Margin" type="MarginContainer" parent="CanvasLayer/CreateModal"]
 layout_mode = 2

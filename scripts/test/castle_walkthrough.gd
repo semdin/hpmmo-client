@@ -1,6 +1,6 @@
 extends Node
 
-## Castle interior walkthrough + map-transfer evidence (plan.md Phase 8).
+## Castle interior walkthrough + map-transfer evidence.
 ##
 ## Headless-safe: it drives the REAL world scene, walks the REAL route through
 ## the REAL collision, and prints node/resource counts either side of every
@@ -11,7 +11,7 @@ extends Node
 ##     --fixed-fps 60 --quit-after 5400
 ##
 ## It is not part of the 93-check regression (scenes/test/test_scenario.tscn);
-## it is the Phase 8 proof scene.
+## it is the castle proof scene.
 
 const ROUTE_TIMEOUT := 30.0
 

@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Measures the world-space bounds and named parts of the Phase 9 models so the
+## Measures the world-space bounds and named parts of the rig models so the
 ## scene wiring uses measured numbers, not assumed ones.
 ## Run: godot --headless --path . --script res://tools/measure_import.gd
 

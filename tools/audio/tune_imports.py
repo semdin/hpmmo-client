@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the Phase 12 audio import settings from the sound library manifest.
+"""Apply the spell effects audio import settings from the sound library manifest.
 
     python client/tools/audio/tune_imports.py --client client [--check]
 
@@ -9,8 +9,8 @@ plays a single 5-second sample and stops - which is exactly what "looping
 ambience" is not. Long beds keep the engine's compressed mode (QOA by default)
 rather than being forced to PCM.
 
-Run this after synth_phase12.py and before the Godot import pass. `--check`
-verifies the settings without writing (used by run_phase12_checks.ps1).
+Run this after synth_spell_sfx.py and before the Godot import pass. `--check`
+verifies the settings without writing (used by run_vfx_checks.ps1).
 """
 
 import argparse
@@ -96,7 +96,7 @@ def main():
     parsed = parser.parse_args()
     manifest_path = library_path(parsed.client)
     if not os.path.exists(manifest_path):
-        raise SystemExit("missing %s (run synth_phase12.py first)" % manifest_path)
+        raise SystemExit("missing %s (run synth_spell_sfx.py first)" % manifest_path)
     with open(manifest_path, "r", encoding="utf-8") as handle:
         manifest = json.load(handle)
 

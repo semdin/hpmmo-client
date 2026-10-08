@@ -1,4 +1,4 @@
-"""Build the Phase 11 boss creature: the Acromantula Matriarch.
+"""Build the boss creature: the Acromantula Matriarch.
 
 Project-original, authored parametrically in Blender. Nothing is imported and
 nothing is downloaded: every vertex, UV, weight, key and texel in the shipped
@@ -19,7 +19,7 @@ What makes it read as a boss rather than "the spider again, with more HP":
     two leg pairs crash down) and Spit_Anticipation/Spit_Attack (tilt back,
     fangs spread, then a thrust along the facing direction).
 
-Authoring convention (art-direction.md section 3: forward +Z for creatures).
+Authoring convention: forward +Z for creatures.
 Blender is Z-up / -Y-forward and the glTF exporter maps Blender -Y -> glTF +Z,
 so the head is authored towards -Y. Up stays +Y in Godot. 1 unit = 1 metre,
 bind-pose feet on the ground plane (lowest vertex within 2 cm of y=0).

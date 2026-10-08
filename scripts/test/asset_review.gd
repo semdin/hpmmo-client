@@ -1,6 +1,6 @@
 extends Node3D
 
-## Phase 2 in-engine asset review (plan.md).
+## in-engine asset review.
 ##
 ## Lineup of representative candidates at actual gameplay camera distance
 ## (the player SpringArm is 8 m; this scene shoots from ~9.5 m wide and ~3.6 m
@@ -126,7 +126,7 @@ func _apply_lighting(mode: String) -> void:
 func _build_lineup() -> void:
 	# Actors row (z = 0): shipped chibi vs taller CC0 candidates. The spider
 	# candidate ships x100 node scale; it is shown here at its ~2 m production
-	# span (normalize at import in Phase 11).
+	# span (normalize at import in the creature pass).
 	_add_model("hero-current", "res://assets/models/characters/wizard.glb", Vector3(-5.25, 0, 0), 1.6)
 	_add_model("hero-adventurer", "res://assets/candidates/character/quaternius-adventurer-male/adventurer-male.glb", Vector3(-3.15, 0, 0), 1.7)
 	_add_model("hero-hooded", "res://assets/candidates/character/quaternius-hooded-adventurer/hooded-adventurer.glb", Vector3(-1.05, 0, 0), 1.7)
@@ -182,7 +182,7 @@ func _add_scene(label: String, path: String, pos: Vector3, face_height: float) -
 	add_child(inst)
 	_register_item(inst, label, face_height)
 
-## Delivered flipbook atlas shown as-is (frames are wired in Phase 12).
+## Delivered flipbook atlas shown as-is (frames are wired in the spell effects).
 func _add_flipbook_sheet(label: String, pos: Vector3, path: String) -> void:
 	if not ResourceLoader.exists(path):
 		print("SKIP %s: missing %s" % [label, path])

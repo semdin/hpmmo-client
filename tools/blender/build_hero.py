@@ -1,4 +1,4 @@
-"""Build the Phase 9 hero (plan.md Phase 9, character + broom-rider tasks).
+"""Build the rig hero (character + broom-rider tasks).
 
 Body: quaternius-hooded-adventurer (CC0 1.0, 1.877 m, 7,276 tris, 62-joint rig).
 Clips:

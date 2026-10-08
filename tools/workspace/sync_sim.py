@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Sync the server-owned simulation package into the client (plan.md Phase 5).
+"""Sync the server-owned simulation package into the client.
 
-Phase 3 exported the world from client -> server. Phase 5 inverts ownership of
+the world export exported the world from client -> server. the authority inverts ownership of
 everything that decides gameplay: the protocol, the combat/movement/zone rules,
 the gameplay data, the authority engine and the network surface now live in
 `server/world/addons/hpmmo_sim/`, and the client consumes a byte-identical copy

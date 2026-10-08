@@ -1,5 +1,5 @@
-Phase 12 spell VFX source art - PROJECT-ORIGINAL.
-Authored by client/tools/blender/phase12_vfx.py running inside Blender 5.2.2
+spell effects source art - PROJECT-ORIGINAL.
+Authored by client/tools/blender/spell_vfx.py running inside Blender 5.2.2
 headless (deterministic seeded numpy fields; re-running the script reproduces
 these files byte-for-byte on the same Blender/numpy build).
 No third-party image was used and no image generator was involved.

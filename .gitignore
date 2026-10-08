@@ -34,3 +34,6 @@ test_log.txt
 .idea/
 Thumbs.db
 Desktop.ini
+
+# Gemini API key for tools/ui/gemini_art.py - never commit
+**/.gemini_key

@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "generator": "client/tools/blender/phase12_vfx.py",
+ "generator": "client/tools/blender/spell_vfx.py",
  "blender": "5.2.2",
  "seed": 20261005,
  "generated": "2026-10-05",
@@ -31,7 +31,7 @@
    "alpha": "straight (non-premultiplied); coverage in A, linear",
    "colour_space": "sRGB (RGB), linear (A)",
    "blend_default": "alpha",
-   "generator": "tools/blender/phase12_vfx.py",
+   "generator": "tools/blender/spell_vfx.py",
    "seed": 20266445,
    "note": "Simulated sequence: one continuous band-limited field sampled at 64 consecutive times (periodic in t, so frame 63 blends into frame 0). Not independent stills."
   },
@@ -58,7 +58,7 @@
    "alpha": "straight (non-premultiplied); coverage in A, linear",
    "colour_space": "sRGB (RGB), linear (A)",
    "blend_default": "alpha",
-   "generator": "tools/blender/phase12_vfx.py",
+   "generator": "tools/blender/spell_vfx.py",
    "seed": 20266445,
    "note": "Simulated one-shot: one continuous band-limited field sampled at 64 consecutive times; first and last frames are empty."
   },
@@ -85,7 +85,7 @@
    "alpha": "straight (non-premultiplied); coverage in A, linear",
    "colour_space": "sRGB (RGB), linear (A)",
    "blend_default": "alpha",
-   "generator": "tools/blender/phase12_vfx.py",
+   "generator": "tools/blender/spell_vfx.py",
    "seed": 20266445,
    "note": "Simulated one-shot: one continuous band-limited field sampled at 64 consecutive times; first and last frames are empty."
   },
@@ -112,7 +112,7 @@
    "alpha": "straight (non-premultiplied); coverage in A, linear",
    "colour_space": "sRGB (RGB), linear (A)",
    "blend_default": "additive",
-   "generator": "tools/blender/phase12_vfx.py",
+   "generator": "tools/blender/spell_vfx.py",
    "seed": 20266445,
    "note": "Simulated one-shot: one continuous band-limited field sampled at 64 consecutive times; first and last frames are empty."
   },
@@ -139,7 +139,7 @@
    "alpha": "straight (non-premultiplied); coverage in A, linear",
    "colour_space": "sRGB (RGB), linear (A)",
    "blend_default": "additive",
-   "generator": "tools/blender/phase12_vfx.py",
+   "generator": "tools/blender/spell_vfx.py",
    "seed": 20265629,
    "note": "Simulated one-shot: one continuous band-limited field sampled at 16 consecutive times; first and last frames are empty."
   },
@@ -256,7 +256,7 @@
    "colour_space": "linear data (white mask)",
    "alpha": "straight (mask)",
    "blend_default": "alpha",
-   "generator": "tools/blender/phase12_vfx.py",
+   "generator": "tools/blender/spell_vfx.py",
    "seed": 20261005,
    "purpose": "Scorch, dust, fragment and cracked-ring ground marks (Bombarda, Incendio, Ultimate)"
   },
@@ -284,7 +284,7 @@
    "colour_space": "linear data (white mask)",
    "alpha": "straight (mask)",
    "blend_default": "additive",
-   "generator": "tools/blender/phase12_vfx.py",
+   "generator": "tools/blender/spell_vfx.py",
    "seed": 20261005,
    "purpose": "Restrained rune/telegraph masks (boss warning, shield ward, ground marks)"
   },
@@ -312,7 +312,7 @@
    "colour_space": "linear data (white mask)",
    "alpha": "straight (mask)",
    "blend_default": "additive",
-   "generator": "tools/blender/phase12_vfx.py",
+   "generator": "tools/blender/spell_vfx.py",
    "seed": 20261005,
    "purpose": "Irregular branching energy masks (Ultimate lightning)"
   }

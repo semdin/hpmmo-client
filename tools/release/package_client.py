@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""HPMMO client packager (plan.md Phase 7).
+"""HPMMO client packager.
 
 Builds the zip a launcher installs, from a *build directory* laid out as:
 

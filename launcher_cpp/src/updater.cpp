@@ -1568,7 +1568,7 @@ bool LaunchInstalledGame(const UpdaterPaths& paths, const AppConfig& cfg, bool s
     // ("Scene path was specified on the command line, but this Godot binary was
     // compiled without support for path overrides") before it ever opens a
     // window. The installed game's main scene is the main menu anyway, so the
-    // argument bought nothing and cost every online launch (Phase 14 defect).
+    // argument bought nothing and cost every online launch (Release gates defect).
     std::wstring cmd = L"\"" + paths.gameExe + L"\"";
     std::vector<wchar_t> envBlock;
     LPVOID envPtr = NULL;

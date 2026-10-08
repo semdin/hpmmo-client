@@ -29,7 +29,7 @@ def main():
     ap.add_argument("--root", required=True)
     args = ap.parse_args()
 
-    # The RPC surface lives in the SERVER-owned simulation package (Phase 5);
+    # The RPC surface lives in the SERVER-owned simulation package (Authority);
     # the client consumes it from the synced copy.
     src = os.path.join(args.server, "world", "addons", "hpmmo_sim", "net.gd")
     lines = open(src, encoding="utf-8").read().splitlines()

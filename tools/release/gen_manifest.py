@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""HPMMO client release manifest generator (plan.md Phase 7).
+"""HPMMO client release manifest generator.
 
 Takes an artifact built by package_client.py and emits the detached-signed
 release manifest the native launcher consumes:
 
-    manifest.json        the document (see server/docs/phase7-release-contract.md)
+    manifest.json        the document (see server/docs/release-contract.md)
     manifest.json.sig    raw 64-byte Ed25519 signature, base64, ONE line
     manifest.json.keyid  which key signed it (JSON sidecar, see below)
     SHA256SUMS           the manifest set, for `sha256sum -c`
@@ -382,7 +382,7 @@ def cmd_verify(args: argparse.Namespace) -> int:
 
 def gate_verdict(doc: dict, installed_client: str, installed_launcher: str,
                  installed_protocol: int | None, installed_content: str | None) -> dict:
-    """The compatibility rules from server/docs/phase7-release-contract.md, in
+    """The compatibility rules from server/docs/release-contract.md, in
     one place so the pipeline can prove them. The launcher implements the same
     rules; this is the reference."""
     reasons: list[str] = []

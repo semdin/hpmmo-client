@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "generator": "client/tools/blender/phase12_meshes.py",
+ "generator": "client/tools/blender/spell_meshes.py",
  "blender": "5.2.2",
  "generated": "2026-10-05",
  "units": "metres; glTF +Y up; untextured (the game assigns materials)",
@@ -22,7 +22,7 @@
    "uv": "U along the length (0 emitter -> 1 tip), V across (0..1)",
    "taper_profile": "alpha = max(0.02, (1-t)^1.35), authored into vertex colour alpha",
    "forward": "+Z (length), width in X, authored sag -Y",
-   "authored": "tools/blender/phase12_meshes.py",
+   "authored": "tools/blender/spell_meshes.py",
    "purpose": "camera-aware tapered strip driven by a sample history (broom trail, projectile ribbon, Expelliarmus)"
   },
   {
@@ -40,7 +40,7 @@
    "bytes": 69360,
    "uv": "spherical (u around, v top to bottom)",
    "radius_m": 1.0,
-   "authored": "tools/blender/phase12_meshes.py",
+   "authored": "tools/blender/spell_meshes.py",
    "purpose": "Protego shell - the one effect where a solid surface is intentional; scaled to the 1.8 m ward radius at runtime"
   },
   {
@@ -58,7 +58,7 @@
    "bytes": 5960,
    "uv": "cylindrical wrap",
    "forward": "+Z",
-   "authored": "tools/blender/phase12_meshes.py",
+   "authored": "tools/blender/spell_meshes.py",
    "purpose": "subtle carrier core inside projectile streaks (replaces the placeholder sphere)"
   },
   {
@@ -74,7 +74,7 @@
    "id": "vfx_shard_meshes",
    "file": "meshes/shards.glb",
    "bytes": 6428,
-   "authored": "tools/blender/phase12_meshes.py",
+   "authored": "tools/blender/spell_meshes.py",
    "purpose": "irregular debris shards for Bombarda (four variants in one GLB)"
   },
   {
@@ -90,7 +90,7 @@
    "id": "vfx_shard_meshes",
    "file": "meshes/shards.glb",
    "bytes": 6428,
-   "authored": "tools/blender/phase12_meshes.py",
+   "authored": "tools/blender/spell_meshes.py",
    "purpose": "irregular debris shards for Bombarda (four variants in one GLB)"
   },
   {
@@ -106,7 +106,7 @@
    "id": "vfx_shard_meshes",
    "file": "meshes/shards.glb",
    "bytes": 6428,
-   "authored": "tools/blender/phase12_meshes.py",
+   "authored": "tools/blender/spell_meshes.py",
    "purpose": "irregular debris shards for Bombarda (four variants in one GLB)"
   },
   {
@@ -122,7 +122,7 @@
    "id": "vfx_shard_meshes",
    "file": "meshes/shards.glb",
    "bytes": 6428,
-   "authored": "tools/blender/phase12_meshes.py",
+   "authored": "tools/blender/spell_meshes.py",
    "purpose": "irregular debris shards for Bombarda (four variants in one GLB)"
   }
  ]

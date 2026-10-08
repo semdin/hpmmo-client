@@ -1,4 +1,4 @@
-"""Author the Phase 11 acromantula (plan.md Phase 11, creature asset tasks).
+"""Author the creature pass acromantula (creature asset tasks).
 
 Not a pile of spheres and sticks.  The body is one continuous loft (sloped
 carapace -> narrow pedicel -> heart-shaped abdomen) with a compact sternum,
@@ -9,7 +9,7 @@ five-segment articulated chain -- coxa, femur, patella, tibia, tarsus -- whose
 femur rises into a knee, whose tibia descends, and whose flattened tarsus
 rests on the ground in the bind pose.
 
-Authoring convention (art-direction.md section 3): Blender is Z-up / -Y
+Authoring convention: Blender is Z-up / -Y
 forward, and the glTF exporter maps Blender -Y -> glTF +Z, so a face authored
 towards -Y lands at +Z in Godot.  Up stays +Y in Godot.  Blender +X is the
 creature's right, so the `LegR*` chains are built on +X.

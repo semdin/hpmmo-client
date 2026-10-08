@@ -4,7 +4,7 @@ A 3D Wizarding MMO Action RPG inspired by Metin2 mechanics, built with real-time
 
 ![HPMMO Key Art Banner](assets/branding/hpmmo_banner.jpg)
 
-**2 October 2026 gameplay update:** walkable castle interiors, new animated enemies, coordinated random encounter respawns, smoother combat and flight, live HUD fixes, and resolved startup/shutdown errors. See [changes, controls and validation](docs/GAMEPLAY_UPDATE.md) and [new asset credits](assets/ASSET_CREDITS.md). The local update has not been deployed to the VPS; shared server-authoritative encounters remain separate networking work.
+**2 October 2026 gameplay update:** walkable castle interiors, new animated enemies, coordinated random encounter respawns, smoother combat and flight, live HUD fixes, and resolved startup/shutdown errors. See [new asset credits](assets/ASSET_CREDITS.md). The local update has not been deployed to the VPS; shared server-authoritative encounters remain separate networking work.
 
 ---
 

@@ -9,7 +9,7 @@ Everything in here is deliberately dependency-free (standard library only).
 The release pipeline must run with nothing but Python, the OpenSSL CLI and
 (optionally) the Godot engine available.
 
-The refusal rules are the ones the Phase 7 exit checks depend on:
+The refusal rules are the ones the release pipeline exit checks depend on:
 
   * USER DATA (settings, keybinds, logs, screenshots, saves) must never be
     inside a package - it lives beside the installed versions and survives an
@@ -47,7 +47,7 @@ KINDS = ("full", "delta")
 #: Every artifact kind the launcher understands. `launcher` is the optional
 #: launcher self-update payload (the launcher's own selector skips it when
 #: choosing what to install); it is reserved here so the verifier does not
-#: reject a future publication, and documented in phase7-release-contract.md.
+#: reject a future publication, and documented in release-contract.md.
 KNOWN_ARTIFACT_KINDS = ("full", "delta", "launcher")
 
 #: The prefix every artifact, version directory and manifest belongs to.

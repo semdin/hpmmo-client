@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """HPMMO asset audit — extract real stats from GLB/GLTF and PNG/JPEG files.
 
-Feeds assets/manifest.json (plan.md Phase 2). Pure stdlib.
+Feeds assets/manifest.json. Pure stdlib.
 Usage: python tools/asset_audit.py
 
 scale_m fields are WORLD-SPACE AABBs: every node's TRS (or matrix) is applied

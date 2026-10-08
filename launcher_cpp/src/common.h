@@ -1,4 +1,4 @@
-// HPMMO launcher - shared utilities (Phase 7 updater support).
+// HPMMO launcher - shared utilities (Release pipeline updater support).
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -85,7 +85,7 @@ struct AppConfig {
     std::wstring lastUsername;
     bool rememberMe = true;
 
-    // Phase 7 updater fields (all optional; empty/0 disables the updater).
+    // the release pipeline updater fields (all optional; empty/0 disables the updater).
     std::wstring releaseBaseUrl;      // e.g. https://releases.example/hpmmo/stable
     std::wstring statusUrl;           // default: <release_base>/status.json
     std::wstring releasePublicKey;    // base64, 32-byte pinned Ed25519 public key

@@ -1,5 +1,5 @@
 Project-original procedural texture set 'trim_sheet_01'.
-Authored in Blender 5.2.2 via client/tools/blender/phase10_textures.py.
+Authored in Blender 5.2.2 via client/tools/blender/kit_textures.py.
 License: project-original (CC0-equivalent dedication by the project).
 Generated: deterministic seeded numpy fields; re-running the script reproduces
 these files byte-for-byte.
