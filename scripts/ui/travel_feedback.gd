@@ -62,6 +62,8 @@ func setup(p_player: Node3D, p_world: Node3D) -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_build()
 	_consolidate_location_labels()
+	get_viewport().size_changed.connect(_arcane_layout)
+	_arcane_layout()
 
 ## Interface presentation consolidation: the map transfer map controller already owns
 ## a top-centre location label with the same text this panel shows (plus the
@@ -104,8 +106,9 @@ func _build() -> void:
 	# frame, which used to reach up into it.
 	_location_label = _make_label("", UITheme.FS_LABEL, UITheme.c("gold_lt"))
 	_location_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	UILayout.place_centred(_location_label, Vector2(480, 22), Vector2(0, 55))
-	_location_label.custom_minimum_size = Vector2(480, 22)
+	UILayout.place_centred(_location_label, Vector2(320, 24), Vector2(0, 20))
+	_location_label.custom_minimum_size = Vector2.ZERO
+	_location_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_location_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(_location_label)
 
@@ -354,7 +357,7 @@ func mounted_text() -> String:
 	else:
 		landing = "Cannot land here: %s" % reason
 	last_landing_reason = reason
-	return "Nimbus - Space rise / Ctrl descend / Shift dismount\nAltitude %.1f m - speed %.1f m/s\n%s" % [altitude, speed, landing]
+	return "Broom - Space rise / Ctrl descend / Shift dismount\nAltitude %.1f m - speed %.1f m/s\n%s" % [altitude, speed, landing]
 
 func _update_mounted() -> void:
 	if player == null or not is_instance_valid(player) or not bool(player.get("is_mounted")):
@@ -410,3 +413,18 @@ func describe() -> Dictionary:
 		"invalid_landings": invalid_landing_warnings,
 		"portals_seen": portals_seen,
 	}
+
+func _arcane_layout() -> void:
+	var canvas := get_viewport().get_visible_rect().size
+	var compact := canvas.x < 1000 or canvas.y < 560
+	UILayout.place_centred(_location_label, Vector2(240 if compact else 320,24), Vector2(0,20))
+	_location_label.add_theme_font_size_override("font_size",15 if compact else 16)
+	_stairs_panel.custom_minimum_size = Vector2.ZERO
+	UILayout.place_centred(_stairs_panel,Vector2(240 if compact else 360,48),Vector2(0,172))
+	_stairs_panel.clip_contents = true
+	_stairs_label.size = Vector2(220 if compact else 340,38)
+	_stairs_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_mounted_panel.custom_minimum_size = Vector2.ZERO
+	UILayout.place(_mounted_panel,Vector2(16,214 if compact else 284),Vector2(210 if compact else 280,92))
+	_mounted_label.custom_minimum_size = Vector2.ZERO
+	_mounted_label.size = Vector2(169 if compact else 239,80)

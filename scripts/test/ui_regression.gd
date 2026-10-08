@@ -134,9 +134,10 @@ func _check_transitions() -> void:
 	_push_stats({"hp": 200, "max_hp": 500})
 	var potion := {"id": "potion_health", "amount": 2, "tier": 0}
 	world.inventory_ui.open_for_player(player)
+	player.inventory.assign([potion])
 	world.inventory_ui._on_item_clicked(potion)
 	await get_tree().process_frame
-	check(potion.amount == 1 and player.current_hp == 350,
+	check(int(player.inventory[0].amount) == 1 and player.current_hp == 350,
 		"Potion use consumes one potion and heals the body (%d, %d left)" % [player.current_hp, potion.amount])
 	_push_stats({"hp": int(player.current_hp)})
 	check(hud.hp_bar.value == player.current_hp,

@@ -24,6 +24,8 @@ const TOAST_H := 120.0
 
 ## The authority's refusal vocabulary -> the words the player reads.
 const REASONS := {
+	"no_wand": "Equip a wand first",
+	"no_broom": "Equip a broom first",
 	HPProtocol.REJECT_NO_MANA: "Not enough Mana",
 	HPProtocol.REJECT_RANGE: "Out of range - move closer",
 	HPProtocol.REJECT_NO_TARGET: "No target selected",
@@ -371,7 +373,7 @@ func _on_reward_granted(exp: int, galleons: int, items: Array) -> void:
 	for entry in items:
 		if entry is Dictionary:
 			var item_id := String(entry.get("id", "item"))
-			_toast("+%s x%d" % [item_id, int(entry.get("amount", 1))], Color(0.75, 0.95, 0.75), item_id)
+			_toast("+%s x%d" % [GameData.ITEMS.get(item_id,{}).get("name",item_id), int(entry.get("amount", 1))], Color(0.75, 0.95, 0.75), item_id)
 
 func _on_level_changed(level: int) -> void:
 	_toast("LEVEL %d!" % level, Color(1.0, 0.9, 0.3), "stat_level")
@@ -390,6 +392,7 @@ func _toast(text: String, color: Color, icon_id: String = "ui_pickup") -> void:
 	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(icon)
 	var label := _make_label(text, UITheme.FS_SMALL, color)
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -398,7 +401,9 @@ func _toast(text: String, color: Color, icon_id: String = "ui_pickup") -> void:
 	if _toast_panel != null:
 		_toast_panel.show()
 	_toasts.append({"label": label, "row": row, "until": _now() + 4.0})
-	while _toasts.size() > TOASTS_MAX:
+	var canvas := get_viewport().get_visible_rect().size
+	var capacity := 2 if canvas.x < 1000 or canvas.y < 560 else TOASTS_MAX
+	while _toasts.size() > capacity:
 		var oldest: Dictionary = _toasts.pop_front()
 		if is_instance_valid(oldest["row"]):
 			(oldest["row"] as Node).queue_free()
@@ -473,7 +478,7 @@ func safe_area_text() -> String:
 
 func _update_status() -> void:
 	_status_label.text = _status_fallback_text()
-	_safe_label.text = safe_area_text()
+	_safe_label.text = "Safe area · Combat disabled" if safe_area_text() != "" else ""
 	_safe_icon.visible = _safe_label.text != ""
 
 ## ------------------------------------------------------------------ process

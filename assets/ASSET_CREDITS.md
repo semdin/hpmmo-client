@@ -25,23 +25,16 @@ The icon set was replaced with pictures made for this project.
   `assets/ui/LICENSES/oga-rpg-icons-496.txt` for the record, and the pack is listed as
   superseded in `assets/manifest.json`.
 
-The chrome did not change. Frames, buttons, slots, bars and the minimap bezel are
-still flat `StyleBoxFlat` boxes in `assets/ui/hpmmo.tres`; the icons are the only
-images under `assets/ui`, and `UITheme.chrome_at()` scales one to the size each
-widget asks for.
+# Arcane interface and equipment pass (2026-10-08)
 
-# UI (October 2026 UI pass)
-The interface is **not drawn from art**. `assets/ui/hpmmo.tres` is a single
-Godot `Theme` whose palette, control styles and type scale are flat
-`StyleBoxFlat` boxes, and every surface in the game takes its look from it (the
-project default theme is the same file, so a bare `Button.new()` already matches).
-There is no frame, button, slot or bar image to slice, tint or re-export.
+The HUD and inventory now opt into four generated chrome images through
+`scripts/ui/arcane_skin.gd`: window, primary button, inset slot and circular
+minimap bezel. Layout, gauges, tooltips and interaction states remain code-driven.
+Seven additional equipment icons accompany the obtainable accessories.
+Provenance and slice geometry: `assets/ui/arcane/PROVENANCE.md`.
+Hashes: `family-arcane-chrome` and `family-arcane-equipment-icons` in the manifest.
+Existing screens continue to use the central flat theme unless they opt in.
 
-- `assets/ui/icons/icon_*.png`: see the icon pass above - the whole folder was
-  replaced on 2026-10-08, so the set is no longer the gnola14 CC0 pixels.
-- Everything else in the interface — window and card frames, buttons in all four
-  states, the hotbar cells, the gauges, the scrollbars, the minimap bezel and its
-  markers, the player plate, the level badge — is a `StyleBoxFlat` in the theme.
 - Fonts: **Cinzel** (headings) and **Alegreya Sans** (body), both SIL OFL 1.1,
   vendored in `assets/fonts/` with the licence beside each face.
 

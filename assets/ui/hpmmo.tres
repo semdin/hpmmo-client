@@ -1,9 +1,8 @@
 ; HPMMO interface theme.
 ;
-; One resource holds every surface the game draws: the palette, the control
-; styles and the type scale. Everything is a flat StyleBoxFlat box or a theme
-; colour, so there is no art to slice, no nine-patch margin to measure and no
-; tooling run between changing a colour and seeing it.
+; Base palette, control styles and type scale for existing screens. UITheme
+; additionally installs opt-in ArcaneSkin roles with textured chrome; ordinary
+; controls retain these stable StyleBoxFlat layouts and content margins.
 ;
 ; The palette lives in the `Palette` type rather than in a JSON beside the art,
 ; so the colours and the boxes that use them cannot drift apart. `UITheme.c()`

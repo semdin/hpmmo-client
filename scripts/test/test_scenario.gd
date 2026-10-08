@@ -31,6 +31,9 @@ func _ready() -> void:
 	check(hud.hp_bar.value == player.current_hp and hud.mana_bar.value == player.current_mana and hud.exp_bar.value == 75, "HUD binds after restoring a DB character")
 	player.restore_character({"inventory": []})
 	check(player.inventory.is_empty(), "Intentionally empty inventory stays empty")
+	# Combat fixtures explicitly own their kit; an empty saved bag is never seeded.
+	player.equipment = {"main_hand": {"id":"wand_hawthorn", "tier":0}, "broom": {"id":"broom_nimbus2000", "tier":0}}
+	SimAuthority.refresh_equipment(SimAuthority.record_for(player))
 	player.current_hp = 300
 	player.current_mana = 100
 	player._regen_hp = 0

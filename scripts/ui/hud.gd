@@ -48,6 +48,7 @@ extends Control
 var player: Node3D = null
 var current_target: Node3D = null
 var _currency: Label
+var _house_crest: TextureRect
 var _target_icon: TextureRect = null
 var _target_status_icon: TextureRect = null
 var _last_galleons := -1
@@ -87,6 +88,7 @@ func _ready() -> void:
 	mount_button.pressed.connect(func(): if is_instance_valid(player): player.toggle_broom_mount())
 
 	_setup_panels()
+	_build_arcane_layout()
 	_add_system_chat("Welcome to HPMMO! Cast spells with 1-4, Q, E. Shift mounts/dismounts. Space rises, Ctrl descends.")
 	_add_system_chat("Target Dark Monoliths and mobs with Left Click or Tab. Destroy Monoliths for massive loot!")
 
@@ -166,7 +168,8 @@ func _build_player_plate() -> void:
 	row.add_theme_constant_override("separation", 5)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.add_child(row)
-	row.add_child(UITheme.icon_rect("currency_galleons", 15.0))
+	_house_crest = UITheme.icon_rect("house_gryffindor", 28.0)
+	row.add_child(_house_crest)
 	row.add_child(_currency)
 
 
@@ -314,7 +317,8 @@ func _on_stats_changed(hp: int, max_hp: int, mana: int, max_mana: int, exp: int,
 func _update_currency() -> void:
 	if not is_instance_valid(player):
 		return
-	_currency.text = "%s  •  %s  •  %d Galleons" % [player.player_name, player.house, _last_galleons]
+	_currency.text = "%s · %s\n%d Galleons" % [player.player_name, player.house, _last_galleons]
+	_house_crest.texture = UITheme.chrome("house_" + player.house.to_lower())
 
 func _on_target_health(_uid: int, hp: int, max_hp: int) -> void:
 	_target_stat.set_value(hp, max_hp)
@@ -448,7 +452,7 @@ func _target_max_hp_value() -> int:
 	return 1
 
 func _on_mounted_changed(is_mounted: bool) -> void:
-	mount_button.text = "Dismount" if is_mounted else "Nimbus"
+	mount_button.text = "Dismount" if is_mounted else "Mount"
 
 
 ## The target frame's icon: a crown for a world boss, the enraged eye for an
@@ -644,3 +648,76 @@ func _frame_level_badge() -> void:
 
 
 
+
+var _player_frame: Panel
+
+func _build_arcane_layout() -> void:
+	_player_frame = Panel.new()
+	_player_frame.name = "PlayerFrame"
+	_player_frame.theme_type_variation = &"ArcaneCard"
+	_player_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_player_frame)
+	move_child(_player_frame, 0)
+	ArcaneSkin.decorate(_player_frame)
+	$BottomBar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$BottomBar.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	$PlayerPlate.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	mount_button.text = "Mount"
+	_currency.add_theme_font_size_override("font_size", 13)
+	_currency.add_theme_constant_override("outline_size", 0)
+	for slot in [slot_1, slot_2, slot_3, slot_4, slot_q, slot_e]:
+		slot.theme_type_variation = &"ArcaneSlot"
+	target_panel.theme_type_variation = &"ArcaneCard"
+	for button in $BottomBar/QuickBar.get_children():
+		if button is Button: button.theme_type_variation = &"ArcaneButton"
+	chat_input.focus_entered.connect(_arcane_layout)
+	chat_input.focus_exited.connect(_arcane_layout)
+	get_viewport().size_changed.connect(_arcane_layout)
+	_arcane_layout()
+
+func _arcane_layout() -> void:
+	if _player_frame == null: return
+	var canvas := get_viewport().get_visible_rect().size
+	var compact := canvas.x < 1000 or canvas.y < 560
+	var rail := 210.0 if compact else 280.0
+	UILayout.place(_player_frame, Vector2(16,12), Vector2(rail,136))
+	UILayout.place($PlayerPlate, Vector2(22,17), Vector2(rail-12,45))
+	var status := $BottomBar/StatusBars as Control
+	status.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	status.custom_minimum_size.x = 0
+	UILayout.place(status, Vector2(28,63), Vector2(rail-24,74))
+	var hotbar := $BottomBar/Hotbar as Control
+	hotbar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	UILayout.place(hotbar, Vector2(-166,-88), Vector2(332,54))
+	for slot in [slot_1,slot_2,slot_3,slot_4,slot_q,slot_e]: slot.custom_minimum_size = Vector2(48,48)
+	UILayout.place(exp_bar, Vector2(-166,-26), Vector2(332,14))
+	var quick := $BottomBar/QuickBar as GridContainer
+	quick.columns = 2 if compact else 3
+	quick.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	for button in quick.get_children():
+		if button is Button:
+			button.custom_minimum_size = Vector2(76 if compact else 88,26)
+	UILayout.place(quick, Vector2(-176 if compact else -292,-92), Vector2(160 if compact else 276,80))
+	var chat := $ChatContainer as Control
+	chat.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	var chat_h := 180.0 if chat_input.has_focus() else (86.0 if compact else 120.0)
+	UILayout.place(chat, Vector2(16,-104-chat_h), Vector2(rail,chat_h))
+	chat_history.custom_minimum_size.y = 0
+	if has_node("ChatBadge"): $ChatBadge.position = chat.position + Vector2(4,-9)
+	UILayout.place(target_panel, Vector2(-120 if compact else -160,42), Vector2(240 if compact else 320,50))
+	if feedback != null:
+		feedback._status_row.position = Vector2(rail-100,72)
+		feedback._safe_label.custom_minimum_size = Vector2.ZERO
+		feedback._safe_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		UILayout.place_centred(feedback._safe_row,Vector2(230,22),Vector2(0,-198))
+		feedback._feedback_label.custom_minimum_size = Vector2.ZERO
+		feedback._feedback_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		feedback._cast_panel.custom_minimum_size = Vector2.ZERO
+		UILayout.place(feedback._cast_panel, Vector2(-140,-144), Vector2(280,46))
+		UILayout.place_centred(feedback._feedback_label, Vector2(minf(460,canvas.x-32),26), Vector2(0,-164))
+		if feedback._toast_panel != null:
+			feedback._toast_panel.custom_minimum_size = Vector2.ZERO
+			UILayout.place(feedback._toast_panel, Vector2(-196 if compact else -rail-16,-140 if compact else -230), Vector2(180 if compact else rail,40 if compact else 120))
+			feedback._toast_box.custom_minimum_size = Vector2(162 if compact else rail-18,0)
+			feedback._toast_box.size.x = 162 if compact else rail-18
+			feedback._toast_panel.clip_contents = true

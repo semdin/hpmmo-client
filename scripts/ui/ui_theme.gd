@@ -3,25 +3,10 @@ class_name UITheme
 
 ## The single styling entry point for every HPMMO interface surface.
 ##
-## The look itself lives in one resource, `assets/ui/hpmmo.tres`: a `Theme` whose
-## palette, control styles and type scale are all flat `StyleBoxFlat` boxes. This
-## file does not draw anything - it loads that theme, names the type variations
-## the layout code asks for, and exposes the few values that are read by layout
-## rather than by the theme system (the type scale and the screen grid).
-##
-## Why one Theme resource instead of per-widget styleboxes:
-##
-##   * a plain `Button.new()` already looks like this game, because `project.godot`
-##     points `gui/theme/custom_theme` at the same file - a control that sets no
-##     override cannot drift from one that does;
-##   * changing a corner radius, a colour or a font size is a one-line edit in one
-##     file, not a sweep through a dozen `_build()` functions;
-##   * nothing has to be sliced, tinted or re-exported, so there is no nine-patch
-##     margin that can silently disagree with the art it describes.
-##
-## Widgets pick a role with `theme_type_variation` (see the `V_*` constants) and
-## are then styled entirely by the theme. The only overrides left in the codebase
-## are the ones a widget must own - a bar's value colour, a status line's hue.
+## The base theme supplies stable flat styles for existing screens. ArcaneSkin
+## adds opt-in textured roles with coordinated nine-slice margins, shadows and
+## matching button-state geometry for the HUD and inventory.
+## Layout and gameplay feedback remain control-driven; artwork is chrome only.
 ##
 ## Text uses Cinzel (headings) and Alegreya Sans (body/UI), both SIL OFL 1.1 with
 ## the licence vendored beside each face in `assets/fonts/`.
@@ -358,6 +343,7 @@ static func get_theme() -> Theme:
 	for variation in VARIATION_BASES:
 		loaded.set_type_variation(variation, VARIATION_BASES[variation])
 	_theme = loaded
+	ArcaneSkin.install(_theme)
 	return _theme
 
 

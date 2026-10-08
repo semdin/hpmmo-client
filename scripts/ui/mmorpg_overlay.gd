@@ -108,17 +108,12 @@ func _build() -> void:
 	_map_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_map.add_child(_map_overlay)
 
-	# The bezel was a sprite; a fully rounded StyleBoxFlat is the same circle with
-	# nothing to import, and its thickness is a number rather than a pixel count
-	# baked into art.
-	var ring := Panel.new()
+	# Fixed-aspect artwork sits over the existing circular map mask.
+	var ring := TextureRect.new()
 	ring.name = "Ring"
-	var bezel := StyleBoxFlat.new()
-	bezel.draw_center = false
-	bezel.set_border_width_all(3)
-	bezel.border_color = UITheme.c("gold_dk")
-	bezel.set_corner_radius_all(int(MAP_PX * 0.5))
-	ring.add_theme_stylebox_override("panel", bezel)
+	ring.texture = ArcaneSkin.texture("minimap")
+	ring.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	ring.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	ring.set_anchors_preset(Control.PRESET_FULL_RECT)
 	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_map.add_child(ring)
@@ -183,6 +178,8 @@ func _build() -> void:
 	_zone_label.add_theme_color_override("font_outline_color", UITheme.c("shadow"))
 	_zone_label.add_theme_constant_override("outline_size", 5)
 	_zone_label.modulate.a = 0.0
+	# TravelFeedback owns the single persistent location row.
+	_zone_label.hide()
 	add_child(_zone_label)
 
 	# --- boss bar (top center under banner) ---
@@ -344,6 +341,11 @@ func _refresh_quest() -> void:
 
 ## The controls card yields to the notification stack when the canvas shrinks.
 func _sync_help_visibility() -> void:
+	if _help_panel != null: _help_panel.hide()
+	_arcane_overlay_layout()
+	return
+
+func _legacy_help_visibility() -> void:
 	if _help_panel == null:
 		return
 	var canvas := get_viewport().get_visible_rect().size
@@ -437,6 +439,14 @@ func _update_minimap() -> void:
 		var size := 12.0
 		var d := _dot("npc_%d" % n.get_instance_id(), "minimap_npc", size)
 		d.position = _world_to_map(n.global_position) - Vector2(size, size) * 0.5
+	# Clip icon extents to the disc, not merely to its rectangular Control.
+	for key in _dots:
+		var dot: Control = _dots[key]
+		var radius := MAP_PX * 0.5 - dot.size.length() * 0.5 - 4.0
+		var inside := (dot.position + dot.size*0.5 - Vector2.ONE*MAP_PX*0.5).length() <= radius
+		if key.begins_with("mob_"):
+			dot.visible = dot.visible and inside
+		else: dot.visible = inside
 	# cleanup dead dots (cheap: every frame ok for <200 dots)
 	for key in _dots.keys():
 		if key.begins_with("mob_") or key.begins_with("mon_") or key.begins_with("npc_"):
@@ -530,3 +540,23 @@ func _update_vignette() -> void:
 		var missing: float = 1.0 - float(hp) / float(max_hp)
 		var target_a: float = clamp((missing - 0.55) * 1.2, 0.0, 0.45)
 		_vignette.color.a = lerpf(_vignette.color.a, target_a, 0.1)
+
+func _arcane_overlay_layout() -> void:
+	if _map == null: return
+	var canvas := get_viewport().get_visible_rect().size
+	var compact := canvas.x < 1000 or canvas.y < 560
+	var scale_factor := 0.70 if compact else 1.0
+	_map.scale = Vector2.ONE * scale_factor
+	_map.offset_left = -16 - MAP_PX * scale_factor
+	_map.offset_right = _map.offset_left + MAP_PX
+	if _quest_panel != null:
+		_quest_panel.custom_minimum_size = Vector2.ZERO
+		UILayout.place(_quest_panel, Vector2(-226 if compact else -276,182 if compact else 250), Vector2(210 if compact else 260,84 if compact else 126))
+		_quest_panel.theme_type_variation = &"ArcaneCard"
+		_quest_label.custom_minimum_size = Vector2(186 if compact else 236,0)
+		_quest_label.max_lines_visible = 2 if compact else 4
+		_quest_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		_quest_panel.clip_contents = true
+	if _boss_panel != null:
+		_boss_panel.custom_minimum_size = Vector2.ZERO
+		UILayout.place(_boss_panel, Vector2(-120 if compact else -180,102), Vector2(240 if compact else 360,40))

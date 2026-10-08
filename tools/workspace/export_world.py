@@ -24,7 +24,6 @@ FILE_LIST = os.path.join(HERE, "world_files.txt")
 # Client-owned content contracts. The gameplay contracts (spells, safe zones)
 # are server-owned since the authority handover and pinned by sync_sim.py instead.
 CONTRACTS = [
-    "data/json/items.json",
     "data/json/houses.json",
     "data/json/quests.json",
 ]

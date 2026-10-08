@@ -1,17 +1,14 @@
 extends Panel
 class_name UIWindow
 
-## A framed, draggable game window: a red ribbon carrying the title, a round
+## A framed, draggable game window: a title strip, a round
 ## close button, and a body.
 ##
 ## Built in code rather than as a .tscn so every window in the game (bag,
 ## Ollivander, settings, journal) shares one construction and one look. A panel
 ## only has to set `title` and add its content to `body`.
 ##
-## The ribbon is the title bar. It is sized to its own texture's aspect ratio
-## and overhangs the top edge of the frame, which is what makes the header read
-## as a banner pinned over the window rather than as another row inside it. It
-## is also the drag handle, for the same reason a title bar usually is.
+## The theme styles the title strip; it also acts as the drag handle.
 ##
 ## Dragging writes `offset_*`, never `position`. `UILayout` documents why: a
 ## Control's `position` is measured from its parent's top-left, so assigning it
@@ -22,7 +19,7 @@ class_name UIWindow
 signal closed
 signal moved
 
-## A ribbon is a fixed-height band drawn as a nine-patch, so its rounded ends
+## The title strip is a fixed-height themed panel, so its rounded ends
 ## stay crisp at any window width. It overhangs the top edge of the frame so the
 ## header reads as a banner pinned over the window rather than another row.
 const RIBBON_H := 40.0

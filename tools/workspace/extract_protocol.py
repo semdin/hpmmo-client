@@ -66,7 +66,7 @@ def main():
     body += [
         "",
         f"Surface entries: {len(rows)}. Hash of this document is pinned in the workspace lock;",
-        "payload schemas for gameplay data live in `contracts/schemas/`.",
+        "Canonical gameplay catalogs live in `world/addons/hpmmo_sim/data/`; client content schemas live in `contracts/schemas/`.",
         "",
     ]
     text = "\n".join(body)

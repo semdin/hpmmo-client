@@ -166,7 +166,9 @@ assets/models/props/broom_flight_broom_straw_basecolor.png
 assets/models/props/broom_flight_broom_wood_basecolor.png
 assets/models/props/broom_flight_broom_wood_rough.png
 assets/models/props/mage_texture.png
+assets/models/props/spellbook_open.bin
 assets/models/props/spellbook_open.gltf
+assets/models/props/wand.bin
 assets/models/props/wand.gltf
 assets/shaders/spell_layer.gdshader
 assets/shaders/spell_layer_add.gdshader
@@ -258,7 +260,6 @@ assets/vfx/tex/noise_flow_512.png
 assets/vfx/tex/shield_fracture_512.png
 assets/vfx/tex/soft_glow_512.png
 data/json/houses.json
-data/json/items.json
 data/json/quests.json
 project.godot
 scenes/entities/loot/loot_drop.tscn
@@ -298,6 +299,7 @@ scripts/autoload/network_manager.gd
 scripts/entities/broom_flight.gd
 scripts/entities/cast_layer_modifier.gd
 scripts/entities/hero_animation.gd
+scripts/entities/hero_appearance.gd
 scripts/entities/loot/loot_drop.gd
 scripts/entities/mobs/mob_base.gd
 scripts/entities/monolith/dark_monolith.gd
@@ -315,11 +317,14 @@ scripts/spells/spell_projectile.gd
 scripts/spells/vfx_library.gd
 scripts/systems/audio_manager.gd
 scripts/systems/quest_manager.gd
+scripts/ui/arcane_skin.gd
+scripts/ui/character_preview.gd
 scripts/ui/character_select.gd
 scripts/ui/combat_feedback.gd
 scripts/ui/floating_text.gd
 scripts/ui/game_settings.gd
 scripts/ui/hud.gd
+scripts/ui/inventory_arcane.gd
 scripts/ui/inventory_ui.gd
 scripts/ui/item_tooltip.gd
 scripts/ui/main_menu.gd

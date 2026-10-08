@@ -77,3 +77,13 @@ if ($testCode -ne 0 -or (Select-String -Path $testLog, $testErr -Pattern 'SCRIPT
     throw 'Gameplay regression or shutdown check failed; inspect tools/downloads/check-regression.log.'
 }
 Write-Output 'Godot import, gameplay regression, and shutdown checks passed.'
+
+# The equipment suite covers ownership, authority gates, GUI gestures and save retries.
+$equipmentLog = Join-Path $logDirectory 'check-equipment.log'
+$equipmentErr = Join-Path $logDirectory 'check-equipment.err.log'
+$equipmentCode = Invoke-Godot @('--headless', '--path', $projectPath, 'res://scenes/test/equipment_regression.tscn', '--fixed-fps', '60', '--quit-after', '3600') $equipmentLog $equipmentErr
+Get-Content $equipmentLog, $equipmentErr
+if ($equipmentCode -ne 0 -or (Select-String -Path $equipmentLog, $equipmentErr -Pattern 'SCRIPT ERROR|ERROR:|leaked at exit|Leaked instance' -Quiet) -or -not (Select-String -Path $equipmentLog -Pattern 'EQUIPMENT RESULT: [1-9]\d* checks, 0 failures' -Quiet)) {
+    throw 'Equipment regression failed; inspect tools/downloads/check-equipment.log.'
+}
+Write-Output 'Equipment ownership, interaction and persistence checks passed.'

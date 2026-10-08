@@ -14,6 +14,50 @@ class_name HeroAppearance
 ## darkened house primary. Nothing is duplicated onto the rig.
 
 const MODEL := preload("res://assets/models/characters/hero_wizard.glb")
+const WAND := preload("res://assets/models/props/wand.gltf")
+
+## The existing prop follows the same wrist on both the live model and preview.
+## This is presentation only: authority remains in HPEquipment.
+static func show_equipped_wand(root: Node, entry: Dictionary) -> void:
+	var previous := root.find_child("EquippedWand",true,false)
+	if previous:
+		previous.get_parent().remove_child(previous)
+		previous.queue_free()
+	if entry.is_empty(): return
+	var skeleton: Skeleton3D = _skeleton(root)
+	if skeleton == null: return
+	var bone := "Wrist.R"
+	if skeleton.find_bone(bone) < 0: bone = "Wrist_R"
+	if skeleton.find_bone(bone) < 0: return
+	var attachment := BoneAttachment3D.new()
+	attachment.name = "EquippedWand"
+	attachment.bone_name = bone
+	skeleton.add_child(attachment)
+	var wand := WAND.instantiate() as Node3D
+	wand.scale = Vector3.ONE * 0.4
+	wand.rotation_degrees.z = 0
+	attachment.add_child(wand)
+	if int(entry.get("tier",0)) >= 4:
+		var aura := CPUParticles3D.new()
+		aura.amount = 16
+		aura.lifetime = 0.6
+		aura.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+		aura.emission_sphere_radius = 0.035
+		aura.gravity = Vector3(0,0.12,0)
+		aura.initial_velocity_min = 0.03
+		aura.initial_velocity_max = 0.08
+		aura.scale_amount_min = 0.012
+		aura.scale_amount_max = 0.025
+		aura.color = GameData.UPGRADE_TABLE[int(entry.tier)].aura
+		aura.position = Vector3(0,0.28,0)
+		attachment.add_child(aura)
+
+static func _skeleton(root: Node) -> Skeleton3D:
+	if root is Skeleton3D: return root
+	for child in root.get_children():
+		var found := _skeleton(child)
+		if found: return found
+	return null
 
 const BODY_SURFACE := "Hero_Body"
 const MATERIAL_TRIM := "Hero_Trim"
