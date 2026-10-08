@@ -62,6 +62,10 @@ var _target_initial_hp := -1
 var _target_respawn_tick := -1
 var _exp_start := -1
 var _exp_now := -1
+## Every distinct exp this client was told about, in order: evidence for the
+## reward arithmetic below, and the only way to see a stat push that arrived too
+## late to count.
+var _exp_seen: Array = []
 var _rewards: Array = []
 var _casts_sent := 0
 var _casts_accepted := 0
@@ -318,7 +322,10 @@ func _on_stats(uid: int, stats: Dictionary) -> void:
 		return
 	if uid != int(SimAuthority.record_for(player).get("uid", -1)):
 		return
-	_exp_now = int(stats.get("exp", _exp_now))
+	var value := int(stats.get("exp", _exp_now))
+	if value != _exp_now or _exp_seen.is_empty():
+		_exp_seen.append({"t": snappedf(_t, 0.01), "exp": value})
+	_exp_now = value
 
 func _on_cast_ack(cast_seq: int, _cast_id: int, ok: bool, reason: String) -> void:
 	if ok:
@@ -528,6 +535,21 @@ var _last_cast_tick := -100
 
 func _finish_agree() -> void:
 	_done = true
+	# The reward and the stat push carrying its experience are separate messages,
+	# and the reward list is what the caller reconciles the exp gain against. Wait
+	# (bounded) for this client's own exp to reflect everything it was awarded, so
+	# the arithmetic is not decided by the sample time; `exp_seen` in the record
+	# shows whether it ever did.
+	var granted := 0
+	for reward in _rewards:
+		granted += int(reward.get("exp", 0))
+	var expected := _exp_start + granted
+	# `_done` stops `_physics_process`, so the wait is counted in frames - two
+	# seconds of them - rather than in the scene clock.
+	for _frame in range(120):
+		if player == null or int(player.current_exp) >= expected:
+			break
+		await get_tree().physics_frame
 	_record("final", {
 		"uid": SimAuthority.local_uid,
 		"target_uid": _target_uid,
@@ -541,7 +563,8 @@ func _finish_agree() -> void:
 		"casts_accepted": _casts_accepted,
 		"casts_rejected": _casts_rejected,
 		"exp_start": _exp_start,
-		"exp_end": _exp_now,
+		"exp_end": int(player.current_exp) if player != null else _exp_now,
+		"exp_seen": _exp_seen,
 		"rewards": _rewards,
 		"visible_mobs": _mob_summary(),
 		"player_pos": [player.global_position.x, player.global_position.y, player.global_position.z],
@@ -664,6 +687,7 @@ func _finish_forged() -> void:
 		"forged_mob_died": _forged_mob_died,
 		"own_hp_before": _own_hp_before,
 		"own_hp_after": int(player.current_hp) if player != null else -1,
+		"own_dead": bool(player.is_dead) if player != null else true,
 		"casts_rejected": _casts_rejected,
 		"casts_accepted": _casts_accepted,
 		"max_position_step": _max_step,
@@ -890,11 +914,18 @@ func _run_protection() -> void:
 	player.global_position = outside_pos
 	record["hp"] = hp_before
 	player.set("current_hp", hp_before)
+	# Health alone cannot answer this: a live caster regenerates, so the number
+	# moves up whatever the projectile does. Count the damage events delivered to
+	# the victim's own record uid (the same key the burn cases below use; the
+	# authority emits them against that uid, not against `local_uid`).
+	var victim_uid := int(SimAuthority.record_for(player).get("uid", 0))
+	var shot_events_in := int(_damage_events.get(victim_uid, 0))
 	SimAuthority.mob_projectile(mob, "stupefy", (outside_pos - attacker_pos).normalized(), 120)
 	await get_tree().create_timer(0.25).timeout
 	player.global_position = inside_pos
 	await get_tree().create_timer(1.0).timeout
-	results["projectile_into_zone"] = {"before": hp_before, "after": int(player.current_hp)}
+	results["projectile_into_zone"] = {"before": hp_before, "after": int(player.current_hp),
+		"events": int(_damage_events.get(victim_uid, 0)) - shot_events_in}
 
 	# The same shot with the victim outside protection: proof the shot was real.
 	# Attacker and victim stand 8 m apart on open ground, so the control turns on
@@ -906,9 +937,11 @@ func _run_protection() -> void:
 	player.global_position = yard_victim
 	record["hp"] = hp_before
 	player.set("current_hp", hp_before)
+	var shot_events_out := int(_damage_events.get(victim_uid, 0))
 	SimAuthority.mob_projectile(mob, "stupefy", (yard_victim - yard_mob).normalized(), 120)
 	await get_tree().create_timer(1.2).timeout
-	results["projectile_outside_zone"] = {"before": hp_before, "after": int(player.current_hp)}
+	results["projectile_outside_zone"] = {"before": hp_before, "after": int(player.current_hp),
+		"events": int(_damage_events.get(victim_uid, 0)) - shot_events_out}
 
 	# --- (2) burn ticks: a REAL incendio hit (damage + burn) on the mob, which
 	# then walks into the zone while the burn is still ticking.
@@ -930,23 +963,43 @@ func _run_protection() -> void:
 		"events": int(_damage_events.get(uid_in, 0)) - events_before_in}
 	mob.set_physics_process(true)
 
-	# Burn control: the same hit, the mob left outside, must tick.
+	# Burn control: the same hit, the mob left outside, must tick. Its own AI is
+	# frozen for the window, exactly as in the inside case above: a live encounter
+	# mob wanders (measured 20 m during this window) and a leash/respawn reset
+	# clears the burn, which would make this control depend on where the mob
+	# happened to walk rather than on protection.
 	_revive_attacker(mob)
 	mob.global_position = yard_mob
+	mob.set_physics_process(false)
 	mob_record["hp"] = int(mob.max_hp)
 	mob.set("current_hp", int(mob.max_hp))
 	SimAuthority.apply_spell_hit(mob, "incendio", player)
+	# Sampled at the hit, not after the wait: by the end of the window the burn
+	# deadline has been consumed either way, so only this answers "did the hit
+	# start a burn at all".
+	var burn_out_started := int(SimAuthority.record_for(mob).get("burn_until_tick", 0)) > 0
+	var burn_out_scheduled := int(SimAuthority.record_for(mob).get("burn_until_tick", 0)) - SimAuthority.sim_tick
+	var burn_out_damage := int(SimAuthority.record_for(mob).get("burn_damage", -1))
+	var burn_out_source := int(SimAuthority.record_for(mob).get("burn_source_uid", -1))
+	var burn_out_hit_tick := SimAuthority.sim_tick
 	var burn_out_before := int(mob.current_hp)
 	var uid_out := int(SimAuthority.record_for(mob).get("uid", 0))
 	var events_before_out := int(_damage_events.get(uid_out, 0))
 	await get_tree().create_timer(3.4).timeout
 	results["burn_outside_zone"] = {"before": burn_out_before, "after": int(mob.current_hp),
-		"burn_started": int(SimAuthority.record_for(mob).get("burn_until_tick", 0)) > 0,
+		"burn_started": burn_out_started,
+		"scheduled_ticks": burn_out_scheduled,
+		"burn_damage": burn_out_damage,
+		"burn_source_uid": burn_out_source,
+		"tick_at_hit": burn_out_hit_tick,
 		"events": int(_damage_events.get(uid_out, 0)) - events_before_out,
 		"diag": {"burn_until": int(SimAuthority.record_for(mob).get("burn_until_tick", -1)),
 			"burn_next": int(SimAuthority.record_for(mob).get("burn_next_tick", -1)),
 			"sim_tick": SimAuthority.sim_tick, "dead": bool(SimAuthority.record_for(mob).get("dead", false)),
+			"protected": HPRules.is_protected_node(mob),
+			"position": [mob.global_position.x, mob.global_position.y, mob.global_position.z],
 			"record_uid": int(SimAuthority.record_for(mob).get("uid", 0)), "counted_uid": uid_out}}
+	mob.set_physics_process(true)
 
 	# --- (3) boss AoE centred outside whose circle covers a player inside.
 	player.global_position = inside_pos

@@ -45,6 +45,15 @@ A 3D Wizarding MMO Action RPG inspired by Metin2 mechanics, built with real-time
   ```powershell
   godot --headless --path . res://scenes/test/test_scenario.tscn
   ```
+- **Spell Animation Viewer** (live preview for tuning spell VFX — caster, effect
+  and a human-sized scale reference in one shot):
+  ```powershell
+  godot --path . res://scenes/test/vfx_viewer.tscn
+  # batch evidence: one PNG per stage into tools/downloads, then exit
+  godot --path . res://scenes/test/vfx_viewer.tscn -- --quality=high --spell=bombarda --shot
+  ```
+  `Space` pause · `←/→` spell · `R` replay · `-`/`=` speed · `1/2/3` quality ·
+  `O` orbit · `T` reference · `C` PNG · `Esc` quit · drag/wheel orbit and zoom.
 
 ### 2. Controls
 | Key | Action |

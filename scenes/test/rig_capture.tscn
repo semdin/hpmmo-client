@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/world/game_world.tscn" id="1_world"]
+[ext_resource type="Script" path="res://scripts/test/rig_capture.gd" id="2_cap"]
+
+[node name="RigCapture" type="Node"]
+script = ExtResource("2_cap")
+
+[node name="GameWorld" parent="." instance=ExtResource("1_world")]

@@ -34,8 +34,12 @@ func _ready() -> void:
 	await get_tree().create_timer(0.5).timeout
 	var player = world.local_player
 	await _check_body(player)
+	await _check_clip_metrics(player)
+	await _check_wand_grip(player)
 	await _check_broom_axes(player)
 	await _check_mount_round_trips(player)
+	await _check_broom_grip(player)
+	await _check_cast_aim(player)
 	await _check_refusals(player)
 	await _check_remote_agreement()
 	await _check_animation_graph(player)
@@ -116,6 +120,145 @@ func _check_body(player) -> void:
 		check(hips.global_position.y > foot.global_position.y + 0.3,
 			"Socket_Hips is above Socket_Foot_L on the standing rig (%.2f m apart)" % (hips.global_position.y - foot.global_position.y))
 
+## ---------------------------------------------------------------- clip metrics
+
+## The exported clips must already be in metric bone space. This rig positions
+## `Foot.L`, `Foot.R`, `PT.L` and `PT.R` by their own translation only (they hang
+## off `Root`, which does not move), so a channel left in the unit the body pack
+## authors it in pins the boots in space while the shins swing through them.
+## `tools/blender/build_hero.py` re-units those channels inside the build
+## (hero_common.reunit_pose_translations); nothing repairs them at runtime, so
+## the shipped GLB is measured here both on the resource and through the pose.
+func _check_clip_metrics(player) -> void:
+	var skeleton: Skeleton3D = player._find_skeleton()
+	var player_anim: AnimationPlayer = player.hero_anim.anim_player
+	# The artifact first: a band, so neither the un-reunited residue nor a double
+	# scale can pass. Measured on the shipped asset: 0.612 m running, 0.512 m
+	# walking.
+	var run_dev := _track_deviation(player_anim, skeleton, "Running_A", "Foot.L")
+	check(run_dev > 0.4 and run_dev < 1.0,
+		"The shipped Running_A foot track is in metres (%.3f m from rest)" % run_dev)
+	var walk_dev := _track_deviation(player_anim, skeleton, "Walk_A", "Foot.L")
+	check(walk_dev > 0.3 and walk_dev < 0.9,
+		"The shipped Walk_A foot track is in metres (%.3f m from rest)" % walk_dev)
+	for clip in ["Running_A", "Walk_A"]:
+		var travel := await _ankle_travel(player, skeleton, clip)
+		check(travel > 0.12 and travel < 1.3,
+			"The ankle travels a real stride in %s (%.3f m over one cycle)" % [clip, travel])
+	# A clip that legitimately does not move the feet must stay still: the boots
+	# are planted in idle, so an over-scaled or mis-targeted track cannot hide
+	# behind the stride checks above.
+	var idle_travel := await _ankle_travel(player, skeleton, "Idle")
+	check(idle_travel < 0.05, "Idle keeps its feet planted (%.3f m)" % idle_travel)
+
+## The largest deviation from its rest of `bone`'s position track in `clip`, read
+## off the shipped Animation resource rather than the pose it drives.
+func _track_deviation(player_anim: AnimationPlayer, skeleton: Skeleton3D, clip: String, bone: String) -> float:
+	if player_anim == null or skeleton == null or not player_anim.has_animation(clip):
+		return -1.0
+	var index := skeleton.find_bone(bone)
+	if index < 0:
+		index = skeleton.find_bone(bone.replace(".", "_"))
+	if index < 0:
+		return -1.0
+	var rest: Vector3 = skeleton.get_bone_rest(index).origin
+	var animation := player_anim.get_animation(clip)
+	var sanitised := bone.replace(".", "_")
+	var peak := 0.0
+	for track in range(animation.get_track_count()):
+		if animation.track_get_type(track) != Animation.TYPE_POSITION_3D:
+			continue
+		var track_bone := String(animation.track_get_path(track)).split(":")[-1]
+		if track_bone != bone and track_bone != sanitised:
+			continue
+		for key in range(animation.track_get_key_count(track)):
+			peak = maxf(peak, (animation.track_get_key_value(track, key) - rest).length())
+	return peak
+
+## The vertical + horizontal travel of the left ankle over one cycle of `clip`,
+## played straight on the AnimationPlayer so the state machine cannot interfere.
+func _ankle_travel(player, skeleton: Skeleton3D, clip: String) -> float:
+	var player_anim: AnimationPlayer = player.hero_anim.anim_player
+	if not player_anim.has_animation(clip):
+		return -1.0
+	var was_enabled: bool = player.hero_anim.enabled
+	player.hero_anim.enabled = false
+	var was_active: bool = player.hero_anim.tree.active
+	player.hero_anim.tree.active = false
+	var animation := player_anim.get_animation(clip)
+	var index := skeleton.find_bone("Foot.L")
+	if index < 0:
+		index = skeleton.find_bone("Foot_L")
+	var low := Vector3(1e9, 1e9, 1e9)
+	var high := Vector3(-1e9, -1e9, -1e9)
+	for step in range(25):
+		player_anim.play(clip)
+		player_anim.seek(animation.length * float(step) / 24.0, true)
+		await get_tree().process_frame
+		var point: Vector3 = skeleton.get_bone_global_pose(index).origin
+		low = low.min(point)
+		high = high.max(point)
+	player_anim.stop()
+	player.hero_anim.enabled = was_enabled
+	player.hero_anim.tree.active = was_active
+	return maxf((high - low).y, Vector2(high.x - low.x, high.z - low.z).length())
+
+## ---------------------------------------------------------------- wand
+
+## The wand has to sit IN the fist and point the way the hand does. Both are
+## measured from the live rig, so the grip transform is checked rather than
+## trusted.
+func _check_wand_grip(player) -> void:
+	await get_tree().create_timer(1.2).timeout
+	var skeleton: Skeleton3D = player._find_skeleton()
+	var holder: Node = player.visuals.find_child("EquippedWand", true, false)
+	check(holder != null, "The equipped wand is attached")
+	if holder == null or skeleton == null:
+		return
+	var wand := holder.get_child(0) as Node3D
+	check(wand is Node3D, "The wand prop hangs off its holder")
+	if wand == null:
+		return
+	var wrist := skeleton.find_bone("Wrist.R")
+	if wrist < 0:
+		wrist = skeleton.find_bone("Wrist_R")
+	# The prop follows the hand's final pose, not a stale clip pose: this is the
+	# bug that left the wand behind whenever a cast aimed the arm.
+	var before: Vector3 = wand.global_position
+	player.hero_anim.play_oneshot("Hit_A")
+	await get_tree().create_timer(0.25).timeout
+	var moved := wand.global_position.distance_to(before)
+	check(moved > 0.01, "The wand follows the animated hand (moved %.3f m during a hit)" % moved)
+	var axis := wand.global_transform.basis.y.normalized()
+	var fist := _grip_centre(skeleton, "R")
+	if fist != Vector3.INF:
+		var fist_world: Vector3 = skeleton.global_transform * fist
+		check(holder.global_position.distance_to(fist_world) < 0.06,
+			"The wand's grip sits in the fist (%.3f m from the finger centres)" % holder.global_position.distance_to(fist_world))
+		check(RigIK.distance_to_line(fist_world, holder.global_position,
+			axis) < 0.07, "The handle runs through the closed fingers")
+	# Compared in SKELETON space: the holder is a child of the skeleton, so its
+	# local basis is the skeleton-space orientation, and the bone pose is too.
+	var hand_axis: Vector3 = RigIK.hand_axis(skeleton, "Wrist.R")
+	var wrist_pose := skeleton.get_bone_global_pose(wrist)
+	var hand_world: Vector3 = (wrist_pose.basis * hand_axis).normalized()
+	var wand_skel: Vector3 = holder.transform.basis.y.normalized()
+	check(wand_skel.dot(hand_world) > 0.9,
+		"The wand points the way the hand does (dot %.2f)" % wand_skel.dot(hand_world))
+
+func _grip_centre(skeleton: Skeleton3D, side: String) -> Vector3:
+	var acc := Vector3.ZERO
+	var counted := 0
+	for bone in ["Index1", "Middle1", "Ring1", "Pinky1", "Thumb1"]:
+		var index := RigIK.bone_index(skeleton, "%s.%s" % [bone, side])
+		if index < 0:
+			continue
+		acc += skeleton.get_bone_global_pose(index).origin
+		counted += 1
+	if counted == 0:
+		return Vector3.INF
+	return acc / float(counted)
+
 ## ---------------------------------------------------------------- broom
 
 func _check_broom_axes(player) -> void:
@@ -174,6 +317,132 @@ func _check_mount_round_trips(player) -> void:
 		"Repeated mount/dismount while turning stays consistent (%d mounts, %d dismounts)" % [mount_ok, dismount_ok])
 	check(phases_seen.size() >= 1, "A mounted rider reports a presented phase (%d distinct)" % phases_seen.size())
 	check(player.global_position.y > -1.0, "No dismount-through-floor: the rider ends above the courtyard floor")
+
+## ---------------------------------------------------------------- broom grip
+
+## How far a hand may sit from the shaft's centreline and still count as holding
+## it. The shaft is a few centimetres across and the palm rides on top of it, so a
+## hand inside this envelope is on the broom rather than floating beside it - the
+## shaft is about 0.08 m across. A settled ride measures 0.027-0.032 m; the
+## allowance is for a hard bank in progress, where the grip is re-solved each frame
+## and trails the roll by one.
+const GRIP_TOLERANCE := 0.09
+
+## The rider's hands must actually hold the shaft, on the local body and on a
+## replicated view alike. Driven through the real inputs (a bank is a held turn),
+## because `_update_flight_pose` and the mount state machine rewrite the visual
+## bank and the mounted clip every frame.
+func _check_broom_grip(player) -> void:
+	await _settle_on_floor(player, Vector3(0, 0.1, 5))
+	player.visuals.rotation.y = 0.0
+	player._mount_lock = 0.0
+	player._cast_lock = 0.0
+	player._combat_until = 0.0
+	player._hit_recovery = 0.0
+	player.toggle_broom_mount()
+	await get_tree().create_timer(1.0).timeout
+	check(player.is_mounted, "Rider is mounted for the grip measurement")
+	if not player.is_mounted or player.broom_grip == null:
+		return
+	# The grip yields while the get-on one-shot plays, so wait for it to engage
+	# before measuring instead of reading a vacuous zero.
+	for _i in range(180):
+		if player.broom_grip.engaged():
+			break
+		await get_tree().physics_frame
+	check(player.broom_grip.engaged(), "The grip engages once the rider is seated")
+	var settled: float = player.broom_grip.hand_error()
+	check(settled >= 0.0 and settled <= GRIP_TOLERANCE,
+		"Both hands sit on the shaft while cruising (%.3f m from its centreline)" % settled)
+	check(player.broom_grip.hand_alignment() >= 0.8,
+		"The hands lie along the shaft (alignment %.2f)" % player.broom_grip.hand_alignment())
+	# A banking turn: the hips roll and the rider leans, and the hands must stay on.
+	Input.action_press("move_left")
+	await get_tree().create_timer(0.8).timeout
+	var banking: float = player.broom_grip.hand_error()
+	check(banking >= 0.0 and banking <= GRIP_TOLERANCE,
+		"The grip survives a banking turn (%.3f m from the shaft)" % banking)
+	check(absf(player.visuals.rotation.z) > 0.02, "The bank is actually being driven (roll %.3f)" % player.visuals.rotation.z)
+	Input.action_release("move_left")
+	await get_tree().create_timer(0.4).timeout
+	# Climbing: the pitch changes and the rider still holds on.
+	Input.action_press("jump")
+	await get_tree().create_timer(0.9).timeout
+	var climbing: float = player.broom_grip.hand_error()
+	Input.action_release("jump")
+	check(climbing >= 0.0 and climbing <= GRIP_TOLERANCE,
+		"The grip survives a climb (%.3f m from the shaft)" % climbing)
+	# A remote view solves the same way, so two clients agree on the pose.
+	var view = preload("res://scenes/entities/player/player.tscn").instantiate()
+	view.is_local_player = false
+	view.sim_puppet = true
+	world.add_child(view)
+	view.global_position = Vector3(6, 0.1, 5)
+	await get_tree().process_frame
+	view.is_mounted = true
+	view.sim_mount_phase = HPProtocol.MountPhase.CRUISE
+	await get_tree().create_timer(1.0).timeout
+	if view.broom_grip != null:
+		check(view.broom_grip.hand_error() >= 0.0 and view.broom_grip.hand_error() <= GRIP_TOLERANCE,
+			"A replicated rider's hands hold the shaft too (%.3f m)" % view.broom_grip.hand_error())
+	else:
+		check(false, "A replicated rider carries the grip solver")
+	view.queue_free()
+	await get_tree().process_frame
+	player.global_position.y = 1.0
+	player.velocity = Vector3.ZERO
+	player._mount_lock = 0.0
+	await get_tree().create_timer(0.1).timeout
+	player.toggle_broom_mount()
+	await get_tree().create_timer(0.4).timeout
+
+## ---------------------------------------------------------------- cast aim
+
+## At the release moment the wand must point at the target, not down the leg.
+func _check_cast_aim(player) -> void:
+	await _settle_on_floor(player, Vector3(0, 0.1, 5))
+	player.visuals.rotation.y = 0.0
+	player._mount_lock = 0.0
+	player._cast_lock = 0.0
+	player._combat_until = 0.0
+	player._hit_recovery = 0.0
+	await get_tree().create_timer(0.4).timeout
+	var skeleton: Skeleton3D = player._find_skeleton()
+	var holder: Node = player.visuals.find_child("EquippedWand", true, false)
+	if holder == null or skeleton == null:
+		check(false, "The caster carries a wand to aim")
+		return
+	player.current_mana = player.max_mana
+	player.spell_cooldowns.clear()
+	player.cast_spell("basic_cast")
+	# Sampled through the hold: the arm reaches, then the wrist lands the wand on
+	# whatever aim the body is using (the player refreshes it per frame, exactly as
+	# it does in play).
+	var best := -1.0
+	# Where the wand sits while the arm aims: the grip has to survive the cast
+	# layer as well as the idle pose (`_check_wand_grip` covers the hit clip).
+	var held_worst := 0.0
+	var wrist_bone := RigIK.bone_index(skeleton, "Wrist.R")
+	for _i in range(40):
+		await get_tree().physics_frame
+		var wand := holder.get_child(0) as Node3D
+		if wand == null:
+			continue
+		var aim: Vector3 = player.get_mouse_aim_point()
+		var axis := wand.global_transform.basis.y.normalized()
+		var to_aim: Vector3 = (aim - wand.global_position).normalized()
+		best = maxf(best, axis.dot(to_aim))
+		if player.hero_anim.cast_aiming() and wrist_bone >= 0:
+			var wrist := skeleton.global_transform * skeleton.get_bone_global_pose(wrist_bone).origin
+			held_worst = maxf(held_worst, wand.global_position.distance_to(wrist))
+	check(best > 0.9, "The wand points at the target on a cast (best dot %.2f)" % best)
+	check(held_worst > 0.0 and held_worst < 0.1,
+		"The wand stays in the fist while the arm aims (%.3f m from the wrist at worst)" % held_worst)
+	for _i in range(180):
+		if not player.hero_anim.cast_aiming():
+			break
+		await get_tree().physics_frame
+	check(not player.hero_anim.cast_aiming(), "The aim is released when the cast ends")
 
 ## ---------------------------------------------------------------- refusals
 
@@ -323,14 +592,18 @@ func _check_animation_graph(player) -> void:
 	check(cast_leg_delta <= ref_leg_delta + 0.12,
 		"Legs are untouched by the cast blend (leg delta %.3f rad vs %.3f without)" % [cast_leg_delta, ref_leg_delta])
 	# ... and with a running locomotion clip the legs keep being driven by it.
-	player.hero_anim.set_locomotion("run_blend", "Running_A", true)
-	await get_tree().physics_frame
+	# Drive the run through the real input: `_update_animation_state` re-selects the
+	# locomotion clip from the body's state every physics frame, so a bare
+	# `set_locomotion` would be replaced by Idle on the next one.
+	Input.action_press("move_forward")
+	await get_tree().create_timer(0.4).timeout
 	var run_a: Quaternion = player.hero_anim.skeleton.get_bone_pose_rotation(leg_index)
 	var moved := 0.0
 	for _i in range(8):
-		player.hero_anim.tick(1.0 / 60.0)
 		await get_tree().physics_frame
 		moved = maxf(moved, run_a.angle_to(player.hero_anim.skeleton.get_bone_pose_rotation(leg_index)))
+	Input.action_release("move_forward")
+	await get_tree().create_timer(0.3).timeout
 	check(moved > 0.03,
 		"Legs keep running under the cast blend (leg motion %.3f rad)" % moved)
 	player.hero_anim.end_cast()

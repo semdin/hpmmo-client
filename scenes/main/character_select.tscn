@@ -110,13 +110,6 @@ scale_amount_max = 1.3
 [node name="ModelAnchor" type="Node3D" parent="Podium"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 
-[node name="WandAuraParticles" type="CPUParticles3D" parent="Podium"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 1.4, -0.6)
-emitting = false
-amount = 20
-lifetime = 0.5
-mesh = SubResource("SphereMesh_spark")
-gravity = Vector3(0, 1.5, 0)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

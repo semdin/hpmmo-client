@@ -184,6 +184,35 @@ def bake_retarget(src_arm, src_action, dst_arm, dst_action_name, fps,
     return dst_action
 
 
+def reunit_pose_translations(actions, factor):
+    """Rescale pose-bone translation channels by `factor`, in place.
+
+    The body packs ship with a 100x scale on the armature and compensating mesh
+    scales (`transform_apply` bakes that into the rests and the meshes). Pose
+    channels are a deviation from rest, so they are unitless only for rotation -
+    a location fcurve authored in the pack's own unit is left behind by the
+    bake, and every bone those clips translate ends up moving 1/factor as far as
+    its rest says it should.
+
+    Location fcurves are pure deviation, so scaling the values (handles included)
+    is the whole correction; there is no rest term to preserve.
+    """
+    if abs(factor - 1.0) < 1e-6:
+        return 0
+    scaled = 0
+    for action in actions:
+        for fcurve in action_fcurves(action):
+            if not fcurve.data_path.endswith(".location"):
+                continue
+            for point in fcurve.keyframe_points:
+                point.co[1] *= factor
+                point.handle_left[1] *= factor
+                point.handle_right[1] *= factor
+            fcurve.update()
+            scaled += 1
+    return scaled
+
+
 def rename_actions(mapping):
     for old, new in mapping.items():
         act = bpy.data.actions.get(old)

@@ -297,6 +297,7 @@ scripts/assets/static_batch.gd
 scripts/autoload/game_data.gd
 scripts/autoload/network_manager.gd
 scripts/entities/broom_flight.gd
+scripts/entities/broom_grip_modifier.gd
 scripts/entities/cast_layer_modifier.gd
 scripts/entities/hero_animation.gd
 scripts/entities/hero_appearance.gd
@@ -304,6 +305,8 @@ scripts/entities/loot/loot_drop.gd
 scripts/entities/mobs/mob_base.gd
 scripts/entities/monolith/dark_monolith.gd
 scripts/entities/player.gd
+scripts/entities/rig_follower.gd
+scripts/entities/rig_ik.gd
 scripts/server/db_manager.gd
 scripts/server/dedicated_server.gd
 scripts/spells/bombarda_blast.gd

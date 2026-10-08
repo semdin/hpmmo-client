@@ -56,6 +56,17 @@ hero_meshes = [ob for ob in bpy.data.objects if ob.type == "MESH" and ob.parent 
 # then renders correctly while every bone-space position (sockets, attachments)
 # is off by the residual factor. Applying the transforms bakes that into the
 # bones and the mesh, so bone space and visible space agree 1:1.
+#
+# `transform_apply` rewrites the bone RESTS, but it does not touch the pose
+# channels that came in with the pack's own clips - those were authored in the
+# unit the armature is scaled by, so the rescaled rig and its animation end up
+# in different units. Rotations are unitless so the limbs still swing; the
+# translation channels are the ones left behind, which is invisible until a bone
+# is positioned by its own translation: in this rig `Foot.L`, `Foot.R`, `PT.L`
+# and `PT.R` hang off `Root` and never inherit a moving parent, so the boots
+# stayed pinned while the shins swung through them. Read the applied unit off the
+# armature rather than hard-coding it.
+pack_unit = abs(hero_arm.scale.x) or 1.0
 bpy.ops.object.select_all(action="SELECT")
 for _ob in bpy.data.objects:
     if _ob.type in ("ARMATURE", "MESH", "EMPTY"):
@@ -64,6 +75,8 @@ bpy.context.view_layer.objects.active = hero_arm
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 print("[hero] applied source transforms; armature scale now %s" % (tuple(round(v, 4) for v in hero_arm.scale),))
 print("[hero] mesh scales: %s" % {ob.name: tuple(round(v, 4) for v in ob.scale) for ob in hero_meshes})
+reunited = hc.reunit_pose_translations(bpy.data.actions, pack_unit)
+print("[hero] re-united %d pack pose-translation fcurves by x%g" % (reunited, pack_unit))
 
 FAMILY = {
     "Skin": "Hero_Skin",

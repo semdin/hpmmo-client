@@ -466,11 +466,18 @@ func _check_effects_runtime() -> void:
 	# Build every stage of every spell in the live world and check what it made.
 	var built := 0
 	var layers_total := 0
+	# presentation only: the effects must change nothing authoritative. The window
+	# has to hold the effects' construction and NOTHING else, so it is bracketed
+	# around the spawn loop: the world also ticks the caster's regeneration, and a
+	# timed window would measure that instead of the effects (hp 502 -> 503 in a
+	# 0.2 s sample of an untouched caster).
+	var player = world.local_player
+	var stats_before := Vector3i(player.current_hp, player.current_mana, player.current_exp)
 	for spell_id in VFX.SPELLS:
 		for stage in VFX.stages_for(spell_id):
 			var effect = SkillFX.spawn_stage(world, spell_id, String(stage),
-				world.local_player.global_position + Vector3(0, 1.4, 0), Vector3.FORWARD,
-				world.local_player)
+				player.global_position + Vector3(0, 1.4, 0), Vector3.FORWARD,
+				player)
 			if effect == null:
 				continue
 			built += 1
@@ -480,13 +487,7 @@ func _check_effects_runtime() -> void:
 				check(false, "%s/%s built no layers" % [spell_id, stage])
 	check(built >= 20, "Every spell stage builds a live effect (%d stages)" % built)
 	check(layers_total > built, "The effects are layered (%d layers across %d stages)" % [layers_total, built])
-	# presentation only: the effects changed nothing authoritative
-	var player = world.local_player
-	var hp_before: int = player.current_hp
-	var mana_before: int = player.current_mana
-	var xp_before: int = player.current_exp
-	await get_tree().create_timer(0.2).timeout
-	check(player.current_hp == hp_before and player.current_mana == mana_before and player.current_exp == xp_before,
+	check(Vector3i(player.current_hp, player.current_mana, player.current_exp) == stats_before,
 		"Effects never touch hp, mana or experience")
 	# nothing is left running once the stages have played out
 	var cancelled: int = SkillFX.cancel_all_of(player)
