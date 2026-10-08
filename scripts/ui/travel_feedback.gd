@@ -199,10 +199,25 @@ func location_text() -> String:
 				return floor_text
 	if map_id == "castle_interior":
 		return "Hogwarts Castle"
+	return _outdoor_place_name(map_id)
+
+## The place the player is standing in, outside the castle.
+##
+## The overlay's `zone_at` is the project's one authored place table, so the
+## persistent line and the transient zone banner can never disagree. The
+## authored region ids (`forest_sw`, `boss_w`) are entity-grouping keys rather
+## than place names, so they are the fallback, not the source.
+func _outdoor_place_name(map_id: String) -> String:
+	if world != null and is_instance_valid(world):
+		var overlay := world.get_node_or_null("MMOOverlay")
+		if overlay != null and overlay.has_method("zone_at"):
+			var named := String(overlay.call("zone_at", player.global_position))
+			if named != "":
+				return named
 	var region := HPRules.zone_id_for_map(map_id, player.global_position)
 	if region == "":
 		return "Hogwarts Grounds"
-	return "Hogwarts Grounds - %s" % region
+	return region.capitalize()
 
 func _update_location() -> void:
 	var text := location_text()

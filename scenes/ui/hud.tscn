@@ -26,9 +26,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -210.0
-offset_top = -18.0
+offset_top = -28.0
 offset_right = 210.0
-offset_bottom = -4.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 0
 value = 50.0
@@ -160,13 +160,11 @@ text = "[I] Bag"
 [node name="OllivanderBtn" type="Button" parent="BottomBar/QuickBar"]
 custom_minimum_size = Vector2(76, 26)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 text = "[O] Ollivander"
 
 [node name="MountBtn" type="Button" parent="BottomBar/QuickBar"]
 custom_minimum_size = Vector2(76, 26)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
 text = "[Shift] Nimbus"
 
 [node name="TargetPanel" type="Panel" parent="."]

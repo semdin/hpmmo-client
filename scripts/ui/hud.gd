@@ -490,7 +490,7 @@ func _apply_theme() -> void:
 	UITheme.role(target_hp_bar, UITheme.V_HP)
 	hp_bar.custom_minimum_size = Vector2(0, 18)
 	mana_bar.custom_minimum_size = Vector2(0, 18)
-	exp_bar.custom_minimum_size = Vector2(0, 14)
+	exp_bar.custom_minimum_size = Vector2(0, 18)
 
 	# The level badge and the target nameplate are captions, so they take the
 	# theme's title role and only override the size the layout needs.

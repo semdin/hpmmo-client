@@ -280,29 +280,13 @@ func _align_broom_to_hips() -> void:
 	broom_mesh.position = target_local - broom.seat_offset()
 
 ## House variation is material-only (no duplicated rig): the robe family takes a
-## darkened house tone and the trim family the house primary colour.
+## darkened house tone and the trim family the house primary colour. The rule
+## itself lives in `HeroAppearance`, which the character-select preview also
+## calls, so the podium and the body cannot drift apart.
 func _apply_house_customization() -> void:
 	if not GameData.HOUSES.has(house):
 		return
-	var h_data = GameData.HOUSES[house]
-	var primary_col: Color = h_data.primary_color
-	var body := visuals.find_child("Hero_Body", true, false)
-	if body is MeshInstance3D:
-		var mesh: Mesh = (body as MeshInstance3D).mesh
-		for i in range(mesh.get_surface_count()):
-			var mat := mesh.surface_get_material(i)
-			if mat is StandardMaterial3D:
-				var named := (mat as StandardMaterial3D).resource_name
-				if named == "Hero_Trim":
-					var trim := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
-					trim.albedo_color = primary_col
-					trim.metallic = 0.35
-					trim.roughness = 0.45
-					(body as MeshInstance3D).set_surface_override_material(i, trim)
-				elif named == "Hero_Robe":
-					var robe := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
-					robe.albedo_color = primary_col.darkened(0.72)
-					(body as MeshInstance3D).set_surface_override_material(i, robe)
+	HeroAppearance.apply_house_tint(visuals, GameData.HOUSES[house].primary_color)
 
 	if house == "Hufflepuff":
 		max_hp = 625

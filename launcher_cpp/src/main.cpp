@@ -20,6 +20,7 @@
 #include <chrono>
 #include <fstream>
 #include <algorithm>
+#include <functional>
 #include <mutex>
 
 #include "updater.h"
@@ -46,24 +47,62 @@ enum {
     ID_TIMER_ANIM = 2003
 };
 
-// Modern dark-wizard theme palette (single source of truth for GDI + GDI+).
+// Launcher palette - the GDI/GDI+ mirror of the game theme in
+// `client/assets/ui/hpmmo.tres`. One constant per role and every draw site reads
+// its colours from here, so the launcher a player meets first and the game they
+// then see are the same product. The old palette was a cool blue-grey scheme
+// that matched neither the theme nor the constants the draw code actually used.
 namespace Theme {
-    constexpr COLORREF Bg        = RGB(13, 16, 23);
-    constexpr COLORREF Card      = RGB(22, 27, 38);
-    constexpr COLORREF CardEdge  = RGB(42, 51, 72);
-    constexpr COLORREF EditBg    = RGB(13, 17, 26);
-    constexpr COLORREF EditEdge  = RGB(58, 70, 99);
-    constexpr COLORREF Text      = RGB(232, 236, 244);
-    constexpr COLORREF Muted     = RGB(154, 165, 189);
-    constexpr COLORREF Gold      = RGB(212, 175, 55);
-    constexpr COLORREF GoldLight = RGB(240, 216, 120);
-    constexpr COLORREF GoldDark  = RGB(150, 115, 30);
-    constexpr COLORREF Green     = RGB(52, 209, 123);
-    constexpr COLORREF GreenDark = RGB(29, 166, 92);
-    constexpr COLORREF Blue      = RGB(74, 144, 217);
-    constexpr COLORREF BlueDark  = RGB(47, 107, 179);
-    constexpr COLORREF Red       = RGB(255, 107, 107);
-    constexpr COLORREF Disabled  = RGB(58, 65, 85);
+    // A COLORREF and its GDI+ twin from one triple: the launcher draws with both
+    // GDI (text, brushes) and GDI+ (rounded plates, gradients).
+    inline Gdiplus::Color Gdi(COLORREF c, BYTE a = 255) {
+        return Gdiplus::Color(a, GetRValue(c), GetGValue(c), GetBValue(c));
+    }
+
+    // --- backgrounds: the theme's ink -> slate -> steel ramp
+    constexpr COLORREF Bg        = RGB(11, 13, 18);     // ink
+    constexpr COLORREF Card      = RGB(26, 29, 38);     // slate
+    constexpr COLORREF CardEdge  = RGB(58, 65, 82);     // steel_lt
+    constexpr COLORREF EditBg    = RGB(9, 10, 14);      // LineEdit bed
+    constexpr COLORREF EditEdge  = RGB(92, 101, 121);   // LineEdit border
+    constexpr COLORREF Track     = RGB(35, 39, 51);     // recessed track (steel)
+    constexpr COLORREF Shadow    = RGB(0, 0, 0);
+
+    // --- type: the theme's parchment ramp
+    constexpr COLORREF Text      = RGB(236, 225, 192);  // parchment
+    constexpr COLORREF Muted     = RGB(153, 152, 142);  // text_dim
+    constexpr COLORREF Faint     = RGB(120, 126, 130);
+    constexpr COLORREF Ink       = RGB(11, 13, 18);     // text on gold
+
+    // --- gold, the theme's accent
+    constexpr COLORREF Gold      = RGB(216, 182, 74);   // gold_lt
+    constexpr COLORREF GoldLight = RGB(244, 226, 160);  // gold_hi
+    constexpr COLORREF GoldDark  = RGB(168, 137, 47);   // gold
+    constexpr COLORREF GoldDeep  = RGB(90, 69, 32);     // gold_dk
+    constexpr COLORREF GoldEdge  = RGB(244, 226, 160);  // focus / hover edge
+
+    // --- state colours: the theme's good / mana / hp ramps
+    constexpr COLORREF Green     = RGB(92, 201, 74);    // good
+    constexpr COLORREF GreenDark = RGB(60, 140, 48);
+    constexpr COLORREF GreenEdge = RGB(140, 224, 122);
+    constexpr COLORREF Blue      = RGB(58, 116, 217);   // mana
+    constexpr COLORREF BlueDark  = RGB(40, 82, 153);
+    constexpr COLORREF BlueEdge  = RGB(127, 166, 238);
+    constexpr COLORREF Red       = RGB(196, 40, 40);    // hp
+    constexpr COLORREF Magic     = RGB(165, 92, 217);
+
+    // --- chrome: idle and disabled plates
+    constexpr COLORREF ButtonTop    = RGB(42, 46, 58);  // slate_lt
+    constexpr COLORREF ButtonBottom = RGB(26, 29, 38);  // slate
+    constexpr COLORREF ButtonEdge   = RGB(58, 65, 82);  // steel_lt
+    constexpr COLORREF Disabled     = RGB(35, 39, 51);  // steel
+    constexpr COLORREF DisabledLt   = RGB(42, 46, 58);  // slate_lt
+
+    // --- status line
+    constexpr COLORREF StatusOk    = RGB(92, 201, 74);
+    constexpr COLORREF StatusWarn  = RGB(216, 182, 74);
+    constexpr COLORREF StatusErr   = RGB(196, 40, 40);
+    constexpr COLORREF StatusMuted = RGB(153, 152, 142);
 }
 
 // Hovered owner-draw button (for hover glow). Set on WM_MOUSEMOVE.
@@ -107,6 +146,10 @@ static HWND g_hBtnRecheck = NULL;
 static HWND g_hBtnNotes = NULL;
 static HWND g_hChkRemember = NULL;
 static HWND g_hChkShowPw = NULL;
+// BS_OWNERDRAW buttons keep no check state of their own (BM_SETCHECK/BM_GETCHECK are
+// no-ops for them), so the checkbox state lives here.
+static bool g_ChkRememberOn = false;
+static bool g_ChkShowPwOn = false;
 static HWND g_hLblStatus = NULL;
 
 // the release pipeline: updater state shared with the UI thread.
@@ -153,7 +196,7 @@ static const int kInsetMargin = 8;
 static std::atomic<int> g_ServerPingMs{-1};
 static std::atomic<bool> g_ServerOnline{false};
 static std::wstring g_StatusMsg = L"Sunucuya bağlanılıyor…";
-static COLORREF g_StatusColor = RGB(200, 200, 200);
+static COLORREF g_StatusColor = Theme::StatusMuted;
 
 // Helper: Convert string types
 std::wstring Utf8ToWide(const std::string& str) {
@@ -283,9 +326,9 @@ static BtnLook LookForButton(int id, bool pressed, bool hover, bool disabled,
         return look;
     }
     if (disabled) {
-        look.top = look.bottom = Color(255, 40, 46, 62);
-        look.edge = Color(255, 52, 60, 80);
-        look.text = Color(255, 130, 140, 165);
+        look.top = look.bottom = Theme::Gdi(Theme::DisabledLt);
+        look.edge = Theme::Gdi(Theme::CardEdge);
+        look.text = Theme::Gdi(Theme::Muted);
         return look;
     }
     auto lighten = [&](Color c) {
@@ -298,30 +341,30 @@ static BtnLook LookForButton(int id, bool pressed, bool hover, bool disabled,
     };
     switch (id) {
     case ID_BTN_AUTH:
-        look.top = Color(255, 240, 216, 120);
-        look.bottom = Color(255, 190, 140, 40);
-        look.edge = Color(255, 255, 230, 150);
-        look.text = Color(255, 26, 20, 8);
+        look.top = Theme::Gdi(Theme::GoldEdge);
+        look.bottom = Theme::Gdi(Theme::GoldDark);
+        look.edge = Theme::Gdi(Theme::GoldEdge);
+        look.text = Theme::Gdi(Theme::Ink);
         break;
     case ID_BTN_PLAY:
-        look.top = Color(255, 52, 209, 123);
-        look.bottom = Color(255, 29, 166, 92);
-        look.edge = Color(255, 120, 240, 170);
-        look.text = Color(255, 255, 255, 255);
+        look.top = Theme::Gdi(Theme::Green);
+        look.bottom = Theme::Gdi(Theme::GreenDark);
+        look.edge = Theme::Gdi(Theme::GreenEdge);
+        look.text = Theme::Gdi(Theme::Text);
         look.radius = 12;
         break;
     case ID_BTN_UPDATE:
-        look.top = Color(255, 74, 144, 217);
-        look.bottom = Color(255, 47, 107, 179);
-        look.edge = Color(255, 130, 180, 240);
-        look.text = Color(255, 255, 255, 255);
+        look.top = Theme::Gdi(Theme::Blue);
+        look.bottom = Theme::Gdi(Theme::BlueDark);
+        look.edge = Theme::Gdi(Theme::BlueEdge);
+        look.text = Theme::Gdi(Theme::Text);
         look.radius = 8;
         break;
     default:  // SOLO + small ghost buttons
-        look.top = Color(255, 35, 42, 61);
-        look.bottom = Color(255, 24, 29, 44);
-        look.edge = Color(255, 70, 84, 120);
-        look.text = Color(255, 220, 226, 238);
+        look.top = Theme::Gdi(Theme::ButtonTop);
+        look.bottom = Theme::Gdi(Theme::ButtonBottom);
+        look.edge = Theme::Gdi(Theme::ButtonEdge);
+        look.text = Theme::Gdi(Theme::Text);
         look.radius = (id == ID_BTN_SOLO) ? 10 : 8;
         break;
     }
@@ -334,6 +377,17 @@ static BtnLook LookForButton(int id, bool pressed, bool hover, bool disabled,
     }
     return look;
 }
+
+// GDI+ keeps a cached band on the DC and flushes it over whatever GDI drew before the
+// next GDI+ call, which silently erased every TextOutW/DrawTextW string in this window.
+// Holding the DC explicitly around each GDI text group keeps the two APIs in order.
+struct GdiDc {
+    Graphics& g;
+    HDC hdc;
+    explicit GdiDc(Graphics& target) : g(target), hdc(target.GetHDC()) {}
+    ~GdiDc() { g.ReleaseHDC(hdc); }
+    operator HDC() const { return hdc; }
+};
 
 static void DrawOwnerButton(LPDRAWITEMSTRUCT di) {
     Graphics g(di->hDC);
@@ -354,6 +408,34 @@ static void DrawOwnerButton(LPDRAWITEMSTRUCT di) {
     wchar_t text[256] = {0};
     GetWindowTextW(di->hwndItem, text, 255);
 
+    // A standard BUTTON with no class background brush paints COLOR_BTNFACE, which
+    // showed up as light grey boxes over the card. Owner-drawn so the row keeps the
+    // card background and the theme's flat gold checkbox.
+    if (di->hwndItem == g_hChkRemember || di->hwndItem == g_hChkShowPw) {
+        SolidBrush bed(Theme::Gdi(Theme::Card));
+        g.FillRectangle(&bed, 0, 0, w, h);
+
+        const int box = 15;
+        const int by = (h - box) / 2;
+        const bool on = (di->hwndItem == g_hChkRemember) ? g_ChkRememberOn : g_ChkShowPwOn;
+        Pen edge(on ? Theme::Gdi(Theme::Gold) : Theme::Gdi(Theme::CardEdge), 1.0f);
+        g.DrawRectangle(&edge, 1, by, box, box);
+        if (on) {
+            Pen tick(Theme::Gdi(Theme::GoldLight), 2.0f);
+            g.DrawLine(&tick, 5, by + 8, 7, by + 11);
+            g.DrawLine(&tick, 7, by + 11, 12, by + 4);
+        }
+
+        FontFamily ff(L"Segoe UI");
+        Gdiplus::Font font(&ff, 14, FontStyleRegular, UnitPixel);
+        SolidBrush fg(Theme::Gdi(disabled ? Theme::Faint : Theme::Text));
+        StringFormat sf;
+        sf.SetLineAlignment(StringAlignmentCenter);
+        RectF layout((REAL)(box + 8), 0, (REAL)(w - box - 8), (REAL)h);
+        g.DrawString(text, -1, &font, layout, &sf, &fg);
+        return;
+    }
+
     if (isTab) {
         bool active = false;
         if (id == ID_TAB_LOGIN) active = !g_IsRegisterMode;
@@ -362,14 +444,14 @@ static void DrawOwnerButton(LPDRAWITEMSTRUCT di) {
         g.FillRectangle(&bg, 0, 0, w, h);
         FontFamily ff(L"Segoe UI");
         Gdiplus::Font font(&ff, 15, active ? FontStyleBold : FontStyleRegular, UnitPixel);
-        SolidBrush fg(active ? Color(255, 240, 216, 120) : Color(255, 154, 165, 189));
+        SolidBrush fg(active ? Theme::Gdi(Theme::GoldEdge) : Theme::Gdi(Theme::Muted));
         StringFormat sf;
         sf.SetAlignment(StringAlignmentCenter);
         sf.SetLineAlignment(StringAlignmentCenter);
         RectF layout(0, 0, (REAL)w, (REAL)(h - 3));
         g.DrawString(text, -1, &font, layout, &sf, &fg);
         if (active) {
-            SolidBrush bar(Color(255, 212, 175, 55));
+            SolidBrush bar(Theme::Gdi(Theme::Gold));
             g.FillRectangle(&bar, w / 2 - 34, h - 3, 68, 3);
         }
         return;
@@ -388,7 +470,7 @@ static void DrawOwnerButton(LPDRAWITEMSTRUCT di) {
     } else {
         FillRoundedRect(g, rc, look.radius, look.top, look.bottom);
         Color edge = look.edge;
-        if (hover && !pressed) edge = Color(255, 255, 230, 150);
+        if (hover && !pressed) edge = Theme::Gdi(Theme::GoldEdge);
         StrokeRoundedRect(g, rc, look.radius, edge, (id == ID_BTN_PLAY) ? 1.5f : 1.0f);
     }
 
@@ -409,13 +491,13 @@ static void DrawOwnerButton(LPDRAWITEMSTRUCT di) {
     HDC hdc = di->hDC;
     SetBkMode(hdc, TRANSPARENT);
     COLORREF tc = RGB(look.text.GetR(), look.text.GetG(), look.text.GetB());
-    if (disabled) tc = RGB(130, 140, 165);
+    if (disabled) tc = Theme::Muted;
     SetTextColor(hdc, tc);
     SelectObject(hdc, hFont);
     RECT tr = {r.left, r.top, r.right, r.bottom};
     UINT fmt = DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX;
     if (disabled) {
-        SetTextColor(hdc, RGB(20, 22, 30));
+        SetTextColor(hdc, Theme::Ink);
         RECT tr2 = tr;
         tr2.left += 1;
         tr2.top += 1;
@@ -469,7 +551,7 @@ static void RebuildCoverCache(int w, int h) {
         g.DrawImage(g_pBannerImg, Rect(0, 0, w, h), sx, sy, sw, sh, UnitPixel);
     } else {
         LinearGradientBrush fallback(Point(0, 0), Point(w, h),
-                                     Color(255, 32, 38, 62), Color(255, 13, 16, 23));
+                                     Theme::Gdi(Theme::ButtonTop), Theme::Gdi(Theme::Bg));
         g.FillRectangle(&fallback, 0, 0, w, h);
     }
 
@@ -485,7 +567,7 @@ static void RebuildCoverCache(int w, int h) {
 
     // Gold hairline under the header.
     LinearGradientBrush goldLine(Point(0, 0), Point(w, 0),
-                                 Color(255, 110, 90, 28), Color(255, 240, 216, 120));
+                                 Theme::Gdi(Theme::GoldDeep), Theme::Gdi(Theme::GoldEdge));
     Pen p(&goldLine, 2.0f);
     g.DrawLine(&p, 0, Layout::HeaderH, w, Layout::HeaderH);
 }
@@ -554,6 +636,35 @@ static LRESULT CALLBACK EditSubclassProc(HWND hEd, UINT msg, WPARAM wParam, LPAR
             p->rgrc[0].left += 12;
             p->rgrc[0].right -= 8;
         }
+        return r;
+    }
+    case WM_NCPAINT: {
+        // Insets the client rect (see WM_NCCALCSIZE below) leaves a non-client
+        // margin, and the default EDIT paints it with its own brush - a grey
+        // band inside the themed field. Paint the margin with the field bed so
+        // the control reads as the single plate the parent already drew.
+        LRESULT r = CallWindowProcW(g_EditProcOrig, hEd, msg, wParam, lParam);
+        RECT wr;
+        GetWindowRect(hEd, &wr);
+        int ww = wr.right - wr.left, wh = wr.bottom - wr.top;
+        POINT origin = {0, 0};
+        ClientToScreen(hEd, &origin);
+        RECT cr;
+        GetClientRect(hEd, &cr);
+        int cx = origin.x - wr.left, cy = origin.y - wr.top;
+        RECT client = {cx, cy, cx + (cr.right - cr.left), cy + (cr.bottom - cr.top)};
+        HDC hdc = GetWindowDC(hEd);
+        HBRUSH bed = CreateSolidBrush(Theme::EditBg);
+        RECT band = {0, 0, ww, client.top};
+        FillRect(hdc, &band, bed);
+        band = {0, client.bottom, ww, wh};
+        FillRect(hdc, &band, bed);
+        band = {0, client.top, client.left, client.bottom};
+        FillRect(hdc, &band, bed);
+        band = {client.right, client.top, ww, client.bottom};
+        FillRect(hdc, &band, bed);
+        DeleteObject(bed);
+        ReleaseDC(hEd, hdc);
         return r;
     }
     case WM_SETFOCUS:
@@ -920,10 +1031,10 @@ void RefreshUpdaterUi() {
     EnableWindow(g_hBtnNotes, (!sum.releaseNotes.empty()) ? TRUE : FALSE);
     if (busy) {
         SetWindowTextW(g_hLblStatus, L"Güncelleme işleniyor…");
-        g_StatusColor = RGB(240, 200, 80);
+        g_StatusColor = Theme::StatusWarn;
     } else if (canUpdate) {
         SetWindowTextW(g_hLblStatus, (stateLine + L"  " + infoLine).c_str());
-        g_StatusColor = RGB(240, 200, 80);
+        g_StatusColor = Theme::StatusWarn;
     }
     // The status STATIC repaints itself; the parent only needs the right card.
     InvalidateRightCard();
@@ -1090,11 +1201,11 @@ void SetUIMode(bool isRegister) {
     if (g_IsRegisterMode) {
         SetWindowTextW(g_hBtnAuth, L"Hesap Oluştur");
         g_StatusMsg = L"Hogwarts kütüğüne adınızı yazdırın.";
-        g_StatusColor = RGB(180, 180, 180);
+        g_StatusColor = Theme::StatusMuted;
     } else {
         SetWindowTextW(g_hBtnAuth, L"Giriş Yap");
         g_StatusMsg = L"Büyücülük dünyasına girmek için giriş yapın.";
-        g_StatusColor = RGB(180, 180, 180);
+        g_StatusColor = Theme::StatusMuted;
     }
     SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
     // Tabs repaint themselves via DRAWITEM; only the left card chrome changes.
@@ -1117,20 +1228,20 @@ void PerformAuthentication() {
 
     if (wUser.length() < 3) {
         g_StatusMsg = L"Kullanıcı adı en az 3 karakter olmalıdır!";
-        g_StatusColor = RGB(255, 90, 90);
+        g_StatusColor = Theme::StatusErr;
         SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
         return;
     }
     if (wPass.length() < 4) {
         g_StatusMsg = L"Şifre en az 4 karakter olmalıdır!";
-        g_StatusColor = RGB(255, 90, 90);
+        g_StatusColor = Theme::StatusErr;
         SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
         return;
     }
 
     EnableWindow(g_hBtnAuth, FALSE);
     g_StatusMsg = g_IsRegisterMode ? L"Hesap oluşturuluyor..." : L"Giriş yapılıyor...";
-    g_StatusColor = RGB(240, 200, 80);
+    g_StatusColor = Theme::StatusWarn;
     SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
 
     std::thread([wUser, wPass]() {
@@ -1225,16 +1336,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         SetWindowPos(g_hEdtPass, NULL, 0, 0, 0, 0,
                      SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
-        // Remember Me + Show password checkboxes (native, dark-colored).
+        // Remember Me + Show password checkboxes (owner-drawn: a native checkbox
+        // ignores WM_CTLCOLORBTN and would paint a light grey box over the card).
         g_hChkRemember = CreateWindowW(L"BUTTON", L"Beni hatırla",
-            WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+            WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_OWNERDRAW,
             64, 410, 150, 24, hWnd, (HMENU)ID_CHK_REMEMBER, NULL, NULL);
         SendMessageW(g_hChkRemember, WM_SETFONT, (WPARAM)g_hFontSmall, TRUE);
-        SendMessageW(g_hChkRemember, BM_SETCHECK,
-                     g_Config.rememberMe ? BST_CHECKED : BST_UNCHECKED, 0);
+        g_ChkRememberOn = g_Config.rememberMe;
 
         g_hChkShowPw = CreateWindowW(L"BUTTON", L"Şifreyi göster",
-            WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+            WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_OWNERDRAW,
             258, 410, 150, 24, hWnd, (HMENU)ID_CHK_SHOWPW, NULL, NULL);
         SendMessageW(g_hChkShowPw, WM_SETFONT, (WPARAM)g_hFontSmall, TRUE);
 
@@ -1349,23 +1460,40 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         return TRUE;
     }
 
+    case WM_ACTIVATE:
+    case WM_WINDOWPOSCHANGED: {
+        // The class has no background brush and the children are clipped out of the
+        // parent's paint (WS_CLIPCHILDREN), so after any exposure the whole client
+        // area has to be repainted - children included - or the pixels of whatever
+        // window was uncovered stay on screen inside ours.
+        RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
+        break;
+    }
+
     case WM_ERASEBKGND: {
-        // We paint the entire client area in WM_PAINT; erasing here would
-        // flash a solid color every 5 s (ping) / on every status update.
+        // Nothing else erases the client area: without this the regions the cover
+        // blit does not touch (child rects, uncovered stripes) keep foreign pixels.
+        RECT rc;
+        GetClientRect(hWnd, &rc);
+        FillRect((HDC)wParam, &rc, g_hBrushBg);
         return TRUE;
     }
 
     case WM_CTLCOLORSTATIC: {
         HDC hdc = (HDC)wParam;
         HWND ctrl = (HWND)lParam;
+        if (ctrl == g_hLblStatus) {
+            // The status static sits in a hole of the parent's paint (WS_CLIPCHILDREN
+            // keeps the parent out of child rects) and paints no background of its own,
+            // so nothing erased it and the uncovered desktop pixels showed through.
+            SetBkMode(hdc, OPAQUE);
+            SetBkColor(hdc, Theme::Bg);
+            SetTextColor(hdc, g_StatusColor);
+            return (LRESULT)g_hBrushBg;
+        }
         // Transparent: the parent paints frosted cards / photo behind.
         SetBkMode(hdc, TRANSPARENT);
-        if (ctrl == g_hLblStatus) {
-            SetTextColor(hdc, g_StatusColor);
-        } else {
-            // Checkboxes: soft muted text over the card.
-            SetTextColor(hdc, Theme::Muted);
-        }
+        SetTextColor(hdc, Theme::Muted);
         return (LRESULT)GetStockObject(NULL_BRUSH);
     }
 
@@ -1395,8 +1523,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         case ID_BTN_AUTH:
             PerformAuthentication();
             break;
+        case ID_CHK_REMEMBER: {
+            // BS_OWNERDRAW keeps no check state of its own, so this is what flips it.
+            g_ChkRememberOn = !g_ChkRememberOn;
+            InvalidateRect(g_hChkRemember, NULL, FALSE);
+            break;
+        }
         case ID_CHK_SHOWPW: {
-            bool show = (SendMessageW(g_hChkShowPw, BM_GETCHECK, 0, 0) == BST_CHECKED);
+            bool show = (g_ChkShowPwOn = !g_ChkShowPwOn);
+            InvalidateRect(g_hChkShowPw, NULL, FALSE);
             SendMessageW(g_hEdtPass, EM_SETPASSWORDCHAR, show ? 0 : (WPARAM)L'•', 0);
             InvalidateRect(g_hEdtPass, NULL, FALSE);
             break;
@@ -1405,14 +1540,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             std::wstring gateReason;
             if (!LaunchGateAllows(gateReason)) {
                 g_StatusMsg = gateReason;
-                g_StatusColor = RGB(255, 90, 90);
+                g_StatusColor = Theme::StatusErr;
                 SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
                 MessageBoxW(hWnd, gateReason.c_str(), L"Uyumluluk Kontrolü", MB_ICONWARNING);
                 break;
             }
             if (g_AuthedToken.empty()) {
                 g_StatusMsg = L"Oyuna başlamak için önce giriş yapmalısınız!";
-                g_StatusColor = RGB(255, 90, 90);
+                g_StatusColor = Theme::StatusErr;
                 SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
                 break;
             }
@@ -1424,14 +1559,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             if (userToLaunch.empty()) userToLaunch = L"Wizard";
 
             g_Config.rememberMe =
-                (SendMessageW(g_hChkRemember, BM_GETCHECK, 0, 0) == BST_CHECKED);
+                g_ChkRememberOn;
             g_Config.lastUsername = userToLaunch;
             SaveConfig();
 
             LogMsg("Launch requested: user=" + WideToUtf8(userToLaunch));
             EnableWindow(g_hBtnPlay, FALSE);
             g_StatusMsg = L"Oyun bileti alınıyor…";
-            g_StatusColor = RGB(240, 200, 80);
+            g_StatusColor = Theme::StatusWarn;
             SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
             RequestTicketThenLaunch(userToLaunch, g_AuthedToken);
             break;
@@ -1448,7 +1583,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             if (g_UpdBusy.load()) {
                 g_UpdCancel = true;
                 g_StatusMsg = L"Güncelleme iptal ediliyor...";
-                g_StatusColor = RGB(240, 200, 80);
+                g_StatusColor = Theme::StatusWarn;
                 SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
             } else {
                 RunUpdaterUpdate();
@@ -1509,10 +1644,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         }
         if (code == hpmmo::kExitOk) {
             g_StatusMsg = L"Güncelleme tamamlandı.";
-            g_StatusColor = RGB(100, 255, 120);
+            g_StatusColor = Theme::StatusOk;
         } else {
             g_StatusMsg = Utf8ToWide(sum.error);
-            g_StatusColor = RGB(255, 90, 90);
+            g_StatusColor = Theme::StatusErr;
         }
         SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
         InvalidateRect(hWnd, NULL, FALSE);
@@ -1530,7 +1665,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
             if (g_IsRegisterMode) {
                 g_StatusMsg = L"Hesabınız başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.";
-                g_StatusColor = RGB(100, 255, 120);
+                g_StatusColor = Theme::StatusOk;
                 SetUIMode(false);
             } else {
                 g_IsAuthenticated = true;
@@ -1543,10 +1678,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 if (g_AuthedToken.empty()) {
                     g_IsAuthenticated = false;
                     g_StatusMsg = L"Sunucu oturum belirteci döndürmedi. Lütfen tekrar deneyin.";
-                    g_StatusColor = RGB(255, 80, 80);
+                    g_StatusColor = Theme::StatusErr;
                 } else {
                     g_StatusMsg = L"Giriş başarılı! “Oyuna Başla” ile dünyayı keşfedin.";
-                    g_StatusColor = RGB(100, 255, 120);
+                    g_StatusColor = Theme::StatusOk;
 
                     EnableWindow(g_hBtnPlay, TRUE);
                     SetFocus(g_hBtnPlay);
@@ -1564,7 +1699,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 }
             }
             g_StatusMsg = Utf8ToWide(msg);
-            g_StatusColor = RGB(255, 80, 80);
+            g_StatusColor = Theme::StatusErr;
         }
 
         SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
@@ -1582,15 +1717,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             if (LaunchGame(false, pReq->username, pReq->ticket)) {
                 ShowWindow(hWnd, SW_MINIMIZE);
                 g_StatusMsg = L"Oyun başlatıldı. İyi oyunlar!";
-                g_StatusColor = RGB(100, 255, 120);
+                g_StatusColor = Theme::StatusOk;
             } else {
                 g_StatusMsg = L"Godot motoru başlatılamadı! godot.exe yolunu kontrol edin.";
-                g_StatusColor = RGB(255, 80, 80);
+                g_StatusColor = Theme::StatusErr;
                 MessageBoxW(hWnd, L"Godot motoru başlatılamadı! godot.exe yolunu kontrol edin.", L"Hata", MB_ICONERROR);
             }
         } else {
             g_StatusMsg = pReq->error.empty() ? L"Oyun bileti alınamadı. Lütfen tekrar deneyin." : pReq->error;
-            g_StatusColor = RGB(255, 80, 80);
+            g_StatusColor = Theme::StatusErr;
         }
 
         SetWindowTextW(g_hLblStatus, g_StatusMsg.c_str());
@@ -1614,6 +1749,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         int h = clientRc.bottom;
         const int kHeaderH = Layout::HeaderH;
 
+        // GDI+ flushes a cached band over the DC and erases whatever GDI drew on that
+        // band, so every GDI string is queued here and drawn after the last GDI+ call.
+        std::vector<std::function<void(HDC)>> gdiText;
+        auto textAt = [&](HFONT font, COLORREF color, int x, int y, const std::wstring& s) {
+            gdiText.push_back([font, color, x, y, s](HDC d) {
+                SelectObject(d, font);
+                SetBkMode(d, TRANSPARENT);
+                SetTextColor(d, color);
+                // DrawTextW, not TextOutW: TextOutW output never reached the screen
+                // here, while DrawTextW with the same font/colour always did.
+                RECT tr = {x, y, x + 1024, y + 64};
+                DrawTextW(d, s.c_str(), -1, &tr,
+                          DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX);
+            });
+        };
+        auto textRow = [&](HFONT font, COLORREF color, int l, int t, int r, int b,
+                           const std::wstring& s, UINT fmt) {
+            gdiText.push_back([font, color, l, t, r, b, s, fmt](HDC d) {
+                SelectObject(d, font);
+                SetBkMode(d, TRANSPARENT);
+                SetTextColor(d, color);
+                RECT tr = {l, t, r, b};
+                DrawTextW(d, s.c_str(), -1, &tr, fmt);
+            });
+        };
+
         // Full-window cinematic cover (cached: 1:1 blit, no per-frame scaling).
         BlitCover(graphics, w, h);
 
@@ -1625,9 +1786,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             DrawNinePatch(graphics, g_UiFrame, kFrameMargin, rightCard);
         } else {
             FillRoundedRect(graphics, leftCard, 16, Color(238, 26, 32, 47), Color(238, 17, 22, 33));
-            StrokeRoundedRect(graphics, leftCard, 16, Color(255, 52, 63, 88));
+            StrokeRoundedRect(graphics, leftCard, 16, Theme::Gdi(Theme::CardEdge));
             FillRoundedRect(graphics, rightCard, 16, Color(238, 26, 32, 47), Color(238, 17, 22, 33));
-            StrokeRoundedRect(graphics, rightCard, 16, Color(255, 52, 63, 88));
+            StrokeRoundedRect(graphics, rightCard, 16, Theme::Gdi(Theme::CardEdge));
         }
 
         // Input field chrome: filled rounded bed + border (gold when focused).
@@ -1643,13 +1804,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             if (g_UiInset) {
                 DrawNinePatch(graphics, g_UiInset, kInsetMargin, chrome);
                 if (focused) {
-                    Pen glow(Color(255, 232, 190, 110), 1.6f);
+                    Pen glow(Theme::Gdi(Theme::Gold, 110), 1.6f);
                     graphics.DrawRectangle(&glow, chrome);
                 }
             } else {
-                FillRoundedRect(graphics, chrome, 9, Color(255, 12, 16, 25), Color(255, 16, 21, 32));
+                FillRoundedRect(graphics, chrome, 9, Theme::Gdi(Theme::EditBg), Theme::Gdi(Theme::EditBg));
                 StrokeRoundedRect(graphics, chrome, 9,
-                                  focused ? Color(255, 232, 190, 90) : Color(255, 62, 74, 104),
+                                  focused ? Theme::Gdi(Theme::Gold, 90) : Theme::Gdi(Theme::EditEdge),
                                   focused ? 1.6f : 1.0f);
             }
         }
@@ -1663,7 +1824,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             graphics.SetClip(&clip);
             graphics.DrawImage(g_pLogoImg, 30, 20, 56, 56);
             graphics.ResetClip();
-            Pen ring(Color(255, 212, 175, 55), 1.6f);
+            Pen ring(Theme::Gdi(Theme::Gold), 1.6f);
             graphics.DrawEllipse(&ring, 30, 20, 56, 56);
         }
 
@@ -1674,25 +1835,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             // crisp where a single stretched DrawImage smears the whole ribbon.
             DrawNinePatch(graphics, g_UiRibbon, 8, Rect(tx - 18, 10, 430, 48));
         }
-        auto shadowText = [&](int x, int y, const wchar_t* s, int n) {
-            SetTextColor(hdc, RGB(0, 0, 0));
-            TextOutW(hdc, x + 1, y + 2, s, n);
-        };
-        // Title and tagline are stacked with fixed rows so they never overlap;
-        // each row is sized to the font above it.
-        SelectObject(hdc, g_hFontTitle);
-        shadowText(tx, 20, L"HOGWARTS MMORPG", 15);
-        SetTextColor(hdc, RGB(240, 216, 120));
-        TextOutW(hdc, tx, 20, L"HOGWARTS MMORPG", 15);
-
-        SelectObject(hdc, g_hFontHeading);
-        shadowText(tx + 2, 66, L"Çevrimiçi Büyücülük Evreni", 25);
-        SetTextColor(hdc, RGB(208, 180, 88));
-        TextOutW(hdc, tx + 2, 66, L"Çevrimiçi Büyücülük Evreni", 25);
-
-        SelectObject(hdc, g_hFontSmall);
-        SetTextColor(hdc, RGB(162, 172, 198));
-        TextOutW(hdc, tx + 2, 96, L"v2.0.0  •  Forward+  •  15 Hz Tick  •  ACID DB", 43);
+        // Title and tagline are stacked with fixed rows so they never overlap; each
+        // row is sized to the font above it.
+        textAt(g_hFontTitle, Theme::Shadow, tx + 1, 22, L"HOGWARTS MMORPG");
+        textAt(g_hFontTitle, Theme::GoldLight, tx, 20, L"HOGWARTS MMORPG");
+        textAt(g_hFontHeading, Theme::Shadow, tx + 3, 68, L"Çevrimiçi Büyücülük Evreni");
+        textAt(g_hFontHeading, Theme::GoldDark, tx + 2, 66, L"Çevrimiçi Büyücülük Evreni");
+        textAt(g_hFontSmall, Theme::Muted, tx + 2, 96, L"v2.0.0  •  Forward+  •  15 Hz Tick  •  ACID DB");
 
         // Server status pill (top-right, frosted).
         {
@@ -1704,35 +1853,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             Rect pillRc(pillX, pillY, Layout::PillW, Layout::PillH);
             FillRoundedRect(graphics, pillRc, 19, Color(215, 20, 26, 38), Color(215, 14, 19, 30));
             StrokeRoundedRect(graphics, pillRc, 19,
-                              online ? Color(255, 52, 209, 123) : Color(255, 255, 107, 107));
-            SolidBrush dotBrush(online ? Color(255, 52, 209, 123) : Color(255, 255, 107, 107));
+                              online ? Theme::Gdi(Theme::Green) : Theme::Gdi(Theme::Red));
+            SolidBrush dotBrush(online ? Theme::Gdi(Theme::Green) : Theme::Gdi(Theme::Red));
             graphics.FillEllipse(&dotBrush, pillX + 16, pillY + Layout::PillH / 2 - 5, 10, 10);
-            SelectObject(hdc, g_hFontSmall);
-            SetTextColor(hdc, online ? RGB(125, 242, 165) : RGB(255, 142, 142));
-            RECT tr = {pillX + 34, pillY, pillX + Layout::PillW - 8, pillY + Layout::PillH};
-            DrawTextW(hdc, pill.c_str(), -1, &tr, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+            textRow(g_hFontSmall, online ? Theme::StatusOk : Theme::StatusErr,
+                    pillX + 34, pillY, pillX + Layout::PillW - 8, pillY + Layout::PillH,
+                    pill, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
             // Realm line under pill
-            SetTextColor(hdc, RGB(150, 160, 185));
-            RECT rr = {pillX, pillY + Layout::PillH + 5, pillX + Layout::PillW, pillY + Layout::PillH + 25};
-            DrawTextW(hdc, L"◇ 213.250.145.75 : 7777", -1, &rr,
-                      DT_RIGHT | DT_SINGLELINE | DT_NOPREFIX);
+            textRow(g_hFontSmall, Theme::Muted, pillX, pillY + Layout::PillH + 5,
+                    pillX + Layout::PillW, pillY + Layout::PillH + 25,
+                    L"◇ 213.250.145.75 : 7777", DT_RIGHT | DT_SINGLELINE | DT_NOPREFIX);
         }
 
         // Left card: section caption + field labels (small caps, gold-tinted).
-        SelectObject(hdc, g_hFontSmall);
-        SetTextColor(hdc, RGB(196, 168, 92));
-        TextOutW(hdc, 66, 200, L"H E S A P", 9);
-        SetTextColor(hdc, RGB(178, 150, 82));
-        TextOutW(hdc, 66, 280, L"KULLANICI ADI", 13);
-        TextOutW(hdc, 66, 344, L"ŞİFRE", 5);
+        textAt(g_hFontSmall, Theme::GoldDark, 66, 200, L"H E S A P");
+        textAt(g_hFontSmall, Theme::GoldDark, 66, 280, L"KULLANICI ADI");
+        textAt(g_hFontSmall, Theme::GoldDark, 66, 344, L"ŞİFRE");
 
         // Right card content: title + gold rule.
-        SelectObject(hdc, g_hFontHeading);
-        SetTextColor(hdc, RGB(246, 226, 135));
-        TextOutW(hdc, 472, 200, L"Oyuna Giriş", 10);
+        textAt(g_hFontHeading, Theme::GoldLight, 472, 200, L"Oyuna Giriş");
         {
             LinearGradientBrush rule(Point(472, 0), Point(600, 0),
-                                     Color(255, 212, 175, 55), Color(0, 212, 175, 55));
+                                     Theme::Gdi(Theme::Gold), Theme::Gdi(Theme::Gold, 0));
             Pen rp(&rule, 2.0f);
             graphics.DrawLine(&rp, 472, 228, 600, 228);
         }
@@ -1749,36 +1891,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
         auto drawRow = [&](int y, const std::wstring& s, COLORREF c) {
             if (s.empty()) return;
-            SelectObject(hdc, g_hFontSmall);
-            SetTextColor(hdc, c);
-            RECT tr = {472, y, 824, y + 20};
-            DrawTextW(hdc, s.c_str(), -1, &tr, DT_LEFT | DT_SINGLELINE | DT_END_ELLIPSIS | DT_NOPREFIX);
+            textRow(g_hFontSmall, c, 472, y, 824, y + 20, s,
+                    DT_LEFT | DT_SINGLELINE | DT_END_ELLIPSIS | DT_NOPREFIX);
         };
 
-        COLORREF c1 = RGB(220, 160, 70);
-        if (sum.ok && sum.state == "MAINTENANCE") c1 = RGB(255, 170, 60);
-        else if (sum.ok) c1 = RGB(110, 240, 140);
+        COLORREF c1 = Theme::StatusWarn;
+        if (sum.ok && sum.state == "MAINTENANCE") c1 = Theme::StatusWarn;
+        else if (sum.ok) c1 = Theme::StatusOk;
         if (!line1.empty()) drawRow(256, line1, c1);
-        if (!line2.empty()) drawRow(278, line2, RGB(170, 180, 200));
+        if (!line2.empty()) drawRow(278, line2, Theme::Muted);
         if (sum.ok) {
             std::wstring meta = L"Sürüm: " +
                                 Utf8ToWide(sum.installedVersion.empty() ? "yok" : sum.installedVersion) +
                                 L" → " + Utf8ToWide(sum.releaseVersion) + L"   •   Protokol: " +
                                 Utf8ToWide(sum.serverVersion);
-            drawRow(300, meta, RGB(140, 150, 175));
+            drawRow(300, meta, Theme::Muted);
             if (!sum.releaseNotes.empty()) {
                 std::wstring notes = Utf8ToWide(sum.releaseNotes);
-                drawRow(322, notes, RGB(130, 140, 165));
+                drawRow(322, notes, Theme::Muted);
             }
         }
-        if (!progress.empty()) drawRow(344, progress, RGB(240, 200, 80));
+        if (!progress.empty()) drawRow(344, progress, Theme::StatusWarn);
 
         // Progress bar (animated marquee while busy)
         {
             Rect track(472, 368, 352, 8);
             bool busy = g_UpdBusy.load();
             if (busy) {
-                SolidBrush trackBrush(Color(255, 30, 36, 52));
+                SolidBrush trackBrush(Theme::Gdi(Theme::Track));
                 GraphicsPath tp;
                 int td = 8;
                 tp.AddArc(track.X, track.Y, td, td, 180, 90);
@@ -1791,7 +1931,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 int span = 110;
                 int x = track.X + (int)((tick / 8) % (track.Width + span)) - span;
                 LinearGradientBrush fill(Point(x, 0), Point(x + span, 0),
-                                         Color(0, 212, 175, 55), Color(255, 240, 216, 120));
+                                         Theme::Gdi(Theme::Gold, 0), Theme::Gdi(Theme::GoldEdge));
                 graphics.SetClip(tp.Clone());
                 graphics.FillRectangle(&fill, x, track.Y, span, track.Height);
                 graphics.ResetClip();
@@ -1799,27 +1939,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         }
 
         // Auth hint inside right card
-        SelectObject(hdc, g_hFontSmall);
         if (g_IsAuthenticated) {
-            SetTextColor(hdc, RGB(110, 240, 140));
-            TextOutW(hdc, 472, 554, L"✓ Kimlik doğrulandı — oyuna bağlanmaya hazırsınız.", 47);
+            textAt(g_hFontSmall, Theme::StatusOk, 472, 554,
+                   L"✓ Kimlik doğrulandı — oyuna bağlanmaya hazırsınız.");
         } else {
-            SetTextColor(hdc, RGB(154, 165, 189));
-            TextOutW(hdc, 472, 554, L"“Oyuna Başla” giriş yaptıktan sonra aktifleşir.", 44);
+            textAt(g_hFontSmall, Theme::Muted, 472, 554,
+                   L"“Oyuna Başla” giriş yaptıktan sonra aktifleşir.");
         }
 
         // Left card footer: build identity.
-        SelectObject(hdc, g_hFontSmall);
-        SetTextColor(hdc, RGB(120, 130, 155));
-        TextOutW(hdc, 66, 548, L"HPMMO Launcher v2.0.0  •  doğrulamalı güncelleme", 46);
+        textAt(g_hFontSmall, Theme::Faint, 66, 548,
+               L"HPMMO Launcher v2.0.0  •  doğrulamalı güncelleme");
 
         // Bottom status separator + dot
         {
-            Pen sep(Color(255, 34, 42, 60), 1.0f);
+            Pen sep(Theme::Gdi(Theme::CardEdge), 1.0f);
             graphics.DrawLine(&sep, 40, 592, w - 40, 592);
             COLORREF sc = g_StatusColor;
             SolidBrush dot(Color(255, GetRValue(sc), GetGValue(sc), GetBValue(sc)));
             graphics.FillEllipse(&dot, 46, 606, 9, 9);
+        }
+
+        {
+            GdiDc d(graphics);
+            for (size_t i = 0; i < gdiText.size(); ++i) gdiText[i](d);
         }
 
         EndPaint(hWnd, &ps);

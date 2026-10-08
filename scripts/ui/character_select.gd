@@ -38,8 +38,6 @@ extends Node3D
 @onready var raven_btn: Button = $CanvasLayer/CreateModal/Margin/VBox/HouseRow/RavenBtn
 @onready var huff_btn: Button = $CanvasLayer/CreateModal/Margin/VBox/HouseRow/HuffBtn
 
-const WIZARD_MODEL_SCENE = preload("res://assets/models/characters/wizard.glb")
-
 var characters: Array = []
 var current_slot: int = 0 # 0 or 1 (max 2 characters)
 var selected_house: String = "Gryffindor"
@@ -182,30 +180,17 @@ func _update_slot_display(_animated: bool = true) -> void:
 func _spawn_podium_character(c_data: Dictionary) -> void:
 	_clear_podium_character()
 
-	var wiz = WIZARD_MODEL_SCENE.instantiate()
-	model_anchor.add_child(wiz)
-	current_char_node = wiz
-	wiz.position = Vector3.ZERO
-	wiz.rotation = Vector3.ZERO
-
-	# Hide staff/spellbook, show 1H wand
-	var staff = wiz.get_node_or_null("Rig/Skeleton3D/handslot_r/2H_Staff")
-	if staff: staff.hide()
-	var book1 = wiz.get_node_or_null("Rig/Skeleton3D/handslot_l/Spellbook")
-	if book1: book1.hide()
-	var book2 = wiz.get_node_or_null("Rig/Skeleton3D/handslot_l/Spellbook_open")
-	if book2: book2.hide()
-
-	# Tint cape with house colors
 	var c_house: String = c_data.get("house", "Gryffindor")
+	var primary := Color(0.6, 0.6, 0.6)
 	if GameData.HOUSES.has(c_house):
-		var primary_col = GameData.HOUSES[c_house].primary_color
-		var cape = wiz.get_node_or_null("Rig/Skeleton3D/chest/Mage_Cape")
-		if cape and cape is MeshInstance3D:
-			var mat = StandardMaterial3D.new()
-			mat.albedo_color = primary_col
-			mat.roughness = 0.4
-			cape.set_surface_override_material(0, mat)
+		primary = GameData.HOUSES[c_house].primary_color
+
+	# The same body and the same house tint the world uses, so the wizard on the
+	# podium is the wizard the player is about to play.
+	current_char_node = HeroAppearance.spawn(model_anchor, primary)
+	if current_char_node == null:
+		return
+	current_anim_player = HeroAppearance.find_anim_player(current_char_node)
 
 	# Wand aura particles
 	var wand_tier: int = c_data.get("wand_tier", 0)
@@ -215,13 +200,6 @@ func _spawn_podium_character(c_data: Dictionary) -> void:
 		wand_aura.color = up_info.get("aura", Color.TRANSPARENT)
 	elif wand_aura:
 		wand_aura.emitting = false
-
-	# Play Idle breathing animation
-	var anim = wiz.find_child("AnimationPlayer", true, false)
-	if anim and anim is AnimationPlayer:
-		current_anim_player = anim
-		if anim.has_animation("Idle"):
-			anim.play("Idle")
 
 func _clear_podium_character() -> void:
 	if is_instance_valid(current_char_node):

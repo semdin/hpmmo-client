@@ -31,8 +31,9 @@ be redistributed with the game.
 ## The one external audio element, for completeness
 
 Nothing under `assets/audio/` is external. The asset audit Kenney candidates
-(`kenney-impact-sounds`, `kenney-rpg-audio`, `kenney-interface-sounds`,
-`kenney-music-jingles`, CC0 1.0, kenney.nl) remain available under
-`assets/candidates/` and `tools/downloads/asset-candidates/` as *unused*
-candidates - this library deliberately does not depend on them, so the shipped
-sound set has a single, provable provenance.
+(`kenney-impact-sounds`, `kenney-rpg-audio`, CC0 1.0, kenney.nl) remain under
+`assets/candidates/audio/` as *unused* candidates - this library deliberately
+does not depend on them, so the shipped sound set has a single, provable
+provenance. The packs that were pruned with the candidate download folder
+(`kenney-interface-sounds`, `kenney-music-jingles`, `oga-fireplace-loop`) are
+recorded in `assets/manifest.json` under `rejected`.

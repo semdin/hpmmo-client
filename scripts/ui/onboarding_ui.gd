@@ -186,7 +186,9 @@ func _refresh() -> void:
 	var lines: Array = []
 	for index in range(STEPS.size()):
 		var entry: Dictionary = STEPS[index]
-		var mark := "[x]" if index < current_index else ("[>]" if index == current_index else "[ ]")
+		# Glyphs are pinned to what Alegreya Sans actually carries: U+2713 and
+		# U+25CB are missing from every weight and render as tofu boxes.
+		var mark := "■" if index < current_index else ("▶" if index == current_index else "□")
 		lines.append("%s %s" % [mark, entry["title"]])
 	lines.append("")
 	lines.append(String(step["hint"]))
