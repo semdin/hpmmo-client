@@ -141,7 +141,7 @@ func _build() -> void:
 	margin.add_child(column)
 
 	_title = UITheme.heading("Getting started", UITheme.FS_HEADER)
-	column.add_child(_title)
+	column.add_child(UITheme.icon_row("ui_interact", _title, 22.0))
 	column.add_child(UITheme.divider())
 
 	_body = UITheme.body("", UITheme.FS_SMALL, UITheme.c("parchment"))
@@ -161,6 +161,7 @@ func _build() -> void:
 	_hide_button.focus_mode = Control.FOCUS_NONE
 	_hide_button.custom_minimum_size = Vector2(84, 26)
 	_hide_button.add_theme_font_size_override("font_size", UITheme.FS_SMALL)
+	UITheme.set_button_icon(_hide_button, "ui_close", 14.0)
 	_hide_button.pressed.connect(toggle_panel)
 	footer.add_child(_hide_button)
 

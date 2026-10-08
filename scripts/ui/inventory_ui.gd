@@ -65,6 +65,7 @@ func _ready() -> void:
 func _build() -> void:
 	_window = UIWindow.new("INVENTORY", Vector2(660, 432))
 	_window.name = "Window"
+	_window.header_icon = "ui_inventory"
 	_window.closed.connect(func(): hide())
 	add_child(_window)
 	close_button = _window._close_button
@@ -181,13 +182,8 @@ func _build_footer() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 
-	var coin := Panel.new()
-	var coin_sb := StyleBoxFlat.new()
-	coin_sb.bg_color = UITheme.c("gold")
-	coin_sb.set_corner_radius_all(11)
-	coin.add_theme_stylebox_override("panel", coin_sb)
-	coin.custom_minimum_size = Vector2(18, 18)
-	coin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var coin := UITheme.icon_rect("galleons", 18.0)
+	coin.name = "CoinIcon"
 	row.add_child(coin)
 
 	galleons_label = Label.new()

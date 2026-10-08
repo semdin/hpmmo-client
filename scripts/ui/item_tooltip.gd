@@ -84,7 +84,7 @@ func show_item(item_id: String, entry: Dictionary = {}) -> void:
 	var rarity := rarity_of(item_id)
 	var tint: Color = RARITY_COLOUR.get(rarity, RARITY_COLOUR["common"])
 
-	_add_name_row(String(data.get("name", item_id)), tint, rarity_label(item_id))
+	_add_name_row(String(data.get("name", item_id)), tint, rarity_label(item_id), item_id)
 	_add_divider()
 	_add_kind_row(item_id, data)
 
@@ -183,8 +183,14 @@ func _row() -> HBoxContainer:
 	return h
 
 
-func _add_name_row(text: String, colour: Color, right: String) -> void:
+func _add_name_row(text: String, colour: Color, right: String, icon_id: String = "") -> void:
 	var h := _row()
+	if icon_id != "":
+		# The same picture the bag cell shows, so the card is unmistakably about
+		# the thing under the cursor.
+		var icon := UITheme.icon_rect(icon_id, 26.0)
+		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(icon)
 	var name_label := Label.new()
 	name_label.text = text
 	name_label.add_theme_font_override("font", UITheme.font_title())

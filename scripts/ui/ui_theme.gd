@@ -199,6 +199,81 @@ static func item_icon(item_id: String) -> Texture2D:
 	return icon_for(item_id)
 
 
+## The interface's own pictures: `ui_*` (buttons and panels), `status_*` (the
+## effects on the local body), `stat_*` (the gauges), `minimap_*` (map markers),
+## `audio_*` (the volume rows), `house_*` (the crests). They are plain files in
+## the same folder and the same namespace as the spell and item icons, so one
+## lookup answers for both - only the id says which is which.
+static func chrome(id: String) -> Texture2D:
+	return icon("chrome", id)
+
+
+## A chrome icon scaled once to `px` and cached, for the widgets that draw their
+## icon at the texture's own size: a `Button` sizes itself to its icon, so handing
+## it a 512 px master would force a 512 px button. This build exposes no
+## `icon_max_width`, and `expand_icon` scales the icon to the whole button - which
+## squeezes the caption out of a button that carries both - so the resize happens
+## here, once per id and size.
+static func chrome_at(id: String, px: float) -> Texture2D:
+	var key := "%s@%d" % [id, int(px)]
+	if _icons.has(key):
+		return _icons[key]
+	var source := chrome(id)
+	var out: Texture2D = source
+	if source != null:
+		var img := source.get_image()
+		if img != null:
+			var scaled := img.duplicate() as Image
+			scaled.resize(int(px), int(px), Image.INTERPOLATE_LANCZOS)
+			out = ImageTexture.create_from_image(scaled)
+	_icons[key] = out
+	return out
+
+
+## A fixed-size icon holder, for chrome and content alike. `px` is the box, and
+## the icon is fitted inside it, so a square crest and a tall broom can use the
+## same call.
+static func icon_rect(id: String, px: float) -> TextureRect:
+	var rect := TextureRect.new()
+	rect.texture = icon_for(id)
+	rect.custom_minimum_size = Vector2(px, px)
+	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return rect
+
+
+## A caption with an icon in front of it, as one row. The caption keeps its own
+## node (callers keep writing to it); the icon explains it.
+static func icon_row(id: String, label: Control, px: float) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 5)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(icon_rect(id, px))
+	row.add_child(label)
+	return row
+
+
+## A button that is only a picture, like the round chrome controls (close, zoom).
+## `tip` is the tooltip and, for a screen reader, the button's name.
+static func icon_button(id: String, tip: String = "", px: float = 26.0) -> Button:
+	var button := Button.new()
+	button.icon = chrome_at(id, px - 10.0)
+	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	button.tooltip_text = tip
+	button.custom_minimum_size = Vector2(px, px)
+	button.focus_mode = Control.FOCUS_NONE
+	role(button, V_ICON_BTN)
+	return button
+
+
+## Give a captioned button its icon, at `px` square. The caption stays, and the
+## icon is pre-scaled so it cannot push the caption out of the row.
+static func set_button_icon(button: Button, id: String, px: float = 15.0) -> void:
+	button.icon = chrome_at(id, px)
+	button.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
+
+
 # ------------------------------------------------------------------- fonts
 
 ## The font for a weight, in the heading face (`title`) or the body face.

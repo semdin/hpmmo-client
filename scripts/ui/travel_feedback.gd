@@ -119,8 +119,12 @@ func _build() -> void:
 	_portal_panel.theme = UITheme.get_theme()
 	_portal_panel.theme_type_variation = UITheme.V_CARD
 	_portal_label = _make_label("Loading...", UITheme.FS_BODY, UITheme.c("parchment"))
-	_portal_label.position = Vector2(10, 6)
+	_portal_label.position = Vector2(36, 6)
 	_portal_panel.add_child(_portal_label)
+	var portal_icon := UITheme.icon_rect("ui_portal", 20.0)
+	portal_icon.name = "PortalIcon"
+	portal_icon.position = Vector2(10, 5)
+	_portal_panel.add_child(portal_icon)
 	_portal_bar = ProgressBar.new()
 	_portal_bar.name = "PortalBar"
 	_portal_bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
@@ -163,10 +167,14 @@ func _build() -> void:
 	_mounted_panel.theme = UITheme.get_theme()
 	_mounted_panel.theme_type_variation = UITheme.V_CARD
 	_mounted_label = _make_label("", UITheme.FS_SMALL, UITheme.c("parchment"))
-	_mounted_label.position = Vector2(9, 6)
-	_mounted_label.custom_minimum_size = Vector2(UITheme.LEFT_COL_W - 18, 66)
+	_mounted_label.position = Vector2(32, 6)
+	_mounted_label.custom_minimum_size = Vector2(UITheme.LEFT_COL_W - 41, 66)
 	_mounted_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_mounted_panel.add_child(_mounted_label)
+	var mounted_icon := UITheme.icon_rect("ui_mount", 20.0)
+	mounted_icon.name = "MountedIcon"
+	mounted_icon.position = Vector2(9, 6)
+	_mounted_panel.add_child(mounted_icon)
 	_mounted_panel.hide()
 	add_child(_mounted_panel)
 

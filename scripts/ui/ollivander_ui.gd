@@ -18,6 +18,9 @@ signal wand_upgraded(new_tier: int)
 var player: Node3D = null
 
 func _ready() -> void:
+	theme = UITheme.get_theme()
+	UITheme.set_button_icon(refine_button, "ui_ollivander", 18.0)
+	UITheme.set_button_icon(close_button, "ui_close")
 	refine_button.pressed.connect(_on_refine_pressed)
 	close_button.pressed.connect(hide)
 	hide()

@@ -309,32 +309,29 @@ def main():
         })
 
     # UI kit family (UI redesign). Declared by hand because the baseline
-    # audit predates assets/ui. The frames, insets, buttons and slots are tinted
-    # Kenney "Fantasy UI Borders" masks; the round controls come from Kenney
-    # "UI Pack"; the icons are one CC0 set. Everything else is drawn by
-    # tools/ui/standard_kit.py.
-    ui_files = sorted(set(
-        glob.glob(os.path.join(ROOT, "assets", "ui", "*.png"))
-        + glob.glob(os.path.join(ROOT, "assets", "ui", "icons", "*.png"))
-    ))
+    # audit predates assets/ui. The frames, insets, buttons and slots are flat
+    # StyleBoxFlat boxes in `assets/ui/hpmmo.tres`, so this entry covers that one
+    # resource. The icon files under `assets/ui/icons/` are recorded separately by
+    # tools/manifest_icons.py (`family-icon-set`), which also owns their hashes.
+    ui_files = sorted(set(glob.glob(os.path.join(ROOT, "assets", "ui", "*.png"))))
     ui_paths = [os.path.relpath(p, ROOT).replace("\\", "/") for p in ui_files
                 if "preview" not in os.path.basename(p).lower()]
     if ui_paths:
         assets.append({
             "id": "family-ui-kit",
-            "purpose": "window/inset/button/slot/bars/icon kit for the HUD, bag, menu and launcher",
+            "purpose": "interface theme: one Theme resource (flat StyleBoxFlat palette, control styles and type scale)",
             "status": "integrated",
-            "author": "Kenney (Kenney.nl), gnola14 (OpenGameArt); procedural shapes are original work",
-            "source_url": "assets/ui/LICENSES",
-            "license": "CC0 1.0 Universal (Public Domain Dedication)",
-            "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-            "license_file": "assets/ui/LICENSES/kenney-fantasy-ui-borders.txt, assets/ui/LICENSES/kenney-ui-pack.txt, assets/ui/LICENSES/oga-rpg-icons-496.txt",
+            "author": "original work",
+            "source_url": "assets/ui/hpmmo.tres",
+            "license": "original work",
+            "license_url": "assets/ASSET_CREDITS.md",
+            "license_file": "",
             "attribution_required": False, "local_paths": ui_paths,
             "sha256": {p: sha256(os.path.join(ROOT, p)) for p in ui_paths},
             "scale_m": "n/a", "triangles": "n/a",
-            "material_slots": "one 64x64 texture per spell/item id (assets/ui/icons/icon_<id>.png)",
-            "textures": {"channels": ["albedo+alpha"],
-                         "note": "nine-patch margins are measured off the masks: 16 px frame window, 8 px small frames, 0 for round buttons"},
+            "material_slots": "none - the theme draws no image",
+            "textures": {"channels": [],
+                         "note": "flat StyleBoxFlat boxes: no frame, button, slot or bar image to slice"},
             "rig": {}, "collision": "n/a", "lods": "n/a",
             "acceptance": "",
         })

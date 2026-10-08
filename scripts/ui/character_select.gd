@@ -47,6 +47,7 @@ var is_switching: bool = false
 
 func _ready() -> void:
 	# Connect UI buttons
+	_apply_icons()
 	enter_world_btn.pressed.connect(_on_enter_world_pressed)
 	new_char_btn.pressed.connect(_on_new_char_pressed)
 	prev_slot_btn.pressed.connect(func(): _switch_slot((current_slot - 1 + 2) % 2))
@@ -75,6 +76,20 @@ func _exit_tree() -> void:
 		NetworkManager.character_create_result.disconnect(_on_character_create_result)
 	if NetworkManager.character_select_result.is_connected(_on_character_select_result):
 		NetworkManager.character_select_result.disconnect(_on_character_select_result)
+
+## The house crests on the create-character buttons, and the glyph the plus sign
+## used to be. The captions stay: the crest says which house, the caption names it.
+func _apply_icons() -> void:
+	var crests := {
+		gryf_btn: "house_gryffindor",
+		slyth_btn: "house_slytherin",
+		raven_btn: "house_ravenclaw",
+		huff_btn: "house_hufflepuff",
+	}
+	for button in crests:
+		UITheme.set_button_icon(button, crests[button], 18.0)
+	new_char_btn.text = "Yeni Büyücü Oluştur"
+	UITheme.set_button_icon(new_char_btn, "minimap_zoom_in", 16.0)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if create_modal.visible:
@@ -133,7 +148,7 @@ func _update_slot_display(_animated: bool = true) -> void:
 		new_char_btn.text = "Maksimum Karakter (2/2)"
 	else:
 		new_char_btn.disabled = false
-		new_char_btn.text = "➕ Yeni Büyücü Oluştur"
+		new_char_btn.text = "Yeni Büyücü Oluştur"
 
 	if has_character:
 		var c = characters[current_slot]
@@ -156,12 +171,13 @@ func _update_slot_display(_animated: bool = true) -> void:
 		
 		char_stats_label.text = "Seviye: %d  |  Can: %d/%d  |  Mana: %d/%d" % [c_level, c_hp, c_max_hp, c_mana, c_max_mana]
 		char_wand_label.text = "Asa: +%d Büyü Gücü" % c_wand
-		char_galleons_label.text = "Servet: %d Galleon 💰" % c_galleons
+		char_galleons_label.text = "Servet: %d Galleon" % c_galleons
 		char_location_label.text = "Konum: Hogwarts Avlusu"
 
 		enter_world_btn.visible = true
 		enter_world_btn.disabled = false
-		enter_world_btn.text = "⚔️ '%s' İLE DÜNYAYA GİR" % c_name
+		enter_world_btn.text = "'%s' İLE DÜNYAYA GİR" % c_name
+		UITheme.set_button_icon(enter_world_btn, "ui_portal", 20.0)
 
 		_spawn_podium_character(c)
 	else:

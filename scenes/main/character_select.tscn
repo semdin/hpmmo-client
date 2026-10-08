@@ -234,7 +234,7 @@ text = "Asa: +0 Büyü Gücü"
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 13
-text = "Servet: 500 Galleon 💰"
+text = "Servet: 500 Galleon"
 
 [node name="LocationLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
 layout_mode = 2
@@ -260,12 +260,12 @@ alignment = 1
 custom_minimum_size = Vector2(240, 50)
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
-text = "⚔️ OYUNA GİR (ENTER WORLD)"
+text = "OYUNA GİR (ENTER WORLD)"
 
 [node name="NewCharBtn" type="Button" parent="CanvasLayer/BottomBar"]
 custom_minimum_size = Vector2(200, 50)
 layout_mode = 2
-text = "➕ Yeni Büyücü Oluştur"
+text = "Yeni Büyücü Oluştur"
 
 [node name="CreateModal" type="PanelContainer" parent="CanvasLayer"]
 visible = false
@@ -323,22 +323,22 @@ theme_override_constants/separation = 6
 alignment = 1
 
 [node name="GryfBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
-custom_minimum_size = Vector2(100, 34)
+custom_minimum_size = Vector2(112, 34)
 layout_mode = 2
 text = "Gryffindor"
 
 [node name="SlythBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
-custom_minimum_size = Vector2(100, 34)
+custom_minimum_size = Vector2(112, 34)
 layout_mode = 2
 text = "Slytherin"
 
 [node name="RavenBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
-custom_minimum_size = Vector2(100, 34)
+custom_minimum_size = Vector2(112, 34)
 layout_mode = 2
 text = "Ravenclaw"
 
 [node name="HuffBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
-custom_minimum_size = Vector2(100, 34)
+custom_minimum_size = Vector2(112, 34)
 layout_mode = 2
 text = "Hufflepuff"
 

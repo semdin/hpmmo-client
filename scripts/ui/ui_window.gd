@@ -35,6 +35,10 @@ var title: String = "":
 		if _title_label != null:
 			_title_label.text = value
 
+## The window's own mark, drawn at the left end of the ribbon. Set before the
+## window enters the tree - `_ready` builds the ribbon once.
+var header_icon: String = ""
+
 var close_button_visible: bool = true
 var draggable: bool = true
 
@@ -116,14 +120,19 @@ func _build_ribbon() -> void:
 	_title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ribbon.add_child(_title_label)
 
+	if header_icon != "":
+		var mark := UITheme.icon_rect(header_icon, 22.0)
+		mark.name = "HeaderIcon"
+		mark.set_anchors_preset(Control.PRESET_CENTER_LEFT)
+		mark.position = Vector2(12.0, -11.0)
+		_ribbon.add_child(mark)
+
 	_close_button = Button.new()
 	_close_button.name = "Close"
-	_close_button.text = "✕"
+	_close_button.icon = UITheme.chrome_at("ui_close", 16.0)
 	_close_button.custom_minimum_size = Vector2(26, 26)
 	_close_button.focus_mode = Control.FOCUS_NONE
 	UITheme.role(_close_button, UITheme.V_ICON_BTN)
-	_close_button.add_theme_font_size_override("font_size", UITheme.FS_BODY)
-	_close_button.add_theme_color_override("font_color", UITheme.c("gold_lt"))
 	_close_button.tooltip_text = "Close"
 	_close_button.pressed.connect(close)
 	_close_button.visible = close_button_visible
