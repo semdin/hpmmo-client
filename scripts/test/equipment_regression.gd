@@ -248,6 +248,16 @@ func _test_gestures() -> void:
 func _test_persistence() -> void:
 	var bridge := FakePersistence.new()
 	add_child(bridge)
+	var sheet := bridge.character_payload(player,record)
+	sheet.inventory.append({"id":"legacy_keepsake","amount":2,"tier":3})
+	player.restore_character(sheet)
+	check(player.inventory.any(func(e):return e.id == "legacy_keepsake" and e.amount == 2 and e.tier == 3),"loading preserves retired catalog entries and their tiers")
+	var previous_house: String = player.house
+	player.house = "Hufflepuff"
+	player.current_hp = 123
+	player._apply_house_customization()
+	check(player.current_hp == 123,"restoring house appearance cannot refill saved HP")
+	player.house = previous_house
 	bridge.revisions[42] = 10
 	bridge.save_character(42,{"character_id":42,"inventory_revision":1})
 	bridge.save_character(42,{"character_id":42,"inventory_revision":2})

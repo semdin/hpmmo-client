@@ -111,6 +111,9 @@ def main():
         text = f.read()
     text = re.sub(r'run/main_scene="[^"]*"',
                   'run/main_scene="%s"' % entry, text)
+    # The server removes its UI before entering the tree and exports no fonts
+    # or chrome. Do not let ThemeDB preload the client's project font/theme.
+    text = re.sub(r'^theme/custom_(?:font|theme)=.*(?:\r?\n|$)', '', text, flags=re.MULTILINE)
     with open(pg, "w", encoding="utf-8", newline="") as f:
         f.write(text)
 
