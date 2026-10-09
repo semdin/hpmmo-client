@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://t4j1q2bpoeyu"
-path="res://.godot/imported/boss_commander_commander_albedo.png-57e42cbb8196dd2d8e03fb7eb3165cf5.ctex"
+path.s3tc="res://.godot/imported/boss_commander_commander_albedo.png-57e42cbb8196dd2d8e03fb7eb3165cf5.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "aabc1d11ef20ccf13c7bc7eefd0f2aad"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monsters/boss_commander_commander_albedo.png"
-dest_files=["res://.godot/imported/boss_commander_commander_albedo.png-57e42cbb8196dd2d8e03fb7eb3165cf5.ctex"]
+dest_files=["res://.godot/imported/boss_commander_commander_albedo.png-57e42cbb8196dd2d8e03fb7eb3165cf5.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

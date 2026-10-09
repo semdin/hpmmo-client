@@ -54,9 +54,7 @@ static func resolve() -> String:
 				_current = wanted
 				return _current
 	var adapter := RenderingServer.get_video_adapter_name().to_lower()
-	if adapter.contains("intel") or adapter.contains("uhd") or adapter.contains("iris"):
-		_current = "low"
-	elif adapter == "":
+	if adapter == "":
 		# Headless / dummy renderer: report the low preset so the checks scene
 		# asserts the same configuration the target machine runs.
 		_current = "low"
