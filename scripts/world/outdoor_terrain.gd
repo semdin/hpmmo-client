@@ -21,7 +21,7 @@ const QUALITY = preload("res://scripts/world/quality_preset.gd")
 ## quidditch pitch, boss arenas) lives between these bounds.
 const CORE_MIN := Vector2(-110.0, -125.0)
 const CORE_MAX := Vector2(110.0, 70.0)
-const WORLD_LIMIT := 248.0
+const WORLD_LIMIT := 495.0
 ## Outdoor stones are weathered grey, not the pale interior ashlar.
 const ROCK_TINT := Color(0.60, 0.58, 0.54)
 const GRID := 4.0          # visual mesh resolution, metres
@@ -73,7 +73,7 @@ static func _height(x: float, z: float) -> float:
 	var h: float = (7.0 + 11.0 * _hills.get_noise_2d(x, z)) * fade
 	h += (2.0 * _detail.get_noise_2d(x, z)) * fade
 	# A ridge line lifts the far corners so the valley reads as enclosed.
-	var rim: float = clampf((maxf(absf(x), absf(z)) - 170.0) / 70.0, 0.0, 1.0)
+	var rim: float = clampf((maxf(absf(x), absf(z)) - 410.0) / 75.0, 0.0, 1.0)
 	h += rim * rim * 12.0
 	return clampf(h, 0.0, 30.0)
 
@@ -81,15 +81,15 @@ static func _height(x: float, z: float) -> float:
 static func _bands() -> Array:
 	return [
 		# [x0, z0, x1, z1]
-		[CORE_MIN.x - 138.0, CORE_MIN.y - 123.0, CORE_MAX.x + 138.0, CORE_MIN.y],
-		[CORE_MIN.x - 138.0, CORE_MAX.y, CORE_MAX.x + 138.0, CORE_MAX.y + 178.0],
-		[CORE_MIN.x - 138.0, CORE_MIN.y, CORE_MIN.x, CORE_MAX.y],
-		[CORE_MAX.x, CORE_MIN.y, CORE_MAX.x + 138.0, CORE_MAX.y],
+		[-WORLD_LIMIT, -WORLD_LIMIT, WORLD_LIMIT, CORE_MIN.y],
+		[-WORLD_LIMIT, CORE_MAX.y, WORLD_LIMIT, WORLD_LIMIT],
+		[-WORLD_LIMIT, CORE_MIN.y, CORE_MIN.x, CORE_MAX.y],
+		[CORE_MAX.x, CORE_MIN.y, WORLD_LIMIT, CORE_MAX.y],
 	]
 
 static func _build_hill_bands(root: Node3D) -> void:
-	var material: Material = PBR.surface("grass_ground_01", Color(1.0, 1.02, 1.0),
-		{"rough_min": 0.75})
+	var material: Material = PBR.surface("grass_ground_01", PBR.MEADOW_TINT,
+		{"rough_min": 0.88})
 	for band in _bands():
 		var x0: float = band[0]
 		var z0: float = band[1]
@@ -269,6 +269,14 @@ static func _blocked(x: float, z: float, margin: float = 2.0) -> bool:
 		return true
 	if Vector2(0.0, -40.0).distance_to(p) < 7.0 + margin:     # broom landing
 		return true
+	if Vector2(-78.0, 18.0).distance_to(p) < 22.0 + margin:   # Hagrid's hut & patch
+		return true
+	if Vector2(260.0, 0.0).distance_to(p) < 32.0 + margin:    # Highlands stone circle
+		return true
+	if Vector2(100.0, 55.0).distance_to(p) < 36.0 + margin:   # Quidditch stadium
+		return true
+	if Vector2(180.0, -160.0).distance_to(p) < 26.0 + margin: # Smuggler's camp
+		return true
 	for path in [[Vector2(0, 5), Vector2(0, -47), 4.0], [Vector2(0, 5), Vector2(38, 14), 2.5],
 			[Vector2(0, 5), Vector2(-34, 18), 2.5], [Vector2(0, -20), Vector2(-52, -52), 2.2],
 			[Vector2(0, -20), Vector2(55, -55), 2.2]]:
@@ -292,7 +300,9 @@ static func _build_vegetation(root: Node3D) -> void:
 	var plantings := [
 		{"count": 150, "rect": Rect2(-100, -110, 62, 95), "mix": 0.75},
 		{"count": 55, "rect": Rect2(42, -105, 55, 95), "mix": 0.45},
-		{"count": 70, "rect": Rect2(-245, -245, 490, 490), "mix": 0.55, "ring_only": true},
+		{"count": 220, "rect": Rect2(-380, -380, 260, 290), "mix": 0.85},
+		{"count": 110, "rect": Rect2(140, -190, 220, 240), "mix": 0.50},
+		{"count": 140, "rect": Rect2(-485, -485, 970, 970), "mix": 0.55, "ring_only": true},
 	]
 	for planting in plantings:
 		var count := int(float(planting["count"]) * density)
@@ -316,20 +326,20 @@ static func _build_vegetation(root: Node3D) -> void:
 				Vector3(s, s * rng.randf_range(0.9, 1.25), s)))
 			placed += 1
 	# Bushes near the forest edges and along the hills' feet.
-	var bushes := int(120.0 * density)
+	var bushes := int(220.0 * density)
 	for i in range(bushes):
-		var x := rng.randf_range(-235.0, 235.0)
-		var z := rng.randf_range(-235.0, 200.0)
+		var x := rng.randf_range(-460.0, 460.0)
+		var z := rng.randf_range(-460.0, 460.0)
 		if _blocked(x, z, 0.5):
 			continue
 		var y := _height(x, z)
 		var s := rng.randf_range(0.8, 1.7)
 		PBR.queue("bush_1", _xform(Vector3(x, y, z), rng.randf() * TAU, Vector3.ONE * s))
 	# Grass clumps fill the open meadow, denser near the paths.
-	var clumps := int(1100.0 * density)
+	var clumps := int(1600.0 * density)
 	for i in range(clumps):
-		var x := rng.randf_range(-215.0, 215.0)
-		var z := rng.randf_range(-215.0, 190.0)
+		var x := rng.randf_range(-450.0, 450.0)
+		var z := rng.randf_range(-450.0, 450.0)
 		if _blocked(x, z, 0.2):
 			continue
 		var y := _height(x, z)
@@ -343,9 +353,9 @@ static func _build_rocks(root: Node3D) -> void:
 	# Path-edge and hillside rock clusters (visual only: no collision, no spawn
 	# interference; large landmark rocks carry no collider either, consistent
 	# with the map transfer ruin scatter).
-	for i in range(int(90.0 * density)):
-		var x := rng.randf_range(-225.0, 225.0)
-		var z := rng.randf_range(-225.0, 195.0)
+	for i in range(int(160.0 * density)):
+		var x := rng.randf_range(-460.0, 460.0)
+		var z := rng.randf_range(-460.0, 460.0)
 		if _blocked(x, z, -0.5):
 			continue
 		var y := _height(x, z)

@@ -7,10 +7,9 @@ const QualityPreset = preload("res://scripts/world/quality_preset.gd")
 
 ## Builds a real wizarding valley: castle, village, forest, lake,
 ## quidditch pitch, paths, lamps, fences, floating candles, stars.
-## Art pass resurfaced it with authored PBR materials, shaped the terrain
-## outside the playable core, and instanced the vegetation through the Gothic
-## kit. the map transfer's route, encounter areas and landing pad are untouched.
-
+## Expanded to a vast 1000m x 1000m realm (3-4x size) featuring Metin2-style
+## terraced villages, elevation plateaus, mountain bridges, Hagrid's hut & pumpkin patch,
+## ancient megalith highlands, deep forbidden forest hollows, and dark mountain passes.
 
 static func build(world: Node3D) -> void:
 	if world.has_node("HogwartsCastle"):
@@ -18,16 +17,19 @@ static func build(world: Node3D) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 20260707
 
-	QualityPreset.apply(world)
 	_apply_sky_and_fog(world)
 	_reskin_terrain(world)
 	_build_paths(world)
 	preload("res://scripts/world/castle_builder.gd").build(world)
 	_build_courtyard_details(world)
 	_build_village(world)
+	_build_hagrids_grounds(world, rng)
+	_build_valley_bridges(world)
 	_build_forbidden_forest(world, rng)
 	_build_black_lake(world)
 	_build_quidditch_pitch(world)
+	_build_highlands_circle(world)
+	_build_smugglers_ridge(world, rng)
 	_build_lamps_and_fences(world, rng)
 	_build_level_dressing(world, rng)
 	OutdoorTerrain.build(world)
@@ -36,23 +38,22 @@ static func build(world: Node3D) -> void:
 	_build_stars_and_moon(world)
 	_build_world_boundaries(world)
 	_build_broom_landing(world)
+	# Apply budgets after the light rig and all fixtures exist.
+	QualityPreset.apply(world)
 
 ## Everything build() adds at the world root. `teardown()` frees exactly these,
 ## which is what lets the map controller prove an outdoor world can be unloaded
 ## before the castle interior is loaded ("old worlds actually
-## unload"). Scene-authored nodes (Terrain, the HUD, Players, Mobs, NPCs,
-## TrainingGrounds) are NOT in this list: they are the world's collision and its
-## live entities, not its map resources.
+## unload").
 const BUILT_NODES := [
 	"OuterMeadow", "StonePaths", "HogwartsCastle", "CourtyardFountain",
-	"HogsmeadeVillage", "ForbiddenForest", "BlackLake", "QuidditchPitch",
+	"HogsmeadeVillage", "HagridsGrounds", "ValleyBridges", "ForbiddenForest",
+	"BlackLake", "QuidditchPitch", "HighlandsStoneCircle", "SmugglersRidge",
 	"Props", "LevelDressing", "TerrainPass", "FloatingCandles", "Moon", "MoonLight",
 	"BroomLanding", "WorldBoundaries",
 ]
 
-## Free the outdoor scenery built by build(). Nodes are removed from the tree
-## first so `has_node("HogwartsCastle")` is false in the same frame (build() uses
-## that as its idempotence guard), then freed.
+## Free the outdoor scenery built by build().
 static func teardown(world: Node3D) -> void:
 	if world == null or not is_instance_valid(world):
 		return
@@ -71,49 +72,44 @@ static func _apply_sky_and_fog(world: Node3D) -> void:
 		var env: Environment = (env_node as WorldEnvironment).environment
 		if env:
 			env.background_mode = Environment.BG_SKY
-			# Clear daylight that keeps texture detail: a bright sky supplies
-			# most of the ambient, so sun-baked surfaces do not need a strong
-			# directional light and the material albedo stays readable.
 			var sky_mat := env.sky.sky_material as ProceduralSkyMaterial
 			if sky_mat:
-				sky_mat.sky_top_color = Color(0.20, 0.40, 0.68)
-				sky_mat.sky_horizon_color = Color(0.68, 0.79, 0.90)
+				sky_mat.sky_top_color = Color(0.24, 0.35, 0.49)
+				sky_mat.sky_horizon_color = Color(0.57, 0.64, 0.70)
 				sky_mat.ground_bottom_color = Color(0.14, 0.16, 0.17)
-				sky_mat.ground_horizon_color = Color(0.42, 0.47, 0.52)
-				sky_mat.sun_angle_max = 10.0
-			# No broad haze: fog stays off so it can never disguise unfinished
-			# terrain or swallow navigation landmarks.
+				sky_mat.ground_horizon_color = Color(0.29, 0.32, 0.34)
+				sky_mat.sun_angle_max = 3.0
 			env.fog_enabled = false
 			env.fog_density = 0.0002
 			env.fog_aerial_perspective = 0.0
 			env.fog_sky_affect = 0.0
-			# Restrained bloom: only genuinely emissive fixtures should glow.
 			env.glow_enabled = true
-			env.glow_intensity = 0.22
-			env.glow_bloom = 0.02
-			env.glow_hdr_threshold = 1.1
+			env.glow_intensity = 0.16
+			env.glow_bloom = 0.0
+			env.glow_hdr_threshold = 1.35
 			env.glow_blend_mode = Environment.GLOW_BLEND_MODE_ADDITIVE
 			env.tonemap_mode = Environment.TONE_MAPPER_ACES
-			env.tonemap_exposure = 1.12
+			env.tonemap_exposure = 0.92
 			env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-			env.ambient_light_energy = 1.0
+			env.ambient_light_energy = 0.62
 			env.adjustment_enabled = true
-			env.adjustment_saturation = 1.04
-			env.adjustment_contrast = 1.03
+			env.adjustment_saturation = 0.96
+			env.adjustment_contrast = 1.04
 			env.ssao_enabled = true
-			env.ssao_intensity = 1.1
-			env.ssao_radius = 1.4
+			env.ssao_intensity = 1.35
+			env.ssao_radius = 0.9
 			env.ssr_enabled = false
 			env.ssr_max_steps = 64
-	# One shadow-casting directional light; the quality preset can switch it off.
 	var sun := world.get_node_or_null("DirectionalLight3D") as DirectionalLight3D
 	if sun:
-		sun.light_color = Color(1.0, 0.97, 0.90)
-		sun.light_energy = 1.25
+		sun.light_color = Color(1.0, 0.96, 0.89)
+		sun.light_energy = 1.1
 		sun.shadow_enabled = true
-		sun.rotation_degrees = Vector3(-44, -30, 0)
+		sun.rotation_degrees = Vector3(-38, -30, 0)
 		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
-		sun.directional_shadow_max_distance = 150.0
+		sun.directional_shadow_max_distance = 180.0
+		sun.directional_shadow_blend_splits = true
+		sun.shadow_normal_bias = 0.8
 
 # ---------------------------------------------------------------- terrain
 
@@ -121,13 +117,13 @@ static func _reskin_terrain(world: Node3D) -> void:
 	var grass_mesh := world.get_node_or_null("Terrain/GrassMesh")
 	if grass_mesh and grass_mesh is MeshInstance3D:
 		(grass_mesh as MeshInstance3D).set_surface_override_material(0,
-			PBR.surface("grass_ground_01"))
+			PBR.surface("grass_ground_01", PBR.MEADOW_TINT, {"rough_min": 0.88}))
 	var meadow := MeshInstance3D.new()
 	meadow.name = "OuterMeadow"
 	var pm := PlaneMesh.new()
-	pm.size = Vector2(600, 600)
+	pm.size = Vector2(1400, 1400)
 	meadow.mesh = pm
-	meadow.material_override = PBR.surface("grass_ground_01", Color(0.86, 0.92, 0.82),
+	meadow.material_override = PBR.surface("grass_ground_01", PBR.MEADOW_TINT,
 		{"metres": 8.0})
 	meadow.position = Vector3(0, -0.62, 0)
 	world.add_child(meadow)
@@ -135,10 +131,13 @@ static func _reskin_terrain(world: Node3D) -> void:
 	var court := world.get_node_or_null("Terrain/Courtyard")
 	if court and court is MeshInstance3D:
 		(court as MeshInstance3D).set_surface_override_material(0, PBR.surface("stone_tiles_02"))
-		# The map transfer courtyard disc was 20 cm proud of the collision plane, so
-		# walkers sank into it. Flush it with the ground now that it carries the
-		# paving material.
 		court.position.y = -0.13
+
+	var grass_col := world.get_node_or_null("Terrain/CollisionShape3D")
+	if grass_col and grass_col is CollisionShape3D:
+		var shape := (grass_col as CollisionShape3D).shape
+		if shape is BoxShape3D:
+			(shape as BoxShape3D).size = Vector3(1400, 1, 1400)
 
 # ---------------------------------------------------------------- paths
 
@@ -162,12 +161,50 @@ static func _build_paths(world: Node3D) -> void:
 	var paths := Node3D.new()
 	paths.name = "StonePaths"
 	world.add_child(paths)
-	# courtyard -> castle, village, lake, pitch, forest edge
+	# Core routes: courtyard -> castle, village, lake, pitch, forest edge
 	_cobble_path(paths, Vector3(0, 0, 5), Vector3(0, 0, -47), 6.0)
 	_cobble_path(paths, Vector3(0, 0, 5), Vector3(38, 0, 14), 3.0)
 	_cobble_path(paths, Vector3(0, 0, 5), Vector3(-34, 0, 18), 3.0)
 	_cobble_path(paths, Vector3(0, 0, -20), Vector3(-52, 0, -52), 2.5)
 	_cobble_path(paths, Vector3(0, 0, -20), Vector3(55, 0, -55), 2.5)
+
+	# West: Hagrid's meadow and pumpkin patch
+	_cobble_path(paths, Vector3(-34, 0, 18), Vector3(-56, 0, 18), 3.0)
+	_cobble_path(paths, Vector3(-56, 0, 18), Vector3(-78, 0, 18), 2.8)
+
+	# West-South: Black Lake docks promenade
+	_cobble_path(paths, Vector3(-34, 0, 18), Vector3(-45, 0, 42), 3.0)
+	_cobble_path(paths, Vector3(-45, 0, 42), Vector3(-68, 0, 65), 3.2)
+	_cobble_path(paths, Vector3(-68, 0, 65), Vector3(-95, 0, 85), 2.8)
+
+	# East: Hogsmeade High Street & Upper Terraces
+	_cobble_path(paths, Vector3(38, 0, 14), Vector3(60, 0, 22), 3.5)
+	_cobble_path(paths, Vector3(60, 0, 22), Vector3(85, 0, 26), 3.0)
+	_cobble_path(paths, Vector3(85, 0, 26), Vector3(110, 0, 30), 2.8)
+
+	# East-South: Quidditch Stadium Boulevard
+	_cobble_path(paths, Vector3(38, 0, 14), Vector3(58, 0, 38), 3.0)
+	_cobble_path(paths, Vector3(58, 0, 38), Vector3(85, 0, 52), 3.2)
+	_cobble_path(paths, Vector3(85, 0, 52), Vector3(100, 0, 55), 3.5)
+
+	# Deep North-West: Forbidden Forest trail
+	_cobble_path(paths, Vector3(-52, 0, -52), Vector3(-85, 0, -78), 2.5)
+	_cobble_path(paths, Vector3(-85, 0, -78), Vector3(-130, 0, -115), 2.4)
+	_cobble_path(paths, Vector3(-130, 0, -115), Vector3(-180, 0, -145), 2.2)
+
+	# Far East: Highlands mountain road climbing to the Ancient Megaliths
+	_cobble_path(paths, Vector3(85, 0, 26), Vector3(135, 0, 18), 2.8)
+	_cobble_path(paths, Vector3(135, 0, 18), Vector3(195, 0, 10), 2.6)
+	_cobble_path(paths, Vector3(195, 0, 10), Vector3(255, 0, 2), 3.0)
+
+	# North-East: Smuggler's Pass & Dark Snatcher Stronghold
+	_cobble_path(paths, Vector3(55, 0, -55), Vector3(95, 0, -90), 2.5)
+	_cobble_path(paths, Vector3(95, 0, -90), Vector3(140, 0, -130), 2.5)
+	_cobble_path(paths, Vector3(140, 0, -130), Vector3(180, 0, -160), 2.8)
+
+	# Cross-valley connecting route: Lake -> Village -> Quidditch
+	_cobble_path(paths, Vector3(-45, 0, 42), Vector3(-10, 0, 35), 2.5)
+	_cobble_path(paths, Vector3(-10, 0, 35), Vector3(15, 0, 25), 2.5)
 
 # ---------------------------------------------------------------- castle
 
@@ -175,7 +212,6 @@ static func _build_courtyard_details(world: Node3D) -> void:
 	var forge := world.get_node_or_null("OllivanderWorkshop")
 	if forge:
 		forge.position = Vector3(8, 0.5, 5)
-	# fountain
 	var fountain := Node3D.new()
 	fountain.name = "CourtyardFountain"
 	fountain.position = Vector3(-9, 0, 6)
@@ -216,10 +252,11 @@ static func _build_courtyard_details(world: Node3D) -> void:
 
 # ---------------------------------------------------------------- village
 
-static func _hut(parent: Node3D, pos: Vector3, rot_y: float, wall_mat: Material, roof_mat: Material, wood_mat: Material) -> void:
+static func _hut(parent: Node3D, pos: Vector3, rot_y: float, wall_mat: Material, roof_mat: Material, wood_mat: Material, scale: float = 1.0) -> void:
 	var hut := Node3D.new()
 	hut.position = pos
 	hut.rotation.y = rot_y
+	hut.scale = Vector3.ONE * scale
 	parent.add_child(hut)
 	var body := MeshInstance3D.new()
 	var bm := BoxMesh.new()
@@ -242,7 +279,6 @@ static func _hut(parent: Node3D, pos: Vector3, rot_y: float, wall_mat: Material,
 	door.mesh = dm
 	door.position = Vector3(0, 1.1, 2.55)
 	hut.add_child(door)
-	# warm window
 	var win := MeshInstance3D.new()
 	var wm := BoxMesh.new()
 	wm.size = Vector3(1.4, 1.0, 0.15)
@@ -269,16 +305,116 @@ static func _build_village(world: Node3D) -> void:
 	var wall_mat := PBR.surface("stone_ashlar_01", Color(0.92, 0.9, 0.86), {"metres": 4.0})
 	var roof_mat := PBR.surface("roof_slates_03")
 	var wood_mat := PBR.surface("dark_wooden_planks")
+
+	# Core village cottages (original spots preserved)
 	var spots := [
 		[Vector3(34, 0, 16), 0.4], [Vector3(42, 0, 10), -0.5],
 		[Vector3(38, 0, 24), 2.8], [Vector3(28, 0, 24), -2.6],
 		[Vector3(-30, 0, 20), 0.9], [Vector3(-38, 0, 14), -0.8],
 		[Vector3(-34, 0, 28), 3.0],
+		# Lower Town expansion
+		[Vector3(48, 0, 18), -0.3], [Vector3(56, 0, 12), 0.8],
+		[Vector3(52, 0, 26), 2.6], [Vector3(44, 0, 32), -2.8],
+		[Vector3(36, 0, 36), 0.2], [Vector3(26, 0, 32), 1.2],
+		# Upper Terrace cottages (Metin2 tiered hillside elevation)
+		[Vector3(72, 0, 16), 0.4], [Vector3(80, 0, 10), -0.6],
+		[Vector3(76, 0, 24), 2.9], [Vector3(86, 0, 22), -2.5],
+		[Vector3(94, 0, 16), 0.7], [Vector3(98, 0, 26), 3.1],
+		[Vector3(106, 0, 20), -0.4],
 	]
 	for s in spots:
 		_hut(village, s[0], s[1], wall_mat, roof_mat, wood_mat)
+
+	# Three Broomsticks Tavern (Grand Village Inn)
+	var tavern_pos := Vector3(64, 0, 32)
+	_hut(village, tavern_pos, 0.2, wall_mat, roof_mat, wood_mat, 1.45)
+	# Outdoor tavern dining tables & benches
+	for ti in range(3):
+		var t_pos := tavern_pos + Vector3(float(ti - 1) * 3.8, 0, 6.0)
+		var table := PBR.kit_instance("long_table_8")
+		if table:
+			table.position = t_pos
+			table.scale = Vector3(0.7, 0.7, 0.7)
+			village.add_child(table)
+		for side in [-1, 1]:
+			var bench := PBR.kit_instance("bench_4")
+			if bench:
+				bench.position = t_pos + Vector3(0, 0, side * 0.9)
+				bench.scale = Vector3(0.7, 0.7, 0.7)
+				village.add_child(bench)
+
+	# Town square paved plaza
+	var plaza := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(24, 20)
+	plaza.material_override = PBR.surface("stone_tiles_02")
+	plaza.mesh = pm
+	plaza.position = Vector3(42, 0.03, 20)
+	village.add_child(plaza)
+
+	# Town square fountain / well
+	var well := Node3D.new()
+	well.position = Vector3(42, 0, 20)
+	village.add_child(well)
+	var w_base := MeshInstance3D.new()
+	var wbm := CylinderMesh.new()
+	wbm.top_radius = 2.0
+	wbm.bottom_radius = 2.2
+	wbm.height = 0.9
+	wbm.material = wall_mat
+	w_base.mesh = wbm
+	w_base.position.y = 0.45
+	well.add_child(w_base)
+	var w_water := MeshInstance3D.new()
+	var wwm := CylinderMesh.new()
+	wwm.top_radius = 1.7
+	wwm.bottom_radius = 1.7
+	wwm.height = 0.15
+	wwm.material = PBR.surface("stone_tiles_02", Color(0.4, 0.75, 1.0))
+	w_water.mesh = wwm
+	w_water.position.y = 0.75
+	well.add_child(w_water)
+	var wl := OmniLight3D.new()
+	wl.light_color = Color(0.5, 0.85, 1.0)
+	wl.light_energy = 1.5
+	wl.omni_range = 10.0
+	wl.position.y = 1.6
+	well.add_child(wl)
+
+	# Directional signpost
+	var sign_node := Node3D.new()
+	sign_node.position = Vector3(36, 0, 14)
+	village.add_child(sign_node)
+	var post := MeshInstance3D.new()
+	var cm := CylinderMesh.new()
+	cm.top_radius = 0.08
+	cm.bottom_radius = 0.1
+	cm.height = 3.2
+	cm.material = wood_mat
+	post.mesh = cm
+	post.position.y = 1.6
+	sign_node.add_child(post)
+	var post_lbl := Label3D.new()
+	post_lbl.text = "← HOGWARTS   •   MARKET ↑   •   HIGHLANDS →"
+	post_lbl.font_size = 28
+	post_lbl.outline_size = 6
+	post_lbl.outline_modulate = Color(0, 0, 0)
+	post_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	post_lbl.position = Vector3(0, 3.2, 0)
+	sign_node.add_child(post_lbl)
+
+	# Upper terrace stone retaining wall
+	for wi in range(6):
+		var r_wall := PBR.kit_instance("wall_module_4x6")
+		if r_wall:
+			r_wall.position = Vector3(66.0, 0.0, 8.0 + float(wi) * 4.0)
+			r_wall.rotation.y = PI * 0.5
+			r_wall.scale = Vector3(1.0, 0.6, 1.0)
+			village.add_child(r_wall)
+
+	# Village Labels
 	var label := Label3D.new()
-	label.text = "HOGSMEADE"
+	label.text = "HOGSMEADE VILLAGE"
 	label.font_size = 40
 	label.outline_size = 8
 	label.outline_modulate = Color(0, 0, 0)
@@ -286,38 +422,173 @@ static func _build_village(world: Node3D) -> void:
 	label.position = Vector3(35, 8, 18)
 	village.add_child(label)
 
-# ---------------------------------------------------------------- forest
+	var terrace_lbl := Label3D.new()
+	terrace_lbl.text = "UPPER TERRACES"
+	terrace_lbl.font_size = 32
+	terrace_lbl.modulate = Color(1.0, 0.9, 0.7)
+	terrace_lbl.outline_size = 6
+	terrace_lbl.outline_modulate = Color(0, 0, 0)
+	terrace_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	terrace_lbl.position = Vector3(85, 7, 20)
+	village.add_child(terrace_lbl)
 
-static func _tree(parent: Node3D, pos: Vector3, trunk_mat: Material, leaf_mat: Material, s: float) -> void:
-	var t := Node3D.new()
-	t.position = pos
-	parent.add_child(t)
-	var trunk := MeshInstance3D.new()
+# ---------------------------------------------------------------- hagrid's grounds
+
+static func _build_hagrids_grounds(world: Node3D, rng: RandomNumberGenerator) -> void:
+	var grounds := Node3D.new()
+	grounds.name = "HagridsGrounds"
+	world.add_child(grounds)
+	var hut_pos := Vector3(-78, 0, 18)
+
+	var stone := PBR.surface("stone_ashlar_01", Color(0.88, 0.85, 0.80), {"metres": 4.0})
+	var roof := PBR.surface("roof_slates_03")
+	var wood := PBR.surface("dark_wooden_planks")
+
+	# Hagrid's round stone cottage
+	var hut := Node3D.new()
+	hut.position = hut_pos
+	grounds.add_child(hut)
+	var base := MeshInstance3D.new()
+	var bm := CylinderMesh.new()
+	bm.top_radius = 4.4
+	bm.bottom_radius = 4.8
+	bm.height = 3.8
+	bm.material = stone
+	base.mesh = bm
+	base.position.y = 1.9
+	hut.add_child(base)
+	var cap := MeshInstance3D.new()
 	var cm := CylinderMesh.new()
-	cm.top_radius = 0.28 * s
-	cm.bottom_radius = 0.5 * s
-	cm.height = 3.2 * s
-	cm.material = trunk_mat
-	trunk.mesh = cm
-	trunk.position.y = 1.6 * s
-	t.add_child(trunk)
-	for i in range(3):
-		var fol := MeshInstance3D.new()
+	cm.top_radius = 0.1
+	cm.bottom_radius = 5.4
+	cm.height = 3.6
+	cm.material = roof
+	cap.mesh = cm
+	cap.position.y = 5.5
+	hut.add_child(cap)
+	# Heavy timber door
+	var door := MeshInstance3D.new()
+	var dm := BoxMesh.new()
+	dm.size = Vector3(1.4, 2.4, 0.3)
+	dm.material = wood
+	door.mesh = dm
+	door.position = Vector3(0, 1.2, 4.6)
+	hut.add_child(door)
+	# Chimney
+	var chim := MeshInstance3D.new()
+	var chm := BoxMesh.new()
+	chm.size = Vector3(1.1, 5.0, 1.1)
+	chm.material = stone
+	chim.mesh = chm
+	chim.position = Vector3(3.2, 3.8, -1.5)
+	hut.add_child(chim)
+	var hl := OmniLight3D.new()
+	hl.light_color = Color(1.0, 0.75, 0.4)
+	hl.light_energy = 1.6
+	hl.omni_range = 14.0
+	hl.position = Vector3(0, 2.6, 5.6)
+	hut.add_child(hl)
+
+	# Giant Pumpkin Patch
+	var patch_center := hut_pos + Vector3(-8.0, 0, 10.0)
+	var pumpkin_mat := StandardMaterial3D.new()
+	pumpkin_mat.albedo_color = Color(0.92, 0.42, 0.08)
+	pumpkin_mat.roughness = 0.65
+	var stem_mat := StandardMaterial3D.new()
+	stem_mat.albedo_color = Color(0.18, 0.35, 0.12)
+
+	# 14 giant pumpkins
+	for pi in range(14):
+		var p := Node3D.new()
+		var p_offset := Vector3(rng.randf_range(-6.5, 6.5), 0, rng.randf_range(-5.5, 5.5))
+		p.position = patch_center + p_offset
+		grounds.add_child(p)
+		var p_radius := rng.randf_range(0.65, 1.6)
+		var p_mesh := MeshInstance3D.new()
 		var sm := SphereMesh.new()
-		sm.radius = (1.7 - i * 0.35) * s
-		sm.height = (2.2 - i * 0.3) * s
-		sm.material = leaf_mat
-		fol.mesh = sm
-		fol.position.y = (3.4 + i * 1.1) * s
-		t.add_child(fol)
+		sm.radius = p_radius
+		sm.height = p_radius * 1.5
+		p_mesh.mesh = sm
+		p_mesh.material_override = pumpkin_mat
+		p_mesh.position.y = p_radius * 0.65
+		p.add_child(p_mesh)
+		var stem := MeshInstance3D.new()
+		var stm := CylinderMesh.new()
+		stm.top_radius = 0.06
+		stm.bottom_radius = 0.09
+		stm.height = 0.45
+		stem.mesh = stm
+		stem.material_override = stem_mat
+		stem.position.y = p_radius * 1.35
+		p.add_child(stem)
+
+	# Rustic fence surrounding patch
+	for fi in range(8):
+		var post_p := patch_center + Vector3(-8.0 + float(fi) * 2.3, 0.5, -6.5)
+		var post_node := MeshInstance3D.new()
+		var pbm := BoxMesh.new()
+		pbm.size = Vector3(0.2, 1.1, 0.2)
+		pbm.material = wood
+		post_node.mesh = pbm
+		post_node.position = post_p
+		grounds.add_child(post_node)
+
+	var label := Label3D.new()
+	label.text = "HAGRID'S HUT & PUMPKIN PATCH"
+	label.font_size = 34
+	label.modulate = Color(1.0, 0.8, 0.4)
+	label.outline_size = 8
+	label.outline_modulate = Color(0, 0, 0)
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.position = hut_pos + Vector3(0, 8.5, 0)
+	grounds.add_child(label)
+
+# ---------------------------------------------------------------- bridges
+
+static func _build_valley_bridges(world: Node3D) -> void:
+	var bridges := Node3D.new()
+	bridges.name = "ValleyBridges"
+	world.add_child(bridges)
+	var specs := [
+		[Vector3(-25, 0, 40), 0.3, 14.0, 4.0],
+		[Vector3(68, 0, 44), -0.4, 16.0, 4.2],
+		[Vector3(165, 0, 14), 0.1, 18.0, 4.0],
+		[Vector3(115, 0, -110), 0.6, 16.0, 3.8]
+	]
+	var flag := PBR.surface("floor_flagstone_01")
+	for s in specs:
+		var b := Node3D.new()
+		b.position = s[0]
+		b.rotation.y = s[1]
+		bridges.add_child(b)
+		var length: float = s[2]
+		var width: float = s[3]
+		var deck := MeshInstance3D.new()
+		var dm := BoxMesh.new()
+		dm.size = Vector3(width, 0.4, length)
+		dm.material = flag
+		deck.mesh = dm
+		deck.position.y = 0.2
+		b.add_child(deck)
+		var rail_count := int(length / 4.0)
+		for r_i in range(rail_count):
+			var r_z := -length * 0.5 + 2.0 + float(r_i) * 4.0
+			for side in [-1, 1]:
+				var bal := PBR.kit_instance("balustrade_4")
+				if bal:
+					bal.position = Vector3(side * (width * 0.5 - 0.2), 0.4, r_z)
+					bal.rotation.y = PI * 0.5 if side > 0 else -PI * 0.5
+					b.add_child(bal)
+		for side in [-1, 1]:
+			for end_z in [-length * 0.5 + 0.5, length * 0.5 - 0.5]:
+				_lamp(b, Vector3(side * (width * 0.5 + 0.4), 0.2, end_z))
+
+# ---------------------------------------------------------------- forest
 
 static func _build_forbidden_forest(world: Node3D, rng: RandomNumberGenerator) -> void:
 	var forest := Node3D.new()
 	forest.name = "ForbiddenForest"
 	world.add_child(forest)
-	# The canopy comes from the instanced terrain pass
-	# (outdoor_terrain.gd, two authored species with visibility ranges); this
-	# node keeps the forest's identity marker and the deep-wood light.
 	var label := Label3D.new()
 	label.text = "FORBIDDEN FOREST"
 	label.font_size = 36
@@ -327,7 +598,6 @@ static func _build_forbidden_forest(world: Node3D, rng: RandomNumberGenerator) -
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.position = Vector3(-60, 9, -40)
 	forest.add_child(label)
-	# spooky green light deep in forest
 	var gl := OmniLight3D.new()
 	gl.light_color = Color(0.3, 1.0, 0.4)
 	gl.light_energy = 1.6
@@ -335,32 +605,86 @@ static func _build_forbidden_forest(world: Node3D, rng: RandomNumberGenerator) -
 	gl.position = Vector3(-60, 4, -42)
 	forest.add_child(gl)
 
+	# Deep Forest Hollows
+	var spider_lbl := Label3D.new()
+	spider_lbl.text = "SPIDER HOLLOW (ACROMANTULA LAIR)"
+	spider_lbl.font_size = 32
+	spider_lbl.modulate = Color(0.4, 0.9, 0.5)
+	spider_lbl.outline_size = 8
+	spider_lbl.outline_modulate = Color(0, 0, 0)
+	spider_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	spider_lbl.position = Vector3(-180, 8, -140)
+	forest.add_child(spider_lbl)
+	var s_light := OmniLight3D.new()
+	s_light.light_color = Color(0.25, 0.85, 0.35)
+	s_light.light_energy = 2.0
+	s_light.omni_range = 28.0
+	s_light.position = Vector3(-180, 3.5, -140)
+	forest.add_child(s_light)
+
+	var ruins_lbl := Label3D.new()
+	ruins_lbl.text = "CURSED CRYPT & DARK RUINS"
+	ruins_lbl.font_size = 32
+	ruins_lbl.modulate = Color(0.7, 0.4, 0.9)
+	ruins_lbl.outline_size = 8
+	ruins_lbl.outline_modulate = Color(0, 0, 0)
+	ruins_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	ruins_lbl.position = Vector3(-240, 8, -200)
+	forest.add_child(ruins_lbl)
+	var r_light := OmniLight3D.new()
+	r_light.light_color = Color(0.6, 0.2, 0.9)
+	r_light.light_energy = 2.2
+	r_light.omni_range = 26.0
+	r_light.position = Vector3(-240, 4.0, -200)
+	forest.add_child(r_light)
+
 # ---------------------------------------------------------------- lake
 
 static func _build_black_lake(world: Node3D) -> void:
 	var lake := Node3D.new()
 	lake.name = "BlackLake"
-	lake.position = Vector3(-38, 0, 30)
+	lake.position = Vector3(-75, 0, 65)
 	world.add_child(lake)
 	var water := MeshInstance3D.new()
 	var pm := PlaneMesh.new()
-	pm.size = Vector2(30, 22)
+	pm.size = Vector2(90, 70)
 	pm.material = MaterialKitScript.water_material()
 	water.mesh = pm
 	water.position.y = 0.05
 	lake.add_child(water)
-	# sandy rim
+
 	var rim := MeshInstance3D.new()
 	var rim_mesh := CylinderMesh.new()
-	rim_mesh.top_radius = 17.0
-	rim_mesh.bottom_radius = 18.5
+	rim_mesh.top_radius = 42.0
+	rim_mesh.bottom_radius = 46.0
 	rim_mesh.height = 0.35
 	rim_mesh.material = PBR.surface("stone_tiles_02", Color(0.75, 0.72, 0.66))
 	rim.mesh = rim_mesh
-	# Buried below the ground plane: the lake reads as a pond in the meadow
-	# instead of a raised stone dome.
 	rim.position.y = -0.32
 	lake.add_child(rim)
+
+	# Lakeside Wooden Pier & Boardwalk
+	var wood := PBR.surface("dark_wooden_planks")
+	for pi in range(5):
+		var plank := MeshInstance3D.new()
+		var plm := BoxMesh.new()
+		plm.size = Vector3(4.0, 0.3, 7.0)
+		plm.material = wood
+		plank.mesh = plm
+		plank.position = Vector3(18.0, 0.25, -15.0 + float(pi) * 7.0)
+		lake.add_child(plank)
+		for side in [-1, 1]:
+			var post := MeshInstance3D.new()
+			var psm := CylinderMesh.new()
+			psm.top_radius = 0.12
+			psm.bottom_radius = 0.15
+			psm.height = 1.4
+			psm.material = wood
+			post.mesh = psm
+			post.position = Vector3(18.0 + side * 2.1, 0.7, -15.0 + float(pi) * 7.0)
+			lake.add_child(post)
+	_lamp(lake, Vector3(20.5, 0.2, 16.0))
+
 	var label := Label3D.new()
 	label.text = "BLACK LAKE"
 	label.font_size = 36
@@ -376,57 +700,239 @@ static func _build_black_lake(world: Node3D) -> void:
 static func _build_quidditch_pitch(world: Node3D) -> void:
 	var pitch := Node3D.new()
 	pitch.name = "QuidditchPitch"
-	pitch.position = Vector3(52, 0, 26)
+	pitch.position = Vector3(100, 0, 55)
 	world.add_child(pitch)
 	var grass := MeshInstance3D.new()
 	var pm := PlaneMesh.new()
-	var gm := PBR.surface("grass_ground_01", Color(0.9, 0.98, 0.85), {"metres": 8.0})
-	pm.size = Vector2(36, 22)
+	var gm := PBR.surface("grass_ground_01", PBR.MEADOW_TINT, {"metres": 8.0, "rough_min": 0.88})
+	pm.size = Vector2(68, 40)
 	pm.material = gm
 	grass.mesh = pm
 	grass.position.y = 0.03
 	pitch.add_child(grass)
-	# center circle (torus flat)
+
 	var ring := MeshInstance3D.new()
 	var tm := TorusMesh.new()
-	tm.inner_radius = 4.6
-	tm.outer_radius = 5.0
+	tm.inner_radius = 5.6
+	tm.outer_radius = 6.0
 	tm.material = PBR.surface("stone_tiles_02")
 	ring.mesh = tm
 	ring.rotation.x = PI * 0.5
 	ring.position.y = 0.08
 	pitch.add_child(ring)
+
 	# 6 goal hoops
 	var gold := MaterialKitScript.gold_material()
 	for side in [-1, 1]:
 		for h_i in range(3):
 			var pole := MeshInstance3D.new()
 			var cm := CylinderMesh.new()
-			cm.top_radius = 0.12
-			cm.bottom_radius = 0.12
-			cm.height = 6.0 + h_i * 1.6
+			cm.top_radius = 0.14
+			cm.bottom_radius = 0.14
+			cm.height = 7.0 + h_i * 2.2
 			cm.material = PBR.surface("dark_wooden_planks")
 			pole.mesh = cm
-			pole.position = Vector3(side * 16.0, (6.0 + h_i * 1.6) * 0.5, (h_i - 1) * 5.0)
+			pole.position = Vector3(side * 28.0, (7.0 + h_i * 2.2) * 0.5, (h_i - 1) * 6.5)
 			pitch.add_child(pole)
 			var hoop := MeshInstance3D.new()
 			var tor := TorusMesh.new()
-			tor.inner_radius = 0.85
-			tor.outer_radius = 1.0
+			tor.inner_radius = 1.1
+			tor.outer_radius = 1.3
 			tor.material = gold
 			hoop.mesh = tor
-			hoop.position = Vector3(side * 16.0, 6.0 + h_i * 1.6, (h_i - 1) * 5.0)
+			hoop.position = Vector3(side * 28.0, 7.0 + h_i * 2.2, (h_i - 1) * 6.5)
 			hoop.rotation.y = PI * 0.5
 			pitch.add_child(hoop)
+
+	# 4 House Spectator Towers (Gryffindor, Slytherin, Ravenclaw, Hufflepuff)
+	var house_data := [
+		{"name": "Gryffindor", "pos": Vector3(-24, 0, -18), "color": Color(0.78, 0.08, 0.12)},
+		{"name": "Slytherin", "pos": Vector3(-24, 0, 18), "color": Color(0.08, 0.45, 0.18)},
+		{"name": "Ravenclaw", "pos": Vector3(24, 0, -18), "color": Color(0.08, 0.28, 0.58)},
+		{"name": "Hufflepuff", "pos": Vector3(24, 0, 18), "color": Color(0.92, 0.72, 0.15)}
+	]
+	var wood := PBR.surface("dark_wooden_planks")
+	for hd in house_data:
+		var tower := Node3D.new()
+		tower.position = hd["pos"]
+		pitch.add_child(tower)
+		# 4 corner columns
+		for c_x in [-1.4, 1.4]:
+			for c_z in [-1.4, 1.4]:
+				var col := MeshInstance3D.new()
+				var ccm := BoxMesh.new()
+				ccm.size = Vector3(0.3, 10.0, 0.3)
+				ccm.material = wood
+				col.mesh = ccm
+				col.position = Vector3(c_x, 5.0, c_z)
+				tower.add_child(col)
+		# Tower platform
+		var plat := MeshInstance3D.new()
+		var pbm := BoxMesh.new()
+		pbm.size = Vector3(3.6, 0.4, 3.6)
+		pbm.material = wood
+		plat.mesh = pbm
+		plat.position.y = 8.0
+		tower.add_child(plat)
+		# Tower roof canopy
+		var troof := MeshInstance3D.new()
+		var rpm := PrismMesh.new()
+		rpm.size = Vector3(4.2, 2.5, 4.2)
+		var t_mat := StandardMaterial3D.new()
+		t_mat.albedo_color = hd["color"]
+		troof.mesh = rpm
+		troof.material_override = t_mat
+		troof.position.y = 11.2
+		tower.add_child(troof)
+		# House Banner
+		var ban := MeshInstance3D.new()
+		var bpm := PlaneMesh.new()
+		bpm.size = Vector2(1.8, 4.0)
+		ban.mesh = bpm
+		ban.material_override = t_mat
+		ban.position = Vector3(0, 6.0, 1.85)
+		ban.add_to_group("castle_banners")
+		tower.add_child(ban)
+
 	var label := Label3D.new()
-	label.text = "QUIDDITCH PITCH"
-	label.font_size = 36
+	label.text = "QUIDDITCH STADIUM"
+	label.font_size = 40
 	label.modulate = Color(1.0, 0.9, 0.4)
 	label.outline_size = 8
 	label.outline_modulate = Color(0, 0, 0)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.position = Vector3(0, 10, 0)
+	label.position = Vector3(0, 12, 0)
 	pitch.add_child(label)
+
+# ---------------------------------------------------------------- highlands stone circle
+
+static func _build_highlands_circle(world: Node3D) -> void:
+	var highlands := Node3D.new()
+	highlands.name = "HighlandsStoneCircle"
+	highlands.position = Vector3(260, 0, 0)
+	world.add_child(highlands)
+
+	var stone := PBR.surface("stone_ashlar_01", Color(0.75, 0.72, 0.68))
+	var circle_radius: float = 14.0
+
+	# 12 megalith standing stones
+	for i in range(12):
+		var angle := TAU * float(i) / 12.0
+		var pos := Vector3(cos(angle) * circle_radius, 0, sin(angle) * circle_radius)
+		var megalith := MeshInstance3D.new()
+		var mm := BoxMesh.new()
+		var h := 4.5 + float((i * 7) % 5) * 0.4
+		mm.size = Vector3(1.6, h, 0.9)
+		mm.material = stone
+		megalith.mesh = mm
+		megalith.position = pos + Vector3(0, h * 0.5, 0)
+		megalith.rotation.y = angle + PI * 0.5
+		highlands.add_child(megalith)
+
+	# Central runic altar
+	var altar := MeshInstance3D.new()
+	var am := CylinderMesh.new()
+	am.top_radius = 3.6
+	am.bottom_radius = 4.0
+	am.height = 0.8
+	am.material = stone
+	altar.mesh = am
+	altar.position.y = 0.4
+	highlands.add_child(altar)
+
+	# Floating cyan rune crystal
+	var cry := MeshInstance3D.new()
+	var cm := PrismMesh.new()
+	cm.size = Vector3(1.0, 2.4, 1.0)
+	var cmat := StandardMaterial3D.new()
+	cmat.albedo_color = Color(0.3, 0.85, 1.0)
+	cmat.emission_enabled = true
+	cmat.emission = Color(0.3, 0.9, 1.0)
+	cmat.emission_energy_multiplier = 2.5
+	cry.mesh = cm
+	cry.material_override = cmat
+	cry.position.y = 2.8
+	highlands.add_child(cry)
+
+	var cl := OmniLight3D.new()
+	cl.light_color = Color(0.35, 0.85, 1.0)
+	cl.light_energy = 2.5
+	cl.omni_range = 18.0
+	cl.position.y = 3.0
+	highlands.add_child(cl)
+
+	var label := Label3D.new()
+	label.text = "ANCIENT MEGALITHS — HIGHLANDS OVERLOOK"
+	label.font_size = 36
+	label.modulate = Color(0.5, 0.9, 1.0)
+	label.outline_size = 8
+	label.outline_modulate = Color(0, 0, 0)
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.position = Vector3(0, 8.0, 0)
+	highlands.add_child(label)
+
+# ---------------------------------------------------------------- smuggler's ridge
+
+static func _build_smugglers_ridge(world: Node3D, rng: RandomNumberGenerator) -> void:
+	var ridge := Node3D.new()
+	ridge.name = "SmugglersRidge"
+	ridge.position = Vector3(180, 0, -160)
+	world.add_child(ridge)
+
+	var wood := PBR.surface("dark_wooden_planks")
+	var stone := PBR.surface("stone_ashlar_01", Color(0.5, 0.5, 0.52))
+
+	# Ruined watchtower
+	var tower := PBR.kit_instance("wall_module_4x6_damaged")
+	if tower:
+		tower.position = Vector3(0, 0, 0)
+		tower.scale = Vector3(1.2, 1.2, 1.2)
+		ridge.add_child(tower)
+
+	# Spiked timber palisades
+	for pi in range(8):
+		var p := MeshInstance3D.new()
+		var pm := CylinderMesh.new()
+		pm.top_radius = 0.05
+		pm.bottom_radius = 0.2
+		pm.height = 3.2
+		pm.material = wood
+		p.mesh = pm
+		p.position = Vector3(-8.0 + float(pi) * 2.2, 1.6, 6.0)
+		ridge.add_child(p)
+
+	# Dark snatcher campfires and tents
+	for ti in range(3):
+		var tent := MeshInstance3D.new()
+		var tm := PrismMesh.new()
+		tm.size = Vector3(4.0, 2.5, 4.5)
+		var tmat := StandardMaterial3D.new()
+		tmat.albedo_color = Color(0.2, 0.16, 0.14)
+		tent.mesh = tm
+		tent.material_override = tmat
+		tent.position = Vector3(float(ti - 1) * 8.0, 1.25, -6.0)
+		ridge.add_child(tent)
+
+	# Bone bonfire with purple flame
+	var fire := Node3D.new()
+	fire.position = Vector3(0, 0, 0)
+	ridge.add_child(fire)
+	var fl := OmniLight3D.new()
+	fl.light_color = Color(0.7, 0.2, 0.95)
+	fl.light_energy = 2.4
+	fl.omni_range = 22.0
+	fl.position.y = 1.5
+	fire.add_child(fl)
+
+	var label := Label3D.new()
+	label.text = "SMUGGLER'S RIDGE — DARK STRONGHOLD"
+	label.font_size = 36
+	label.modulate = Color(0.8, 0.4, 0.95)
+	label.outline_size = 8
+	label.outline_modulate = Color(0, 0, 0)
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.position = Vector3(0, 7.5, 0)
+	ridge.add_child(label)
 
 # ---------------------------------------------------------------- lamps / fences
 
@@ -475,14 +981,20 @@ static func _build_lamps_and_fences(world: Node3D, rng: RandomNumberGenerator) -
 		Vector3(3, 0, 2), Vector3(-3, 0, 2), Vector3(2, 0, -12),
 		Vector3(-2, 0, -12), Vector3(2, 0, -28), Vector3(-2, 0, -28),
 		Vector3(12, 0, 8), Vector3(30, 0, 14), Vector3(-14, 0, 10),
+		# Expanded road lamps
+		Vector3(50, 0, 18), Vector3(70, 0, 24), Vector3(90, 0, 28),
+		Vector3(-50, 0, 18), Vector3(-70, 0, 18),
+		Vector3(-40, 0, 36), Vector3(-55, 0, 52), Vector3(-70, 0, 68),
+		Vector3(50, 0, 35), Vector3(75, 0, 48),
+		Vector3(120, 0, 20), Vector3(180, 0, 12),
+		Vector3(75, 0, -70), Vector3(120, 0, -110),
 	]
 	for p in lamp_spots:
 		_lamp(props, p)
-	# fence line around courtyard
 	var wood := PBR.surface("dark_wooden_planks")
 	for i in range(-8, 9):
 		if abs(i) < 2:
-			continue # gate opening
+			continue
 		for z in [12.0]:
 			var post := MeshInstance3D.new()
 			var bm := BoxMesh.new()
@@ -500,8 +1012,6 @@ static func _build_lamps_and_fences(world: Node3D, rng: RandomNumberGenerator) -
 	props.add_child(rail)
 
 # ------------------------------------------------------- level dressing
-# Original set dressing (own art): forest arch, ruins + crystals, market
-# stalls, torches, banners, dock, mountains, grass tufts / rocks / flowers.
 
 static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> void:
 	var dz := Node3D.new()
@@ -509,7 +1019,6 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 	world.add_child(dz)
 	var stone := PBR.surface("stone_ashlar_01", Color(1.0, 1.0, 1.0), {"metres": 4.0})
 	var wood := MaterialKitScript.wood_material()
-	# -- forest arch gate (west path): two pillars + beam + hanging lantern
 	for side in [-1, 1]:
 		var pillar := MeshInstance3D.new()
 		var pm := BoxMesh.new()
@@ -533,7 +1042,6 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 	arch_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	arch_label.position = Vector3(0, 7.6, -14)
 	dz.add_child(arch_label)
-	# -- ruins + crystals near each monolith approach (cover + landmark)
 	var ruin_spots := [Vector3(28, 0, -40), Vector3(39, 0, -20), Vector3(-39, 0, -23)]
 	for rs in ruin_spots:
 		for i in range(4):
@@ -545,7 +1053,6 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 			wall.position = rs + Vector3(rng.randf_range(-5, 5), wm.size.y * 0.5, rng.randf_range(-4, 4))
 			wall.rotation.y = rng.randf_range(0, TAU)
 			dz.add_child(wall)
-		# dark crystal cluster (emissive landmark)
 		for i in range(3):
 			var cry := MeshInstance3D.new()
 			var cm := PrismMesh.new()
@@ -560,11 +1067,18 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 			cry.position = rs + Vector3(rng.randf_range(-3, 3), 0.8, rng.randf_range(-3, 3))
 			cry.rotation.z = rng.randf_range(-0.25, 0.25)
 			dz.add_child(cry)
-	# -- Hogsmeade market stalls (2) with striped awnings
-	for si in range(2):
+	# Hogsmeade market stalls (4 colorful stalls)
+	var stall_specs := [
+		{"pos": Vector3(31, 0, 21), "color": Color(0.75, 0.2, 0.2)},
+		{"pos": Vector3(38, 0, 21), "color": Color(0.2, 0.35, 0.65)},
+		{"pos": Vector3(47, 0, 23), "color": Color(0.18, 0.55, 0.22)},
+		{"pos": Vector3(54, 0, 23), "color": Color(0.85, 0.65, 0.15)}
+	]
+	for si in range(stall_specs.size()):
+		var spec: Dictionary = stall_specs[si]
 		var stall := Node3D.new()
-		stall.position = Vector3(31 + si * 7.0, 0, 21)
-		stall.rotation.y = -0.4 + si * 0.3
+		stall.position = spec["pos"]
+		stall.rotation.y = -0.4 + float(si) * 0.2
 		dz.add_child(stall)
 		var counter := MeshInstance3D.new()
 		var ccm := BoxMesh.new()
@@ -587,17 +1101,15 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 		var awm := BoxMesh.new()
 		awm.size = Vector3(3.6, 0.12, 2.2)
 		var awmat := StandardMaterial3D.new()
-		awmat.albedo_color = Color(0.75, 0.2, 0.2) if si == 0 else Color(0.2, 0.35, 0.65)
+		awmat.albedo_color = spec["color"]
 		awm.material = awmat
 		awn.mesh = awm
 		awn.position.y = 2.8
 		awn.rotation.x = 0.15
 		stall.add_child(awn)
-	# -- torches along main castle road (flicker handled by game_world)
 	for tz in [-6.0, -18.0, -30.0]:
 		for side in [-1, 1]:
 			_torch(dz, Vector3(side * 3.0, 0, tz))
-	# -- castle banners (house colors) on gate pillars
 	var banner_cols := [Color(0.78, 0.08, 0.12), Color(0.08, 0.45, 0.18), Color(0.08, 0.28, 0.58), Color(0.92, 0.72, 0.15)]
 	for i in range(4):
 		var b := MeshInstance3D.new()
@@ -611,7 +1123,6 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 		b.position = Vector3(-6 + i * 4.0, 12.0, -49.5)
 		dz.add_child(b)
 		b.add_to_group("castle_banners")
-	# -- lake dock (planks + posts)
 	for i in range(5):
 		var plank := MeshInstance3D.new()
 		var plm := BoxMesh.new()
@@ -621,9 +1132,6 @@ static func _build_level_dressing(world: Node3D, rng: RandomNumberGenerator) -> 
 		plank.position = Vector3(-30 + 0.0, 0.25, 22 + i * 1.0)
 		dz.add_child(plank)
 	preload("res://scripts/world/distant_ridges.gd").build(dz)
-	# Grass tufts, rocks and flowers are now instanced kit modules with
-	# visibility ranges (outdoor_terrain.gd), replacing the 270 individual
-	# PlaneMesh/SphereMesh nodes the greybox scattered here.
 
 static func _torch(parent: Node3D, pos: Vector3) -> void:
 	var t := Node3D.new()
@@ -685,22 +1193,20 @@ static func _build_floating_candles(world: Node3D) -> void:
 		candles.add_child(c)
 		c.set_meta("base_y", rng_pos.y)
 		c.set_meta("phase", randf() * TAU)
-	# animate in game_world _process via group
 	candles.add_to_group("floating_candles")
 
 static func _build_stars_and_moon(world: Node3D) -> void:
-	# moon
 	var moon := MeshInstance3D.new()
 	moon.name = "Moon"
 	var sm := SphereMesh.new()
-	sm.radius = 6.0
-	sm.height = 12.0
+	sm.radius = 8.0
+	sm.height = 16.0
 	var mm := StandardMaterial3D.new()
 	mm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mm.albedo_color = Color(0.95, 0.95, 0.85)
 	sm.material = mm
 	moon.mesh = sm
-	moon.position = Vector3(-140, 110, -220)
+	moon.position = Vector3(-280, 160, -420)
 	world.add_child(moon)
 	var ml := DirectionalLight3D.new()
 	ml.name = "MoonLight"
@@ -709,15 +1215,9 @@ static func _build_stars_and_moon(world: Node3D) -> void:
 	ml.rotation_degrees = Vector3(-50, -30, 0)
 	world.add_child(ml)
 
-# ------------------------------------------------------ broom landing (Map transfer)
+# ------------------------------------------------------ broom landing
 
-## Landing/dismount area in front of the castle gate. Broom flight is prohibited
-## inside the castle slice, so a rider lands here and walks in. Purely
-## presentation: flush with the ground and collision-free, so it can never trip
-## the approach route.
 static func _build_broom_landing(world: Node3D) -> void:
-	# Matches the catalog's authored landing circle: castle_door.landing and the
-	# "castle_landing_pad" spawn point in maps.json both centre on (0, -40).
 	var pad := Node3D.new()
 	pad.name = "BroomLanding"
 	pad.position = Vector3(0, 0, -40)
@@ -731,7 +1231,6 @@ static func _build_broom_landing(world: Node3D) -> void:
 	disc.mesh = cm
 	disc.position.y = -0.04
 	pad.add_child(disc)
-	# painted ring so the pad reads from the air
 	var ring := MeshInstance3D.new()
 	var tm := TorusMesh.new()
 	tm.inner_radius = 3.4
@@ -741,7 +1240,6 @@ static func _build_broom_landing(world: Node3D) -> void:
 	ring.rotation.x = PI * 0.5
 	ring.position.y = 0.03
 	pad.add_child(ring)
-	# Corner posts sit on the diagonals: the x=0 approach line stays clear.
 	for i in range(4):
 		var angle := PI * 0.25 + TAU * float(i) / 4.0
 		var post := MeshInstance3D.new()
@@ -755,7 +1253,7 @@ static func _build_broom_landing(world: Node3D) -> void:
 	lamp.light_color = Color(1.0, 0.85, 0.5)
 	lamp.light_energy = 1.2
 	lamp.omni_range = 14.0
-	lamp.position = Vector3(0, 2.4, 0)
+	lamp.position.y = 2.4
 	pad.add_child(lamp)
 	var label := Label3D.new()
 	label.text = "BROOM LANDING\nDISMOUNT BEFORE ENTERING"
@@ -763,7 +1261,6 @@ static func _build_broom_landing(world: Node3D) -> void:
 	label.outline_size = 8
 	label.outline_modulate = Color(0, 0, 0)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	# Off the walk line, so it is readable without being walked through.
 	label.position = Vector3(3.2, 3.6, 1.6)
 	pad.add_child(label)
 
@@ -774,18 +1271,17 @@ static func _build_world_boundaries(world: Node3D) -> void:
 	bounds.name = "WorldBoundaries"
 	world.add_child(bounds)
 
-	var half_size: float = 250.0 # 500m x 500m world boundary
-	var wall_height: float = 60.0
-	var wall_thickness: float = 8.0
+	var half_size: float = 500.0 # 1000m x 1000m world boundary (4x area expansion)
+	var wall_height: float = 70.0
+	var wall_thickness: float = 12.0
 
 	var wall_specs = [
-		{"pos": Vector3(0, wall_height * 0.5, -half_size), "size": Vector3(half_size * 2, wall_height, wall_thickness)}, # North
-		{"pos": Vector3(0, wall_height * 0.5, half_size), "size": Vector3(half_size * 2, wall_height, wall_thickness)},  # South
-		{"pos": Vector3(-half_size, wall_height * 0.5, 0), "size": Vector3(wall_thickness, wall_height, half_size * 2)}, # West
-		{"pos": Vector3(half_size, wall_height * 0.5, 0), "size": Vector3(wall_thickness, wall_height, half_size * 2)}   # East
+		{"pos": Vector3(0, wall_height * 0.5, -half_size), "size": Vector3(half_size * 2, wall_height, wall_thickness)},
+		{"pos": Vector3(0, wall_height * 0.5, half_size), "size": Vector3(half_size * 2, wall_height, wall_thickness)},
+		{"pos": Vector3(-half_size, wall_height * 0.5, 0), "size": Vector3(wall_thickness, wall_height, half_size * 2)},
+		{"pos": Vector3(half_size, wall_height * 0.5, 0), "size": Vector3(wall_thickness, wall_height, half_size * 2)}
 	]
 
-	# Glowing ancient magical barrier effect (Section 7.2 of.md)
 	var barrier_mat := StandardMaterial3D.new()
 	barrier_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	barrier_mat.albedo_color = Color(0.15, 0.55, 1.0, 0.12)
@@ -805,7 +1301,6 @@ static func _build_world_boundaries(world: Node3D) -> void:
 		col.shape = box
 		sb.add_child(col)
 
-		# Visual subtle shimmering blue ancient ward barrier
 		var mesh_inst := MeshInstance3D.new()
 		var bm := BoxMesh.new()
 		bm.size = spec["size"]

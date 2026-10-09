@@ -142,6 +142,14 @@ func setup(p_spell: String, p_stage: String, p_quality: String, p_origin: Vector
 
 func _build_layer(layer: Dictionary, colour: Color) -> Node3D:
 	match String(layer.get("kind", "")):
+		"signature":
+			var signature := preload("res://scripts/spells/spell_signature_vfx.gd").new()
+			signature.name = "SpellSignature"
+			add_child(signature)
+			var area := aoe_radius if aoe_radius > 0.0 else float(GameData.SPELLS.get(spell_id, {}).get("radius", 0.0))
+			signature.configure(spell_id, float(layer.get("life", 0.8)), area)
+			signature.setup(stage, quality, direction)
+			return signature
 		"stupefy_energy":
 			var energy := preload("res://scripts/spells/stupefy_vfx.gd").new()
 			energy.name = "StupefyEnergy"
@@ -322,7 +330,13 @@ func _build_mesh_layer(layer: Dictionary, colour: Color) -> Node3D:
 		mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD if String(layer.get("blend", "alpha")) == "add" else BaseMaterial3D.BLEND_MODE_MIX
 		mat.vertex_color_use_as_albedo = true
 		var tint := _layer_colour(layer, colour)
-		if bool(layer.get("flow", false)):
+		if bool(layer.get("ward", false)):
+			var ward := ShaderMaterial.new()
+			ward.shader = preload("res://assets/shaders/ward_surface.gdshader")
+			ward.set_shader_parameter("flow_noise", load(VFX.asset_path("vfx_noise_flow")))
+			ward.set_shader_parameter("tint", tint)
+			_set_mesh_material(instance, ward)
+		elif bool(layer.get("flow", false)):
 			# the shell carries a flowing noise field and a bright rim so the
 			# ward reads as a surface, not as a sprite
 			var shader_mat := ShaderMaterial.new()
@@ -428,6 +442,12 @@ func _tick_layer(entry: Dictionary, delta: float) -> void:
 	# fade curves: nothing pops, everything is a curve
 	var fade := _fade_for(layer, age, life)
 	match kind:
+		"signature":
+			var current_aim := direction
+			if is_instance_valid(follow_target) and "direction" in follow_target:
+				current_aim = follow_target.get("direction")
+			node.duration = maxf(0.1, life)
+			node.advance(age, current_aim)
 		"stupefy_energy":
 			var current_aim := direction
 			if is_instance_valid(follow_target) and "direction" in follow_target:
@@ -470,6 +490,11 @@ func _tick_layer(entry: Dictionary, delta: float) -> void:
 			var mat := _first_material(node)
 			if mat is ShaderMaterial:
 				var shader_mat := mat as ShaderMaterial
+				if bool(layer.get("ward", false)):
+					shader_mat.set_shader_parameter("clock", age)
+					shader_mat.set_shader_parameter("opacity", fade)
+					if bool(layer.get("grow", false)):
+						node.scale = Vector3.ONE * maxf(0.01, smoothstep(0, 0.18, age))
 				var tint: Color = shader_mat.get_shader_parameter("tint")
 				shader_mat.set_shader_parameter("tint", Color(tint.r, tint.g, tint.b, fade * 0.35))
 				if bool(layer.get("fracture", false)):

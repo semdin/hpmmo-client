@@ -184,22 +184,25 @@ func _check_kit_sizes() -> void:
 # ------------------------------------------------------------------ quality
 
 func _check_quality_preset() -> void:
-	# Headless resolves to the reduced preset, the same configuration the
-	# target Intel integrated profile gets.
+	# Headless resolves to the reduced preset.
 	check(QualityPreset.current() == "low",
 		"The reduced preset is selected for this adapter profile (%s)" % QualityPreset.current())
 	var settings := QualityPreset.settings()
-	check(not bool(settings["sun_shadows"]), "Reduced preset disables sun shadows")
+	check(bool(settings["sun_shadows"]) and float(settings["shadow_max_distance"]) <= 45.0,
+		"Reduced preset preserves nearby sun shadows within a bounded range")
 	check(not bool(settings["glow"]), "Reduced preset disables glow")
 	check(not bool(settings["ssao"]), "Reduced preset disables SSAO")
 	check(int(settings["msaa"]) == 0, "Reduced preset disables MSAA")
 	check(float(settings["foliage_density"]) <= 0.6, "Reduced preset halves vegetation density")
 	check(float(settings["particle_scale"]) <= 0.6, "Reduced preset halves particle density")
 	if world != null:
+		var built_env: Environment = world.get_node("WorldEnvironment").environment
+		check(not built_env.glow_enabled and not built_env.ssao_enabled,
+			"World construction preserves the reduced postprocessing budget")
 		QualityPreset.apply(world)
 		var sun := world.get_node_or_null("DirectionalLight3D") as DirectionalLight3D
-		check(sun != null and not sun.shadow_enabled,
-			"Applying the preset turns the sun's shadow off on the live world")
+		check(sun != null and sun.shadow_enabled and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS,
+			"Applying low quality keeps two-cascade sun shadows on the live world")
 		var env_node := world.get_node_or_null("WorldEnvironment")
 		if env_node is WorldEnvironment:
 			var env: Environment = (env_node as WorldEnvironment).environment

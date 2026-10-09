@@ -77,6 +77,7 @@ func _ready() -> void:
 	await _check_effects_runtime()
 	await _check_effect_behaviour()
 	await _check_wand_bolts()
+	await _check_spell_signatures()
 	await _check_effect_sound()
 	await _check_cancellation()
 	await _check_prediction_rejection()
@@ -653,6 +654,53 @@ func _check_wand_bolts() -> void:
 	QualityPreset.forced(original)
 
 
+func _check_spell_signatures() -> void:
+	var original := QualityPreset.current()
+	for preset in ["low", "high"]:
+		QualityPreset.forced(preset)
+		for spell in ["bombarda", "expelliarmus", "ultimate"]:
+			var projectile = preload("res://scenes/spells/spell_projectile.tscn").instantiate()
+			world.add_child(projectile)
+			projectile.global_position = Vector3(17, 80, -23)
+			projectile.visual_only = true
+			projectile.setup(null, spell, Vector3.RIGHT)
+			projectile.set_physics_process(false)
+			var tail: Node3D = projectile.travel_effect
+			var signature = tail.get_node("SpellSignature")
+			check(not projectile.mesh.visible, "%s/%s has no solid carrier" % [spell, preset])
+			for step in range(5):
+				projectile.global_position += Vector3.RIGHT * 0.5
+				await get_tree().process_frame
+			var geometry: MeshInstance3D = signature.get_node("SignatureGeometry")
+			var vertices: PackedVector3Array = geometry.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+			check(vertices.size() > 20 and geometry.global_transform.is_equal_approx(Transform3D.IDENTITY),
+				"%s/%s draws its signature in world space" % [spell, preset])
+			projectile.direction = Vector3.UP
+			await get_tree().process_frame
+			await get_tree().process_frame
+			check(signature.direction.is_equal_approx(Vector3.UP), "%s/%s supports reflected aim" % [spell, preset])
+			projectile._handle_hit(null)
+			await get_tree().process_frame
+			check(is_instance_valid(tail) and tail.get_parent() == world and not signature.get_node("SignatureCore").visible,
+				"%s/%s preserves only the fading trail after impact" % [spell, preset])
+			await get_tree().create_timer(0.32).timeout
+			check(not is_instance_valid(tail), "%s/%s frees the retired trail" % [spell, preset])
+		for spell in ["bombarda", "ultimate"]:
+			var impact := SkillFX.spawn_stage(world, spell, "impact", Vector3(17, 80, -23), Vector3.RIGHT)
+			check(is_equal_approx(impact.get_node("SpellSignature").radius, float(GameData.SPELLS[spell]["radius"])),
+				"%s/%s blast uses the gameplay radius" % [spell, preset])
+			impact.queue_free()
+		var cone := SkillFX.spawn_stage(world, "incendio", "cast", Vector3(17, 80, -23), Vector3.RIGHT)
+		var fire = cone.get_node("SpellSignature")
+		var bounded := true
+		for axis in fire._cone_directions:
+			bounded = bounded and Vector3.RIGHT.angle_to(axis) <= deg_to_rad(float(GameData.SPELLS.incendio.cone_angle) * 0.5) + 0.001
+		check(bounded and fire._flames.size() == (6 if preset == "low" else 10), "Incendio/%s keeps its cone silhouette within the gameplay angle" % preset)
+		cone.queue_free()
+		await get_tree().process_frame
+	QualityPreset.forced(original)
+
+
 func _check_effect_sound() -> void:
 	var audio := get_node_or_null("/root/AudioManager")
 	if audio == null:
@@ -889,6 +937,15 @@ func _check_protego_shell() -> void:
 	check(shield.is_in_group("shields"), "The ward stays in the shield group the projectile code reflects against")
 	check(shield.collision_layer == 16 and shield.collision_mask == 4,
 		"The ward's collision layer/mask are unchanged (projectiles still reach it)")
+	await get_tree().create_timer(0.2).timeout
+	var surface: MeshInstance3D = shield.get_node("MeshInstance3D")
+	var collision: CollisionShape3D = shield.get_node("CollisionShape3D")
+	check(is_equal_approx(surface.mesh.get_aabb().size.x * surface.scale.x * 0.5, collision.shape.radius),
+		"Protego's visible radius matches the projectile reflection boundary")
+	var hit_point: Vector3 = shield.global_position + Vector3.RIGHT * 1.8
+	shield.on_hit(hit_point)
+	check((surface.material_override as ShaderMaterial).get_shader_parameter("hit_point").is_equal_approx(hit_point),
+		"Protego's surface ripple starts at the actual impact point")
 	shield.queue_free()
 	await get_tree().process_frame
 
@@ -934,7 +991,7 @@ func _check_no_missing_resources() -> void:
 	for shader_path in ["res://assets/shaders/spell_layer.gdshader",
 			"res://assets/shaders/spell_layer_add.gdshader",
 			"res://assets/shaders/spell_ribbon.gdshader", "res://assets/shaders/wand_energy.gdshader",
-			"res://assets/shaders/stupefy_plasma.gdshader", "res://assets/shaders/stupefy_filament.gdshader"]:
+			"res://assets/shaders/stupefy_plasma.gdshader", "res://assets/shaders/stupefy_filament.gdshader", "res://assets/shaders/spell_signature.gdshader", "res://assets/shaders/ward_surface.gdshader"]:
 		if not ResourceLoader.exists(shader_path):
 			missing.append(shader_path)
 	check(missing.is_empty(), "Every resource the effects reference resolves (%d missing)" % missing.size())
@@ -943,11 +1000,11 @@ func _check_no_missing_resources() -> void:
 	for shader_path in ["res://assets/shaders/spell_layer.gdshader",
 			"res://assets/shaders/spell_layer_add.gdshader",
 			"res://assets/shaders/spell_ribbon.gdshader", "res://assets/shaders/wand_energy.gdshader",
-			"res://assets/shaders/stupefy_plasma.gdshader", "res://assets/shaders/stupefy_filament.gdshader"]:
+			"res://assets/shaders/stupefy_plasma.gdshader", "res://assets/shaders/stupefy_filament.gdshader", "res://assets/shaders/spell_signature.gdshader", "res://assets/shaders/ward_surface.gdshader"]:
 		var shader: Shader = load(shader_path)
 		if shader != null and shader.get_shader_uniform_list().size() > 0:
 			compiled += 1
-	check(compiled == 6, "All six effect shaders compile with their uniforms (%d/6)" % compiled)
+	check(compiled == 8, "All eight effect shaders compile with their uniforms (%d/8)" % compiled)
 	for key in sound_library.get("sounds", {}):
 		var path := "res://" + String((sound_library["sounds"][key] as Dictionary).get("path", ""))
 		if not ResourceLoader.exists(path):

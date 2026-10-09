@@ -499,6 +499,22 @@ func _check_cast_aim(player) -> void:
 			break
 		await get_tree().physics_frame
 	check(not player.hero_anim.cast_aiming(), "The aim is released when the cast ends")
+	for spell in ["incendio", "bombarda", "expelliarmus", "protego", "ultimate"]:
+		player._play_cast_animation("Spellcast_Shoot", player.get_mouse_aim_point(), spell)
+		best = -1.0
+		held_worst = 0.0
+		for frame in range(60):
+			await get_tree().physics_frame
+			if not player.hero_anim.cast_aiming():
+				continue
+			var wand := holder.get_child(0) as Node3D
+			var aim: Vector3 = player.get_mouse_aim_point()
+			best = maxf(best, wand.global_basis.y.normalized().dot((aim - wand.global_position).normalized()))
+			var palm := skeleton.global_transform * (rendered_poses[wrist_bone] as Transform3D) * HeroAppearance.wand_grip_transform(skeleton).origin
+			held_worst = maxf(held_worst, wand.global_position.distance_to(palm))
+		check(best > 0.9, "%s gesture keeps the wand aimed (%.2f)" % [spell, best])
+		check(held_worst < 0.005, "%s gesture keeps the wand in the hand (%.3f m)" % [spell, held_worst])
+		check(not player.hero_anim.cast_aiming(), "%s gesture releases its aim after recovery" % spell)
 
 ## ---------------------------------------------------------------- refusals
 

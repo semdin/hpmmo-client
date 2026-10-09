@@ -14,6 +14,9 @@ var cycle := 0.0
 var fired := false
 var frames := 0
 var recording := false
+var spell := "stupefy"
+var output_dir := OUT
+var capture_frames := 250
 
 func _ready() -> void:
 	capture = "--capture" in OS.get_cmdline_user_args()
@@ -24,6 +27,11 @@ func _ready() -> void:
 			QUALITY.forced(arg.trim_prefix("--quality="))
 		elif arg.begins_with("--speed="):
 			Engine.time_scale = clampf(float(arg.trim_prefix("--speed=")), 0.1, 1.0)
+		elif arg.begins_with("--spell="):
+			spell = arg.trim_prefix("--spell=")
+	output_dir = "res://tools/downloads/%s-preview" % spell
+	if spell == "protego":
+		capture_frames = int(ceil(4.4 * 60 / Engine.time_scale))
 	var environment := WorldEnvironment.new()
 	var settings := Environment.new()
 	settings.background_mode = Environment.BG_COLOR
@@ -97,11 +105,11 @@ func _ready() -> void:
 	canvas.add_child(label)
 	var hint := Label.new()
 	hint.position = Vector2(40, 666)
-	hint.text = "SPACE  replay     S  speed     1 / 2 / 3  quality     •     Actual Godot projectile + collision"
+	hint.text = "SPACE  replay     S  speed     1 / 2 / 3  quality     •     Runtime spell VFX"
 	hint.modulate = Color("97a6be")
 	canvas.add_child(hint)
 	if capture:
-		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output_dir))
 	await get_tree().create_timer(0.25).timeout
 	recording = true
 
@@ -121,37 +129,51 @@ func _process(delta: float) -> void:
 	if not recording:
 		return
 	cycle += delta
-	label.text = "STUPEFY\nScarlet discharge   /   %.1fx   /   %s" % [Engine.time_scale, QUALITY.current()]
+	label.text = "%s\n%.1fx   /   %s" % [String(GameData.SPELLS.get(spell, {}).get("name", spell)).to_upper(), Engine.time_scale, QUALITY.current()]
 	if cycle >= 0.16 and not fired:
 		fired = true
 		_fire()
-	if cycle > 1.65 and not capture:
+	if cycle > (4.4 if spell == "protego" else 2.1) and not capture:
 		cycle = 0
 		fired = false
 	if capture:
 		frames += 1
 		if frames % 2 == 0:
 			_save_frame(frames / 2)
-		if frames >= 250:
+		if frames >= capture_frames:
 			recording = false
 			await RenderingServer.frame_post_draw
 			get_tree().quit()
 
 func _fire() -> void:
 	var hit := target.global_position + Vector3.UP * 1.05
-	player._play_cast_animation("Spellcast_Shoot", hit, "stupefy")
+	player._play_cast_animation("Spellcast_Shoot", hit, spell)
 	# Short pose settle is review-only. The gameplay launch timing is untouched.
 	await get_tree().create_timer(0.07).timeout
 	var origin := FX.emission_origin(player, player.global_position + Vector3.UP * 1.25, Vector3.RIGHT)
+	if spell == "incendio":
+		FX.play_cast(self, player, spell, origin, (hit - origin).normalized())
+		await get_tree().create_timer(0.1).timeout
+		FX.play_impact(self, hit, spell, target, Vector3.RIGHT)
+		return
+	if spell == "protego":
+		var shield = preload("res://scenes/spells/protego_shield.tscn").instantiate()
+		player.add_child(shield)
+		shield.setup(player)
+		FX.play_cast(self, player, spell, origin, Vector3.RIGHT)
+		await get_tree().create_timer(0.75).timeout
+		if is_instance_valid(shield):
+			shield.on_hit(player.global_position + Vector3(1.65, 1.3, 0))
+		return
 	var bolt = preload("res://scenes/spells/spell_projectile.tscn").instantiate()
 	add_child(bolt)
 	bolt.global_position = origin
 	bolt.visual_only = true
-	bolt.setup(player, "stupefy", (hit - origin).normalized())
+	bolt.setup(player, spell, (hit - origin).normalized())
 
 func _save_frame(index: int) -> void:
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("%s/frame-%03d.png" % [OUT, index])
+	get_viewport().get_texture().get_image().save_png("%s/frame-%03d.png" % [output_dir, index])
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:

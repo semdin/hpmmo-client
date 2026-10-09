@@ -40,7 +40,7 @@ func setup(source: Node3D, id: String, aim: Vector3, target: Node3D = null, bonu
 	spell_color = data.get("color", Color.WHITE)
 	# These wand bolts are entirely light layers. A second, full-size imported
 	# carrier obscured the streak and read as a flying solid block.
-	mesh.visible = id not in ["basic_cast", "stupefy"]
+	mesh.visible = false # The travel composition owns every spell's visible body.
 	# The placeholder sphere is replaced by the authored carrier core;
 	# the layered travel stage (ribbon + wisps) rides along with it.
 	var core_scene := load(VFX.asset_path("vfx_projectile_mesh")) as PackedScene
@@ -151,7 +151,7 @@ func _handle_hit(target: Node) -> void:
 
 
 func _end_travel(reason: String) -> void:
-	if spell_id == "stupefy":
+	if spell_id in ["stupefy", "bombarda", "expelliarmus", "ultimate"]:
 		# Keep the last quarter-second of filaments in world space at impact.
 		travel_effect.reparent(get_parent(), true)
 		travel_effect.call("retire_travel")

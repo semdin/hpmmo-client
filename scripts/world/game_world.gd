@@ -505,6 +505,10 @@ func _on_cast_landed(_cast_id: int, _caster_uid: int, spell_id: String, hits: Ar
 			if victim.has_method("_spawn_floating_text"):
 				victim.call("_spawn_floating_text", "REFLECTED!", Color(0.3, 0.8, 1.0), 1.3)
 			continue
+		# The travelling view draws one area blast at its collision point. Drawing
+		# another full-radius blast on every victim duplicates the affected area.
+		if spell_id in ["bombarda", "ultimate"]:
+			continue
 		preload("res://scripts/spells/skill_fx.gd").play_impact(self, (victim as Node3D).global_position + Vector3.UP, spell_id)
 
 func _on_loot_spawned(uid: int, item_id: String, amount: int, pos: Vector3) -> void:

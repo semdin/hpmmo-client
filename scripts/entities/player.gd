@@ -1110,12 +1110,16 @@ func _play_cast_animation(anim_name: String = "Spellcast_Shoot", aim: Variant = 
 	is_casting_anim = true
 	_cast_generation += 1
 	var generation := _cast_generation
+	if spell in ["protego", "ultimate"]:
+		anim_name = "Spellcast_Raise"
 	var upper := anim_name + "_Upper"
 	var hold := 0.42
 	if spell == "basic_cast":
 		hold = 0.30 if combo != 2 else 0.36
 	elif spell == "stupefy":
 		hold = 0.48
+	else:
+		hold = float({"incendio": 0.65, "bombarda": 0.55, "expelliarmus": 0.42, "protego": 0.62, "ultimate": 0.72}.get(spell, hold))
 	if hero_anim:
 		hero_anim.start_cast(upper if hero_anim.has_clip(upper) else anim_name, hold)
 		if hero_anim.cast_layer:
