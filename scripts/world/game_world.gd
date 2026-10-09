@@ -470,7 +470,7 @@ func _on_cast_released(_cast_id: int, caster_uid: int, spell_id: String, origin:
 	# Another player's body plays the gesture too, aimed from the authority's
 	# direction, so a replicated cast reads the same as the caster's prediction.
 	if caster != null and is_instance_valid(caster) and caster.has_method("present_replicated_cast"):
-		caster.call("present_replicated_cast", origin, dir)
+		caster.call("present_replicated_cast", origin, dir, spell_id)
 	if spell_id in ["incendio", "protego"]:
 		preload("res://scripts/spells/skill_fx.gd").play_cast(self, caster if caster is Node3D else null, spell_id, origin, dir)
 		return

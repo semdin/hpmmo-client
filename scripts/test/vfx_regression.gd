@@ -76,6 +76,7 @@ func _ready() -> void:
 	await get_tree().create_timer(0.6).timeout
 	await _check_effects_runtime()
 	await _check_effect_behaviour()
+	await _check_wand_bolts()
 	await _check_effect_sound()
 	await _check_cancellation()
 	await _check_prediction_rejection()
@@ -597,6 +598,61 @@ func _check_effect_behaviour() -> void:
 
 ## Where a stage's sound comes from: the emission point, not the world origin, and
 ## a looping stage rides its effect instead of staying at the launch point.
+func _check_wand_bolts() -> void:
+	var original := QualityPreset.current()
+	for preset in ["low", "high"]:
+		QualityPreset.forced(preset)
+		for spell in ["basic_cast", "stupefy"]:
+			var projectile = preload("res://scenes/spells/spell_projectile.tscn").instantiate()
+			world.add_child(projectile)
+			projectile.global_position = Vector3(17, 80, -23)
+			projectile.visual_only = true
+			projectile.setup(null, spell, Vector3.RIGHT)
+			projectile.set_physics_process(false)
+			check(not projectile.mesh.visible, "%s/%s has no solid carrier" % [spell, preset])
+			var ribbon: MeshInstance3D = null
+			var motes: GPUParticles3D = null
+			for child in projectile.travel_effect.get_children():
+				if child is MeshInstance3D and child.mesh is ImmediateMesh:
+					ribbon = child
+				if child is GPUParticles3D:
+					motes = child
+			for step in range(5):
+				projectile.global_position += Vector3.RIGHT * 0.4
+				await get_tree().process_frame
+			check(ribbon != null and ribbon.global_transform.is_equal_approx(Transform3D.IDENTITY),
+				"%s/%s ribbon uses world space away from origin" % [spell, preset])
+			if ribbon != null and ribbon.mesh.get_surface_count() > 0:
+				var vertices: PackedVector3Array = ribbon.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+				check(not vertices.is_empty() and vertices[0].distance_to(projectile.global_position) < 1.0,
+					"%s/%s trail reaches its actual projectile" % [spell, preset])
+			if preset == "high":
+				check(motes != null and not motes.one_shot, "%s motes emit throughout flight" % spell)
+			else:
+				check(not projectile.light.visible, "%s low quality disables carrier light" % spell)
+			if spell == "stupefy":
+				var tail: Node3D = projectile.travel_effect
+				var energy := tail.get_node_or_null("StupefyEnergy")
+				check(energy != null and energy.get_node("HelicalFilaments").mesh.get_surface_count() > 0,
+					"Stupefy/%s builds its moving 3D filaments" % preset)
+				# Reflection changes the next frame's axis without losing the history.
+				projectile.direction = Vector3.UP
+				await get_tree().process_frame
+				await get_tree().process_frame
+				check(energy != null and energy.direction.is_equal_approx(Vector3.UP),
+					"Stupefy/%s filaments follow a reflected vertical aim" % preset)
+				projectile._handle_hit(null)
+				await get_tree().process_frame
+				check(is_instance_valid(tail) and tail.get_parent() == world and not energy.get_node("TurbulentHeart").visible,
+					"Stupefy/%s leaves only a fading tail after collision" % preset)
+				await get_tree().create_timer(0.32).timeout
+				check(not is_instance_valid(tail), "Stupefy/%s retires its tail without orphan nodes" % preset)
+			else:
+				projectile.queue_free()
+			await get_tree().process_frame
+	QualityPreset.forced(original)
+
+
 func _check_effect_sound() -> void:
 	var audio := get_node_or_null("/root/AudioManager")
 	if audio == null:
@@ -877,7 +933,8 @@ func _check_no_missing_resources() -> void:
 			missing.append(path)
 	for shader_path in ["res://assets/shaders/spell_layer.gdshader",
 			"res://assets/shaders/spell_layer_add.gdshader",
-			"res://assets/shaders/spell_ribbon.gdshader"]:
+			"res://assets/shaders/spell_ribbon.gdshader", "res://assets/shaders/wand_energy.gdshader",
+			"res://assets/shaders/stupefy_plasma.gdshader", "res://assets/shaders/stupefy_filament.gdshader"]:
 		if not ResourceLoader.exists(shader_path):
 			missing.append(shader_path)
 	check(missing.is_empty(), "Every resource the effects reference resolves (%d missing)" % missing.size())
@@ -885,11 +942,12 @@ func _check_no_missing_resources() -> void:
 	var compiled := 0
 	for shader_path in ["res://assets/shaders/spell_layer.gdshader",
 			"res://assets/shaders/spell_layer_add.gdshader",
-			"res://assets/shaders/spell_ribbon.gdshader"]:
+			"res://assets/shaders/spell_ribbon.gdshader", "res://assets/shaders/wand_energy.gdshader",
+			"res://assets/shaders/stupefy_plasma.gdshader", "res://assets/shaders/stupefy_filament.gdshader"]:
 		var shader: Shader = load(shader_path)
 		if shader != null and shader.get_shader_uniform_list().size() > 0:
 			compiled += 1
-	check(compiled == 3, "All three effect shaders compile with their uniforms (%d/3)" % compiled)
+	check(compiled == 6, "All six effect shaders compile with their uniforms (%d/6)" % compiled)
 	for key in sound_library.get("sounds", {}):
 		var path := "res://" + String((sound_library["sounds"][key] as Dictionary).get("path", ""))
 		if not ResourceLoader.exists(path):

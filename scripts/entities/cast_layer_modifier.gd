@@ -50,6 +50,16 @@ var aim_point := Vector3.ZERO
 var _aim_active := false
 ## Clip rotations used as the blend source for the arm aim in this modifier pass.
 var _clip_rotations := {}
+var gesture_time := 0.0
+var gesture_duration := 0.42
+var gesture_strength := 0.0
+var gesture_side := 1.0
+
+func set_gesture(spell: String, combo: int, duration: float) -> void:
+	gesture_time = 0.0
+	gesture_duration = duration
+	gesture_strength = 1.0 if spell == "stupefy" else ((0.8 if combo == 2 else 0.6) if spell == "basic_cast" else 0.0)
+	gesture_side = -1.0 if combo == 1 else 1.0
 
 func _bone_of(path: NodePath) -> String:
 	var text := String(path)
@@ -81,6 +91,8 @@ func play(clip: Animation, start_time := 0.0) -> void:
 		configure(clip)
 	playing = true
 	time = start_time
+	gesture_time = 0.0
+	gesture_strength = 0.0
 
 func stop() -> void:
 	playing = false
@@ -99,6 +111,7 @@ func aim_active() -> bool:
 
 func _process_modification_with_delta(delta: float) -> void:
 	time += delta
+	gesture_time += delta
 	_apply()
 
 func _apply() -> void:
@@ -148,7 +161,15 @@ func _apply_aim(skeleton: Skeleton3D) -> void:
 	var upper_len := shoulder.distance_to(elbow_live)
 	var lower_len := elbow_live.distance_to(end_live)
 	# Target just inside full extension so the elbow keeps a natural bend.
-	var target := shoulder + towards.normalized() * ((upper_len + lower_len) * AIM_EXTENSION)
+	# A short elbow draw, quick extension, then recoil. The wrist continues to
+	# aim at the actual target; locomotion and the wand grip remain untouched.
+	var phase := clampf(gesture_time / maxf(0.05, gesture_duration), 0.0, 1.0)
+	var snap := smoothstep(0.0, 0.24, phase)
+	var recoil := smoothstep(0.36, 0.9, phase)
+	var extension := AIM_EXTENSION - gesture_strength * (0.25 * (1.0 - snap) + 0.16 * recoil)
+	var side := towards.normalized().cross(Vector3.UP).normalized()
+	var sweep := sin(phase * PI * 2.0) * (1.0 - snap) * gesture_strength * 0.12 * gesture_side
+	var target := shoulder + towards.normalized() * ((upper_len + lower_len) * extension) + side * sweep
 	var bases := {}
 	for bone in [root, mid]:
 		bases[bone] = _clip_rotations.get(skeleton.get_bone_name(bone), Quaternion())

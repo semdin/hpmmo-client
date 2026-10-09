@@ -276,7 +276,7 @@ func _enter_stage(stage: String) -> void:
 func _play_caster_cast() -> void:
 	var caster := _caster()
 	if caster != null and caster.has_method("_play_cast_animation"):
-		caster.call("_play_cast_animation")
+		caster.call("_play_cast_animation", "Spellcast_Shoot", _spawn_point() + aim * flight_distance, spell_id)
 
 
 func _begin_travel() -> void:
@@ -386,7 +386,7 @@ func _place_actor() -> void:
 		(caster as CharacterBody3D).velocity = Vector3.ZERO
 	var visuals := caster.get("visuals") as Node3D
 	if visuals != null:
-		visuals.rotation.y = atan2(-aim.x, -aim.z)
+		visuals.rotation.y = atan2(aim.x, aim.z)
 	_dummy.global_position = origin + aim * _beam_distance(spell_id)
 
 

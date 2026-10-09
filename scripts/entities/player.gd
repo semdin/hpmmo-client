@@ -1027,16 +1027,17 @@ func cast_spell(spell_id: String) -> void:
 	# Refined Basic Attack Chain (Section 4.3 of.md) - animation only; the
 	# damage multiplier is the server's combo counter.
 	var anim_name := "Spellcast_Shoot"
+	var gesture_combo := basic_combo_index
 	if spell_id == "basic_cast":
 		basic_combo_timer = 1.2
 		if basic_combo_index == 0:
 			anim_name = "Spellcast_Shoot"
 			basic_combo_index = 1
 		elif basic_combo_index == 1:
-			anim_name = "Spellcast_Raise"
+			anim_name = "Spellcast_Shoot"
 			basic_combo_index = 2
 		else:
-			anim_name = "1H_Melee_Attack_Chop"
+			anim_name = "Spellcast_Shoot"
 			basic_combo_index = 0
 			_spawn_floating_text("3-HIT COMBO!", Color(1.0, 0.85, 0.2), 1.4)
 
@@ -1046,7 +1047,7 @@ func cast_spell(spell_id: String) -> void:
 		_committed_until = maxf(_committed_until, COMMITTED_MELEE)
 	_cast_seq += 1
 	_predicted_casts[_cast_seq] = {"spell_id": spell_id, "aim": aim_hit}
-	_play_cast_animation(anim_name, aim_hit)
+	_play_cast_animation(anim_name, aim_hit, spell_id, gesture_combo)
 	if spell_id == "protego":
 		_activate_protego_preview()
 	# spell-effect hook: predicted PRESENTATION only (wand flash + cast sound), keyed
@@ -1103,7 +1104,7 @@ func _reject_feedback(reason: String) -> void:
 ##
 ## `aim` defaults to the body's forward so the cast still points somewhere when a
 ## caller has no aim point (the vfx viewer calls this with no arguments).
-func _play_cast_animation(anim_name: String = "Spellcast_Shoot", aim: Variant = null) -> void:
+func _play_cast_animation(anim_name: String = "Spellcast_Shoot", aim: Variant = null, spell: String = "", combo: int = 0) -> void:
 	if hero_anim == null and not is_instance_valid(anim_player):
 		return
 	is_casting_anim = true
@@ -1111,8 +1112,14 @@ func _play_cast_animation(anim_name: String = "Spellcast_Shoot", aim: Variant = 
 	var generation := _cast_generation
 	var upper := anim_name + "_Upper"
 	var hold := 0.42
+	if spell == "basic_cast":
+		hold = 0.30 if combo != 2 else 0.36
+	elif spell == "stupefy":
+		hold = 0.48
 	if hero_anim:
 		hero_anim.start_cast(upper if hero_anim.has_clip(upper) else anim_name, hold)
+		if hero_anim.cast_layer:
+			hero_anim.cast_layer.set_gesture(spell, combo, hold)
 		hero_anim.align_cast(hold * 0.6, 0.45)
 		# A wand cast points the wand at the target; a melee chop is a SWING, so it
 		# keeps the clip's own arm (holding it on the target would freeze it). The
@@ -1127,6 +1134,8 @@ func _play_cast_animation(anim_name: String = "Spellcast_Shoot", aim: Variant = 
 		elif anim_player.has_animation("Spellcast_Shoot"):
 			anim_player.play("Spellcast_Shoot", 0.08)
 	await get_tree().create_timer(hold * 0.6).timeout
+	if generation != _cast_generation or is_dead:
+		return
 	if animation_events.size() < 32:
 		_on_animation_event("fx:wand_release")
 	await get_tree().create_timer(hold * 0.4).timeout
@@ -1138,10 +1147,10 @@ func _play_cast_animation(anim_name: String = "Spellcast_Shoot", aim: Variant = 
 ## A replicated cast: another player's body plays the same gesture, aimed from the
 ## authority's origin and direction rather than from local input. The caster's own
 ## client already predicted this, so only other clients run it.
-func present_replicated_cast(origin: Vector3, dir: Vector3) -> void:
+func present_replicated_cast(origin: Vector3, dir: Vector3, spell: String = "") -> void:
 	if is_local_player or hero_anim == null or is_dead:
 		return
-	_play_cast_animation("Spellcast_Shoot", origin + dir * 20.0)
+	_play_cast_animation("Spellcast_Shoot", origin + dir * 20.0, spell)
 
 func _activate_protego_preview() -> void:
 	is_protego_active = true

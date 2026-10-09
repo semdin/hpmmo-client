@@ -77,49 +77,52 @@ const LAYER_PRESETS := {
 ## serves every spell while each keeps its own identity.
 const SPELLS := {
 	"basic_cast": {
-		"colour": Color(1.0, 0.847, 0.4),
+		"colour": Color(1.0, 0.67, 0.22),
 		"stages": {
-			"cast": {"layers": ["glow_flash"], "length": 0.3,
-				"audio": "spell_basic_cast_cast", "core": "cast_snap"},
+			"cast": {"layers": [
+				{"kind": "sprite", "energy_shape": 3, "blend": "add", "core": true, "colour": true, "size": 0.75, "life": 0.16}
+			], "length": 0.3, "audio": "spell_basic_cast_cast", "core": "cast_snap"},
 			"travel": {"layers": [
-				{"kind": "mesh", "mesh": "vfx_projectile_mesh", "blend": "add", "core": true,
-					"size": Vector3(0.13, 0.13, 0.42), "life": 0.0, "follow": true, "colour": true},
-				{"kind": "ribbon", "tex": "vfx_energy_streak", "blend": "add", "core": false,
-					"width": 0.07, "length": 2.2, "life": 0.0, "follow": true},
-				{"kind": "particles", "tex": "vfx_spark_static", "blend": "add", "core": false, "optional": true,
-					"amount": 10, "life": 0.3, "speed": 1.2, "spread": 18.0, "gravity": 0.0, "size": 0.06},
+				{"kind": "sprite", "energy_shape": 1, "blend": "add", "core": true, "colour": true, "size": 0.36, "life": 0.0, "stretch": 4.0, "forward": -0.36},
+				{"kind": "sprite", "energy_shape": 0, "blend": "add", "core": true, "colour": true, "size": 0.48, "life": 0.0, "opacity": 0.45},
+				{"kind": "ribbon", "tex": "vfx_energy_streak", "blend": "add", "core": true, "colour": true, "width": 0.065, "length": 2.6, "life": 0.0, "follow": true},
+				{"kind": "particles", "tex": "vfx_spark_static", "blend": "add", "colour": true, "amount": 12, "life": 0.18, "speed": 0.6, "size": 0.045, "spread": 150.0, "gravity": 0.0, "optional": true, "continuous": true}
 			], "length": 0.0, "audio": "spell_basic_cast_travel", "loop_audio": true},
-			"impact": {"layers": ["impact_ring", "ember_sparks", "glow_flash"], "length": 0.7,
-				"audio": "spell_basic_cast_impact", "core": "impact_fleck"},
+			"impact": {"layers": [
+				{"kind": "sprite", "energy_shape": 3, "blend": "add", "core": true, "colour": true, "size": 1.05, "life": 0.16},
+				{"kind": "sprite", "energy_shape": 2, "blend": "add", "core": true, "colour": true, "size": 1.3, "life": 0.26},
+				{"kind": "particles", "tex": "vfx_spark_static", "blend": "add", "colour": true, "amount": 14, "life": 0.32, "speed": 3.2, "size": 0.05, "spread": 150.0, "gravity": -1.5}
+			], "length": 0.4, "audio": "spell_basic_cast_impact", "core": "impact_fleck"},
 			"end": {"layers": [
-				{"kind": "sprite", "tex": "vfx_soft_glow", "blend": "add", "core": true,
-					"size": 0.7, "life": 0.35, "fade": "out"},
-			], "length": 0.4, "audio": "spell_basic_cast_end"},
+				{"kind": "sprite", "energy_shape": 0, "blend": "add", "core": true, "colour": true, "size": 0.45, "life": 0.2, "opacity": 0.4}
+			], "length": 0.25, "audio": "spell_basic_cast_end"}
 		},
 	},
 	"stupefy": {
-		"colour": Color(1.0, 0.133, 0.2),
+		"colour": Color(1.0, 0.025, 0.075),
 		"stages": {
 			"cast": {"layers": [
-				"glow_flash",
-				{"kind": "flipbook", "atlas": "vfx_energy_impact", "blend": "add", "core": true,
-					"size": 0.8, "life": 0.35, "colour": true},
-			], "length": 0.4, "audio": "spell_stupefy_cast", "core": "cast_buildup"},
+				{"kind": "stupefy_energy", "core": true, "life": 0.32},
+				{"kind": "particles", "tex": "vfx_spark_static", "blend": "add", "colour": true,
+					"amount": 14, "life": 0.24, "speed": 2.4, "size": 0.045, "spread": 65.0, "gravity": 0.0, "forward": true, "optional": true},
+				{"kind": "light", "colour": true, "energy": 2.6, "range": 3.0, "life": 0.22},
+			], "length": 0.34, "audio": "spell_stupefy_cast", "core": "spiral_discharge"},
 			"travel": {"layers": [
-				{"kind": "mesh", "mesh": "vfx_projectile_mesh", "blend": "add", "core": true,
-					"size": Vector3(0.16, 0.16, 0.62), "life": 0.0, "follow": true, "colour": true},
-				{"kind": "ribbon", "tex": "vfx_energy_streak", "blend": "add", "core": false,
-					"width": 0.10, "length": 2.8, "life": 0.0, "follow": true},
+				{"kind": "stupefy_energy", "core": true, "life": 0.0},
+				{"kind": "ribbon", "tex": "vfx_energy_streak", "blend": "add", "core": true, "colour": true,
+					"width": 0.11, "length": 4.8, "life": 0.0, "follow": true},
+				{"kind": "particles", "tex": "vfx_spark_static", "blend": "add", "colour": true,
+					"amount": 32, "life": 0.22, "speed": 1.1, "size": 0.045, "spread": 150.0, "gravity": 0.0, "optional": true, "continuous": true},
 			], "length": 0.0, "audio": "spell_stupefy_travel", "loop_audio": true},
 			"impact": {"layers": [
-				"impact_ring",
-				{"kind": "flipbook", "atlas": "vfx_energy_impact", "blend": "add", "core": false, "optional": true,
-					"size": 2.2, "life": 0.5, "colour": true},
-				"glow_flash",
-			], "length": 0.8, "audio": "spell_stupefy_impact", "core": "impact_stun"},
+				{"kind": "stupefy_energy", "core": true, "life": 0.72},
+				{"kind": "particles", "tex": "vfx_spark_static", "blend": "add", "colour": true,
+					"amount": 40, "life": 0.58, "speed": 4.8, "size": 0.055, "spread": 170.0, "gravity": -2.0, "optional": true},
+				{"kind": "light", "colour": true, "energy": 3.2, "range": 4.0, "life": 0.28},
+			], "length": 0.76, "audio": "spell_stupefy_impact", "core": "torn_energy_burst"},
 			"sustain": {"layers": [
-				{"kind": "sprite", "atlas": "vfx_rune_masks", "frame": 1, "blend": "add", "core": true,
-					"billboard": true, "size": 1.6, "life": 1.8, "fade": "hold"},
+				{"kind": "sprite", "atlas": "vfx_rune_masks", "frame": 1, "blend": "add", "core": true, "colour": true,
+					"size": 0.85, "life": 1.8, "fade": "hold"},
 			], "length": 1.8, "audio": "spell_stupefy_end", "core": "stun_indicator"},
 		},
 	},
