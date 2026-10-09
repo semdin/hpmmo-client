@@ -2,12 +2,12 @@
  "schema": 1,
  "generated": "2026-10-08",
  "project": "HPMMO",
- "notes": "Asset audit manifest. The audit tools are retired: their input (tools/downloads/asset-audit.json) was removed with the downloaded candidate packs, so this document is hand-maintained. Every local_paths / license_file entry names a file that exists. `status: missing` means the asset is planned and not yet produced; `rejected` holds packs that were evaluated and not adopted. Measured fields (scale_m, triangles, sha256) come from the retired tools and from re-measurement on disk.",
+ "notes": "Asset audit manifest. The audit tools are retired: their input (tools/downloads/asset-audit.json) was removed with the downloaded candidate packs, so this document is hand-maintained. Every local_paths / license_file entry names a file that exists. `status: missing` means the asset is planned and not yet produced; `rejected` holds packs that were evaluated and not adopted. Measured fields (scale_m, triangles, sha256) come from the retired tools and from re-measurement on disk. | the spell effects (2026-10-05): every missing VFX inventory item is now project-original art authored by tools/blender/spell_vfx.py (four coherent 64-frame flipbooks, ripple/rune/mark/lightning atlases, glow/noise/flow/distortion/streak/fracture textures) and tools/blender/spell_meshes.py (trail ribbon, shield shell, projectile core, shards); the whole sound library is original synthesis from tools/audio/synth_spell_sfx.py. The two Kenney stills remain as particle ingredients, not effects. No VFX or audio entry remains missing or placeholder.",
  "summary": {
   "candidate": 32,
   "placeholder": 3,
-  "integrated": 99,
-  "missing": 9
+  "integrated": 121,
+  "missing": 8
  },
  "assets": [
   {
@@ -5192,9 +5192,9 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "Two minor stat slips: (1) ceiling_tile measures 4x4x0.35 units, so the 'tile thickness 0.15' note holds for floors but not the ceiling; (2) provenance cannot be hash-pinned to a public mirror (archive deleted; the GitHub mirror is v1.0), though the in-archive 1.1 CC0 license and the live itch page are consistent. Neither affects licensing or file validity. Repo side verified exact: assets/models/environment holds exactly 44 KayKit models (all walls/banners/pillars/chest/torch \u2014 no stairs/floors/railings/furniture) and wall.gltf.glb measures 4x4x1.0."
+    "note": "Two minor stat slips: (1) ceiling_tile measures 4x4x0.35 units, so the 'tile thickness 0.15' note holds for floors but not the ceiling; (2) provenance cannot be hash-pinned to a public mirror (archive deleted; the GitHub mirror is v1.0), though the in-archive 1.1 CC0 license and the live itch page are consistent. Neither affects licensing or file validity. Repo side verified exact: assets/models/environment holds exactly 44 KayKit models (all walls/banners/pillars/chest/torch — no stairs/floors/railings/furniture) and wall.gltf.glb measures 4x4x1.0."
    },
-   "gaps": "No animations, no skins, no LODs, no collision meshes, no damage/wear variants (those are the paid EXTRA tier). IMPORTANT: this 1.1 release ships its own 1024x1024 atlas (dungeon_texture.png, sha256 ceb331d6\u2026) that differs from the atlas the repo's existing KayKit files reference (assets/models/environment/wall_dungeon_texture.png, 15,794 B, sha256 f9ae1825\u2026) \u2014 the new pieces must be imported with this 1.1 atlas (each .gltf references 'dungeon_texture.png' relatively, so keep it beside them), or the whole Dungeon family should be re-imported from 1.1 so everything shares one material; otherwise expect UV/colour mismatch. KayKit's module is 4 units (not metres), so the art-audit unit decision applies: at the repo's current root_scale=1.0 the standard stair rises 5.1 units, and a 1.75-1.90 m character needs the agreed global scale. Does NOT include: potted plants, a suit of armour, a real multi-arm chandelier, or benches. Each .gltf needs its same-named .bin buffer beside it."
+   "gaps": "No animations, no skins, no LODs, no collision meshes, no damage/wear variants (those are the paid EXTRA tier). IMPORTANT: this 1.1 release ships its own 1024x1024 atlas (dungeon_texture.png, sha256 ceb331d6…) that differs from the atlas the repo's existing KayKit files reference (assets/models/environment/wall_dungeon_texture.png, 15,794 B, sha256 f9ae1825…) — the new pieces must be imported with this 1.1 atlas (each .gltf references 'dungeon_texture.png' relatively, so keep it beside them), or the whole Dungeon family should be re-imported from 1.1 so everything shares one material; otherwise expect UV/colour mismatch. KayKit's module is 4 units (not metres), so the art-audit unit decision applies: at the repo's current root_scale=1.0 the standard stair rises 5.1 units, and a 1.75-1.90 m character needs the agreed global scale. Does NOT include: potted plants, a suit of armour, a real multi-arm chandelier, or benches. Each .gltf needs its same-named .bin buffer beside it."
   },
   {
    "id": "kaykit-furniture-bits-1.0",
@@ -5514,7 +5514,7 @@
     "adversarially_verified": true,
     "note": "Full-kit entry count ('406 entries') and the site's '75 assets' label can no longer be reconciled since the zip was deleted; not material to the kept files."
    },
-   "gaps": "Different art style from KayKit (flat-shaded stone with a single shared colormap, no gradient atlas) \u2014 the plan's 'avoid mixing styles' rule applies, so treat these as alternates, not mix-ins. Tiny module: the stair is 0.67 units tall, so it needs a scale decision, and the wall segments do not match the KayKit 4-unit grid. No animations/LODs/collision. Textures/colormap.png must stay in its subfolder or the GLBs lose their texture."
+   "gaps": "Different art style from KayKit (flat-shaded stone with a single shared colormap, no gradient atlas) — the plan's 'avoid mixing styles' rule applies, so treat these as alternates, not mix-ins. Tiny module: the stair is 0.67 units tall, so it needs a scale decision, and the wall segments do not match the KayKit 4-unit grid. No animations/LODs/collision. Textures/colormap.png must stay in its subfolder or the GLBs lose their texture."
   },
   {
    "id": "kenney-furniture-kit",
@@ -5582,7 +5582,7 @@
     "adversarially_verified": true,
     "note": "Scale claim is wrong: pottedPlant.glb renders ~0.54 units tall (raw accessor 0.536; root node scale 2x over a nested 0.5x plant node), not '0.12 units'. The 0.12 figure is the plant sub-mesh alone. plantSmall1-3 render ~0.14 units. Assets still valid; only the scale note needs fixing before the manifest uses it."
    },
-   "gaps": "Totally different look from KayKit: flat untextured colour, clean/modern rather than castle-carved, and the models are very small in raw units (pottedPlant is 0.12 units tall) so they must be scaled. No textures at all (0 images) means no shared atlas and no PBR \u2014 plan the material setup. No animations/LODs/collision. If plants must match the KayKit atlas look, use these only as a stand-in until a KayKit-style plant is authored."
+   "gaps": "Totally different look from KayKit: flat untextured colour, clean/modern rather than castle-carved, and the models are very small in raw units (pottedPlant is 0.12 units tall) so they must be scaled. No textures at all (0 images) means no shared atlas and no PBR — plan the material setup. No animations/LODs/collision. If plants must match the KayKit atlas look, use these only as a stand-in until a KayKit-style plant is authored."
   },
   {
    "id": "kenney-impact-sounds",
@@ -5886,7 +5886,7 @@
     "adversarially_verified": true,
     "note": "None."
    },
-   "gaps": "No ambience or loops; only short one-shots (no long tails for large spells); no magic-specific whoosh/zap/chime \u2014 spell cast must be assembled from these layers plus UI sounds."
+   "gaps": "No ambience or loops; only short one-shots (no long tails for large spells); no magic-specific whoosh/zap/chime — spell cast must be assembled from these layers plus UI sounds."
   },
   {
    "id": "kenney-rpg-audio",
@@ -6586,7 +6586,7 @@
     "adversarially_verified": true,
     "note": "CC-BY-3.0 is permissive with attribution. Corrected: the required credit is the original creator Jonathan Shaw (InspectorJ) per the source page; the local receipt was rewritten accordingly."
    },
-   "gaps": "License is CC-BY-3.0, NOT CC0 \u2014 shipping requires visible credit to AntumDeluge (recorded in LICENSE.txt); no license file ships from the site; loop seam not verified in a WAV editor; no other ambiences in this pack."
+   "gaps": "License is CC-BY-3.0, NOT CC0 — shipping requires visible credit to AntumDeluge (recorded in LICENSE.txt); no license file ships from the site; loop seam not verified in a WAV editor; no other ambiences in this pack."
   },
   {
    "id": "para-animated-particle-fx-1",
@@ -6855,7 +6855,7 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "One stat is wrong: the report says '54 nodes'; the GLB actually has 86 nodes (54 is KayKit's node count, likely copied across). Everything else in this candidate is accurate. Preview file named preview.jpg is really a PNG (magic 89 50 4E 47) \u2014 see category-level note."
+    "note": "One stat is wrong: the report says '54 nodes'; the GLB actually has 86 nodes (54 is KayKit's node count, likely copied across). Everything else in this candidate is accurate. Preview file named preview.jpg is really a PNG (magic 89 50 4E 47) — see category-level note."
    },
    "gaps": "No textures at all (11 flat materials; the original pack's texture atlas is not in the Poly Pizza conversion, though UVs and TEXCOORD_0 exist); no dedicated spellcast clip (melee/gun clips only); no LODs, no collision, no root motion; conversion duplicates the skin 5x (one per mesh) and 5 identical 62-joint skins must be merged before production use; textured original is Quaternius 'Ultimate Modular Men' whose Google Drive link is quota-blocked (manual); shoe/prop sockets not verified.",
    "acceptance": "tools/downloads/asset-review-neutral-hero-adventurer.png, tools/downloads/asset-review-final-hero-adventurer.png"
@@ -6986,7 +6986,7 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "The gaps field says '2 duplicated skins' \u2014 actually there are 4 identical 62-joint skins (Body, Head, Legs, Feet), i.e. the merge cost is double what was stated. Preview.jpg is really a PNG. Otherwise accurate."
+    "note": "The gaps field says '2 duplicated skins' — actually there are 4 identical 62-joint skins (Body, Head, Legs, Feet), i.e. the merge cost is double what was stated. Preview.jpg is really a PNG. Otherwise accurate."
    },
    "gaps": "Untextured (flat materials, UVs present); Sword mesh is a separate NON-skinned mesh (must be socketed to a hand bone manually); 2 duplicated skins; no spellcast clip; no LODs/collision/root motion; same Google-Drive-blocked textured original as the male Adventurer.",
    "acceptance": "tools/downloads/asset-review-neutral-hero-hooded.png, tools/downloads/asset-review-final-hero-hooded.png"
@@ -7253,7 +7253,7 @@
    "status": "candidate",
    "author": "Quaternius (quaternius.com)",
    "source_url": "https://quaternius.itch.io/universal-animation-library",
-   "license": "CC0 1.0 Universal (Public Domain Dedication) \u2014 license text shipped inside the archive",
+   "license": "CC0 1.0 Universal (Public Domain Dedication) — license text shipped inside the archive",
    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
    "license_file": "assets/candidates/character/quaternius-universal-animation-library/License.txt",
    "attribution_required": false,
@@ -7335,9 +7335,9 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "The itch page advertises '120+ animations' for the library, but the free Standard GLBs actually contain only 43 clips each \u2014 the researcher's 43 is what the downloaded artifact has, but a reader expecting the advertised 120+ from the free tier will be short (the rest sit in the paid Pro/Source tiers). No files are mislabeled; audio/other formats are not needed."
+    "note": "The itch page advertises '120+ animations' for the library, but the free Standard GLBs actually contain only 43 clips each — the researcher's 43 is what the downloaded artifact has, but a reader expecting the advertised 120+ from the free tier will be short (the rest sit in the paid Pro/Source tiers). No files are mislabeled; audio/other formats are not needed."
    },
-   "gaps": "Animation product, not a costumed hero: the included mesh is an untextured mannequin (2 flat materials, no skin/cloth textures, no robe); free Standard tier has 43 clips (the paid Pro tier, $9.99, has the larger set); 65-joint UE5-named rig differs from the 53-joint DEF- base mesh copy on Poly Pizza \u2014 pair it with its own mannequin or retarget deliberately; itch.io has no static URL (download needed a csrf + /download_url + /file/<id> session, reproduced in this run).",
+   "gaps": "Animation product, not a costumed hero: the included mesh is an untextured mannequin (2 flat materials, no skin/cloth textures, no robe); free Standard tier has 43 clips (the paid Pro tier, $9.99, has the larger set); 65-joint UE5-named rig differs from the 53-joint DEF- base mesh copy on Poly Pizza — pair it with its own mannequin or retarget deliberately; itch.io has no static URL (download needed a csrf + /download_url + /file/<id> session, reproduced in this run).",
    "acceptance": "tools/downloads/asset-review-neutral-hero-mannequin.png"
   },
   {
@@ -7783,25 +7783,40 @@
   },
   {
    "id": "vfx_trail_mesh",
-   "purpose": "camera-aware tapered ribbon mesh for broom/projectile trails",
-   "status": "missing",
-   "author": "",
-   "source_url": "",
-   "license": "",
-   "license_url": "",
-   "license_file": "",
+   "purpose": "camera-aware tapered strip driven by a sample history (broom trail, projectile ribbon, Expelliarmus)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
    "attribution_required": false,
-   "local_paths": [],
-   "sha256": {},
+   "local_paths": [
+    "assets/vfx/meshes/trail_ribbon.glb",
+    "tools/blender/spell_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/trail_ribbon.glb": "01e4bea59e0df7c3154abff43f30c56e2f6eee4cc6854689c601efdcda0c43e8"
+   },
    "scale_m": "",
-   "triangles": "",
+   "triangles": 48,
    "material_slots": "",
    "textures": {},
    "rig": {},
    "collision": "",
    "lods": "",
    "blocks": "vfx",
-   "notes": "author procedurally or in Blender (not installed)"
+   "notes": "author procedurally or in Blender (not installed)",
+   "generator": "tools/blender/spell_meshes.py (Blender 5.2.2)",
+   "vertices": 50,
+   "uv": "U along the length (0 emitter -> 1 tip), V across (0..1)",
+   "bounds_m": [
+    1.0,
+    0.06,
+    1.0
+   ],
+   "acceptance": "tools/blender/spell_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the spell-effect checks",
+   "taper_profile": "alpha = max(0.02, (1-t)^1.35), authored into vertex colour alpha"
   },
   {
    "id": "vfx_distortion_flow",
@@ -7962,6 +7977,728 @@
     "assets/ui/icons/icon_ring_apprentice.png": "7449dce259b4df502a6e2b09da16a2e0fb5681efd37675c84726f9d6a5a65f85",
     "assets/ui/icons/icon_ring_adept.png": "e3e68dc043bcb1d7c412e32ad365bfb243808a1357b3dc3c9535ae3d2962183e"
    }
+  },
+  {
+   "id": "vfx_flame_loop",
+   "purpose": "Loaning flame plume flipbook: Incendio sustain, Ultimate tail, torches",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/flame_loop_8x8_2k.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/flame_loop_8x8_2k.png": "7e06c83fc09b08a217e55d53b19fd7ceb131f82b2f180eaf86fa8cde6d9e347e"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 64,
+   "loop": true,
+   "fps": 30,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 256,
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "padding_px": 4,
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "alpha",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_flame_loop.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-flame_loop_8x8_2k.png"
+   ]
+  },
+  {
+   "id": "vfx_fire_burst",
+   "purpose": "Non-looping directional fire burst: Incendio cast/impact",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/fire_burst_8x8_2k.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/fire_burst_8x8_2k.png": "1683349943b5bef49dd9b2a44ad722f17799b2162455bfe48c6391b043a5718e"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 64,
+   "loop": false,
+   "fps": 40,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 256,
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "padding_px": 4,
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "alpha",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_fire_burst.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-fire_burst_8x8_2k.png"
+   ]
+  },
+  {
+   "id": "vfx_smoke_puff",
+   "purpose": "Evolving soft smoke: Incendio extinguish, Bombarda dust, Ultimate tail",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/smoke_puff_8x8_2k.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/smoke_puff_8x8_2k.png": "0a9097a66eda74f9d0391f61b5e9ff340b144cf52fdc3e8f36857dba51a36d5c"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 64,
+   "loop": false,
+   "fps": 24,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 256,
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "padding_px": 4,
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "alpha",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_smoke_puff.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-smoke_puff_8x8_2k.png"
+   ]
+  },
+  {
+   "id": "vfx_energy_impact",
+   "purpose": "Irregular magical impact: every projectile hit and the Ultimate strike",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/energy_impact_8x8_2k.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/energy_impact_8x8_2k.png": "8dc9fce18b1e814ae9ecfcd34c993a34a95ff805c25cc91c2846376520a631d9"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 64,
+   "loop": false,
+   "fps": 40,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 256,
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "padding_px": 4,
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_energy_impact.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-energy_impact_8x8_2k.png"
+   ]
+  },
+  {
+   "id": "vfx_shield_ripple",
+   "purpose": "Local shield impact ripple with a fracture tail: Protego hit response",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/shield_ripple_4x4_1k.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/shield_ripple_4x4_1k.png": "5033194fe869feaf512d5641e9ef288e853eacecbb2505d0b378427d1d17b54c"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 16,
+   "loop": false,
+   "fps": 24,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 256,
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "padding_px": 4,
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_shield_ripple.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-shield_ripple_4x4_1k.png"
+   ]
+  },
+  {
+   "id": "vfx_soft_glow",
+   "purpose": "Soft radial glow used by muzzle flashes, ember sprites and impact cores",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/soft_glow_512.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/soft_glow_512.png": "0f67291eb3eb7bb21dc31a6edcdc270ce3deb53626bb005c4facda393d98bc29"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 512,
+   "sheet_px": [
+    512,
+    512
+   ],
+   "padding_px": 0,
+   "alpha": "straight",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_soft_glow.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-soft_glow_512.png"
+   ]
+  },
+  {
+   "id": "vfx_noise_flow",
+   "purpose": "Tileable flow + noise data for the shield's flowing field and streak scroll",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/noise_flow_512.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/noise_flow_512.png": "af773990f91e9f0dae93b2152e8280968e6fe4a52d38e40a1e119264fb37894e"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 512,
+   "sheet_px": [
+    512,
+    512
+   ],
+   "padding_px": 0,
+   "alpha": "none (A=1)",
+   "colour_space": "linear data",
+   "blend_default": "n/a (data)",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_noise_flow.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-noise_flow_512.png"
+   ],
+   "channel_convention": "R,G = normalised flow vector, B = tileable value noise",
+   "tiling": "tileable on both axes"
+  },
+  {
+   "id": "vfx_noise_erosion",
+   "purpose": "Tileable erosion noise for the shield's expiration dissolve",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/noise_erosion_512.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/noise_erosion_512.png": "c35f0c385f6cc65b09a556ee528ea9349d2c57d102c7ddf8c15645ab46c99ac3"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 512,
+   "sheet_px": [
+    512,
+    512
+   ],
+   "padding_px": 0,
+   "alpha": "none (A=1)",
+   "colour_space": "linear data",
+   "blend_default": "n/a (data)",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_noise_erosion.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-noise_erosion_512.png"
+   ],
+   "tiling": "tileable on both axes"
+  },
+  {
+   "id": "vfx_distortion",
+   "purpose": "Heat-haze/refraction vector data (available to the distortion layer)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/distortion_512.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/distortion_512.png": "3930f153318e4de19a95210830982195694cd543ce9bea732ab094ac49d32d93"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 512,
+   "sheet_px": [
+    512,
+    512
+   ],
+   "padding_px": 0,
+   "alpha": "none (A=1)",
+   "colour_space": "linear data",
+   "blend_default": "n/a (data)",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_distortion.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-distortion_512.png"
+   ],
+   "channel_convention": "R,G = distortion vector, B = magnitude",
+   "tiling": "tileable on both axes"
+  },
+  {
+   "id": "vfx_energy_streak",
+   "purpose": "Tapered streak mask for projectile trails, the Expelliarmus ribbon and the broom trail",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/energy_streak_1024x256.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/energy_streak_1024x256.png": "5b9b62157d9461943eb379e17e50a01cae11aa6721d30444a6ec87fe8554ac90"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 1024,
+   "sheet_px": [
+    1024,
+    256
+   ],
+   "padding_px": 0,
+   "alpha": "straight",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_energy_streak.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-energy_streak_1024x256.png"
+   ]
+  },
+  {
+   "id": "vfx_shield_fracture",
+   "purpose": "Fracture mask drawn over the ward as it expires",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/shield_fracture_512.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/shield_fracture_512.png": "47f65b36a07fc7403a38e019bc651d1782656ddafcf277255f71219f0becd795"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 1,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "single frame",
+   "cell_px": 512,
+   "sheet_px": [
+    512,
+    512
+   ],
+   "padding_px": 0,
+   "alpha": "straight (mask)",
+   "colour_space": "linear data (white mask)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_shield_fracture.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-shield_fracture_512.png"
+   ]
+  },
+  {
+   "id": "vfx_ground_marks",
+   "purpose": "Scorch, dust ring, fragment spray and cracked ring ground marks",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/ground_marks_2x2_1k.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/ground_marks_2x2_1k.png": "32339f4449e1d55217da990f80eedf2c51b22f40b189dcdde010328fe500464b"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 4,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 512,
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "padding_px": 4,
+   "alpha": "straight (mask)",
+   "colour_space": "linear data (white mask)",
+   "blend_default": "alpha",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_ground_marks.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-ground_marks_2x2_1k.png"
+   ]
+  },
+  {
+   "id": "vfx_rune_masks",
+   "purpose": "Restrained rune/telegraph masks: boss warning, ward glyph, countdown",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/rune_masks_2x2_1k.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/rune_masks_2x2_1k.png": "5fce2ba5c2db558d40375f88374b46beb14c06becaaf8b27dc7bd40c563721ac"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 4,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 512,
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "padding_px": 4,
+   "alpha": "straight (mask)",
+   "colour_space": "linear data (white mask)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_rune_masks.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-rune_masks_2x2_1k.png"
+   ]
+  },
+  {
+   "id": "vfx_lightning_branches",
+   "purpose": "Irregular branching energy masks for the Ultimate strike",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/lightning_branches_2x2_1k.png",
+    "tools/blender/spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/lightning_branches_2x2_1k.png": "03fb6c8a740a19b2647c220d8f99334c6568ba539033d16adbe07517d46ab0cd"
+   },
+   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
+   "frames": 4,
+   "loop": false,
+   "fps": 0,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "cell_px": 512,
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "padding_px": 4,
+   "alpha": "straight (mask)",
+   "colour_space": "linear data (white mask)",
+   "blend_default": "additive",
+   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
+   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_lightning_branches.png, and run_vfx_checks.ps1",
+   "evidence": [
+    "tools/downloads/vfx-atlas-lightning_branches_2x2_1k.png"
+   ]
+  },
+  {
+   "id": "vfx_shield_mesh",
+   "purpose": "Protego shell - the one effect where a solid surface is intentional; scaled to the 1.8 m ward radius at runtime",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/shield_shell.glb",
+    "tools/blender/spell_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/shield_shell.glb": "d765fa52b30601875bdbb6fcc4a4398deadb860f433da0007db2bf4da4938661"
+   },
+   "generator": "tools/blender/spell_meshes.py (Blender 5.2.2)",
+   "triangles": 952,
+   "vertices": 478,
+   "uv": "spherical (u around, v top to bottom)",
+   "bounds_m": [
+    2.0,
+    2.0,
+    2.0
+   ],
+   "acceptance": "tools/blender/spell_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the spell-effect checks",
+   "radius_m": 1.0
+  },
+  {
+   "id": "vfx_projectile_mesh",
+   "purpose": "subtle carrier core inside projectile streaks (replaces the placeholder sphere)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/projectile_core.glb",
+    "tools/blender/spell_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/projectile_core.glb": "c0bd46ff58a8a760c1bf950af0c94b44bc75941ffd7fd96a503fa1d65e231a3e"
+   },
+   "generator": "tools/blender/spell_meshes.py (Blender 5.2.2)",
+   "triangles": 64,
+   "vertices": 34,
+   "uv": "cylindrical wrap",
+   "bounds_m": [
+    0.5,
+    0.5,
+    2.224
+   ],
+   "acceptance": "tools/blender/spell_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the spell-effect checks"
+  },
+  {
+   "id": "vfx_shard_meshes",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/shards.glb",
+    "tools/blender/spell_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/shards.glb": "a05e0f221ffcde25492fc4b6c671c4ab06b10f69ecfd28f1df507eddfc243ca0"
+   },
+   "generator": "tools/blender/spell_meshes.py (Blender 5.2.2)",
+   "triangles": 8,
+   "vertices": 6,
+   "uv": "",
+   "bounds_m": [
+    0.1108,
+    0.0952,
+    0.1395
+   ],
+   "acceptance": "tools/blender/spell_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the spell-effect checks"
+  },
+  {
+   "id": "vfx_shard_meshes",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/shards.glb",
+    "tools/blender/spell_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/shards.glb": "a05e0f221ffcde25492fc4b6c671c4ab06b10f69ecfd28f1df507eddfc243ca0"
+   },
+   "generator": "tools/blender/spell_meshes.py (Blender 5.2.2)",
+   "triangles": 8,
+   "vertices": 6,
+   "uv": "",
+   "bounds_m": [
+    0.0826,
+    0.1104,
+    0.1844
+   ],
+   "acceptance": "tools/blender/spell_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the spell-effect checks"
+  },
+  {
+   "id": "vfx_shard_meshes",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/shards.glb",
+    "tools/blender/spell_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/shards.glb": "a05e0f221ffcde25492fc4b6c671c4ab06b10f69ecfd28f1df507eddfc243ca0"
+   },
+   "generator": "tools/blender/spell_meshes.py (Blender 5.2.2)",
+   "triangles": 8,
+   "vertices": 6,
+   "uv": "",
+   "bounds_m": [
+    0.102,
+    0.1056,
+    0.2934
+   ],
+   "acceptance": "tools/blender/spell_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the spell-effect checks"
+  },
+  {
+   "id": "vfx_shard_meshes",
+   "purpose": "irregular debris shards for Bombarda (four variants in one GLB)",
+   "status": "integrated",
+   "author": "HPMMO project (original)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/vfx/PROVENANCE.txt",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/meshes/shards.glb",
+    "tools/blender/spell_meshes.py"
+   ],
+   "sha256": {
+    "assets/vfx/meshes/shards.glb": "a05e0f221ffcde25492fc4b6c671c4ab06b10f69ecfd28f1df507eddfc243ca0"
+   },
+   "generator": "tools/blender/spell_meshes.py (Blender 5.2.2)",
+   "triangles": 8,
+   "vertices": 6,
+   "uv": "",
+   "bounds_m": [
+    0.1214,
+    0.1118,
+    0.2684
+   ],
+   "acceptance": "tools/blender/spell_meshes.py validation block (UV-mapped, low poly, no degenerate faces), meshes_metadata.json, and the spell-effect checks"
+  },
+  {
+   "id": "sfx_spell_library",
+   "purpose": "Spell-effect sound library: distinct cast/travel/impact/sustain/end variants for all seven spells, surface footsteps, robe movement, mount/dismount, broom wind, landing, spider movement/bites/death, boss attacks and death, UI feedback, map transitions, exterior wind and birds, interior room tones (Great Hall / library / dungeon), fire and candle beds, distant activity and the moving-stair mechanism",
+   "status": "integrated",
+   "author": "HPMMO project (original synthesis)",
+   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
+   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
+   "license_url": "assets/audio/CREDITS-spell-audio.md",
+   "license_file": "assets/audio/CREDITS-spell-audio.md",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/audio/",
+    "tools/audio/synth_spell_sfx.py",
+    "tools/audio/tune_imports.py"
+   ],
+   "generator": "tools/audio/synth_spell_sfx.py (Python standard library, seeded 20261005)",
+   "sound_count": 103,
+   "buses": [
+    "Music",
+    "SFX",
+    "UI",
+    "Ambience"
+   ],
+   "import_policy": "loop beds import with the forward loop flag and IMA-ADPCM; everything over two seconds stays compressed; enforced by tools/audio/tune_imports.py --check",
+   "acceptance": "run_vfx_checks.ps1 (every stage's sound exists and is distinct, every loop imports as a loop, buses and volume controls present, limiter and priority keys configured) and tools/downloads/vfx-check.log",
+   "evidence": [
+    "assets/audio/sound_library.json",
+    "tools/downloads/vfx-check.log"
+   ]
   }
  ],
  "rejected": [
@@ -7972,12 +8709,12 @@
   },
   {
    "id": "kenney-mini-characters",
-   "reason": "0.67 m blocky characters, 7 bones \u2014 fails the art direction",
+   "reason": "0.67 m blocky characters, 7 bones — fails the art direction",
    "source": "kenney.nl"
   },
   {
    "id": "quaternius-animated-base-character",
-   "reason": "Poly Pizza copy lists CC-BY 3.0 while the pack page says CC0 \u2014 license discrepancy; UAL (CC0) covers the same mannequin",
+   "reason": "Poly Pizza copy lists CC-BY 3.0 while the pack page says CC0 — license discrepancy; UAL (CC0) covers the same mannequin",
    "source": "poly.pizza"
   },
   {

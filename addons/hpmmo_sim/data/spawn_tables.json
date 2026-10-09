@@ -405,20 +405,20 @@
       "kind": "water",
       "shape": "cylinder",
       "center": [
-        -220.0,
-        -7.0,
-        185.0
+        -38.0,
+        0.0,
+        30.0
       ],
-      "radius": 88.0
+      "radius": 21.0
     },
     {
       "id": "courtyard_fountain",
       "kind": "water",
       "shape": "cylinder",
       "center": [
-        -9.0,
         0.0,
-        6.0
+        0.0,
+        0.0
       ],
       "radius": 4.0
     },

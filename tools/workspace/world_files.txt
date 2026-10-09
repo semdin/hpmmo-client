@@ -173,7 +173,13 @@ assets/models/props/wand.gltf
 assets/shaders/spell_layer.gdshader
 assets/shaders/spell_layer_add.gdshader
 assets/shaders/spell_ribbon.gdshader
+assets/shaders/spell_signature.gdshader
+assets/shaders/stupefy_filament.gdshader
+assets/shaders/stupefy_plasma.gdshader
 assets/shaders/triplanar_pbr.gdshader
+assets/shaders/wand_energy.gdshader
+assets/shaders/ward_surface.gdshader
+assets/shaders/water_pbr.gdshader
 assets/textures/masonry.gdshader
 assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_ao_2k.jpg
 assets/textures/pbr/dark_wooden_planks/dark_wooden_planks_diff_2k.jpg
@@ -318,6 +324,8 @@ scripts/spells/protego_shield.gd
 scripts/spells/skill_fx.gd
 scripts/spells/spell_effect.gd
 scripts/spells/spell_projectile.gd
+scripts/spells/spell_signature_vfx.gd
+scripts/spells/stupefy_vfx.gd
 scripts/spells/vfx_library.gd
 scripts/systems/audio_manager.gd
 scripts/systems/quest_manager.gd

@@ -7,7 +7,7 @@
       "available": true,
       "flight_allowed": true,
       "capacity": 64,
-      "y_min": -16.0,
+      "y_min": -10.0,
       "y_max": 185.0,
       "safe_zones": ["courtyard", "castle_approach", "village_square"],
       "entity_set": "grounds",

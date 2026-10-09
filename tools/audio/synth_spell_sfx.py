@@ -1,36 +1,32 @@
 #!/usr/bin/env python3
-"""Spell effects sound library - PROJECT-ORIGINAL synthesis.
+"""Spell effects sound library - HIGH-FIDELITY PROJECT-ORIGINAL synthesis.
 
     python client/tools/audio/synth_spell_sfx.py --out client/assets/audio
 
-Everything the game plays is generated here from deterministic seeded DSP (the
-standard library `wave` module, no external audio library, no download, no
-third-party sample). Re-running the script reproduces the files byte-for-byte.
+Every sound is synthesized here deterministically with high-quality DSP
+using Python, NumPy and SciPy. Re-running the script reproduces the audio
+files byte-for-byte.
 
-Coverage (12.5):
-
+Coverage:
     spells/<spell>/cast|travel|impact|sustain|end.wav
-        all seven spells with their own cast/travel/impact/end variants - never
-        one generic whoosh for everything
+        all seven spells with their own cast/travel/impact/end variants plus
+        attack/impact micro-variations.
     footsteps/<surface>_<n>.wav          five surfaces, three variants each
     character/                           robe movement, mount/dismount, broom
                                          wind (loop), landing
     monsters/                            spider move/bite/death, boss attacks,
                                          boss death
     ui/                                  button, confirm, cancel, error, loot,
-                                         level up, quest, upgrade, chat
+                                         level up, quest, upgrade, chat, hit
     transitions/                         map transfer, door open/close
     ambience/                            exterior wind + birds, fire, candles,
                                          distant activity, Great Hall, library,
-                                         dungeon room tones, moving-stair mechanism
+                                         dungeon room tones, moving-stair mechanism,
+                                         plus ambient scatter events (bird chirps,
+                                         wind gusts, leaf rustles, dungeon drips,
+                                         hall settlement creaks, library page flips).
 
-The Great Hall, library and dungeon are acoustically distinct: different
-reverb character (large hall / tight dry room / wet stone basement), different
-beds and different incident sounds. Loops are seam-continuous (the tail is
-crossfaded into the head and the seam continuity is asserted).
-
-Provenance is recorded in assets/audio/CREDITS-spell-audio.md and per-file in the
-manifest: all project-original, synthesised by this script.
+All loops are seam-continuous using crossfade_loop.
 """
 
 import argparse
@@ -38,143 +34,144 @@ import array
 import json
 import math
 import os
-import random
 import struct
 import sys
 import time
 import wave
+import numpy as np
+import scipy.signal as sp
 
 RATE_SFX = 44100
 RATE_AMB = 22050
 
 
-# ------------------------------------------------------------------ primitives
-
-def zeros(n):
-    return array.array("d", bytes(8 * n))
-
+# ------------------------------------------------------------------ DSP Primitives
 
 def clamp(value, lo, hi):
-    return lo if value < lo else (hi if value > hi else value)
+    return np.clip(value, lo, hi)
 
 
-class Rng:
-    def __init__(self, seed):
-        self.r = random.Random(seed)
-
-    def uni(self, a, b):
-        return a + (b - a) * self.r.random()
-
-    def sym(self, amount):
-        return (self.r.random() * 2.0 - 1.0) * amount
-
-    def int(self, a, b):
-        return self.r.randint(a, b)
-
-    def pick(self, seq):
-        return seq[self.r.randrange(len(seq))]
+def normalize(sig, target_peak=0.92):
+    peak = float(np.max(np.abs(sig)))
+    if peak > 1e-6:
+        return sig * (target_peak / peak)
+    return sig
 
 
-def white(rng, n):
-    r = rng.r
-    return array.array("d", [r.random() * 2.0 - 1.0 for _ in range(n)])
+def soft_clip(sig, drive=1.2):
+    """Tube-like tanh saturation that adds warm punchy harmonics and prevents harsh clipping."""
+    d = max(0.1, float(drive))
+    return np.tanh(sig * d) / np.tanh(d)
+
+
+def butter_lowpass(sig, cutoff, rate, order=2):
+    nyq = 0.5 * rate
+    norm = float(np.clip(cutoff / nyq, 0.001, 0.96))
+    b, a = sp.butter(order, norm, btype='low')
+    return sp.lfilter(b, a, sig)
+
+
+def butter_highpass(sig, cutoff, rate, order=2):
+    nyq = 0.5 * rate
+    norm = float(np.clip(cutoff / nyq, 0.001, 0.96))
+    b, a = sp.butter(order, norm, btype='high')
+    return sp.lfilter(b, a, sig)
+
+
+def butter_bandpass(sig, low, high, rate, order=2):
+    nyq = 0.5 * rate
+    low_norm = float(np.clip(low / nyq, 0.001, 0.94))
+    high_norm = float(np.clip(high / nyq, low_norm + 0.01, 0.96))
+    b, a = sp.butter(order, [low_norm, high_norm], btype='band')
+    return sp.lfilter(b, a, sig)
+
+
+def resonator(sig, center, q, rate):
+    """Bandpass resonator with normalized peak gain."""
+    w0 = 2.0 * math.pi * float(np.clip(center, 20.0, rate * 0.45)) / rate
+    cw, sw = math.cos(w0), math.sin(w0)
+    alpha = sw / (2.0 * max(0.1, q))
+    b0 = alpha
+    b1 = 0.0
+    b2 = -alpha
+    a0 = 1.0 + alpha
+    a1 = -2.0 * cw
+    a2 = 1.0 - alpha
+    b = [b0 / a0, b1 / a0, b2 / a0]
+    a = [1.0, a1 / a0, a2 / a0]
+    return sp.lfilter(b, a, sig)
+
+
+def multi_resonator(sig, partials, rate):
+    """partials is a list of (freq, q, amp)."""
+    out = np.zeros(len(sig))
+    for freq, q, amp in partials:
+        out += resonator(sig, freq, q, rate) * amp
+    return out
 
 
 def sine(n, freq, rate, phase=0.0, amp=1.0):
-    """freq may be a float or a callable(progress 0..1) -> Hz."""
-    out = zeros(n)
-    ph = phase
-    if callable(freq):
-        for i in range(n):
-            f = freq(i / float(max(1, n - 1)))
-            ph += math.tau * f / rate
-            out[i] = amp * math.sin(ph)
-    else:
-        step = math.tau * freq / rate
-        for i in range(n):
-            ph += step
-            out[i] = amp * math.sin(ph)
-    return out
+    t = np.arange(n) / float(rate)
+    if isinstance(freq, (int, float)):
+        return amp * np.sin(2.0 * np.pi * freq * t + phase)
+    elif isinstance(freq, np.ndarray):
+        ph = 2.0 * np.pi * np.cumsum(freq) / float(rate) + phase
+        return amp * np.sin(ph)
+    elif callable(freq):
+        p = np.linspace(0, 1, n)
+        f_arr = np.array([freq(x) for x in p])
+        ph = 2.0 * np.pi * np.cumsum(f_arr) / float(rate) + phase
+        return amp * np.sin(ph)
+    return np.zeros(n)
 
 
-def _sweep_freq(f0, f1, shape):
-    if shape == "lin":
-        return lambda p: f0 + (f1 - f0) * p
+def sine_sweep(n, f0, f1, rate, shape="exp"):
+    t = np.linspace(0, 1, n)
     if shape == "exp":
         ratio = max(1e-6, f1 / max(1e-6, f0))
-        return lambda p: f0 * (ratio ** p)
-    return lambda p: f0
+        freqs = f0 * (ratio ** t)
+    else:
+        freqs = f0 + (f1 - f0) * t
+    phases = 2.0 * np.pi * np.cumsum(freqs) / float(rate)
+    return np.sin(phases)
 
 
-# ---------------------------------------------------------------- biquads
-
-def biquad(sig, b0, b1, b2, a1, a2):
-    out = zeros(len(sig))
-    x1 = x2 = y1 = y2 = 0.0
-    for i, x0 in enumerate(sig):
-        y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2
-        out[i] = y0
-        x2, x1 = x1, x0
-        y2, y1 = y1, y0
-    return out
+def exp_decay(n, tau):
+    t = np.linspace(0, 1, n)
+    return np.exp(-t / max(1e-4, tau))
 
 
-def _rbj(kind, cutoff, q, rate):
-    w0 = math.tau * clamp(cutoff, 10.0, rate * 0.45) / rate
-    cw, sw = math.cos(w0), math.sin(w0)
-    alpha = sw / (2.0 * max(0.05, q))
-    if kind == "lp":
-        b0 = (1.0 - cw) / 2.0
-        b1 = 1.0 - cw
-        b2 = b0
-        a0 = 1.0 + alpha
-        a1 = -2.0 * cw
-        a2 = 1.0 - alpha
-    elif kind == "hp":
-        b0 = (1.0 + cw) / 2.0
-        b1 = -(1.0 + cw)
-        b2 = b0
-        a0 = 1.0 + alpha
-        a1 = -2.0 * cw
-        a2 = 1.0 - alpha
-    else:  # bandpass (constant peak gain)
-        b0 = alpha
-        b1 = 0.0
-        b2 = -alpha
-        a0 = 1.0 + alpha
-        a1 = -2.0 * cw
-        a2 = 1.0 - alpha
-    return b0 / a0, b1 / a0, b2 / a0, a1 / a0, a2 / a0
+def env_shape(n, points):
+    """Piecewise-linear envelope from [(t, v), ...] with t in 0..1."""
+    t_pts = [p[0] for p in points]
+    v_pts = [p[1] for p in points]
+    t = np.linspace(0, 1, n)
+    return np.interp(t, t_pts, v_pts)
 
 
-def lowpass(sig, cutoff, q=0.707, rate=RATE_SFX):
-    return biquad(sig, *_rbj("lp", cutoff, q, rate))
+def adsr(n, attack, decay, sustain, release):
+    a = max(1, int(attack * n))
+    d = max(1, int(decay * n))
+    r = max(1, int(release * n))
+    s = max(0, n - a - d - r)
+    pts = [(0.0, 0.0), (a / float(n), 1.0), ((a + d) / float(n), sustain)]
+    if s > 0:
+        pts.append(((a + d + s) / float(n), sustain))
+    pts.append((1.0, 0.0))
+    return env_shape(n, pts)
 
 
-def highpass(sig, cutoff, q=0.707, rate=RATE_SFX):
-    return biquad(sig, *_rbj("hp", cutoff, q, rate))
+def white_noise(n, rng):
+    return rng.uniform(-1.0, 1.0, n)
 
 
-def bandpass(sig, center, q=1.0, rate=RATE_SFX):
-    return biquad(sig, *_rbj("bp", center, q, rate))
-
-
-def resonators(sig, partials, rate=RATE_SFX):
-    """Sum of bandpasses - inharmonic metal/wood/glass bodies."""
-    out = zeros(len(sig))
-    for freq, q, amp in partials:
-        band = bandpass(sig, freq, q, rate)
-        for i in range(len(out)):
-            out[i] += band[i] * amp
-    return out
-
-
-def pink(rng, n):
-    """Paul Kellet's economical pink filter over white noise."""
-    w = white(rng, n)
-    out = zeros(n)
+def pink_noise(n, rng):
+    """Paul Kellet filter for authentic pink noise."""
+    w = white_noise(n, rng)
     b = [0.0] * 7
-    for i, x in enumerate(w):
+    out = np.zeros(n)
+    for i in range(n):
+        x = w[i]
         b[0] = 0.99886 * b[0] + x * 0.0555179
         b[1] = 0.99332 * b[1] + x * 0.0750759
         b[2] = 0.96900 * b[2] + x * 0.1538520
@@ -186,221 +183,81 @@ def pink(rng, n):
     return out
 
 
-def brown(rng, n):
-    w = white(rng, n)
-    out = zeros(n)
+def brown_noise(n, rng):
+    w = white_noise(n, rng)
+    out = np.zeros(n)
     acc = 0.0
-    for i, x in enumerate(w):
-        acc = clamp(acc + x * 0.02, -1.0, 1.0) * 0.995
+    for i in range(n):
+        acc = np.clip(acc + w[i] * 0.02, -1.0, 1.0) * 0.995
         out[i] = acc
     return out
 
 
-# ---------------------------------------------------------------- envelopes
-
-def env_shape(n, points):
-    """Piecewise-linear envelope from [(t, v), ...] with t in 0..1."""
-    out = zeros(n)
-    if not points:
-        return out
-    for i in range(n):
-        t = i / float(max(1, n - 1))
-        v = points[-1][1]
-        for k in range(len(points) - 1):
-            t0, v0 = points[k]
-            t1, v1 = points[k + 1]
-            if t <= t1:
-                k2 = 0.0 if t1 <= t0 else (t - t0) / (t1 - t0)
-                v = v0 + (v1 - v0) * k2
-                break
-        out[i] = v
-    return out
-
-
-def adsr(n, attack, decay, sustain, release):
-    a = max(1, int(attack * n))
-    d = max(1, int(decay * n))
-    r = max(1, int(release * n))
-    s = max(0, n - a - d - r)
-    pts = []
-    if a:
-        pts.append((0.0, 0.0))
-        pts.append((a / float(n), 1.0))
-    if d:
-        pts.append(((a + d) / float(n), sustain))
-    if s:
-        pts.append(((a + d + s) / float(n), sustain))
-    pts.append((1.0, 0.0))
-    return env_shape(n, pts)
-
-
-def expdecay(n, tau):
-    out = zeros(n)
-    for i in range(n):
-        out[i] = math.exp(-(i / float(max(1, n - 1))) / max(1e-4, tau))
-    return out
-
-
-def smoothstep(x):
-    x = clamp(x, 0.0, 1.0)
-    return x * x * (3.0 - 2.0 * x)
-
-
-# ---------------------------------------------------------------- mixing
-
-def mix(*sigs):
-    n = max(len(s) for s in sigs)
-    out = zeros(n)
-    for s in sigs:
-        for i, v in enumerate(s):
-            out[i] += v
-    return out
-
-
-def gain(sig, g):
-    return array.array("d", [v * g for v in sig])
-
-
-def apply_env(sig, env):
-    return array.array("d", [sig[i] * env[i] for i in range(len(sig))])
-
-
-def delay(sig, samples):
-    out = zeros(len(sig) + samples)
-    for i, v in enumerate(sig):
-        out[i + samples] += v
-    return out
-
-
-def soft_clip(sig, drive=1.0):
-    return array.array("d", [math.tanh(v * drive) for v in sig])
-
-
-def normalize(sig, peak=0.89):
-    top = 0.0
-    for v in sig:
-        av = abs(v)
-        if av > top:
-            top = av
-    if top < 1e-9:
-        return sig
-    g = peak / top
-    return array.array("d", [v * g for v in sig])
-
-
-def fade_edges(sig, samples):
-    n = len(sig)
-    samples = min(samples, n // 3)
-    for i in range(samples):
-        g = i / float(samples)
-        sig[i] *= g
-        sig[n - 1 - i] *= g
-    return sig
-
-
 def crossfade_loop(sig, fade_samples):
-    """Cut a seamless loop out of a longer bed.
-
-    The loop occupies sig[0:L] with L = n - fade. Its head is blended with
-    sig[L:L+fade] - the samples that naturally CONTINUE the end of the loop -
-    so the wrap L-1 -> 0 is continuous in both value and slope rather than a
-    jump. Blending the head with the tail instead (a common mistake) leaves a
-    step at the seam, which is exactly what the validation check catches.
-    """
+    """Cut a mathematically seamless loop out of a longer bed."""
     n = len(sig)
     fade = min(fade_samples, n // 4)
     if fade <= 1:
         return sig
     length = n - fade
-    out = array.array("d", sig[:length])
-    for i in range(fade):
-        t = i / float(fade)
-        out[i] = sig[i] * t + sig[length + i] * (1.0 - t)
+    out = np.copy(sig[:length])
+    t = np.linspace(0, 1, fade)
+    out[:fade] = sig[:fade] * t + sig[length:length + fade] * (1.0 - t)
     return out
 
 
 def reverb(sig, rate, decay=1.6, mix_amount=0.3, damp=4200.0, size=1.0):
-    """Schroeder reverb: four combs into two allpasses.
-
-    The comb delays are scaled by `size` so a hall, a room and a stone basement
-    are genuinely different spaces rather than the same tail at one gain.
-    """
+    """Schroeder reverb: four comb filters + two allpass filters."""
     combs = [1116, 1188, 1277, 1356]
-    wet = zeros(len(sig))
+    wet = np.zeros(len(sig))
     for delay_ms, fb in ((combs[0], 0.78), (combs[1], 0.74), (combs[2], 0.71), (combs[3], 0.68)):
         d = max(8, int(rate * delay_ms / 1000.0 * size))
-        buf = zeros(d)
+        buf = np.zeros(d)
         idx = 0
-        length = int(decay * 1.6)
-        g = clamp(fb * (0.5 + 0.5 * decay / 2.0), 0.0, 0.94)
+        g = float(np.clip(fb * (0.5 + 0.5 * decay / 2.0), 0.0, 0.94))
         for i in range(len(sig)):
             y = buf[idx]
             wet[i] += y * 0.25
             buf[idx] = sig[i] + y * g
-            idx += 1
-            if idx >= d:
-                idx = 0
-    wet = lowpass(wet, damp, 0.7, rate)
-    out = zeros(len(sig))
-    for i in range(len(sig)):
-        out[i] = sig[i] * (1.0 - mix_amount) + wet[i] * mix_amount
-    return out
-
-
-def clip_offsets(sig, offsets, body):
-    """Sparse events (drips, birds, distant thumps) placed at offsets."""
-    n = len(sig)
-    out = array.array("d", sig)
-    for off in offsets:
-        if off + len(body) <= n:
-            for i, v in enumerate(body):
-                out[off + i] += v
-    return out
-
-
-def noise_burst(rng, rate, seconds, lo=400.0, hi=6000.0, q=0.9):
-    n = int(rate * seconds)
-    w = white(rng, n)
-    band = bandpass(w, math.sqrt(lo * hi), q, rate)
-    return apply_env(band, expdecay(n, 0.28))
+            idx = (idx + 1) % d
+    wet = butter_lowpass(wet, damp, rate)
+    return sig * (1.0 - mix_amount) + wet * mix_amount
 
 
 def crackles(rng, rate, seconds, density=14.0, bright=5200.0, level=0.5):
-    """Fire/ember crackle bed: sparse filtered clicks."""
+    """Fire / ember crackle bed with sparse natural micro-pops."""
     n = int(rate * seconds)
-    out = zeros(n)
+    out = np.zeros(n)
     t = 0.0
     while t < seconds:
-        gap = rng.uni(0.35, 1.6) / density
+        gap = rng.uniform(0.35, 1.6) / density
         t += gap
         start = int(t * rate)
         if start >= n - 64:
             break
-        length = rng.int(24, 110)
+        length = rng.randint(24, 110)
         length = min(length, n - start)
-        decay = expdecay(length, rng.uni(0.06, 0.22))
-        for i in range(length):
-            out[start + i] += (rng.uni(-1.0, 1.0)) * decay[i] * level
+        decay = exp_decay(length, rng.uniform(0.06, 0.22))
+        rand_vals = rng.uniform(-1.0, 1.0, length)
+        out[start:start + length] += rand_vals * decay * level
         t += length / float(rate) + gap
-    return lowpass(highpass(out, 500.0, 0.7, rate), bright, 0.7, rate)
+    out = butter_highpass(out, 500.0, rate)
+    return butter_lowpass(out, bright, rate)
 
 
 def ping(rate, freq, seconds, decay=0.25, partials=((1.0, 1.0), (2.01, 0.45), (3.02, 0.22), (4.9, 0.12))):
     n = int(rate * seconds)
-    out = zeros(n)
-    env = expdecay(n, decay)
+    out = np.zeros(n)
+    env = exp_decay(n, decay)
     for ratio, amp in partials:
-        tone = sine(n, freq * ratio, rate, amp=amp)
-        for i in range(n):
-            out[i] += tone[i] * env[i]
+        out += sine(n, freq * ratio, rate, amp=amp) * env
     return out
 
 
-# ------------------------------------------------------------------ writing
-
 def write_wav(path, sig, rate):
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    data = array.array("h", [int(clamp(v, -1.0, 1.0) * 32767.0) for v in sig])
+    clamped = np.clip(sig, -1.0, 1.0)
+    data = (clamped * 32767.0).astype(np.int16)
     with wave.open(path, "wb") as handle:
         handle.setnchannels(1)
         handle.setsampwidth(2)
@@ -408,10 +265,10 @@ def write_wav(path, sig, rate):
         handle.writeframes(data.tobytes())
 
 
-# ------------------------------------------------------------------ spells
+# ------------------------------------------------------------------ Spell Synthesis
 
 def spell_library(rng):
-    """Every spell gets its own voice: cast, travel, impact and end."""
+    """Synthesizes high-fidelity spell sounds with visceral weight and magical identity."""
     out = {}
 
     def add(spell, stage, sig, rate=RATE_SFX, loop=False, gain_db=-4.0,
@@ -422,196 +279,303 @@ def spell_library(rng):
             spatial=spatial, purpose=purpose,
             loop_mode="forward" if loop else "disabled")
 
-    # --- basic_cast: a small bright flick, light hiss, tiny fizz
-    n = int(RATE_SFX * 0.16)
-    snap = apply_env(bandpass(white(rng, n), 2600, 1.1, RATE_SFX), adsr(n, 0.004, 0.05, 0.10, 0.5))
-    flick = apply_env(gain(sine(n, _sweep_freq(1900, 1250, "exp"), RATE_SFX), 0.55), expdecay(n, 0.18))
-    add("basic_cast", "cast", normalize(mix(snap, flick), 0.8), gain_db=-7.0,
-        pitch_var=0.05, purpose="wand flick: bright noise snap + short downward chirp")
-    n = int(RATE_SFX * 0.5)
-    hiss = bandpass(white(rng, n), 3200, 0.7, RATE_SFX)
-    add("basic_cast", "travel", normalize(apply_env(hiss, env_shape(n, [(0, 0.0), (0.1, 0.9), (0.85, 0.8), (1.0, 0.0)])), 0.5),
-        gain_db=-13.0, loop=True, purpose="light airy hiss while the bolt is in flight")
-    n = int(RATE_SFX * 0.3)
-    tick = apply_env(bandpass(white(rng, n), 3400, 1.4, RATE_SFX), adsr(n, 0.002, 0.03, 0.05, 0.7))
-    sparkle = ping(RATE_SFX, 3100, 0.3, 0.09)
-    add("basic_cast", "impact", normalize(mix(gain(tick, 1.0), gain(sparkle, 0.35)), 0.85),
-        gain_db=-6.0, pitch_var=0.07, purpose="irregular fleck impact: tick plus a brief sparkle")
-    add("basic_cast", "end", normalize(gain(apply_env(bandpass(white(rng, int(RATE_SFX * 0.22)), 2200, 0.8, RATE_SFX),
-                                                          expdecay(int(RATE_SFX * 0.22), 0.22)), 0.5), 0.7),
-        gain_db=-14.0, purpose="small glow decay after the hit")
+    # ----------------------------------------------------------------
+    # 1. basic_cast (The primary attack! Snappy, crisp, punchy, satisfying)
+    # ----------------------------------------------------------------
+    def synth_basic_cast(sub_f=140.0, flick_f=2800.0, body_f=580.0):
+        n = int(RATE_SFX * 0.26)
+        t = np.arange(n) / RATE_SFX
+        
+        # Whip-crack transient (wand slicing through air)
+        w_len = int(RATE_SFX * 0.05)
+        crack_noise = rng.normal(0, 1, w_len)
+        crack_filt = butter_bandpass(crack_noise, flick_f * 0.8, flick_f * 2.2, RATE_SFX)
+        crack = np.zeros(n)
+        crack[:w_len] = crack_filt * np.exp(-np.linspace(0, 1, w_len) / 0.035) * 1.3
 
-    # --- stupefy: red stun - low-mid rise, wobbling travel, heavy hit, shimmer end
-    n = int(RATE_SFX * 0.32)
-    rise = apply_env(gain(sine(n, _sweep_freq(170, 520, "exp"), RATE_SFX), 0.8), env_shape(n, [(0, 0.1), (0.5, 1.0), (0.75, 0.9), (1.0, 0.0)]))
-    body = apply_env(bandpass(white(rng, n), 900, 1.2, RATE_SFX), adsr(n, 0.01, 0.1, 0.5, 0.4))
-    add("stupefy", "cast", normalize(mix(rise, gain(body, 0.6)), 0.9), gain_db=-5.0,
-        pitch_var=0.04, purpose="charge-up: rising tone with a resonant edge")
-    n = int(RATE_SFX * 0.6)
-    wob = zeros(n)
-    for i in range(n):
-        wob[i] = math.sin(math.tau * 7.0 * i / RATE_SFX) * 0.5 + 0.5
-    air = bandpass(white(rng, n), 1500, 1.1, RATE_SFX)
-    air = array.array("d", [air[i] * (0.55 + 0.45 * wob[i]) for i in range(n)])
-    add("stupefy", "travel", normalize(apply_env(air, env_shape(n, [(0, 0.0), (0.12, 0.95), (0.85, 0.85), (1.0, 0.0)])), 0.55),
-        gain_db=-11.0, loop=True, purpose="wobbling mid-band whoosh in flight")
-    n = int(RATE_SFX * 0.42)
-    thump = apply_env(gain(sine(n, _sweep_freq(150, 60, "exp"), RATE_SFX), 0.9), expdecay(n, 0.16))
-    hit = apply_env(bandpass(white(rng, n), 700, 0.9, RATE_SFX), adsr(n, 0.002, 0.05, 0.2, 0.7))
-    ring = ping(RATE_SFX, 880, 0.42, 0.22, partials=((1.0, 1.0), (2.35, 0.4), (3.9, 0.18)))
-    add("stupefy", "impact", normalize(mix(gain(thump, 1.0), gain(hit, 0.7), gain(ring, 0.35)), 0.95),
-        gain_db=-3.0, pitch_var=0.03, purpose="body hit + stun ring (the ring matches the stun status)")
-    shimmer = ping(RATE_SFX, 1180, 0.6, 0.4, partials=((1.0, 1.0), (1.48, 0.5), (2.7, 0.25)))
-    n2 = len(shimmer)
-    trem = array.array("d", [0.55 + 0.45 * math.sin(math.tau * 5.0 * i / RATE_SFX) for i in range(n2)])
-    add("stupefy", "end", normalize(apply_env(shimmer, apply_env(expdecay(n2, 0.35), trem)), 0.6),
-        gain_db=-12.0, purpose="distinct stun end cue as the status expires")
+        # Sub-harmonic punch (air displacement weight)
+        p_len = int(RATE_SFX * 0.10)
+        t_p = np.arange(p_len) / RATE_SFX
+        freq_p = sub_f * np.exp(-t_p / 0.03) + 45.0
+        phases_p = 2.0 * np.pi * np.cumsum(freq_p) / RATE_SFX
+        punch = np.zeros(n)
+        punch[:p_len] = np.sin(phases_p) * np.exp(-t_p / 0.03) * 0.85
 
-    # --- incendio: fire onset, roaring sustain, burst, extinguish
-    n = int(RATE_SFX * 0.45)
-    roar = apply_env(lowpass(white(rng, n), 1800, 0.8, RATE_SFX), env_shape(n, [(0, 0.0), (0.16, 1.0), (0.6, 0.85), (1.0, 0.15)]))
-    blast = apply_env(gain(sine(n, _sweep_freq(120, 55, "exp"), RATE_SFX), 0.8), expdecay(n, 0.18))
-    add("incendio", "cast", normalize(mix(crackles(rng, RATE_SFX, 0.45, 26.0), gain(roar, 0.9), gain(blast, 0.8)), 0.95),
-        gain_db=-3.0, pitch_var=0.03, purpose="fire onset: roar + crackle + low thump")
-    n = int(RATE_AMB * 2.0)
-    bed = lowpass(pink(rng, n), 2400, 0.8, RATE_AMB)
-    bed = array.array("d", [v * (0.72 + 0.28 * math.sin(math.tau * 0.7 * i / RATE_AMB)) for i, v in enumerate(bed)])
-    bed = mix(bed, gain(crackles(rng, RATE_AMB, 2.0, 9.0, 5200.0, 0.55), 0.9))
-    add("incendio", "sustain", normalize(crossfade_loop(bed, int(RATE_AMB * 0.25)), 0.7), rate=RATE_AMB,
-        loop=True, gain_db=-11.0, spatial=False, purpose="burn loop while the server burn ticks run")
-    n = int(RATE_SFX * 0.5)
-    burst = apply_env(lowpass(white(rng, n), 3200, 0.9, RATE_SFX), env_shape(n, [(0, 0.0), (0.05, 1.0), (0.4, 0.7), (1.0, 0.05)]))
-    add("incendio", "impact", normalize(mix(gain(burst, 1.0), crackles(rng, RATE_SFX, 0.5, 34.0), gain(apply_env(gain(sine(n, _sweep_freq(180, 70, "exp"), RATE_SFX), 0.7), expdecay(n, 0.2)), 0.6)), 0.95),
-        gain_db=-3.0, pitch_var=0.04, purpose="cone burst on the confirmed hit")
-    n = int(RATE_SFX * 0.85)
-    hiss = apply_env(gain(highpass(white(rng, n), 1200, 0.7, RATE_SFX), 0.8),
-                     env_shape(n, [(0, 0.0), (0.08, 1.0), (0.5, 0.5), (1.0, 0.0)]))
-    swell = lowpass(hiss, 3000, 0.7, RATE_SFX)
-    add("incendio", "end", normalize(mix(gain(swell, 1.0), gain(apply_env(gain(sine(n, _sweep_freq(400, 120, "exp"), RATE_SFX), 0.3), expdecay(n, 0.3)), 0.7)), 0.8),
-        gain_db=-8.0, purpose="extinguish: steam hiss over a falling body")
+        # Arcane resonant body (warm magical core)
+        f_body = body_f * np.exp(-t / 0.12) + 200.0
+        ph_body = 2.0 * np.pi * np.cumsum(f_body) / RATE_SFX
+        body = (np.sin(ph_body) + 0.45 * np.sin(ph_body * 2.02) + 0.2 * np.sin(ph_body * 3.01))
+        body = body * np.exp(-t / 0.075) * 0.65
 
-    # --- bombarda: heavy charge, rumble travel, weighted blast, debris tail
-    n = int(RATE_SFX * 0.42)
-    charge = apply_env(gain(sine(n, _sweep_freq(90, 240, "lin"), RATE_SFX), 0.9), env_shape(n, [(0, 0.0), (0.7, 0.9), (1.0, 1.0)]))
-    click = apply_env(bandpass(white(rng, n), 1800, 1.6, RATE_SFX), adsr(n, 0.002, 0.02, 0.02, 0.9))
-    add("bombarda", "cast", normalize(mix(charge, gain(click, 0.5)), 0.9), gain_db=-4.0,
-        pitch_var=0.03, purpose="charge-up with a latch click")
-    n = int(RATE_SFX * 0.7)
-    rumble = apply_env(lowpass(white(rng, n), 700, 0.8, RATE_SFX), env_shape(n, [(0, 0.0), (0.15, 0.95), (0.8, 0.8), (1.0, 0.0)]))
-    add("bombarda", "travel", normalize(gain(mix(rumble, gain(sine(n, 70, RATE_SFX), 0.35)), 0.7), 0.75),
-        gain_db=-10.0, loop=True, purpose="low rushing rumble in flight")
-    n = int(RATE_SFX * 1.25)
-    boom = apply_env(gain(sine(n, _sweep_freq(130, 34, "exp"), RATE_SFX), 1.0), expdecay(n, 0.22))
-    crack = apply_env(lowpass(white(rng, n), 2400, 0.7, RATE_SFX), adsr(n, 0.001, 0.04, 0.05, 0.9))
-    tail = apply_env(lowpass(pink(rng, n), 600, 0.8, RATE_SFX), env_shape(n, [(0, 0.0), (0.05, 1.0), (0.4, 0.45), (1.0, 0.0)]))
-    add("bombarda", "impact", normalize(mix(gain(boom, 1.0), gain(crack, 0.8), gain(tail, 0.6)), 0.98),
-        gain_db=-1.0, pitch_var=0.02, purpose="weighted blast with controlled low-frequency content")
-    n = int(RATE_SFX * 1.1)
-    debris = zeros(n)
-    t = 0.0
-    while t < 1.0:
-        t += rng.uni(0.03, 0.18)
-        start = int(t * RATE_SFX)
-        if start >= n - 200:
-            break
-        chip = ping(RATE_SFX, rng.uni(900, 2600), 0.12, 0.05, partials=((1.0, 1.0), (2.7, 0.4)))
-        for i, v in enumerate(chip):
-            if start + i < n:
-                debris[start + i] += v * rng.uni(0.4, 1.0) * 0.5
-    rumble2 = apply_env(lowpass(white(rng, n), 420, 0.8, RATE_SFX), expdecay(n, 0.5))
-    add("bombarda", "end", normalize(mix(debris, gain(rumble2, 0.7)), 0.7), gain_db=-9.0,
-        purpose="debris and settling rumble after the blast")
+        # Sparkle motes (high-frequency fizzle)
+        s_len = int(RATE_SFX * 0.18)
+        spark = np.zeros(n)
+        spark_noise = butter_bandpass(rng.normal(0, 1, s_len), 4500, 9200, RATE_SFX)
+        spark[:s_len] = spark_noise * np.exp(-np.linspace(0, 1, s_len) / 0.08) * 0.4
 
-    # --- expelliarmus: whip crack, whistle, disarm clang, wind-down
-    n = int(RATE_SFX * 0.22)
-    whip = apply_env(bandpass(white(rng, n), 4000, 1.5, RATE_SFX), adsr(n, 0.001, 0.02, 0.02, 0.95))
-    fall = apply_env(gain(sine(n, _sweep_freq(1700, 480, "exp"), RATE_SFX), 0.5), expdecay(n, 0.12))
-    add("expelliarmus", "cast", normalize(mix(whip, fall), 0.9), gain_db=-5.0,
-        pitch_var=0.05, purpose="whip-snap cast matching the wand sweep")
-    n = int(RATE_SFX * 0.6)
-    whistle = zeros(n)
-    phase = 0.0
-    for i in range(n):
-        # frequency-modulated carrier: integrate the instantaneous frequency so
-        # the phase stays continuous (multiplying an absolute time by a varying
-        # frequency produces a waveform that cannot loop)
-        freq = 2400.0 * (1.0 + 0.04 * math.sin(math.tau * 11.0 * i / RATE_SFX))
-        phase += math.tau * freq / RATE_SFX
-        whistle[i] = math.sin(phase)
-    add("expelliarmus", "travel", normalize(apply_env(gain(whistle, 0.7), env_shape(n, [(0, 0.0), (0.12, 0.9), (0.85, 0.8), (1.0, 0.0)])), 0.5),
-        gain_db=-12.0, loop=True, purpose="high whistle with vibrato")
-    n = int(RATE_SFX * 0.5)
-    clang = apply_env(resonators(white(rng, n), [(1180, 9.0, 1.0), (1780, 11.0, 0.7), (2630, 13.0, 0.4)], RATE_SFX),
-                      expdecay(n, 0.16))
-    rattle = zeros(n)
-    for _ in range(6):
-        off = rng.int(0, max(1, n - 900))
-        short = apply_env(bandpass(white(rng, 800), rng.uni(1500, 3600), 2.0, RATE_SFX), expdecay(800, 0.06))
-        for i, v in enumerate(short):
-            rattle[off + i] += v * 0.5
-    add("expelliarmus", "impact", normalize(mix(gain(clang, 1.0), gain(rattle, 0.7)), 0.95),
-        gain_db=-4.0, pitch_var=0.04, purpose="knocked-away wand clang + rattle")
-    n = int(RATE_SFX * 0.4)
-    down = apply_env(gain(sine(n, _sweep_freq(900, 260, "exp"), RATE_SFX), 0.5), expdecay(n, 0.25))
-    add("expelliarmus", "end", normalize(down, 0.6), gain_db=-14.0, purpose="recoil tail")
+        sig = crack + punch + body + spark
+        sig = soft_clip(sig, drive=1.3)
+        return normalize(sig, 0.92)
 
-    # --- protego: raise, sustained hum, positional ping, collapse
+    add("basic_cast", "cast", synth_basic_cast(140.0, 3100.0, 620.0), gain_db=-5.0,
+        pitch_var=0.06, purpose="wand flick: snappy whip crack + sub-punch + arcane fizzle")
+    
+    # Variations for basic cast to avoid machine-gunning
+    out["spell_basic_cast_cast_2"] = dict(
+        path="spells/basic_cast/cast_02.wav", sig=synth_basic_cast(155.0, 3400.0, 660.0),
+        rate=RATE_SFX, loop=False, bus="sfx", gain_db=-5.0, pitch_var=0.06, spatial=True,
+        purpose="basic cast variation 2", loop_mode="disabled")
+    out["spell_basic_cast_cast_3"] = dict(
+        path="spells/basic_cast/cast_03.wav", sig=synth_basic_cast(128.0, 2800.0, 580.0),
+        rate=RATE_SFX, loop=False, bus="sfx", gain_db=-5.0, pitch_var=0.06, spatial=True,
+        purpose="basic cast variation 3", loop_mode="disabled")
+
+    # Basic cast travel (aerodynamic slipstream whoosh with subtle phase spin)
+    n = int(RATE_SFX * 0.75)
+    t = np.arange(n) / RATE_SFX
+    wh_noise = butter_bandpass(pink_noise(n, rng), 900, 3600, RATE_SFX)
+    swirl = 0.7 + 0.3 * np.sin(2.0 * np.pi * 5.0 * t)
+    wh_hum = sine(n, 280, RATE_SFX, amp=0.25) * np.sin(2.0 * np.pi * 3.5 * t)
+    travel = (wh_noise * swirl + wh_hum) * 0.7
+    add("basic_cast", "travel", normalize(crossfade_loop(travel, int(RATE_SFX * 0.2)), 0.65),
+        gain_db=-12.0, loop=True, purpose="aerodynamic slipstream whoosh while bolt is in flight")
+
+    # Basic cast impact (visceral thud + sharp dispersion crack + sparkling flecks)
+    def synth_basic_impact(thud_f=95.0, crack_f=3400.0):
+        n = int(RATE_SFX * 0.35)
+        t = np.arange(n) / RATE_SFX
+        # Thump
+        thump_f = thud_f * np.exp(-t / 0.04) + 40.0
+        thump = np.sin(2.0 * np.pi * np.cumsum(thump_f) / RATE_SFX) * np.exp(-t / 0.045) * 1.1
+        # Crack
+        c_len = int(RATE_SFX * 0.08)
+        crack_w = butter_bandpass(rng.normal(0, 1, c_len), crack_f * 0.8, crack_f * 1.8, RATE_SFX)
+        crack = np.zeros(n)
+        crack[:c_len] = crack_w * np.exp(-np.linspace(0, 1, c_len) / 0.025) * 1.2
+        # Crystalline fleck dispersion
+        fleck = ping(RATE_SFX, 2800, 0.35, decay=0.08, partials=((1.0, 1.0), (1.42, 0.5), (2.1, 0.3))) * 0.4
+        sig = soft_clip(thump + crack + fleck, drive=1.3)
+        return normalize(sig, 0.94)
+
+    add("basic_cast", "impact", synth_basic_impact(105.0, 3600.0), gain_db=-4.5,
+        pitch_var=0.08, purpose="impact: punchy body thud + dispersion crack + sparkling flecks")
+    out["spell_basic_cast_impact_2"] = dict(
+        path="spells/basic_cast/impact_02.wav", sig=synth_basic_impact(90.0, 3200.0),
+        rate=RATE_SFX, loop=False, bus="sfx", gain_db=-4.5, pitch_var=0.08, spatial=True,
+        purpose="basic impact variation 2", loop_mode="disabled")
+
+    # Basic cast end (gentle magical dissipate)
+    n = int(RATE_SFX * 0.28)
+    diss = butter_bandpass(pink_noise(n, rng), 1400, 4800, RATE_SFX) * exp_decay(n, 0.16)
+    add("basic_cast", "end", normalize(diss, 0.6), gain_db=-13.0, purpose="subtle dissipate tail")
+
+    # ----------------------------------------------------------------
+    # 2. stupefy (Stun bolt: deep rising charge, Doppler hum, stun blast)
+    # ----------------------------------------------------------------
+    n = int(RATE_SFX * 0.36)
+    t = np.arange(n) / RATE_SFX
+    rise_f = 120.0 + 440.0 * (t / t[-1]) ** 1.8
+    charge = np.sin(2.0 * np.pi * np.cumsum(rise_f) / RATE_SFX)
+    charge += 0.4 * np.sin(2.0 * np.pi * np.cumsum(rise_f * 1.98) / RATE_SFX)
+    charge = charge * adsr(n, 0.01, 0.1, 0.6, 0.29)
+    crack = butter_bandpass(rng.normal(0, 1, n), 800, 2800, RATE_SFX) * adsr(n, 0.01, 0.15, 0.4, 0.44)
+    add("stupefy", "cast", normalize(soft_clip(charge * 0.9 + crack * 0.7, drive=1.2), 0.92),
+        gain_db=-4.5, pitch_var=0.05, purpose="stupefy cast: rising resonant charge with crisp release")
+
+    n = int(RATE_SFX * 0.8)
+    t = np.arange(n) / RATE_SFX
+    dop = sine(n, 340 + 60 * np.sin(2.0 * np.pi * 7.0 * t), RATE_SFX, amp=0.5)
+    noise_dop = butter_bandpass(pink_noise(n, rng), 600, 2200, RATE_SFX) * (0.7 + 0.3 * np.sin(2.0 * np.pi * 7.0 * t))
+    add("stupefy", "travel", normalize(crossfade_loop(dop + noise_dop, int(RATE_SFX * 0.2)), 0.75),
+        gain_db=-10.0, loop=True, purpose="pulsing reverberant stun energy travel hum")
+
     n = int(RATE_SFX * 0.55)
-    swell = apply_env(gain(sine(n, _sweep_freq(220, 520, "exp"), RATE_SFX), 0.7), env_shape(n, [(0, 0.0), (0.45, 1.0), (0.8, 0.85), (1.0, 0.2)]))
-    choral = mix(sine(n, 328, RATE_SFX, amp=0.4), sine(n, 331, RATE_SFX, amp=0.4), sine(n, 494, RATE_SFX, amp=0.25))
-    choral = apply_env(gain(choral, 0.5), adsr(n, 0.15, 0.2, 0.6, 0.3))
-    add("protego", "cast", normalize(mix(swell, choral), 0.85), gain_db=-6.0,
-        pitch_var=0.02, purpose="shield raise: rising swell + shimmer")
-    n = int(RATE_AMB * 2.5)
-    beat = mix(sine(n, 110, RATE_AMB, amp=0.5), sine(n, 110.7, RATE_AMB, amp=0.5), sine(n, 165.2, RATE_AMB, amp=0.3))
-    bed = lowpass(white(rng, n), 700, 0.8, RATE_AMB)
-    hum = mix(gain(beat, 0.7), gain(bed, 0.25))
-    hum = array.array("d", [v * (0.85 + 0.15 * math.sin(math.tau * 0.35 * i / RATE_AMB)) for i, v in enumerate(hum)])
-    add("protego", "sustain", normalize(crossfade_loop(hum, int(RATE_AMB * 0.3)), 0.55), rate=RATE_AMB,
-        loop=True, gain_db=-14.0, spatial=False, purpose="low sustained ward hum for the 3.5 s ward")
-    n = int(RATE_SFX * 0.45)
-    glass = ping(RATE_SFX, 1450, 0.45, 0.2, partials=((1.0, 1.0), (2.4, 0.5), (3.6, 0.3), (5.1, 0.15)))
-    thud = apply_env(lowpass(white(rng, n), 500, 0.9, RATE_SFX), adsr(n, 0.001, 0.03, 0.05, 0.9))
-    add("protego", "impact", normalize(mix(gain(glass, 1.0), gain(thud, 0.6)), 0.9),
-        gain_db=-6.0, pitch_var=0.06, purpose="positional impact ping on the shell (per hit)")
-    n = int(RATE_SFX * 0.7)
-    crack = apply_env(bandpass(white(rng, n), 2600, 1.2, RATE_SFX), adsr(n, 0.002, 0.05, 0.1, 0.85))
-    fall = apply_env(gain(sine(n, _sweep_freq(620, 140, "exp"), RATE_SFX), 0.6), expdecay(n, 0.3))
-    add("protego", "end", normalize(mix(gain(crack, 0.8), fall), 0.85), gain_db=-8.0,
-        purpose="ward collapse: bright crack over a falling swell")
+    t = np.arange(n) / RATE_SFX
+    sub_stun = np.sin(2.0 * np.pi * np.cumsum(75 * np.exp(-t / 0.05) + 35) / RATE_SFX) * np.exp(-t / 0.06) * 1.2
+    bell = ping(RATE_SFX, 480, 0.55, decay=0.18, partials=((1.0, 1.0), (1.45, 0.6), (2.2, 0.4), (3.15, 0.2)))
+    burst = butter_bandpass(rng.normal(0, 1, n), 1200, 5200, RATE_SFX) * exp_decay(n, 0.07) * 1.1
+    add("stupefy", "impact", normalize(soft_clip(sub_stun + bell * 0.8 + burst * 0.9, drive=1.3), 0.96),
+        gain_db=-3.0, pitch_var=0.05, purpose="stupefy impact: concussive shockwave + resonant bell ring")
 
-    # --- ultimate: long charge, heavy roar, lightning strike, residual sizzle
+    n = int(RATE_SFX * 0.65)
+    halo = ping(RATE_SFX, 587, 0.65, decay=0.25, partials=((1.0, 1.0), (1.5, 0.5), (2.0, 0.3))) * 0.6
+    add("stupefy", "end", normalize(halo, 0.65), gain_db=-12.0, purpose="ringing stun halo")
+
+    # ----------------------------------------------------------------
+    # 3. incendio (Fire spell: roaring ignition, fiery splash, burning hearth)
+    # ----------------------------------------------------------------
+    n = int(RATE_SFX * 0.55)
+    t = np.arange(n) / RATE_SFX
+    ignition_sub = np.sin(2.0 * np.pi * np.cumsum(120 * np.exp(-t / 0.06) + 40) / RATE_SFX) * np.exp(-t / 0.08) * 0.9
+    flame_whoosh = butter_bandpass(pink_noise(n, rng), 250, 1600, RATE_SFX) * adsr(n, 0.04, 0.2, 0.5, 0.26) * 1.2
+    spark_snap = butter_bandpass(rng.normal(0, 1, n), 2400, 8000, RATE_SFX) * exp_decay(n, 0.05) * 0.8
+    add("incendio", "cast", normalize(soft_clip(ignition_sub + flame_whoosh + spark_snap, drive=1.2), 0.94),
+        gain_db=-4.0, pitch_var=0.05, purpose="incendio cast: explosive flame ignition + turbulent whoosh")
+
+    n = int(RATE_SFX * 0.6)
+    splash_roar = butter_bandpass(brown_noise(n, rng) + pink_noise(n, rng), 180, 2200, RATE_SFX) * exp_decay(n, 0.15)
+    sizzle_hiss = butter_highpass(rng.normal(0, 1, n), 2800, RATE_SFX) * exp_decay(n, 0.22) * 0.7
+    add("incendio", "impact", normalize(soft_clip(splash_roar * 1.1 + sizzle_hiss, drive=1.2), 0.94),
+        gain_db=-4.0, pitch_var=0.06, purpose="incendio impact: fiery eruption splash and sizzling heat")
+
+    n = int(RATE_AMB * 3.5)
+    t = np.arange(n) / RATE_AMB
+    flame_drone = butter_bandpass(brown_noise(n, rng), 60, 380, RATE_AMB) * 0.85
+    flame_crackle = crackles(rng, RATE_AMB, 3.5, density=18.0, bright=4800.0, level=0.7)
+    heat_flutter = 0.8 + 0.2 * np.sin(2.0 * np.pi * 4.2 * t)
+    sustain_flame = (flame_drone * heat_flutter + flame_crackle) * 0.8
+    add("incendio", "sustain", normalize(crossfade_loop(sustain_flame, int(RATE_AMB * 0.4)), 0.75),
+        rate=RATE_AMB, loop=True, gain_db=-12.0, spatial=True, purpose="rich roaring flame loop with wood pops")
+
+    n = int(RATE_SFX * 0.7)
+    embers = crackles(rng, RATE_SFX, 0.7, density=12.0, bright=5400.0, level=0.6) * exp_decay(n, 0.35)
+    smoke = butter_bandpass(pink_noise(n, rng), 600, 2400, RATE_SFX) * exp_decay(n, 0.28) * 0.5
+    add("incendio", "end", normalize(embers + smoke, 0.7), gain_db=-12.0, purpose="dying flame embers")
+
+    # ----------------------------------------------------------------
+    # 4. bombarda (Explosive Blasting Curse: heavy volatile charge, MASSIVE BOOM)
+    # ----------------------------------------------------------------
+    n = int(RATE_SFX * 0.42)
+    t = np.arange(n) / RATE_SFX
+    volt_hum = sine(n, 90 + 280 * (t / t[-1]) ** 2, RATE_SFX, amp=0.7) * adsr(n, 0.05, 0.2, 0.6, 0.15)
+    volt_snap = butter_bandpass(rng.normal(0, 1, n), 1800, 6500, RATE_SFX) * exp_decay(n, 0.06) * 0.9
+    add("bombarda", "cast", normalize(volt_hum + volt_snap, 0.92), gain_db=-4.0,
+        pitch_var=0.04, purpose="bombarda cast: volatile electrical build-up + concussive snap")
+
+    n = int(RATE_SFX * 0.75)
+    t = np.arange(n) / RATE_SFX
+    vortex = butter_bandpass(brown_noise(n, rng), 140, 900, RATE_SFX) * (0.8 + 0.2 * np.sin(2.0 * np.pi * 9.0 * t))
+    add("bombarda", "travel", normalize(crossfade_loop(vortex, int(RATE_SFX * 0.2)), 0.8),
+        gain_db=-9.0, loop=True, purpose="heavy rushing vortex slicing through air")
+
+    # Bombarda Impact - Cinematic explosion (sub-bass boom, shattered debris, cavernous roll)
+    n = int(RATE_SFX * 1.45)
+    t = np.arange(n) / RATE_SFX
+    # Sub-bass detonation (40-90Hz shockwave)
+    sub_exp = np.sin(2.0 * np.pi * np.cumsum(95 * np.exp(-t / 0.12) + 38) / RATE_SFX) * np.exp(-t / 0.22) * 1.5
+    # Blast fragmentation crunch
+    crunch_len = int(RATE_SFX * 0.35)
+    crunch = np.zeros(n)
+    crunch_noise = butter_bandpass(rng.normal(0, 1, crunch_len), 300, 3800, RATE_SFX)
+    crunch[:crunch_len] = crunch_noise * np.exp(-np.linspace(0, 1, crunch_len) / 0.08) * 1.3
+    # Rolling reverberant decay
+    rumble = butter_lowpass(brown_noise(n, rng), 240, RATE_SFX) * exp_decay(n, 0.45) * 1.1
+    exp_mix = soft_clip(sub_exp + crunch + rumble, drive=1.4)
+    add("bombarda", "impact", normalize(exp_mix, 0.98), gain_db=-0.5,
+        pitch_var=0.04, purpose="bombarda impact: cinematic explosion with sub-bass boom and debris")
+
     n = int(RATE_SFX * 1.1)
-    drone = mix(gain(sine(n, _sweep_freq(55, 92, "lin"), RATE_SFX), 0.9), gain(sine(n, _sweep_freq(110, 184, "lin"), RATE_SFX), 0.35))
-    pulse = zeros(n)
-    for i in range(n):
-        pulse[i] = 0.6 + 0.4 * math.sin(math.tau * (3.0 + 6.0 * i / n) * i / RATE_SFX)
-    drone = array.array("d", [drone[i] * pulse[i] for i in range(n)])
-    chorald = apply_env(gain(mix(sine(n, 220, RATE_SFX, amp=0.3), sine(n, 277, RATE_SFX, amp=0.28), sine(n, 330, RATE_SFX, amp=0.22)), 0.6),
-                        env_shape(n, [(0, 0.0), (0.5, 0.9), (0.85, 1.0), (1.0, 0.4)]))
-    add("ultimate", "cast", normalize(mix(drone, chorald), 0.95), gain_db=-3.0,
-        pitch_var=0.02, purpose="readable warning: rising dark drone with a quickening pulse")
-    n = int(RATE_SFX * 0.9)
-    roar = apply_env(lowpass(white(rng, n), 1400, 0.8, RATE_SFX), env_shape(n, [(0, 0.0), (0.2, 1.0), (0.8, 0.85), (1.0, 0.1)]))
-    add("ultimate", "travel", normalize(mix(roar, gain(sine(n, 82, RATE_SFX), 0.5)), 0.85),
-        gain_db=-6.0, loop=True, purpose="heavy roar in flight")
-    n = int(RATE_SFX * 1.6)
-    strike = apply_env(bandpass(white(rng, n), 5200, 0.8, RATE_SFX), adsr(n, 0.001, 0.03, 0.03, 0.95))
-    det = apply_env(gain(sine(n, _sweep_freq(150, 30, "exp"), RATE_SFX), 1.0), expdecay(n, 0.28))
-    tail = apply_env(lowpass(pink(rng, n), 900, 0.8, RATE_SFX), env_shape(n, [(0, 0.0), (0.03, 1.0), (0.35, 0.4), (1.0, 0.0)]))
-    add("ultimate", "impact", normalize(mix(gain(strike, 0.95), gain(det, 1.0), gain(tail, 0.55)), 0.99),
-        gain_db=0.0, pitch_var=0.02, purpose="distinct strike: lightning crack over a low detonation")
-    n = int(RATE_SFX * 1.3)
-    sizzle = apply_env(gain(highpass(white(rng, n), 3600, 0.7, RATE_SFX), 0.5), env_shape(n, [(0, 0.0), (0.05, 0.8), (0.4, 0.45), (1.0, 0.0)]))
-    rumble = apply_env(lowpass(pink(rng, n), 300, 0.8, RATE_SFX), expdecay(n, 0.55))
-    add("ultimate", "end", normalize(mix(gain(sizzle, 0.7), gain(rumble, 0.8)), 0.75), gain_db=-7.0,
-        purpose="residual sparks and rolling tail")
+    debris = butter_bandpass(rng.normal(0, 1, n), 400, 2800, RATE_SFX) * exp_decay(n, 0.35) * 0.7
+    add("bombarda", "end", normalize(debris, 0.65), gain_db=-10.0, purpose="falling debris and dust")
+
+    # ----------------------------------------------------------------
+    # 5. expelliarmus (Disarming charm: whip-crack, ribbon whistle, kinetic clash)
+    # ----------------------------------------------------------------
+    n = int(RATE_SFX * 0.32)
+    t = np.arange(n) / RATE_SFX
+    whip_f = 2400 * np.exp(-t / 0.04) + 600
+    whip = np.sin(2.0 * np.pi * np.cumsum(whip_f) / RATE_SFX) * np.exp(-t / 0.05) * 0.8
+    whip_snap = butter_bandpass(rng.normal(0, 1, n), 2200, 7200, RATE_SFX) * exp_decay(n, 0.03) * 1.2
+    add("expelliarmus", "cast", normalize(soft_clip(whip + whip_snap, drive=1.2), 0.92),
+        gain_db=-4.5, pitch_var=0.05, purpose="expelliarmus cast: fast whip-crack with energetic swirl")
+
+    n = int(RATE_SFX * 0.65)
+    t = np.arange(n) / RATE_SFX
+    whistle = sine(n, 980 + 120 * np.sin(2.0 * np.pi * 8.0 * t), RATE_SFX, amp=0.5)
+    add("expelliarmus", "travel", normalize(crossfade_loop(whistle, int(RATE_SFX * 0.2)), 0.7),
+        gain_db=-11.0, loop=True, purpose="whistling high-speed ribbon trail")
+
+    n = int(RATE_SFX * 0.52)
+    t = np.arange(n) / RATE_SFX
+    # Metal/wood clash
+    clash_ring = ping(RATE_SFX, 1150, 0.52, decay=0.12, partials=((1.0, 1.0), (1.68, 0.7), (2.85, 0.4))) * 0.9
+    clash_trans = butter_bandpass(rng.normal(0, 1, n), 1800, 5600, RATE_SFX) * exp_decay(n, 0.03) * 1.1
+    clash_sub = np.sin(2.0 * np.pi * np.cumsum(140 * np.exp(-t / 0.04) + 50) / RATE_SFX) * np.exp(-t / 0.05) * 0.8
+    add("expelliarmus", "impact", normalize(soft_clip(clash_ring + clash_trans + clash_sub, drive=1.2), 0.95),
+        gain_db=-3.5, pitch_var=0.05, purpose="expelliarmus impact: forceful kinetic wand clash and ring")
+
+    n = int(RATE_SFX * 0.4)
+    recoil = butter_lowpass(pink_noise(n, rng), 600, RATE_SFX) * exp_decay(n, 0.15) * 0.6
+    add("expelliarmus", "end", normalize(recoil, 0.6), gain_db=-13.0, purpose="kinetic recoil tail")
+
+    # ----------------------------------------------------------------
+    # 6. protego (Shield charm: crystal chime, harmonic hum, glass deflection)
+    # ----------------------------------------------------------------
+    n = int(RATE_SFX * 0.55)
+    chime = ping(RATE_SFX, 523, 0.55, decay=0.22, partials=((1.0, 1.0), (1.5, 0.6), (2.0, 0.4), (2.67, 0.25))) * 0.8
+    swell = butter_lowpass(brown_noise(n, rng), 400, RATE_SFX) * adsr(n, 0.1, 0.2, 0.5, 0.2) * 0.7
+    add("protego", "cast", normalize(chime + swell, 0.9), gain_db=-5.0,
+        pitch_var=0.03, purpose="protego cast: crystal barrier summon chime + deep hum")
+
+    n = int(RATE_AMB * 3.2)
+    t = np.arange(n) / RATE_AMB
+    # Detuned dual harmonics for ethereal barrier hum
+    hum1 = np.sin(2.0 * np.pi * 110.0 * t)
+    hum2 = np.sin(2.0 * np.pi * 110.8 * t)
+    hum3 = np.sin(2.0 * np.pi * 165.2 * t) * 0.5
+    ward_bed = butter_lowpass(pink_noise(n, rng), 500, RATE_AMB) * 0.3
+    ward_hum = (hum1 * 0.4 + hum2 * 0.4 + hum3 + ward_bed) * (0.85 + 0.15 * np.sin(2.0 * np.pi * 0.3 * t))
+    add("protego", "sustain", normalize(crossfade_loop(ward_hum, int(RATE_AMB * 0.4)), 0.65),
+        rate=RATE_AMB, loop=True, gain_db=-13.0, spatial=False, purpose="sustained shimmering ward hum")
+
+    n = int(RATE_SFX * 0.45)
+    t = np.arange(n) / RATE_SFX
+    ping_glass = ping(RATE_SFX, 1580, 0.45, decay=0.14, partials=((1.0, 1.0), (2.1, 0.5), (3.4, 0.3), (4.8, 0.15))) * 1.0
+    deflect_sub = np.sin(2.0 * np.pi * np.cumsum(130 * np.exp(-t / 0.03) + 60) / RATE_SFX) * np.exp(-t / 0.05) * 0.8
+    add("protego", "impact", normalize(soft_clip(ping_glass + deflect_sub, drive=1.2), 0.94),
+        gain_db=-4.5, pitch_var=0.06, purpose="protego impact: crystalline deflection ping + bass displacement")
+
+    n = int(RATE_SFX * 0.65)
+    collapse_crack = butter_bandpass(rng.normal(0, 1, n), 2200, 6500, RATE_SFX) * exp_decay(n, 0.08) * 0.8
+    collapse_tone = ping(RATE_SFX, 392, 0.65, decay=0.22) * 0.6
+    add("protego", "end", normalize(collapse_crack + collapse_tone, 0.8), gain_db=-8.0,
+        purpose="ward collapse: crystalline shatter and harmonic fade")
+
+    # ----------------------------------------------------------------
+    # 7. ultimate (Ultimate Arcane Strike: thunderous crescendo, cataclysmic blast)
+    # ----------------------------------------------------------------
+    n = int(RATE_SFX * 1.25)
+    t = np.arange(n) / RATE_SFX
+    drone_f = 50.0 + 90.0 * (t / t[-1]) ** 1.5
+    drone = np.sin(2.0 * np.pi * np.cumsum(drone_f) / RATE_SFX) * adsr(n, 0.05, 0.3, 0.8, 0.1) * 0.9
+    pulse_freq = 3.0 + 8.0 * (t / t[-1])
+    drone *= (0.6 + 0.4 * np.sin(2.0 * np.pi * pulse_freq * t))
+    choral = (sine(n, 220, RATE_SFX, amp=0.3) + sine(n, 277, RATE_SFX, amp=0.25) + sine(n, 330, RATE_SFX, amp=0.2)) * adsr(n, 0.1, 0.3, 0.85, 0.15)
+    add("ultimate", "cast", normalize(soft_clip(drone + choral, drive=1.2), 0.96), gain_db=-2.5,
+        pitch_var=0.02, purpose="ultimate cast: gathering catastrophic arcane drone and quickening pulse")
+
+    n = int(RATE_SFX * 0.95)
+    t = np.arange(n) / RATE_SFX
+    roar = butter_bandpass(brown_noise(n, rng) + pink_noise(n, rng), 100, 1800, RATE_SFX) * (0.8 + 0.2 * np.sin(2.0 * np.pi * 12.0 * t))
+    add("ultimate", "travel", normalize(crossfade_loop(roar, int(RATE_SFX * 0.2)), 0.85),
+        gain_db=-5.0, loop=True, purpose="raging plasma roar in flight")
+
+    # Cataclysmic Thunderblast Impact
+    n = int(RATE_SFX * 1.7)
+    t = np.arange(n) / RATE_SFX
+    # Earth-shattering 40Hz bass drop
+    sub_seismic = np.sin(2.0 * np.pi * np.cumsum(110 * np.exp(-t / 0.14) + 36) / RATE_SFX) * np.exp(-t / 0.28) * 1.6
+    # Lightning crack
+    l_len = int(RATE_SFX * 0.12)
+    l_crack = np.zeros(n)
+    l_crack[:l_len] = butter_bandpass(rng.normal(0, 1, l_len), 1200, 8500, RATE_SFX) * np.exp(-np.linspace(0, 1, l_len) / 0.03) * 1.5
+    # Cavernous thunder rumble
+    t_rumble = butter_lowpass(brown_noise(n, rng), 260, RATE_SFX) * exp_decay(n, 0.55) * 1.2
+    add("ultimate", "impact", normalize(soft_clip(sub_seismic + l_crack + t_rumble, drive=1.5), 0.99),
+        gain_db=0.0, pitch_var=0.02, purpose="ultimate impact: colossal thunder strike detonation and rolling shockwave")
+
+    n = int(RATE_SFX * 1.35)
+    sparks = butter_highpass(rng.normal(0, 1, n), 3200, RATE_SFX) * exp_decay(n, 0.25) * 0.6
+    deep_tail = butter_lowpass(brown_noise(n, rng), 200, RATE_SFX) * exp_decay(n, 0.45) * 0.8
+    add("ultimate", "end", normalize(sparks + deep_tail, 0.75), gain_db=-6.5, purpose="residual arcane sparks and rolling tremor")
+
     return out
 
 
-# ------------------------------------------------------------------ rest
+# ------------------------------------------------------------------ World & Ambience Synthesis
 
 def world_library(rng):
+    """Synthesizes rich world, creature, UI, footstep and ambient audio."""
     out = {}
 
     def add(key, path, sig, rate=RATE_SFX, loop=False, bus="sfx", gain_db=-6.0,
@@ -621,263 +585,374 @@ def world_library(rng):
                         purpose=purpose,
                         loop_mode=loop_mode or ("forward" if loop else "disabled"))
 
-    # --- footsteps, five surfaces x three variants
+    # ----------------------------------------------------------------
+    # Footsteps: Physical materials (stone, dirt, grass, wood, water)
+    # ----------------------------------------------------------------
     surfaces = {
-        "stone": (1900.0, 0.045, 0.10, 0.30),
-        "dirt": (700.0, 0.06, 0.05, 0.45),
-        "grass": (3600.0, 0.09, 0.02, 0.55),
-        "wood": (1200.0, 0.07, 0.06, 0.40),
-        "water": (2600.0, 0.14, 0.03, 0.60),
+        "stone": {"heel_f": 3200.0, "res_f": 1150.0, "thud_w": 0.35, "crisp_w": 0.85, "len": 0.21},
+        "dirt":  {"heel_f": 1800.0, "res_f": 450.0,  "thud_w": 0.65, "crisp_w": 0.55, "len": 0.23},
+        "grass": {"heel_f": 2600.0, "res_f": 650.0,  "thud_w": 0.25, "crisp_w": 0.75, "len": 0.24},
+        "wood":  {"heel_f": 2200.0, "res_f": 380.0,  "thud_w": 0.75, "crisp_w": 0.70, "len": 0.23},
+        "water": {"heel_f": 1900.0, "res_f": 850.0,  "thud_w": 0.45, "crisp_w": 1.10, "len": 0.28},
     }
-    for surface, (centre, length, thud, rustle) in surfaces.items():
+    for surface, cfg in surfaces.items():
         for variant in range(3):
-            n = int(RATE_SFX * (0.16 + length))
-            click = apply_env(bandpass(white(rng, n), centre * rng.uni(0.9, 1.1), 1.4, RATE_SFX),
-                              adsr(n, 0.001, 0.02, 0.03, 0.9))
-            body = apply_env(lowpass(white(rng, n), 300, 0.8, RATE_SFX), adsr(n, 0.002, 0.04, 0.08, 0.85))
-            extra = apply_env(highpass(white(rng, n), 4000, 0.7, RATE_SFX), expdecay(n, 0.05))
-            sig = mix(gain(click, 1.0), gain(body, thud * 2.2), gain(extra, rustle * 0.55))
+            n = int(RATE_SFX * cfg["len"])
+            t = np.arange(n) / RATE_SFX
+            # Heel strike transient
+            h_len = int(RATE_SFX * 0.04)
+            heel = np.zeros(n)
+            heel_noise = butter_bandpass(rng.normal(0, 1, h_len), cfg["heel_f"] * 0.8, cfg["heel_f"] * 1.5, RATE_SFX)
+            heel[:h_len] = heel_noise * np.exp(-np.linspace(0, 1, h_len) / 0.015) * cfg["crisp_w"]
+            # Material resonance
+            res_noise = butter_bandpass(rng.normal(0, 1, n), cfg["res_f"] * 0.7, cfg["res_f"] * 1.4, RATE_SFX)
+            res = res_noise * np.exp(-t / 0.045) * 0.7
+            # Foot mass thud
+            thud = np.sin(2.0 * np.pi * 95.0 * t) * np.exp(-t / 0.035) * cfg["thud_w"]
+            sig = soft_clip(heel + res + thud, drive=1.1)
             add("step_%s_%d" % (surface, variant + 1), "footsteps/%s_%02d.wav" % (surface, variant + 1),
-                normalize(sig, 0.7), gain_db=-9.0, pitch_var=0.09,
+                normalize(sig, 0.78), gain_db=-9.0, pitch_var=0.08,
                 purpose="%s footstep variant %d" % (surface, variant + 1))
 
-    # --- character
+    # ----------------------------------------------------------------
+    # Character sounds (robes, mount, dismount, landing, broom flight)
+    # ----------------------------------------------------------------
     for variant in range(3):
         n = int(RATE_SFX * 0.5)
-        cloth = apply_env(bandpass(white(rng, n), 2400, 0.8, RATE_SFX), env_shape(n, [(0, 0.0), (0.3, 0.7), (0.7, 0.4), (1.0, 0.0)]))
-        cloth = mix(gain(cloth, 1.0), gain(apply_env(bandpass(white(rng, n), 900, 0.9, RATE_SFX), expdecay(n, 0.2)), 0.4))
+        cloth_w = butter_bandpass(pink_noise(n, rng), 900, 3200, RATE_SFX)
+        cloth_env = env_shape(n, [(0, 0.0), (0.25, 0.8), (0.6, 0.4), (1.0, 0.0)])
         add("robe_%d" % (variant + 1), "character/robe_move_%02d.wav" % (variant + 1),
-            normalize(cloth, 0.55), gain_db=-15.0, pitch_var=0.07, purpose="robe movement %d" % (variant + 1))
+            normalize(cloth_w * cloth_env, 0.6), gain_db=-14.0, pitch_var=0.07, purpose="robe movement %d" % (variant + 1))
+
     n = int(RATE_SFX * 0.5)
-    whoosh = apply_env(bandpass(white(rng, n), 900, 0.7, RATE_SFX), env_shape(n, [(0, 0.0), (0.25, 1.0), (1.0, 0.0)]))
-    hop = apply_env(gain(sine(n, _sweep_freq(220, 90, "exp"), RATE_SFX), 0.5), expdecay(n, 0.12))
-    add("mount", "character/mount.wav", normalize(mix(gain(whoosh, 0.9), gain(hop, 0.6)), 0.85),
-        gain_db=-7.0, purpose="mount: broom whoosh + settling thud")
+    whoosh = butter_bandpass(pink_noise(n, rng), 350, 1800, RATE_SFX) * env_shape(n, [(0, 0.0), (0.25, 1.0), (1.0, 0.0)])
+    hop = np.sin(2.0 * np.pi * 140.0 * (np.arange(n) / RATE_SFX)) * exp_decay(n, 0.1) * 0.6
+    add("mount", "character/mount.wav", normalize(whoosh * 0.85 + hop * 0.6, 0.85),
+        gain_db=-7.0, purpose="mount: broom whoosh and hop")
+
     n = int(RATE_SFX * 0.45)
-    drop = apply_env(gain(sine(n, _sweep_freq(160, 70, "exp"), RATE_SFX), 0.6), expdecay(n, 0.14))
-    cloth = apply_env(bandpass(white(rng, n), 1800, 0.8, RATE_SFX), adsr(n, 0.005, 0.05, 0.1, 0.8))
-    add("dismount", "character/dismount.wav", normalize(mix(gain(drop, 0.9), gain(cloth, 0.7)), 0.85),
-        gain_db=-7.0, purpose="dismount: hop-down thud with a cloth settle")
-    n = int(RATE_AMB * 3.0)
-    wind = lowpass(white(rng, n), 900, 0.8, RATE_AMB)
-    wind = mix(gain(wind, 0.8), gain(lowpass(white(rng, n), 260, 0.7, RATE_AMB), 0.5))
-    wind = array.array("d", [v * (0.7 + 0.3 * math.sin(math.tau * 0.31 * i / RATE_AMB)) for i, v in enumerate(wind)])
-    add("broom_wind", "character/broom_wind.wav", normalize(crossfade_loop(wind, int(RATE_AMB * 0.3)), 0.75),
-        rate=RATE_AMB, loop=True, gain_db=-12.0, spatial=False, purpose="broom wind bed (pitch follows speed)")
-    n = int(RATE_SFX * 0.4)
-    land = apply_env(lowpass(white(rng, n), 420, 0.8, RATE_SFX), adsr(n, 0.001, 0.05, 0.1, 0.8))
-    body = gain(sine(n, _sweep_freq(160, 70, "exp"), RATE_SFX), 0.7)
-    dust = apply_env(highpass(white(rng, n), 3200, 0.7, RATE_SFX), expdecay(n, 0.06))
-    add("landing", "character/landing.wav",
-        normalize(mix(gain(land, 1.0), apply_env(body, expdecay(n, 0.12)), gain(dust, 0.4)), 0.9),
-        gain_db=-7.0, purpose="landing impact")
+    drop = np.sin(2.0 * np.pi * 120.0 * (np.arange(n) / RATE_SFX)) * exp_decay(n, 0.12) * 0.7
+    cloth_d = butter_bandpass(pink_noise(n, rng), 800, 2600, RATE_SFX) * exp_decay(n, 0.15) * 0.6
+    add("dismount", "character/dismount.wav", normalize(drop + cloth_d, 0.85),
+        gain_db=-7.0, purpose="dismount: footstep settle and cloth rustle")
 
-    # --- monsters
+    # Broom flight wind loop
+    n = int(RATE_AMB * 3.5)
+    t = np.arange(n) / RATE_AMB
+    flight_wind = butter_bandpass(brown_noise(n, rng) + pink_noise(n, rng), 80, 1400, RATE_AMB)
+    flight_flutter = 0.85 + 0.15 * np.sin(2.0 * np.pi * 2.8 * t)
+    add("broom_wind", "character/broom_wind.wav",
+        normalize(crossfade_loop(flight_wind * flight_flutter, int(RATE_AMB * 0.35)), 0.78),
+        rate=RATE_AMB, loop=True, gain_db=-11.0, spatial=False, purpose="broom flight wind bed")
+
+    n = int(RATE_SFX * 0.42)
+    t = np.arange(n) / RATE_SFX
+    land_thud = np.sin(2.0 * np.pi * 110.0 * t) * exp_decay(n, 0.08) * 0.9
+    land_crunch = butter_bandpass(rng.normal(0, 1, n), 400, 2400, RATE_SFX) * exp_decay(n, 0.06) * 0.7
+    add("landing", "character/landing.wav", normalize(land_thud + land_crunch, 0.88),
+        gain_db=-6.5, purpose="landing impact")
+
+    # ----------------------------------------------------------------
+    # Monsters & Boss (Spiders, Boss Slam, Boss Death)
+    # ----------------------------------------------------------------
     for variant in range(3):
-        n = int(RATE_SFX * 0.3)
-        taps = zeros(n)
-        for _ in range(5):
-            off = rng.int(0, max(1, n - 420))
-            tap = apply_env(bandpass(white(rng, 420), rng.uni(2200, 4600), 3.0, RATE_SFX), expdecay(420, 0.03))
-            for i, v in enumerate(tap):
-                taps[off + i] += v
+        n = int(RATE_SFX * 0.32)
+        taps = np.zeros(n)
+        for _ in range(6):
+            off = rng.randint(0, max(1, n - 400))
+            tap = butter_bandpass(rng.normal(0, 1, 400), rng.uniform(2200, 4800), rng.uniform(5000, 8000), RATE_SFX) * exp_decay(400, 0.03)
+            taps[off:off + 400] += tap * 0.8
         add("spider_move_%d" % (variant + 1), "monsters/spider_move_%02d.wav" % (variant + 1),
-            normalize(taps, 0.5), gain_db=-16.0, purpose="chitin taps as the spider walks")
-    n = int(RATE_SFX * 0.35)
-    bite = mix(gain(apply_env(bandpass(white(rng, n), 1800, 1.6, RATE_SFX), adsr(n, 0.001, 0.02, 0.03, 0.95)), 1.0),
-               gain(apply_env(gain(sine(n, _sweep_freq(420, 120, "exp"), RATE_SFX), 0.6), expdecay(n, 0.1)), 0.7))
-    add("spider_bite", "monsters/spider_bite.wav", normalize(bite, 0.9), gain_db=-6.0, pitch_var=0.06,
-        purpose="bite anticipation/release snap")
+            normalize(taps, 0.65), gain_db=-15.0, purpose="spider chitin movement %d" % (variant + 1))
+
+    n = int(RATE_SFX * 0.36)
+    t = np.arange(n) / RATE_SFX
+    bite_snap = butter_bandpass(rng.normal(0, 1, n), 1600, 4800, RATE_SFX) * exp_decay(n, 0.04) * 1.2
+    bite_hiss = butter_highpass(rng.normal(0, 1, n), 3200, RATE_SFX) * exp_decay(n, 0.12) * 0.6
+    add("spider_bite", "monsters/spider_bite.wav", normalize(bite_snap + bite_hiss, 0.92),
+        gain_db=-5.0, pitch_var=0.06, purpose="spider bite snap and venomous hiss")
+
     n = int(RATE_SFX * 1.2)
-    crunch = apply_env(bandpass(white(rng, n), 1300, 1.1, RATE_SFX), adsr(n, 0.002, 0.08, 0.15, 0.9))
-    hiss = apply_env(gain(highpass(white(rng, n), 3000, 0.7, RATE_SFX), 0.5), env_shape(n, [(0, 0.0), (0.15, 0.7), (0.7, 0.3), (1.0, 0.0)]))
-    add("spider_death", "monsters/spider_death.wav", normalize(mix(gain(crunch, 1.0), hiss), 0.9),
-        gain_db=-5.0, purpose="death curl: wet crunch and expiring hiss")
-    n = int(RATE_SFX * 1.0)
-    charge = apply_env(gain(sine(n, _sweep_freq(70, 190, "lin"), RATE_SFX), 0.8), env_shape(n, [(0, 0.0), (0.75, 1.0), (1.0, 0.6)]))
-    add("boss_slam_cast", "monsters/boss_slam_cast.wav", normalize(mix(charge, gain(apply_env(bandpass(white(rng, n), 900, 0.9, RATE_SFX), adsr(n, 0.05, 0.2, 0.5, 0.4)), 0.5)), 0.9),
-        gain_db=-4.0, purpose="boss attack telegraph/charge")
-    n = int(RATE_SFX * 1.4)
-    slam = mix(gain(apply_env(gain(sine(n, _sweep_freq(90, 28, "exp"), RATE_SFX), 1.0), expdecay(n, 0.25)), 1.0),
-               gain(apply_env(lowpass(white(rng, n), 900, 0.7, RATE_SFX), adsr(n, 0.001, 0.05, 0.08, 0.9)), 0.9))
-    add("boss_slam_release", "monsters/boss_slam_release.wav", normalize(slam, 0.98), gain_db=-2.0,
-        purpose="boss area attack release (matches the telegraph release tick)")
-    n = int(RATE_SFX * 2.2)
-    collapse = mix(gain(apply_env(lowpass(white(rng, n), 260, 0.8, RATE_SFX), adsr(n, 0.01, 0.3, 0.4, 0.5)), 1.0),
-                   gain(apply_env(lowpass(pink(rng, n), 700, 0.8, RATE_SFX), env_shape(n, [(0, 0.0), (0.1, 1.0), (0.6, 0.4), (1.0, 0.0)])), 0.6))
-    add("boss_death", "monsters/boss_death.wav", normalize(collapse, 0.95), gain_db=-4.0,
-        purpose="boss death: long collapse with a rolling tail")
+    crunch = butter_bandpass(rng.normal(0, 1, n), 800, 2600, RATE_SFX) * exp_decay(n, 0.22) * 1.1
+    hiss = butter_bandpass(pink_noise(n, rng), 1800, 6000, RATE_SFX) * exp_decay(n, 0.45) * 0.7
+    add("spider_death", "monsters/spider_death.wav", normalize(crunch + hiss, 0.9),
+        gain_db=-4.5, purpose="spider death: chitin crunch and expiring hiss")
 
-    # --- UI
-    def ui(key, freq, seconds, decay, partials=((1.0, 1.0), (2.0, 0.35), (3.01, 0.15)), shape=None):
-        n = int(RATE_SFX * seconds)
+    # Boss slam cast (menacing low monster roar + ground tremor)
+    n = int(RATE_SFX * 1.05)
+    t = np.arange(n) / RATE_SFX
+    growl_f = 65.0 + 110.0 * (t / t[-1])
+    growl = np.sin(2.0 * np.pi * np.cumsum(growl_f) / RATE_SFX) * adsr(n, 0.05, 0.3, 0.7, 0.2) * 0.8
+    growl += butter_lowpass(brown_noise(n, rng), 350, RATE_SFX) * adsr(n, 0.1, 0.2, 0.6, 0.25) * 0.7
+    add("boss_slam_cast", "monsters/boss_slam_cast.wav", normalize(soft_clip(growl, drive=1.2), 0.92),
+        gain_db=-3.5, purpose="boss attack telegraph: deep guttural charge")
+
+    # Boss slam release (earth-shattering impact)
+    n = int(RATE_SFX * 1.45)
+    t = np.arange(n) / RATE_SFX
+    slam_sub = np.sin(2.0 * np.pi * np.cumsum(85 * np.exp(-t / 0.12) + 32) / RATE_SFX) * np.exp(-t / 0.22) * 1.4
+    slam_stone = butter_bandpass(rng.normal(0, 1, n), 250, 3200, RATE_SFX) * exp_decay(n, 0.09) * 1.2
+    slam_roll = butter_lowpass(brown_noise(n, rng), 220, RATE_SFX) * exp_decay(n, 0.4) * 0.9
+    add("boss_slam_release", "monsters/boss_slam_release.wav",
+        normalize(soft_clip(slam_sub + slam_stone + slam_roll, drive=1.3), 0.98),
+        gain_db=-1.5, purpose="boss slam release: massive ground impact detonation")
+
+    # Boss death (catastrophic creature death roar and collapse)
+    n = int(RATE_SFX * 2.3)
+    t = np.arange(n) / RATE_SFX
+    roar_d = np.sin(2.0 * np.pi * np.cumsum(120 * np.exp(-t / 0.8) + 40) / RATE_SFX) * exp_decay(n, 0.65) * 0.8
+    collapse_rumble = butter_lowpass(brown_noise(n, rng), 280, RATE_SFX) * adsr(n, 0.05, 0.3, 0.5, 0.45) * 1.1
+    add("boss_death", "monsters/boss_death.wav",
+        normalize(soft_clip(roar_d + collapse_rumble, drive=1.3), 0.95),
+        gain_db=-3.0, purpose="boss death: long bellow and heavy collapse")
+
+    # ----------------------------------------------------------------
+    # UI Sounds (Tactile, modern, clear, gratifying)
+    # ----------------------------------------------------------------
+    def ui_snd(key, freq, seconds, decay, partials=((1.0, 1.0), (2.0, 0.35), (3.01, 0.15))):
         sig = ping(RATE_SFX, freq, seconds, decay, partials)
-        if shape:
-            sig = apply_env(sig, shape)
-        add("ui_" + key, "ui/%s.wav" % key, normalize(sig, 0.62), bus="ui", gain_db=-10.0,
+        add("ui_" + key, "ui/%s.wav" % key, normalize(sig, 0.75), bus="ui", gain_db=-9.0,
             spatial=False, purpose="UI %s" % key)
-    ui("button", 620, 0.09, 0.05)
-    ui("hover", 880, 0.06, 0.035, ((1.0, 1.0), (2.0, 0.2)))
-    ui("confirm", 660, 0.22, 0.09, ((1.0, 1.0), (1.5, 0.5), (2.0, 0.3)))
-    ui("cancel", 420, 0.2, 0.08, ((1.0, 1.0), (0.75, 0.6)))
-    ui("deny", 240, 0.3, 0.12, ((1.0, 1.0), (1.41, 0.5)))
-    ui("chat", 1200, 0.07, 0.03)
-    ui("quest", 523, 0.45, 0.16, ((1.0, 1.0), (1.5, 0.6), (2.0, 0.3)))
-    ui("levelup", 440, 0.7, 0.28, ((1.0, 1.0), (1.5, 0.7), (2.0, 0.45), (3.0, 0.2)))
-    ui("loot", 980, 0.2, 0.06, ((1.0, 1.0), (2.02, 0.3)))
-    ui("upgrade_success", 520, 0.55, 0.2, ((1.0, 1.0), (1.5, 0.7), (2.0, 0.4), (2.5, 0.2)))
-    ui("upgrade_fail", 380, 0.5, 0.18, ((1.0, 1.0), (1.32, 0.6), (0.66, 0.4)))
-    ui("open", 700, 0.14, 0.06, ((1.0, 1.0), (1.48, 0.3)))
-    ui("close", 500, 0.14, 0.06, ((1.0, 1.0), (0.7, 0.3)))
-    n = int(RATE_SFX * 0.2)
-    hit = mix(gain(apply_env(bandpass(white(rng, n), 1500, 1.0, RATE_SFX), adsr(n, 0.001, 0.02, 0.04, 0.9)), 1.0),
-              gain(apply_env(gain(sine(n, _sweep_freq(300, 140, "exp"), RATE_SFX), 0.6), expdecay(n, 0.08)), 0.7))
-    add("ui_hit", "ui/hit.wav", normalize(hit, 0.7), bus="ui", gain_db=-11.0, spatial=False,
-        pitch_var=0.07, purpose="damage feedback tick")
 
-    # --- transitions
-    n = int(RATE_SFX * 1.1)
-    whoosh = apply_env(bandpass(white(rng, n), 700, 0.7, RATE_SFX), env_shape(n, [(0, 0.0), (0.4, 1.0), (1.0, 0.0)]))
-    shimmer = apply_env(gain(mix(sine(n, 880, RATE_SFX, amp=0.4), sine(n, 1320, RATE_SFX, amp=0.3)), 0.5),
-                        env_shape(n, [(0, 0.0), (0.55, 0.8), (1.0, 0.0)]))
-    add("map_transition", "transitions/map_transfer.wav", normalize(mix(gain(whoosh, 1.0), shimmer), 0.85),
-        bus="ui", gain_db=-8.0, spatial=False, purpose="map transfer swell")
-    n = int(RATE_SFX * 0.8)
-    creak = apply_env(resonators(white(rng, n), [(220, 14.0, 1.0), (380, 16.0, 0.5), (610, 18.0, 0.3)], RATE_SFX),
-                      adsr(n, 0.05, 0.3, 0.4, 0.5))
-    add("door_open", "transitions/door_open.wav", normalize(creak, 0.6), gain_db=-12.0, spatial=True,
-        purpose="heavy door opening")
-    add("door_close", "transitions/door_close.wav", normalize(mix(gain(creak, 0.7), gain(
-        apply_env(lowpass(white(rng, int(RATE_SFX * 0.25)), 400, 0.8, RATE_SFX), adsr(int(RATE_SFX * 0.25), 0.001, 0.03, 0.05, 0.9)), 0.8)), 0.7),
-        gain_db=-11.0, spatial=True, purpose="heavy door closing")
+    ui_snd("button", 650, 0.09, 0.05)
+    ui_snd("hover", 920, 0.06, 0.035, ((1.0, 1.0), (2.0, 0.2)))
+    ui_snd("confirm", 700, 0.22, 0.09, ((1.0, 1.0), (1.5, 0.5), (2.0, 0.3)))
+    ui_snd("cancel", 400, 0.2, 0.08, ((1.0, 1.0), (0.75, 0.6)))
+    ui_snd("deny", 250, 0.3, 0.12, ((1.0, 1.0), (1.41, 0.5)))
+    ui_snd("chat", 1250, 0.07, 0.03)
+    ui_snd("quest", 540, 0.45, 0.18, ((1.0, 1.0), (1.5, 0.6), (2.0, 0.3)))
+    ui_snd("levelup", 440, 0.75, 0.3, ((1.0, 1.0), (1.5, 0.7), (2.0, 0.5), (3.0, 0.25)))
+    ui_snd("loot", 1050, 0.22, 0.07, ((1.0, 1.0), (2.02, 0.35)))
+    ui_snd("upgrade_success", 550, 0.55, 0.2, ((1.0, 1.0), (1.5, 0.7), (2.0, 0.4), (2.5, 0.2)))
+    ui_snd("upgrade_fail", 360, 0.5, 0.18, ((1.0, 1.0), (1.32, 0.6), (0.66, 0.4)))
+    ui_snd("open", 720, 0.14, 0.06, ((1.0, 1.0), (1.48, 0.3)))
+    ui_snd("close", 480, 0.14, 0.06, ((1.0, 1.0), (0.7, 0.3)))
 
-    # --- ambience, one acoustic identity per room
-    def bed(seconds, lo, hi, q=0.8, rate=RATE_AMB):
-        n = int(rate * seconds)
-        return lowpass(bandpass(pink(rng, n), math.sqrt(lo * hi), q, rate), hi, 0.8, rate)
+    # ui_hit (Combat hit feedback: punchy, tactile hit indicator!)
+    n = int(RATE_SFX * 0.18)
+    t = np.arange(n) / RATE_SFX
+    hit_click = butter_bandpass(rng.normal(0, 1, n), 2200, 6800, RATE_SFX) * exp_decay(n, 0.025) * 1.2
+    hit_punch = np.sin(2.0 * np.pi * np.cumsum(180 * np.exp(-t / 0.03) + 70) / RATE_SFX) * exp_decay(n, 0.04) * 0.9
+    add("ui_hit", "ui/hit.wav", normalize(soft_clip(hit_click + hit_punch, drive=1.2), 0.85),
+        bus="ui", gain_db=-8.0, spatial=False, pitch_var=0.07, purpose="combat damage hit marker tick")
 
-    # exterior: wind with gusts, plus sparse birds
-    n = int(RATE_AMB * 6.0)
-    wind = mix(gain(bed(6.0, 200, 1400), 1.0), gain(brown(rng, n), 0.35))
-    gust = zeros(n)
-    for i in range(n):
-        gust[i] = 0.55 + 0.45 * math.sin(math.tau * 0.13 * i / RATE_AMB) * math.sin(math.tau * 0.041 * i / RATE_AMB)
-    wind = array.array("d", [wind[i] * gust[i] for i in range(n)])
-    add("amb_exterior_wind", "ambience/exterior_wind.wav", normalize(crossfade_loop(wind, int(RATE_AMB * 0.6)), 0.62),
-        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-16.0, spatial=False,
-        purpose="exterior wind bed with gusts")
-    bird_offsets = [int(RATE_AMB * t) for t in (0.8, 1.9, 3.4, 4.6)]
-    birds = zeros(n)
-    for off in bird_offsets:
-        for chirp in range(rng.int(2, 4)):
-            length = rng.int(int(RATE_AMB * 0.05), int(RATE_AMB * 0.12))
-            c = apply_env(gain(sine(length, _sweep_freq(rng.uni(2600, 3600), rng.uni(1900, 2600), "exp"), RATE_AMB), 0.35),
-                          adsr(length, 0.1, 0.2, 0.4, 0.4))
-            start = off + chirp * rng.int(600, 1800)
-            for i, v in enumerate(c):
-                if start + i < n:
-                    birds[start + i] += v
-    add("amb_exterior_birds", "ambience/exterior_birds.wav", normalize(crossfade_loop(birds, int(RATE_AMB * 0.5)), 0.4),
-        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-22.0, spatial=False,
-        purpose="sparse bird calls for the grounds")
-    # fire / candle beds used by both exterior props and interior rooms
-    n = int(RATE_AMB * 5.0)
-    fire = mix(gain(lowpass(pink(rng, n), 1500, 0.7, RATE_AMB), 0.9), gain(crackles(rng, RATE_AMB, 5.0, 11.0, 5400.0, 0.6), 1.0))
-    add("amb_fire", "ambience/fire_loop.wav", normalize(crossfade_loop(fire, int(RATE_AMB * 0.5)), 0.6),
-        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-17.0,
-        purpose="hearth/fire loop (Great Hall, common rooms, braziers)")
-    n = int(RATE_AMB * 4.0)
-    candle = mix(gain(highpass(white(rng, n), 5000, 0.7, RATE_AMB), 0.25), gain(crackles(rng, RATE_AMB, 4.0, 5.0, 6800.0, 0.35), 1.0))
-    candle = array.array("d", [v * (0.7 + 0.3 * math.sin(math.tau * 0.9 * i / RATE_AMB)) for i, v in enumerate(candle)])
-    add("amb_candles", "ambience/candle_loop.wav", normalize(crossfade_loop(candle, int(RATE_AMB * 0.4)), 0.42),
-        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-24.0,
-        purpose="candle flicker sizzle for interior fixtures")
-    # distant activity: muffled footfalls and doors beyond the walls
+    # ----------------------------------------------------------------
+    # Transitions (portal transfer, doors)
+    # ----------------------------------------------------------------
+    n = int(RATE_SFX * 1.15)
+    t = np.arange(n) / RATE_SFX
+    trans_whoosh = butter_bandpass(pink_noise(n, rng), 400, 2200, RATE_SFX) * env_shape(n, [(0, 0.0), (0.45, 1.0), (1.0, 0.0)])
+    trans_chime = (sine(n, 880, RATE_SFX, amp=0.3) + sine(n, 1320, RATE_SFX, amp=0.25)) * env_shape(n, [(0, 0.0), (0.5, 0.8), (1.0, 0.0)])
+    add("map_transition", "transitions/map_transfer.wav", normalize(trans_whoosh * 0.9 + trans_chime, 0.9),
+        bus="ui", gain_db=-7.0, spatial=False, purpose="map transition ethereal swell")
+
+    n = int(RATE_SFX * 0.85)
+    door_creak = multi_resonator(rng.normal(0, 1, n), [(220, 14.0, 1.0), (380, 16.0, 0.5), (610, 18.0, 0.3)], RATE_SFX) * adsr(n, 0.05, 0.3, 0.4, 0.5)
+    add("door_open", "transitions/door_open.wav", normalize(door_creak, 0.7), gain_db=-10.0,
+        spatial=True, purpose="heavy medieval door opening creak")
+
+    door_thud = butter_lowpass(rng.normal(0, 1, int(RATE_SFX * 0.28)), 320, RATE_SFX) * exp_decay(int(RATE_SFX * 0.28), 0.08) * 1.1
+    door_c_sig = np.copy(door_creak * 0.6)
+    door_c_sig[-len(door_thud):] += door_thud * 0.9
+    add("door_close", "transitions/door_close.wav", normalize(door_c_sig, 0.8), gain_db=-9.0,
+        spatial=True, purpose="heavy medieval door closing latch thud")
+
+    # ----------------------------------------------------------------
+    # Continuous Ambient Beds (Lush, non-repetitive, seamless)
+    # ----------------------------------------------------------------
+    # 1. Exterior Wind Bed (11.5s seamless loop: layered atmospheric gusts)
+    n = int(RATE_AMB * 11.5)
+    t = np.arange(n) / RATE_AMB
+    air_deep = butter_lowpass(brown_noise(n, rng), 220, RATE_AMB) * 0.8
+    air_mid = butter_bandpass(pink_noise(n, rng), 400, 1600, RATE_AMB) * 0.6
+    # Non-synchronous coprime gust modulations (0.09Hz and 0.14Hz)
+    gust_mod = 0.65 + 0.35 * np.sin(2.0 * np.pi * 0.09 * t) * np.sin(2.0 * np.pi * 0.14 * t + 0.8)
+    wind_bed = (air_deep + air_mid * gust_mod) * 0.75
+    add("amb_exterior_wind", "ambience/exterior_wind.wav",
+        normalize(crossfade_loop(wind_bed, int(RATE_AMB * 0.8)), 0.68),
+        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-15.0, spatial=False,
+        purpose="exterior wind bed with lush undulating gusts")
+
+    # 2. Exterior Birds / Nature Bed (11.5s seamless loop: serene meadow atmosphere)
+    # (Individual calls are handled by dynamic scatter events!)
+    birds_bed = butter_bandpass(pink_noise(n, rng), 900, 3200, RATE_AMB) * 0.18
+    # Gentle subtle distant calls embedded into bed
+    for off_s in (2.2, 5.8, 9.1):
+        idx = int(off_s * RATE_AMB)
+        call_len = int(RATE_AMB * 0.25)
+        if idx + call_len < n:
+            call = ping(RATE_AMB, rng.uniform(2800, 3600), 0.25, decay=0.1) * 0.22
+            birds_bed[idx:idx + call_len] += call
+    add("amb_exterior_birds", "ambience/exterior_birds.wav",
+        normalize(crossfade_loop(birds_bed, int(RATE_AMB * 0.6)), 0.45),
+        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-21.0, spatial=False,
+        purpose="serene woodland meadow ambient bed")
+
+    # 3. Fireplace Loop (10.0s seamless loop: warm hearth combustion + crackles)
+    n = int(RATE_AMB * 10.0)
+    t = np.arange(n) / RATE_AMB
+    fire_drone = butter_bandpass(brown_noise(n, rng), 60, 340, RATE_AMB) * 0.75
+    fire_crack = crackles(rng, RATE_AMB, 10.0, density=14.0, bright=4800.0, level=0.7)
+    fire_flame = fire_drone * (0.8 + 0.2 * np.sin(2.0 * np.pi * 1.5 * t)) + fire_crack
+    add("amb_fire", "ambience/fire_loop.wav",
+        normalize(crossfade_loop(fire_flame, int(RATE_AMB * 0.6)), 0.65),
+        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-16.0,
+        purpose="hearth/fire loop with warm low body and authentic wood pops")
+
+    # 4. Candles Loop (8.0s seamless loop)
     n = int(RATE_AMB * 8.0)
-    distant = zeros(n)
-    t = 0.6
-    while t < 7.4:
-        length = int(RATE_AMB * 0.5)
-        ev = apply_env(lowpass(white(rng, length), rng.uni(180, 420), 0.8, RATE_AMB), adsr(length, 0.02, 0.15, 0.2, 0.6))
-        start = int(t * RATE_AMB)
-        for i, v in enumerate(ev):
-            if start + i < n:
-                distant[start + i] += v * rng.uni(0.25, 0.6)
-        t += rng.uni(0.7, 1.6)
-    add("amb_distant", "ambience/distant_activity.wav", normalize(crossfade_loop(distant, int(RATE_AMB * 0.5)), 0.45),
-        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-23.0, spatial=False,
-        purpose="muffled distant activity beyond the room walls")
-    # Great Hall: big hall reverb, deep bed, occasional fire swell
-    n = int(RATE_AMB * 6.0)
-    hall_bed = mix(gain(brown(rng, n), 0.5), gain(lowpass(pink(rng, n), 700, 0.7, RATE_AMB), 0.7))
-    hall_bed = reverb(hall_bed, RATE_AMB, decay=2.6, mix_amount=0.5, damp=2600.0, size=1.9)
-    hall_bed = crossfade_loop(hall_bed, int(RATE_AMB * 0.8))
-    add("amb_great_hall", "ambience/great_hall.wav", normalize(hall_bed, 0.5), rate=RATE_AMB, loop=True,
-        bus="ambience", gain_db=-19.0, spatial=False,
-        purpose="Great Hall: large reverberant room tone with a deep bed")
-    # Library: tight dry room, clock tick, paper rustle
-    n = int(RATE_AMB * 6.0)
-    lib = mix(gain(lowpass(pink(rng, n), 1200, 0.8, RATE_AMB), 0.55), gain(highpass(white(rng, n), 6000, 0.7, RATE_AMB), 0.06))
-    lib = reverb(lib, RATE_AMB, decay=0.55, mix_amount=0.16, damp=5200.0, size=0.55)
-    ticks = zeros(n)
-    t = 0.4
-    while t < 5.6:
-        start = int(t * RATE_AMB)
-        tick = apply_env(bandpass(white(rng, 400), 4200, 4.0, RATE_AMB), expdecay(400, 0.02))
-        for i, v in enumerate(tick):
-            if start + i < n:
-                ticks[start + i] += v * 0.35
-        t += 1.0
-    rustles = zeros(n)
-    for _ in range(4):
-        start = rng.int(0, n - RATE_AMB)
-        length = int(RATE_AMB * rng.uni(0.25, 0.6))
-        rust = apply_env(bandpass(white(rng, length), rng.uni(3000, 6000), 0.8, RATE_AMB), adsr(length, 0.1, 0.2, 0.35, 0.5))
-        for i, v in enumerate(rust):
-            rustles[start + i] += v * 0.3
-    lib = mix(lib, gain(ticks, 0.5), gain(rustles, 0.7))
-    add("amb_library", "ambience/library.wav", normalize(crossfade_loop(lib, int(RATE_AMB * 0.7)), 0.5),
+    t = np.arange(n) / RATE_AMB
+    candle_hiss = butter_highpass(rng.normal(0, 1, n), 4500, RATE_AMB) * 0.2
+    candle_pop = crackles(rng, RATE_AMB, 8.0, density=4.0, bright=6500.0, level=0.35)
+    candle = (candle_hiss + candle_pop) * (0.75 + 0.25 * np.sin(2.0 * np.pi * 0.8 * t))
+    add("amb_candles", "ambience/candle_loop.wav",
+        normalize(crossfade_loop(candle, int(RATE_AMB * 0.5)), 0.42),
+        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-23.0,
+        purpose="candle flicker sizzle for interior fixtures")
+
+    # 5. Distant Castle Activity (11.0s seamless loop)
+    n = int(RATE_AMB * 11.0)
+    distant = np.zeros(n)
+    t_step = 0.8
+    while t_step < 10.2:
+        ev_len = int(RATE_AMB * 0.45)
+        ev = butter_lowpass(rng.normal(0, 1, ev_len), rng.uniform(180, 400), RATE_AMB) * adsr(ev_len, 0.02, 0.15, 0.2, 0.6)
+        st = int(t_step * RATE_AMB)
+        if st + ev_len < n:
+            distant[st:st + ev_len] += ev * rng.uniform(0.3, 0.65)
+        t_step += rng.uniform(1.2, 2.6)
+    add("amb_distant", "ambience/distant_activity.wav",
+        normalize(crossfade_loop(distant, int(RATE_AMB * 0.6)), 0.45),
+        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-22.0, spatial=False,
+        purpose="muffled distant castle presence beyond room walls")
+
+    # 6. Great Hall Room Tone (11.0s seamless loop)
+    n = int(RATE_AMB * 11.0)
+    hall_air = butter_lowpass(brown_noise(n, rng) + pink_noise(n, rng), 600, RATE_AMB) * 0.6
+    hall_rev = reverb(hall_air, RATE_AMB, decay=2.5, mix_amount=0.45, damp=2800.0, size=1.8)
+    add("amb_great_hall", "ambience/great_hall.wav",
+        normalize(crossfade_loop(hall_rev, int(RATE_AMB * 0.8)), 0.55),
+        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-18.0, spatial=False,
+        purpose="Great Hall: large reverberant hall room tone with deep acoustic space")
+
+    # 7. Library Room Tone (10.5s seamless loop)
+    n = int(RATE_AMB * 10.5)
+    lib_air = butter_lowpass(pink_noise(n, rng), 900, RATE_AMB) * 0.45
+    lib_rev = reverb(lib_air, RATE_AMB, decay=0.5, mix_amount=0.15, damp=4800.0, size=0.5)
+    add("amb_library", "ambience/library.wav",
+        normalize(crossfade_loop(lib_rev, int(RATE_AMB * 0.6)), 0.48),
         rate=RATE_AMB, loop=True, bus="ambience", gain_db=-20.0, spatial=False,
-        purpose="Library: tight dry tone, clock tick and paper rustle")
-    # Dungeon: wet stone, drips, low drone, no birds
-    n = int(RATE_AMB * 6.0)
-    dun = mix(gain(brown(rng, n), 0.6), gain(lowpass(pink(rng, n), 400, 0.7, RATE_AMB), 0.5))
-    dun = reverb(dun, RATE_AMB, decay=2.2, mix_amount=0.55, damp=1500.0, size=1.5)
-    drips = zeros(n)
-    t = 0.3
-    while t < 5.7:
-        start = int(t * RATE_AMB)
-        length = int(RATE_AMB * 0.22)
-        drop = apply_env(gain(sine(length, _sweep_freq(rng.uni(900, 1500), rng.uni(380, 620), "exp"), RATE_AMB), 0.5),
-                         adsr(length, 0.01, 0.2, 0.25, 0.5))
-        for i, v in enumerate(drop):
-            if start + i < n:
-                drips[start + i] += v * rng.uni(0.4, 0.9)
-        t += rng.uni(0.6, 1.4)
-    dun = mix(crossfade_loop(dun, int(RATE_AMB * 0.8)), drips)
-    add("amb_dungeon", "ambience/dungeon.wav", normalize(crossfade_loop(dun, int(RATE_AMB * 0.8)), 0.55),
-        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-19.0, spatial=False,
-        purpose="Dungeon: wet stone drone with water drips")
-    # Moving-stair mechanism
-    n = int(RATE_AMB * 5.0)
-    grind = apply_env(resonators(white(rng, n), [(70, 9.0, 1.0), (140, 12.0, 0.6), (310, 15.0, 0.35)], RATE_AMB),
-                      env_shape(n, [(0, 0.0), (0.15, 0.9), (0.85, 0.85), (1.0, 0.0)]))
-    clunks = zeros(n)
-    for beat in range(6):
-        start = int((0.4 + beat * 0.75) * RATE_AMB)
-        clunk = apply_env(resonators(white(rng, int(RATE_AMB * 0.3)), [(180, 12.0, 1.0), (420, 15.0, 0.5)], RATE_AMB),
-                          expdecay(int(RATE_AMB * 0.3), 0.08))
-        for i, v in enumerate(clunk):
-            if start + i < n:
-                clunks[start + i] += v * 0.8
-    stair = mix(gain(grind, 0.8), clunks)
-    add("amb_stairs", "ambience/stair_mechanism.wav", normalize(crossfade_loop(stair, int(RATE_AMB * 0.5)), 0.6),
-        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-18.0, spatial=True,
-        purpose="moving-stair mechanism: stone grind with docking clunks")
+        purpose="Library: tight dry room tone with gentle scholarly calm")
+
+    # 8. Dungeon Room Tone (11.0s seamless loop)
+    n = int(RATE_AMB * 11.0)
+    dun_sub = butter_lowpass(brown_noise(n, rng), 240, RATE_AMB) * 0.6
+    dun_rev = reverb(dun_sub, RATE_AMB, decay=2.4, mix_amount=0.5, damp=1400.0, size=1.6)
+    add("amb_dungeon", "ambience/dungeon.wav",
+        normalize(crossfade_loop(dun_rev, int(RATE_AMB * 0.8)), 0.52),
+        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-18.0, spatial=False,
+        purpose="Dungeon: dark subterranean stone cellar drone")
+
+    # 9. Moving Stair Mechanism (9.0s seamless loop)
+    n = int(RATE_AMB * 9.0)
+    grind = multi_resonator(rng.normal(0, 1, n), [(75, 9.0, 1.0), (150, 12.0, 0.6), (320, 15.0, 0.35)], RATE_AMB) * 0.6
+    clunks = np.zeros(n)
+    for beat in range(8):
+        st = int((0.5 + beat * 1.05) * RATE_AMB)
+        clunk = multi_resonator(rng.normal(0, 1, int(RATE_AMB * 0.25)), [(180, 12.0, 1.0), (420, 15.0, 0.5)], RATE_AMB) * exp_decay(int(RATE_AMB * 0.25), 0.08)
+        if st + len(clunk) < n:
+            clunks[st:st + len(clunk)] += clunk * 0.75
+    add("amb_stairs", "ambience/stair_mechanism.wav",
+        normalize(crossfade_loop(grind + clunks, int(RATE_AMB * 0.6)), 0.6),
+        rate=RATE_AMB, loop=True, bus="ambience", gain_db=-17.0, spatial=True,
+        purpose="moving-stair mechanism: stone grind with mechanical clunks")
+
+    # ----------------------------------------------------------------
+    # Procedural Ambient Scatter Events (The solution to "çevre sesleri repeat ediyor"!)
+    # ----------------------------------------------------------------
+    # Exterior Bird Chirps (Different species / calls for 3D positional scatter)
+    def synth_bird(f0, f1, f2, dur):
+        n = int(RATE_SFX * dur)
+        t = np.arange(n) / RATE_SFX
+        freqs = f0 + (f1 - f0) * np.sin(np.pi * t / dur) + (f2 - f0) * (t / dur)
+        ph = 2.0 * np.pi * np.cumsum(freqs) / RATE_SFX
+        sig = (np.sin(ph) + 0.35 * np.sin(ph * 2.01)) * adsr(n, 0.08, 0.2, 0.5, 0.22)
+        return normalize(sig, 0.8)
+
+    add("amb_bird_chirp_1", "ambience/birds/bird_chirp_01.wav", synth_bird(2800, 3600, 2900, 0.32),
+        gain_db=-16.0, pitch_var=0.08, spatial=True, purpose="scatter: robin double-chirp")
+    add("amb_bird_chirp_2", "ambience/birds/bird_chirp_02.wav", synth_bird(3200, 4200, 3100, 0.42),
+        gain_db=-17.0, pitch_var=0.08, spatial=True, purpose="scatter: warbler melodic trill")
+    add("amb_bird_chirp_3", "ambience/birds/bird_chirp_03.wav", synth_bird(2400, 3100, 2200, 0.48),
+        gain_db=-16.0, pitch_var=0.08, spatial=True, purpose="scatter: blackbird flute call")
+    add("amb_bird_chirp_4", "ambience/birds/bird_chirp_04.wav", synth_bird(1800, 2400, 1900, 0.58),
+        gain_db=-18.0, pitch_var=0.06, spatial=True, purpose="scatter: distant wood pigeon coo")
+
+    # Exterior Wind Gusts & Foliage Rustles
+    n = int(RATE_SFX * 1.8)
+    gust1 = butter_bandpass(brown_noise(n, rng), 120, 900, RATE_SFX) * env_shape(n, [(0, 0.0), (0.4, 1.0), (0.8, 0.6), (1.0, 0.0)])
+    add("amb_wind_gust_1", "ambience/wind/wind_gust_01.wav", normalize(gust1, 0.75),
+        gain_db=-15.0, pitch_var=0.05, spatial=False, purpose="scatter: gentle rolling breeze gust")
+    n = int(RATE_SFX * 2.4)
+    gust2 = butter_bandpass(pink_noise(n, rng), 180, 1400, RATE_SFX) * env_shape(n, [(0, 0.0), (0.35, 1.0), (0.7, 0.5), (1.0, 0.0)])
+    add("amb_wind_gust_2", "ambience/wind/wind_gust_02.wav", normalize(gust2, 0.75),
+        gain_db=-16.0, pitch_var=0.05, spatial=False, purpose="scatter: rolling meadow wind swell")
+
+    n = int(RATE_SFX * 0.85)
+    rustle1 = butter_bandpass(pink_noise(n, rng), 800, 3400, RATE_SFX) * adsr(n, 0.1, 0.3, 0.4, 0.2)
+    add("amb_leaf_rustle_1", "ambience/nature/leaf_rustle_01.wav", normalize(rustle1, 0.65),
+        gain_db=-18.0, pitch_var=0.08, spatial=True, purpose="scatter: gentle leaf rustle in trees")
+    n = int(RATE_SFX * 0.95)
+    rustle2 = butter_bandpass(pink_noise(n, rng), 600, 2800, RATE_SFX) * adsr(n, 0.12, 0.25, 0.45, 0.18)
+    add("amb_leaf_rustle_2", "ambience/nature/leaf_rustle_02.wav", normalize(rustle2, 0.65),
+        gain_db=-18.0, pitch_var=0.08, spatial=True, purpose="scatter: branch foliage brushing")
+
+    # Dungeon Water Drops & Cavern Moan
+    def synth_drip(f_start, f_end, dur):
+        n = int(RATE_SFX * dur)
+        t = np.arange(n) / RATE_SFX
+        freqs = f_start * np.exp(-t / 0.04) + f_end
+        ph = 2.0 * np.pi * np.cumsum(freqs) / RATE_SFX
+        sig = np.sin(ph) * exp_decay(n, 0.06)
+        rev = reverb(sig, RATE_SFX, decay=1.8, mix_amount=0.45, damp=3200.0, size=1.4)
+        return normalize(rev, 0.8)
+
+    add("amb_dungeon_drip_1", "ambience/dungeon/water_drip_01.wav", synth_drip(1450, 780, 0.45),
+        gain_db=-14.0, pitch_var=0.09, spatial=True, purpose="scatter: clear cavern water drop")
+    add("amb_dungeon_drip_2", "ambience/dungeon/water_drip_02.wav", synth_drip(1200, 620, 0.5),
+        gain_db=-14.0, pitch_var=0.09, spatial=True, purpose="scatter: deeper resonance water drip")
+    add("amb_dungeon_drip_3", "ambience/dungeon/water_drip_03.wav", synth_drip(1700, 920, 0.55),
+        gain_db=-15.0, pitch_var=0.09, spatial=True, purpose="scatter: high-pitched water drop echo")
+
+    n = int(RATE_SFX * 2.6)
+    dun_rumble = butter_lowpass(brown_noise(n, rng), 160, RATE_SFX) * env_shape(n, [(0, 0.0), (0.4, 0.85), (0.8, 0.5), (1.0, 0.0)])
+    add("amb_dungeon_rumble", "ambience/dungeon/cavern_rumble.wav", normalize(dun_rumble, 0.7),
+        gain_db=-16.0, pitch_var=0.04, spatial=False, purpose="scatter: subterranean stone shift")
+
+    # Great Hall & Castle Interior Settlement
+    n = int(RATE_SFX * 1.1)
+    settle1 = multi_resonator(rng.normal(0, 1, n), [(140, 15.0, 1.0), (320, 18.0, 0.5)], RATE_SFX) * exp_decay(n, 0.18)
+    add("amb_hall_settle_1", "ambience/castle/hall_settle_01.wav", normalize(settle1, 0.65),
+        gain_db=-18.0, pitch_var=0.07, spatial=True, purpose="scatter: timber settlement creak")
+    n = int(RATE_SFX * 0.8)
+    settle2 = multi_resonator(rng.normal(0, 1, n), [(220, 18.0, 1.0), (480, 20.0, 0.4)], RATE_SFX) * exp_decay(n, 0.14)
+    add("amb_hall_settle_2", "ambience/castle/hall_settle_02.wav", normalize(settle2, 0.65),
+        gain_db=-19.0, pitch_var=0.07, spatial=True, purpose="scatter: distant stone click")
+
+    # Library Page Flips
+    n = int(RATE_SFX * 0.72)
+    page1 = butter_bandpass(pink_noise(n, rng), 1800, 5600, RATE_SFX) * adsr(n, 0.08, 0.25, 0.35, 0.32)
+    add("amb_library_page_1", "ambience/library/page_flip_01.wav", normalize(page1, 0.6),
+        gain_db=-18.0, pitch_var=0.08, spatial=True, purpose="scatter: parchment page flip")
+    n = int(RATE_SFX * 0.85)
+    page2 = butter_bandpass(pink_noise(n, rng), 1400, 4800, RATE_SFX) * adsr(n, 0.1, 0.28, 0.4, 0.22)
+    add("amb_library_page_2", "ambience/library/page_flip_02.wav", normalize(page2, 0.6),
+        gain_db=-18.0, pitch_var=0.08, spatial=True, purpose="scatter: delicate book rustle")
+
     return out
 
 
-# ------------------------------------------------------------------ validation
+# ------------------------------------------------------------------ Validation
 
 def validate(library):
     problems = []
@@ -887,16 +962,12 @@ def validate(library):
         if len(sig) == 0:
             problems.append("%s is empty" % key)
             continue
-        peak = max(abs(v) for v in sig)
+        peak = float(np.max(np.abs(sig)))
         if peak > 1.0:
             problems.append("%s clips (peak %.3f)" % (key, peak))
         if peak < 0.01:
             problems.append("%s is silent (peak %.4f)" % (key, peak))
         if entry["loop"]:
-            # A seamless loop means the seam step is no worse than the worst
-            # ordinary step-to-step step inside the loop: a bright 2.4 kHz tone
-            # legitimately moves up to ~0.33 between neighbours, so absolutes
-            # would be meaningless.
             steps = sorted(abs(sig[i + 1] - sig[i]) for i in range(0, len(sig) - 1, 4))
             worst = steps[int(len(steps) * 0.999)] if steps else 0.0
             seam = abs(sig[0] - sig[-1])
@@ -905,7 +976,7 @@ def validate(library):
                                 % (key, sig[-1], sig[0], worst))
         seconds = len(sig) / float(entry["rate"])
         if seconds > 12.0:
-            problems.append("%s is %.1f s (loops should stay short)" % (key, seconds))
+            problems.append("%s is %.1f s (loops should stay short <= 12s)" % (key, seconds))
     if problems:
         for p in problems:
             print("[spell-sfx] VALIDATION FAIL: %s" % p)
@@ -920,7 +991,7 @@ def main():
     out_dir = parsed.out
     os.makedirs(out_dir, exist_ok=True)
 
-    rng = Rng(20261005)
+    rng = np.random.RandomState(20261005)
     library = {}
     library.update(spell_library(rng))
     library.update(world_library(rng))
@@ -929,7 +1000,7 @@ def main():
         "schema": 1,
         "generator": "client/tools/audio/synth_spell_sfx.py",
         "generated": time.strftime("%Y-%m-%d"),
-        "provenance": "project-original synthesis (deterministic seeded DSP, Python standard library only); no downloaded or third-party audio",
+        "provenance": "project-original synthesis (deterministic seeded DSP, Python NumPy/SciPy); no downloaded or third-party audio",
         "license": "project-original (CC0-equivalent dedication by the project)",
         "buses": ["Music", "SFX", "UI", "Ambience"],
         "notes": "Per-file bus, base gain, pitch variation and loop mode. Spatial entries are played on an AudioStreamPlayer3D with attenuation; UI and bed entries play on a non-positional player. Long loops import as IMA-ADPCM with the forward loop flag (see tools/audio/tune_imports.py).",
@@ -938,9 +1009,6 @@ def main():
     written = 0
     for key in sorted(library):
         entry = library[key]
-        if entry["loop"]:
-            # one uniform seam-continuous loop pass over every looping bed
-            entry["sig"] = crossfade_loop(entry["sig"], int(entry["rate"] * 0.3))
         path = os.path.join(out_dir, entry["path"])
         write_wav(path, entry["sig"], entry["rate"])
         written += 1
@@ -956,14 +1024,15 @@ def main():
             "seconds": round(len(entry["sig"]) / float(entry["rate"]), 3),
             "purpose": entry["purpose"],
         }
+
     validate(library)
     manifest_path = os.path.join(out_dir, "sound_library.json")
     with open(manifest_path, "w", encoding="utf-8") as handle:
         json.dump(manifest, handle, indent=1)
         handle.write("\n")
-    print("[spell-sfx] wrote %d sounds -> %s" % (written, out_dir))
-    print("[spell-sfx] manifest -> %s" % manifest_path)
+    print("[spell-sfx] successfully synthesized %d audio assets into %s" % (written, out_dir))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
