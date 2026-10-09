@@ -112,7 +112,12 @@ func _process(delta: float) -> void:
 			(b as MeshInstance3D).rotation.y = sin(_candle_t * 1.6) * 0.12
 	var lake := get_node_or_null("BlackLake")
 	if lake:
-		lake.position.y = sin(_candle_t * 0.8) * 0.05
+		# Bob only the water surface + foam, never the docks, collision or
+		# lakebed: moving the whole lake moved its StaticBodies every frame and
+		# jittered any body standing on the piers.
+		var surface := lake.get_node_or_null("LakeWaterSurface")
+		if surface:
+			surface.position.y = -7.0 + sin(_candle_t * 0.8) * 0.05
 
 var _offline_save_timer: float = 15.0
 
