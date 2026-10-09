@@ -34,8 +34,8 @@ uniform float depth_distance : hint_range(0.5, 20.0) = 5.0;
 uniform float foam_depth : hint_range(0.05, 1.5) = 0.45;
 uniform float emission_boost = 0.35;
 
-uniform sampler2D depth_texture : hint_depth_texture, filter_linear_mipmap;
-uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
+// Depth/screen textures are intentionally NOT sampled: reading them from a
+// transparent surface turned the lake black on some passes/renderers.
 
 varying vec3 world_pos;
 varying vec3 vertex_normal;
@@ -67,23 +67,10 @@ void vertex() {
 }
 
 void fragment() {
-	// Depth below the surface. When no depth is available (raw ~1.0 / far
-	// plane) fall back to a mid-lake depth so the water keeps a healthy
-	// mid-blue instead of collapsing to deep-black or transparent.
-	float raw_depth = texture(depth_texture, SCREEN_UV).r;
-	float water_depth = 2.0;
-	if (raw_depth < 0.999) {
-		vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, raw_depth);
-		vec4 view_pos = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
-		view_pos.xyz /= max(view_pos.w, 0.0001);
-		float linear_depth = -view_pos.z;
-		float surface_depth = -(VIEW_MATRIX * vec4(world_pos, 1.0)).z;
-		water_depth = max(0.0, linear_depth - surface_depth);
-		water_depth = clamp(water_depth, 0.0, depth_distance * 1.5);
-		if (water_depth < 0.001) {
-			water_depth = 2.0;
-		}
-	}
+	// Fixed mid-lake depth tint plus a slow large-scale variation so the
+	// surface always has a lit, readable blue base colour.
+	float water_depth = 2.2 + 1.6 * sin(world_pos.x * 0.05 + TIME * 0.2) * cos(world_pos.z * 0.045 - TIME * 0.15);
+	water_depth = clamp(water_depth, 0.4, depth_distance);
 
 	float depth_factor = clamp(water_depth / depth_distance, 0.0, 1.0);
 	depth_factor = pow(depth_factor, 0.7);
