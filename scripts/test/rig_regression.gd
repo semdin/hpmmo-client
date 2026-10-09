@@ -15,6 +15,8 @@ const BroomFlightScript = preload("res://scripts/entities/broom_flight.gd")
 
 var failures: Array[String] = []
 var checks := 0
+var rendered_poses := {}
+var rendered_rotations := {}
 @onready var world = $GameWorld
 
 func check(condition: bool, message: String) -> void:
@@ -33,6 +35,12 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	await get_tree().create_timer(0.5).timeout
 	var player = world.local_player
+	var sk: Skeleton3D = player._find_skeleton()
+	sk.skeleton_updated.connect(func():
+		for i in range(sk.get_bone_count()):
+			rendered_poses[i] = sk.get_bone_global_pose(i)
+			rendered_rotations[i] = sk.get_bone_pose_rotation(i)
+	)
 	await _check_body(player)
 	await _check_clip_metrics(player)
 	await _check_wand_grip(player)
@@ -237,23 +245,32 @@ func _check_wand_grip(player) -> void:
 			"The wand's grip sits in the fist (%.3f m from the finger centres)" % holder.global_position.distance_to(fist_world))
 		check(RigIK.distance_to_line(fist_world, holder.global_position,
 			axis) < 0.07, "The handle runs through the closed fingers")
+	var closed := true
+	for finger in ["Index", "Middle", "Ring", "Pinky"]:
+		var base := RigIK.bone_index(skeleton, finger + "2.R")
+		var tip := RigIK.bone_index(skeleton, finger + "4.R")
+		var proximal: Transform3D = rendered_poses[base]
+		var distal: Transform3D = rendered_poses[tip]
+		closed = closed and (distal.origin - proximal.origin).length() < 0.065
+		closed = closed and RigIK.distance_to_line(skeleton.global_transform * distal.origin, holder.global_position, axis) < 0.065
+	check(closed, "All four fingers curl around the wand handle")
 	# Compared in SKELETON space: the holder is a child of the skeleton, so its
 	# local basis is the skeleton-space orientation, and the bone pose is too.
-	var hand_axis: Vector3 = RigIK.hand_axis(skeleton, "Wrist.R")
-	var wrist_pose := skeleton.get_bone_global_pose(wrist)
+	var hand_axis: Vector3 = HeroAppearance.wand_axis_in_wrist(skeleton)
+	var wrist_pose: Transform3D = rendered_poses[wrist]
 	var hand_world: Vector3 = (wrist_pose.basis * hand_axis).normalized()
 	var wand_skel: Vector3 = holder.transform.basis.y.normalized()
 	check(wand_skel.dot(hand_world) > 0.9,
-		"The wand points the way the hand does (dot %.2f)" % wand_skel.dot(hand_world))
+		"The wand crosses the palm toward the index finger (dot %.2f)" % wand_skel.dot(hand_world))
 
 func _grip_centre(skeleton: Skeleton3D, side: String) -> Vector3:
 	var acc := Vector3.ZERO
 	var counted := 0
-	for bone in ["Index1", "Middle1", "Ring1", "Pinky1", "Thumb1"]:
+	for bone in ["Index2", "Middle2", "Ring2", "Pinky2"]:
 		var index := RigIK.bone_index(skeleton, "%s.%s" % [bone, side])
 		if index < 0:
 			continue
-		acc += skeleton.get_bone_global_pose(index).origin
+		acc += (rendered_poses[index] as Transform3D).origin
 		counted += 1
 	if counted == 0:
 		return Vector3.INF
@@ -320,13 +337,8 @@ func _check_mount_round_trips(player) -> void:
 
 ## ---------------------------------------------------------------- broom grip
 
-## How far a hand may sit from the shaft's centreline and still count as holding
-## it. The shaft is a few centimetres across and the palm rides on top of it, so a
-## hand inside this envelope is on the broom rather than floating beside it - the
-## shaft is about 0.08 m across. A settled ride measures 0.027-0.032 m; the
-## allowance is for a hard bank in progress, where the grip is re-solved each frame
-## and trails the roll by one.
-const GRIP_TOLERANCE := 0.09
+## The palm centre must remain inside the wood's radius, including during banks.
+const GRIP_TOLERANCE := 0.035
 
 ## The rider's hands must actually hold the shaft, on the local body and on a
 ## replicated view alike. Driven through the real inputs (a bank is a held turn),
@@ -351,11 +363,28 @@ func _check_broom_grip(player) -> void:
 			break
 		await get_tree().physics_frame
 	check(player.broom_grip.engaged(), "The grip engages once the rider is seated")
+	await get_tree().create_timer(0.4).timeout
 	var settled: float = player.broom_grip.hand_error()
 	check(settled >= 0.0 and settled <= GRIP_TOLERANCE,
 		"Both hands sit on the shaft while cruising (%.3f m from its centreline)" % settled)
 	check(player.broom_grip.hand_alignment() >= 0.8,
 		"The hands lie along the shaft (alignment %.2f)" % player.broom_grip.hand_alignment())
+	var head := RigIK.bone_index(skeleton_for(player), "Head")
+	var neck := RigIK.bone_index(skeleton_for(player), "Neck")
+	player.hero_anim.tree.active = false
+	var head_source := skeleton_for(player).get_bone_pose_rotation(head)
+	var neck_source := skeleton_for(player).get_bone_pose_rotation(neck)
+	await get_tree().create_timer(0.1).timeout
+	var head_start: Quaternion = rendered_rotations[head]
+	var head_drift := 0.0
+	for _frame in range(120):
+		await get_tree().process_frame
+		head_drift = maxf(head_drift, head_start.angle_to(rendered_rotations[head]))
+	check(head_drift < 0.01, "A frozen mounted pose never accumulates head rotation (%.4f rad)" % head_drift)
+	check(head_source.angle_to(skeleton_for(player).get_bone_pose_rotation(head)) < 0.001
+		and neck_source.angle_to(skeleton_for(player).get_bone_pose_rotation(neck)) < 0.001,
+		"Grip modifiers do not overwrite the source head/neck pose")
+	player.hero_anim.tree.active = true
 	# A banking turn: the hips roll and the rider leans, and the hands must stay on.
 	Input.action_press("move_left")
 	await get_tree().create_timer(0.8).timeout
@@ -372,6 +401,33 @@ func _check_broom_grip(player) -> void:
 	Input.action_release("jump")
 	check(climbing >= 0.0 and climbing <= GRIP_TOLERANCE,
 		"The grip survives a climb (%.3f m from the shaft)" % climbing)
+	# Exercise every sustained flight clip, not just the input's default cruise.
+	player.set_physics_process(false)
+	for clip in ["Broom_Seated_Idle", "Broom_Cruise", "Broom_Accelerate", "Broom_Bank_L", "Broom_Bank_R", "Broom_Climb", "Broom_Dive", "Broom_Brake"]:
+		player.hero_anim.set_locomotion(clip, clip, true)
+		await get_tree().create_timer(0.6).timeout
+		var sk := skeleton_for(player)
+		var head_pose: Transform3D = rendered_poses[RigIK.bone_index(sk, "Head")]
+		var head_rest := sk.get_bone_global_rest(RigIK.bone_index(sk, "Head"))
+		var facing := head_pose.basis * head_rest.basis.inverse()
+		check(facing.z.dot(Vector3.BACK) > 0.99, "Head stays facing forward in " + clip)
+		var hands_ahead := true
+		var fingers_around := true
+		var shaft_start: Vector3 = player.broom.grip_socket.global_position + player.broom.model_root_ref.global_basis.y * BroomGripModifier.SHAFT_RISE
+		var shaft_axis: Vector3 = player.broom.broom_forward()
+		for side in ["L", "R"]:
+			var wrist: Transform3D = rendered_poses[RigIK.bone_index(sk, "Wrist." + side)]
+			var palm := wrist * RigIK.grip_frame(sk, side, BroomGripModifier.PALM_DEPTH).origin
+			var hips_pose: Transform3D = rendered_poses[RigIK.bone_index(sk, "Hips")]
+			hands_ahead = hands_ahead and palm.z - hips_pose.origin.z > 0.3
+			for finger in ["Index", "Middle", "Ring", "Pinky"]:
+				var tip: Transform3D = rendered_poses[RigIK.bone_index(sk, finger + "4." + side)]
+				fingers_around = fingers_around and RigIK.distance_to_line(sk.global_transform * tip.origin, shaft_start, shaft_axis) < 0.075
+		check(hands_ahead, "Hands grip in front of the seat in " + clip)
+		check(fingers_around, "Both hands' fingers wrap the wood in " + clip)
+		check(player.broom_grip.hand_error() <= GRIP_TOLERANCE,
+			"Both palms hold the handle in %s (%.3f m)" % [clip, player.broom_grip.hand_error()])
+	player.set_physics_process(true)
 	# A remote view solves the same way, so two clients agree on the pose.
 	var view = preload("res://scenes/entities/player/player.tscn").instantiate()
 	view.is_local_player = false
@@ -433,11 +489,11 @@ func _check_cast_aim(player) -> void:
 		var to_aim: Vector3 = (aim - wand.global_position).normalized()
 		best = maxf(best, axis.dot(to_aim))
 		if player.hero_anim.cast_aiming() and wrist_bone >= 0:
-			var wrist := skeleton.global_transform * skeleton.get_bone_global_pose(wrist_bone).origin
-			held_worst = maxf(held_worst, wand.global_position.distance_to(wrist))
+			var palm := skeleton.global_transform * (rendered_poses[wrist_bone] as Transform3D) * HeroAppearance.wand_grip_transform(skeleton).origin
+			held_worst = maxf(held_worst, wand.global_position.distance_to(palm))
 	check(best > 0.9, "The wand points at the target on a cast (best dot %.2f)" % best)
-	check(held_worst > 0.0 and held_worst < 0.1,
-		"The wand stays in the fist while the arm aims (%.3f m from the wrist at worst)" % held_worst)
+	check(held_worst < 0.005,
+		"The wand stays in the fist while the arm aims (%.3f m from the palm at worst)" % held_worst)
 	for _i in range(180):
 		if not player.hero_anim.cast_aiming():
 			break
@@ -568,23 +624,23 @@ func _check_animation_graph(player) -> void:
 		arm_index = player.hero_anim.skeleton.find_bone("UpperArm.L")
 	player.hero_anim.set_locomotion("idle_ref", "Idle", true)
 	await get_tree().physics_frame
-	var ref_leg_a: Quaternion = player.hero_anim.skeleton.get_bone_pose_rotation(leg_index)
-	var ref_arm_a: Quaternion = player.hero_anim.skeleton.get_bone_pose_rotation(arm_index)
+	var ref_leg_a: Quaternion = (rendered_rotations[leg_index] as Quaternion)
+	var ref_arm_a: Quaternion = (rendered_rotations[arm_index] as Quaternion)
 	for _i in range(14):
 		player.hero_anim.tick(1.0 / 60.0)
 		await get_tree().physics_frame
-	var ref_leg_delta: float = ref_leg_a.angle_to(player.hero_anim.skeleton.get_bone_pose_rotation(leg_index))
-	var ref_arm_delta: float = ref_arm_a.angle_to(player.hero_anim.skeleton.get_bone_pose_rotation(arm_index))
+	var ref_leg_delta: float = ref_leg_a.angle_to((rendered_rotations[leg_index] as Quaternion))
+	var ref_arm_delta: float = ref_arm_a.angle_to((rendered_rotations[arm_index] as Quaternion))
 	player.hero_anim.set_locomotion("idle_blend", "Idle", true)
 	await get_tree().physics_frame
-	var cast_leg_a: Quaternion = player.hero_anim.skeleton.get_bone_pose_rotation(leg_index)
-	var cast_arm_a: Quaternion = player.hero_anim.skeleton.get_bone_pose_rotation(arm_index)
+	var cast_leg_a: Quaternion = (rendered_rotations[leg_index] as Quaternion)
+	var cast_arm_a: Quaternion = (rendered_rotations[arm_index] as Quaternion)
 	player.hero_anim.start_cast("Spellcast_Shoot_Upper", 0.6)
 	for _i in range(14):
 		player.hero_anim.tick(1.0 / 60.0)
 		await get_tree().physics_frame
-	var cast_leg_delta: float = cast_leg_a.angle_to(player.hero_anim.skeleton.get_bone_pose_rotation(leg_index))
-	var cast_arm_delta: float = cast_arm_a.angle_to(player.hero_anim.skeleton.get_bone_pose_rotation(arm_index))
+	var cast_leg_delta: float = cast_leg_a.angle_to((rendered_rotations[leg_index] as Quaternion))
+	var cast_arm_delta: float = cast_arm_a.angle_to((rendered_rotations[arm_index] as Quaternion))
 	check(player.hero_anim.cast_weight() > 0.5,
 		"Cast layer reaches full weight over locomotion (%.2f)" % player.hero_anim.cast_weight())
 	check(cast_arm_delta > ref_arm_delta + 0.05,
@@ -597,11 +653,11 @@ func _check_animation_graph(player) -> void:
 	# `set_locomotion` would be replaced by Idle on the next one.
 	Input.action_press("move_forward")
 	await get_tree().create_timer(0.4).timeout
-	var run_a: Quaternion = player.hero_anim.skeleton.get_bone_pose_rotation(leg_index)
+	var run_a: Quaternion = (rendered_rotations[leg_index] as Quaternion)
 	var moved := 0.0
 	for _i in range(8):
 		await get_tree().physics_frame
-		moved = maxf(moved, run_a.angle_to(player.hero_anim.skeleton.get_bone_pose_rotation(leg_index)))
+		moved = maxf(moved, run_a.angle_to((rendered_rotations[leg_index] as Quaternion)))
 	Input.action_release("move_forward")
 	await get_tree().create_timer(0.3).timeout
 	check(moved > 0.03,
@@ -644,3 +700,6 @@ func _check_animation_graph(player) -> void:
 			footsteps += 1
 	check(footsteps >= 1, "Footstep events fire from foot contact while moving (%d)" % footsteps)
 	await get_tree().create_timer(0.2).timeout
+
+func skeleton_for(player) -> Skeleton3D:
+	return player._find_skeleton()

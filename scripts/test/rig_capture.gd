@@ -7,6 +7,8 @@ extends Node
 ## Run with a rendering driver (not --headless):
 ##   godot --path . res://scenes/test/rig_capture.tscn
 
+var rendered_bones := {}
+
 const OUT_DIR := "res://tools/downloads"
 
 @onready var world = $GameWorld
@@ -19,6 +21,11 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	await get_tree().create_timer(1.2).timeout
 	var player = world.local_player
+	var skeleton: Skeleton3D = player._find_skeleton()
+	skeleton.skeleton_updated.connect(func():
+		for i in range(skeleton.get_bone_count()):
+			rendered_bones[skeleton.get_bone_name(i)] = skeleton.global_transform * skeleton.get_bone_global_pose(i)
+	)
 	world.get_node("CanvasLayer").hide()
 	if world.overlay:
 		world.overlay.hide()
@@ -84,6 +91,8 @@ func _ready() -> void:
 	await _shot(camera, "rig-3-mount-side", hips + Vector3(4.6, 0.2, 0.0), hips)
 	await _shot(camera, "rig-3-mount-front", hips + Vector3(0.0, 0.3, 4.2), hips)
 	await _shot(camera, "rig-3-mount-three-quarter", hips + Vector3(3.0, 1.4, 3.2), hips)
+	var handle_focus: Vector3 = player.broom.grip_socket.global_position + Vector3.UP * BroomGripModifier.SHAFT_RISE
+	await _shot(camera, "rig-3-handle-close", handle_focus + Vector3(0.55, 0.4, 0.9), handle_focus)
 	Input.action_press("move_left")
 	await get_tree().create_timer(0.9).timeout
 	await _shot(camera, "rig-3-mount-bank", hips + Vector3(3.4, 1.0, 3.4), hips)
@@ -99,23 +108,12 @@ func _ready() -> void:
 	# Independent check: the distance from each hand to the shaft line derived from
 	# the broom's OWN sockets in world space (not from the modifier's helper).
 	var sk2: Skeleton3D = player._find_skeleton()
-	var seat: Vector3 = player.broom.seat_socket.global_position
+	var line_a: Vector3 = player.broom.grip_socket.global_position + player.broom.get("model_root_ref").global_basis.y * BroomGripModifier.SHAFT_RISE
 	var shaft_dir: Vector3 = player.broom.broom_forward()
-	var up: Vector3 = player.broom.get("model_root_ref").global_basis.y
-	var drop: float = absf(player.broom.seat_socket.position.y - player.broom.grip_socket.position.y)
-	var line_a: Vector3 = seat - up * drop
 	for side in ["L", "R"]:
-		var acc := Vector3.ZERO
-		var n := 0
-		for bone in ["Index1", "Middle1", "Ring1", "Pinky1", "Thumb1"]:
-			var idx := RigIK.bone_index(sk2, "%s.%s" % [bone, side])
-			if idx >= 0:
-				acc += sk2.global_transform * sk2.get_bone_global_pose(idx).origin
-				n += 1
-		if n > 0:
-			var fist: Vector3 = acc / float(n)
-			print("CAPTURE hand %s world=%s dist_to_shaft=%.3f" % [
-				side, fist, RigIK.distance_to_line(fist, line_a, shaft_dir)])
+		var wrist_frame: Transform3D = rendered_bones["Wrist." + side]
+		var palm := wrist_frame * RigIK.grip_frame(sk2, side, BroomGripModifier.PALM_DEPTH).origin
+		print("CAPTURE hand %s dist_to_wood=%.3f" % [side, RigIK.distance_to_line(palm, line_a, shaft_dir)])
 	await _follow(camera, player, "rig-3-grip-closeup", Vector3(1.25, 0.55, 1.0), focus)
 	await _follow(camera, player, "rig-3-grip-tight", Vector3(0.95, 0.16, 0.55), focus)
 	await _follow(camera, player, "rig-3-grip-top", Vector3(0.0, 1.35, 0.35), focus)
@@ -162,7 +160,7 @@ func _bone(player, name: String) -> Vector3:
 	var idx := sk.find_bone(name)
 	if idx < 0:
 		return Vector3.ZERO
-	return sk.global_transform * sk.get_bone_global_pose(idx).origin
+	return (rendered_bones.get(name, sk.global_transform * sk.get_bone_global_pose(idx)) as Transform3D).origin
 
 ## Every wand-like node in the scene, where it is, and how far it sits from the
 ## casting wrist. A frame can show a wand that is not the caster's (a mob carries

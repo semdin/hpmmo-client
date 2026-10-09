@@ -75,6 +75,8 @@ func _ready() -> void:
 	_check_audio_system()
 	await get_tree().create_timer(0.6).timeout
 	await _check_effects_runtime()
+	await _check_effect_behaviour()
+	await _check_effect_sound()
 	await _check_cancellation()
 	await _check_prediction_rejection()
 	await _check_boss_warning()
@@ -507,6 +509,161 @@ func _check_effects_runtime() -> void:
 		"A zero-length direction falls back to a unit direction")
 	if zero != null:
 		zero.call("cancel", "test")
+
+
+## The on-screen behaviours a stage is judged by: a sprite that holds its cell, a
+## follow that keeps its authored offset, a travel stage that outlives the bolt's
+## flight, and a status sustain that runs for the length it was asked for.
+func _check_effect_behaviour() -> void:
+	var probe := Node3D.new()
+	probe.name = "BehaviourProbe"
+	world.add_child(probe)
+	probe.global_position = Vector3(0.0, 0.2, -6.0)
+	# A sprite layer is ONE authored atlas cell; it never walks the sheet. The
+	# stun indicator is the case that shows it: a halo 1.9 m over the head.
+	var mark = SkillFX.spawn_stage(world, "stupefy", "sustain", probe.global_position + Vector3.UP * 1.9,
+		Vector3.UP, null, {"follow_target": probe})
+	var rune := _layer_node(mark, "vfx_rune_masks")
+	check(rune != null, "The stun indicator builds its rune mask")
+	if rune != null:
+		var rune_mat := rune.mesh.surface_get_material(0) as ShaderMaterial
+		await get_tree().create_timer(0.35).timeout
+		check(int(round(float(rune_mat.get_shader_parameter("frame")))) == 1,
+			"The stun rune holds its authored cell (no slide to another picture)")
+		check(absf(rune.global_position.y - probe.global_position.y - 1.9) < 0.01,
+			"The stun halo is still 1.9 m over its target (%.2f m)" % (rune.global_position.y - probe.global_position.y))
+		probe.global_position += Vector3(3.0, 0.0, 0.0)
+		await get_tree().process_frame
+		await get_tree().process_frame
+		check(absf(rune.global_position.x - probe.global_position.x) < 0.01
+			and absf(rune.global_position.y - probe.global_position.y - 1.9) < 0.01,
+			"The stun halo rides its target without dropping to its feet")
+	if mark != null:
+		mark.call("cancel", "test")
+	# The sprite rule is not a blanket freeze: a flipbook still walks its atlas.
+	var flame_fx = SkillFX.spawn_stage(world, "incendio", "sustain", probe.global_position, Vector3.UP)
+	var flame := _layer_node(flame_fx, "vfx_flame_loop")
+	check(flame != null, "The burn builds its looping flame")
+	if flame != null:
+		var flame_mat := flame.mesh.surface_get_material(0) as ShaderMaterial
+		var first := float(flame_mat.get_shader_parameter("frame"))
+		await get_tree().create_timer(0.3).timeout
+		check(float(flame_mat.get_shader_parameter("frame")) > first,
+			"A looping flame still animates its atlas")
+	if flame_fx != null:
+		flame_fx.call("cancel", "test")
+	# A travel stage is owned by the bolt, not by a 0.6 s timer. basic_cast flies
+	# 28 m at 40 m/s, so the old timer cut the streak off mid-flight.
+	var bolt_probe := Node3D.new()
+	bolt_probe.name = "BoltProbe"
+	world.add_child(bolt_probe)
+	bolt_probe.global_position = probe.global_position
+	var bolt = SkillFX.spawn_stage(world, "basic_cast", "travel", bolt_probe.global_position,
+		Vector3.FORWARD, null, {"follow_target": bolt_probe})
+	var held := 0.0
+	while held < 1.0:
+		await get_tree().process_frame
+		var step := get_process_delta_time()
+		held += step
+		bolt_probe.global_position += Vector3(0.0, 0.0, 40.0 * step)
+	check(is_instance_valid(bolt) and not bool(bolt.get("cancelled")),
+		"The travel stage is still flying after 1.0 s (the bolt needs 0.9 s)")
+	bolt_probe.queue_free()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(not is_instance_valid(bolt), "A travel stage ends when its bolt is gone")
+	# The burn sustain runs for the length it was asked for, not the table's 3 s.
+	var victim := Node3D.new()
+	victim.name = "BurnVictim"
+	world.add_child(victim)
+	victim.global_position = probe.global_position
+	check(absf(SkillFX.burn_seconds("incendio") - 3.0) < 0.01,
+		"The burn length is read from spells.json (%.2f s)" % SkillFX.burn_seconds("incendio"))
+	var burn = SkillFX.play_burn(world, victim, 5.0)
+	check(burn != null, "A burn sustain attaches to its victim")
+	if burn != null:
+		check(absf(float((burn.call("describe") as Dictionary)["duration"]) - 5.0) < 0.01,
+			"The burn runs for the requested length, not the authored one (%s)"
+			% str((burn.call("describe") as Dictionary)["duration"]))
+		burn.call("cancel", "test")
+	await get_tree().create_timer(0.25).timeout
+	check(not is_instance_valid(mark) and not is_instance_valid(flame_fx)
+		and not is_instance_valid(burn) and not is_instance_valid(bolt),
+		"The behaviour probes release themselves")
+	probe.queue_free()
+	victim.queue_free()
+	await get_tree().process_frame
+
+
+## Where a stage's sound comes from: the emission point, not the world origin, and
+## a looping stage rides its effect instead of staying at the launch point.
+func _check_effect_sound() -> void:
+	var audio := get_node_or_null("/root/AudioManager")
+	if audio == null:
+		return
+	var spot := Vector3(13.0, 0.2, -7.0)
+	# a one-shot: it plays where the stage is, once
+	var cast_fx = SkillFX.spawn_stage(world, "basic_cast", "cast", spot, Vector3.FORWARD)
+	var cast_voice := _voice_near(audio, "spell_basic_cast_cast", spot)
+	check(cast_voice != null, "The cast stage starts its sound")
+	if cast_voice != null:
+		var off := cast_voice.global_position.distance_to(spot)
+		check(off < 0.01, "The cast sound starts at the emission point, not the world origin (%.2f m off)" % off)
+	# a loop on a moving owner: it has to be carried or it stays behind
+	var probe := Node3D.new()
+	probe.name = "SoundProbe"
+	world.add_child(probe)
+	probe.global_position = spot
+	var whoosh = SkillFX.spawn_stage(world, "basic_cast", "travel", spot, Vector3.FORWARD, null,
+		{"follow_target": probe})
+	await get_tree().process_frame
+	var voice := _voice_near(audio, "spell_basic_cast_travel", spot)
+	check(voice != null, "The travel stage starts its looping whoosh")
+	if voice != null:
+		var start_off := voice.global_position.distance_to(spot)
+		check(start_off < 0.01, "The whoosh starts at the bolt, not the world origin (%.2f m off)" % start_off)
+		probe.global_position += Vector3(0.0, 0.0, 8.0)
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var ride_off := voice.global_position.distance_to(probe.global_position)
+		check(ride_off < 0.01, "The whoosh rides the bolt as it flies (%.2f m behind)" % ride_off)
+	if cast_fx != null:
+		cast_fx.call("cancel", "test")
+	if whoosh != null:
+		whoosh.call("cancel", "test")
+	await get_tree().create_timer(0.25).timeout
+	check(not is_instance_valid(cast_fx) and not is_instance_valid(whoosh),
+		"The sound probes release themselves")
+	probe.queue_free()
+	await get_tree().process_frame
+
+
+## The pooled voice playing `key` closest to `position`: the pool reuses players,
+## so more than one can carry the same key at once.
+func _voice_near(audio: Node, key: String, position: Vector3) -> AudioStreamPlayer3D:
+	var best: AudioStreamPlayer3D = null
+	var best_distance := INF
+	for child in audio.get_children():
+		if child is AudioStreamPlayer3D and String((child as Node).get_meta("key", "")) == key:
+			var distance := (child as AudioStreamPlayer3D).global_position.distance_to(position)
+			if distance < best_distance:
+				best = child as AudioStreamPlayer3D
+				best_distance = distance
+	return best
+
+
+## The layer node carrying `asset_id`'s texture, found by what it draws rather
+## than by child order (several layers can share a node name).
+func _layer_node(effect: Node, asset_id: String) -> MeshInstance3D:
+	if effect == null or not is_instance_valid(effect):
+		return null
+	var texture: Texture2D = load(VFX.asset_path(asset_id))
+	for child in effect.get_children():
+		if child is MeshInstance3D:
+			var material := (child as MeshInstance3D).mesh.surface_get_material(0) as ShaderMaterial
+			if material != null and material.get_shader_parameter("atlas") == texture:
+				return child as MeshInstance3D
+	return null
 
 
 func _check_cancellation() -> void:

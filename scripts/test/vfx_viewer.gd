@@ -73,6 +73,7 @@ var flight_distance := 9.0
 var _camera: Camera3D
 var _dummy: Node3D
 var _travel_target: Node3D
+var _travel_effect: Node3D
 var _spawned: Array = []
 ## Camera bearing measured from directly behind the caster, so the framing is
 ## expressed against the beam and works for any aim: 0 is down the beam, ~1.15
@@ -287,6 +288,18 @@ func _begin_travel() -> void:
 		_caster(), {"follow_target": _travel_target})
 	if effect != null:
 		_spawned.append(effect)
+		_travel_effect = effect
+
+
+## The flight is over: the probe owns the travel stage, so the stage is retired
+## with the probe instead of leaving a bolt parked where the flight stopped.
+func _end_travel() -> void:
+	if is_instance_valid(_travel_effect) and _travel_effect.has_method("cancel"):
+		_travel_effect.call("cancel", "viewer_stage_end")
+	_travel_effect = null
+	if is_instance_valid(_travel_target):
+		_travel_target.queue_free()
+	_travel_target = null
 
 
 func _begin_sustain() -> void:
@@ -341,6 +354,8 @@ func _maybe_shoot() -> void:
 
 
 func _advance() -> void:
+	if String(plan[plan_index]["stage"]) == "travel":
+		_end_travel()
 	plan_index += 1
 	if plan_index >= plan.size():
 		if shot_mode:
@@ -404,9 +419,7 @@ func _clear_spawned() -> void:
 		if is_instance_valid(effect) and effect.has_method("cancel"):
 			effect.call("cancel", "viewer_reset")
 	_spawned.clear()
-	if is_instance_valid(_travel_target):
-		_travel_target.queue_free()
-	_travel_target = null
+	_end_travel()
 
 
 ## ---------------------------------------------------------------- camera
