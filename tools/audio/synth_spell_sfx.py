@@ -736,6 +736,40 @@ def world_library(rng):
     add("ui_hit", "ui/hit.wav", normalize(soft_clip(hit_click + hit_punch, drive=1.2), 0.85),
         bus="ui", gain_db=-8.0, spatial=False, pitch_var=0.07, purpose="combat damage hit marker tick")
 
+    # ui_equip (Crisp leather & metallic buckle clasp)
+    n = int(RATE_SFX * 0.20)
+    t = np.arange(n) / RATE_SFX
+    eq_leather = butter_bandpass(rng.normal(0, 1, n), 1200, 3800, RATE_SFX) * exp_decay(n, 0.05) * 0.9
+    eq_click = butter_highpass(rng.normal(0, 1, n), 4200, RATE_SFX) * exp_decay(n, 0.02) * 1.2
+    eq_buckle = ping(RATE_SFX, 580, 0.20, decay=0.06, partials=((1.0, 1.0), (1.8, 0.4), (2.5, 0.2))) * 0.7
+    add("ui_equip", "ui/equip.wav", normalize(soft_clip(eq_leather + eq_click + eq_buckle, drive=1.2), 0.88),
+        bus="ui", gain_db=-8.0, spatial=False, purpose="UI equip armor/gear")
+
+    # ui_unequip (Soft leather slide / cloth rustle)
+    n = int(RATE_SFX * 0.22)
+    t = np.arange(n) / RATE_SFX
+    uneq_leather = butter_bandpass(rng.normal(0, 1, n), 700, 2600, RATE_SFX) * exp_decay(n, 0.08) * 1.0
+    uneq_soft = ping(RATE_SFX, 360, 0.22, decay=0.07, partials=((1.0, 1.0), (1.4, 0.3))) * 0.4
+    add("ui_unequip", "ui/unequip.wav", normalize(uneq_leather + uneq_soft, 0.85),
+        bus="ui", gain_db=-8.5, spatial=False, purpose="UI unequip gear")
+
+    # ui_potion (Cork uncork pop + magical elixir glug + sparkle)
+    n = int(RATE_SFX * 0.38)
+    t = np.arange(n) / RATE_SFX
+    pop_len = int(RATE_SFX * 0.06)
+    t_pop = np.arange(pop_len) / RATE_SFX
+    pop_freq = 750.0 * np.exp(-t_pop / 0.012) + 160.0
+    pop = np.zeros(n)
+    pop[:pop_len] = np.sin(2.0 * np.pi * np.cumsum(pop_freq) / RATE_SFX) * np.exp(-t_pop / 0.015) * 1.3
+    bub1 = ping(RATE_SFX, 480, 0.25, decay=0.07, partials=((1.0, 1.0), (1.6, 0.4))) * 0.6
+    bub2 = ping(RATE_SFX, 620, 0.20, decay=0.06, partials=((1.0, 1.0), (1.3, 0.3))) * 0.5
+    liquid = np.zeros(n)
+    liquid[int(RATE_SFX * 0.05):int(RATE_SFX * 0.05) + len(bub1)] += bub1
+    liquid[int(RATE_SFX * 0.14):int(RATE_SFX * 0.14) + len(bub2)] += bub2
+    fizz = butter_bandpass(rng.normal(0, 1, n), 3500, 8500, RATE_SFX) * adsr(n, 0.05, 0.1, 0.3, 0.2) * 0.35
+    add("ui_potion", "ui/potion.wav", normalize(soft_clip(pop + liquid + fizz, drive=1.1), 0.90),
+        bus="ui", gain_db=-7.5, spatial=False, purpose="UI drink potion")
+
     # ----------------------------------------------------------------
     # Transitions (portal transfer, doors)
     # ----------------------------------------------------------------
