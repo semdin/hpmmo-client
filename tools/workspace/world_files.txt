@@ -307,6 +307,7 @@ scripts/entities/monolith/dark_monolith.gd
 scripts/entities/player.gd
 scripts/entities/rig_follower.gd
 scripts/entities/rig_ik.gd
+scripts/entities/wand_grip_modifier.gd
 scripts/server/db_manager.gd
 scripts/server/dedicated_server.gd
 scripts/spells/bombarda_blast.gd
