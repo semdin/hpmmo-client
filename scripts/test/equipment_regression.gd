@@ -9,6 +9,9 @@ var sequence := 1000
 
 class FakePersistence extends "res://addons/hpmmo_sim/persistence.gd":
 	var requests: Array = []
+	var sync_response := {"_status": 503}
+	func _post_sync(_path: String, _body: Dictionary) -> Dictionary:
+		return sync_response.duplicate(true)
 	func _post_async(path: String, body: Dictionary, callback: Callable) -> void:
 		requests.append({"path":path, "body":body.duplicate(true), "callback":callback})
 	func reply(response: Dictionary) -> void:
@@ -46,6 +49,7 @@ func _ready() -> void:
 	_test_pure()
 	_test_authority()
 	await _test_gestures()
+	_test_stat_revisions()
 	_test_persistence()
 	print("EQUIPMENT RESULT: %d checks, %d failures" % [checks,failures])
 	get_tree().quit(0 if failures == 0 else 1)
@@ -229,6 +233,20 @@ func _test_gestures() -> void:
 	get_viewport().push_input(click,true)
 	check(bag_slot.selected and ui._details.text.contains("Apprentice Ring"),"single click selects and shows item details")
 	check(not player._basic_held and not player.mouse_orbit_active,"equipment UI input does not start world attack or camera orbit")
+	# Actual viewport dispatch must handle both phases of the double click.
+	var combat_tick: int = record.last_combat_tick
+	bag_slot = ui._bag_slots.filter(func(s):return s.item_id == "boots_apprentice")[0]
+	await _double_click(bag_slot)
+	check(player.equipment.has("feet") and not ui._pending, "viewport double click equips without a combat lock")
+	await _double_click(ui._doll_slots.filter(func(s):return s.equipment_slot == "feet")[0])
+	check(not player.equipment.has("feet"), "viewport double click unequips")
+	player.current_hp = 100
+	record.hp = 100
+	var potion_count := int(totals(player.inventory,{}).get("potion_health:0",0))
+	await _double_click(ui._bag_slots.filter(func(s):return s.item_id == "potion_health")[0])
+	check(player.current_hp == 250 and int(totals(player.inventory,{}).get("potion_health:0",0)) == potion_count-1, "viewport double click consumes exactly one potion and updates HP")
+	check(record.last_combat_tick == combat_tick and not player._basic_held and not player.mouse_orbit_active, "equip, unequip and potion clicks never reach world combat")
+	bag_slot = ui._bag_slots.filter(func(s):return s.item_id == "ring_apprentice")[0]
 	ui._activate(bag_slot)
 	await get_tree().process_frame
 	bag_slot = ui._bag_slots.filter(func(s):return s.item_id == "ring_apprentice")[0]
@@ -244,6 +262,44 @@ func _test_gestures() -> void:
 	check(player.equipment.ring_right.id == "ring_adept" and player.equipment.ring_left.id == "ring_apprentice","ring destination choice replaces only the selected hand")
 	ui.hide()
 	check(ui._preview.view.render_target_update_mode == SubViewport.UPDATE_DISABLED,"closed inventory suspends preview rendering")
+	var presses := [0]
+	world.hud.slot_1.pressed.connect(func(): presses[0] += 1)
+	_mouse_click(world.hud.slot_1, false)
+	check(presses[0] == 1, "one hotbar click emits one pressed signal")
+
+func _mouse_click(control: Control, double_click: bool) -> void:
+	var event := InputEventMouseButton.new()
+	event.position = control.get_global_rect().get_center()
+	event.button_index = MOUSE_BUTTON_LEFT
+	event.pressed = true
+	event.double_click = double_click
+	get_viewport().push_input(event, true)
+	event = event.duplicate()
+	event.pressed = false
+	get_viewport().push_input(event, true)
+
+func _double_click(control: Control) -> void:
+	_mouse_click(control, false)
+	_mouse_click(control, true)
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+func _test_stat_revisions() -> void:
+	var bag: Array = player.inventory.duplicate(true)
+	var gear: Dictionary = player.equipment.duplicate(true)
+	var revision: int = player.inventory_revision
+	var stale := SimAuthority.build_stats(record)
+	stale.merge({"inventory_revision": revision-1, "inventory": [], "equipment": {}, "hp": 123, "mana": 45, "exp": 67}, true)
+	SimAuthority.apply_stats_payload(record.uid, stale)
+	check(player.current_hp == 123 and player.current_mana == 45 and player.current_exp == 67, "stale inventory revision does not block live HP, mana or EXP")
+	check(world.hud.hp_bar.value == 123 and world.hud.mana_bar.value == 45 and world.hud.exp_bar.value == 67, "live stats reach HUD through the network payload path")
+	check(player.inventory == bag and player.equipment == gear and player.inventory_revision == revision, "stale ownership cannot overwrite the bag or its revision")
+	check(record.get("inventory_revision", revision) == revision, "stale ownership cannot regress the authority mirror record")
+	var previous_role: int = SimAuthority.role
+	SimAuthority.role = SimAuthority.Role.CLIENT
+	player.add_loot("hat_apprentice", 1)
+	check(player.inventory == bag and player.inventory_revision == revision, "client cannot invent loot or advance inventory revision")
+	SimAuthority.role = previous_role
 
 func _test_persistence() -> void:
 	var bridge := FakePersistence.new()
@@ -266,12 +322,35 @@ func _test_persistence() -> void:
 	check(bridge.requests[0].body.base_revision == 11 and bridge.requests[0].body.inventory_revision == 2,"next queued save uses acknowledged revision")
 	bridge.reply({"_status":503})
 	check(bridge.pending_count() == 1,"transient persistence failure retains dirty state for barrier and retry")
+	for attempt in 7:
+		bridge._process(5)
+		bridge.reply({"_status":503})
+	check(bridge.pending_count() == 1, "extended service outage never discards unsaved inventory")
+	check(bridge.resolve_character(42,1).get("reason") == "save_pending" and bridge.pending_count() == 1, "rejoin cannot discard dirty loot or load an older character")
 	bridge._process(5)
 	bridge.reply({"_status":409,"revision":15})
 	check(bridge.requests[0].path == "/api/characters/load" and bridge.revisions[42] == 11,"revision conflict loads newer state instead of overwriting it")
 	bridge.reply({"_status":503})
 	check(bridge.pending_count() == 1,"failed conflict reload stays dirty")
+	for attempt in 7:
+		bridge._process(5)
+		bridge.reply({"_status":503})
+	check(bridge.pending_count() == 1, "extended reconciliation outage remains pending")
 	bridge._process(5)
 	bridge.reply({"_status":200,"character":{"revision":15}})
 	check(bridge.pending_count() == 0 and bridge.revisions[42] == 15,"reconciliation resolves dirty state after successful reload")
+	# Loot must reach the persistence queue immediately, before disconnect/autosave.
+	var old_id: int = record.character_id
+	record.character_id = 42
+	SimAuthority.persistence = bridge
+	var before := totals(player.inventory,{})
+	SimAuthority._collect_loot({"uid":987654321,"item_id":"hat_apprentice","amount":2}, record)
+	check(bridge.requests.size() == 1 and int(totals(bridge.requests[0].body.inventory,{}).get("hat_apprentice:0",0)) == before.get("hat_apprentice:0",0)+2, "pickup queues the full updated bag immediately")
+	var saved: Dictionary = bridge.requests[0].body.duplicate(true)
+	bridge.reply({"_status":200,"revision":16})
+	player.inventory.clear()
+	player.restore_character(saved)
+	check(totals(player.inventory,{}) == totals(saved.inventory,{}), "saved loot survives character restore exactly once")
+	SimAuthority.persistence = null
+	record.character_id = old_id
 	bridge.queue_free()

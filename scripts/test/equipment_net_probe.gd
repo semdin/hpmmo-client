@@ -49,6 +49,20 @@ func _run() -> void:
 		check(player.galleons == 400,"authoritative refinement price survives reconnect")
 	else:
 		check(player.equipment.has("main_hand") and player.equipment.has("chest"),"initial server snapshot includes equipment")
+		# A locally visible marker is not proof of ownership: the server can
+		# refuse a pickup that raced another collector or already despawned.
+		var bag_before: Array = player.inventory.duplicate(true)
+		var revision_before: int = player.inventory_revision
+		var marker = preload("res://scenes/entities/loot/loot_drop.tscn").instantiate()
+		world.add_child(marker)
+		marker.global_position = player.global_position
+		marker.setup("hat_apprentice", 1)
+		marker.set_meta("sim_uid", 987654321)
+		check(marker.collect(player), "client sends pickup intent for a visible marker")
+		check(not marker.is_collected and player.inventory == bag_before and player.inventory_revision == revision_before, "pending pickup neither grants loot nor hides the marker")
+		await get_tree().create_timer(0.3).timeout
+		check(not marker.is_collected and player.inventory == bag_before and player.inventory_revision == revision_before, "rejected pickup leaves bag, revision and marker unchanged")
+		marker.queue_free()
 		var answer := await send("unequip","chest")
 		check(answer.ok and not player.equipment.has("chest"),"network unequip is acknowledged")
 		answer = await send("equip","ring_left","ring_apprentice")

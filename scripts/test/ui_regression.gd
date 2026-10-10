@@ -95,7 +95,7 @@ func _check_binding() -> void:
 		"The HUD binds to the stat mirror's own signal as well as the authority payload")
 	check(hud.hp_bar.value == player.current_hp and hud.mana_bar.value == player.current_mana,
 		"The bars show the mirror's values at bind time")
-	check(hud.level_label.text == "Lv. %d" % player.level, "The level label binds at bind time")
+	check(hud.get_node("BottomBar/StatusBars").get_child_count() == 2, "Top-left status contains only HP and mana")
 
 ## --------------------------------------------------- state transitions
 
@@ -126,8 +126,8 @@ func _check_transitions() -> void:
 
 	# EXP + level.
 	_push_stats({"exp": 75, "max_exp": 200, "level": 3})
-	check(hud.exp_bar.value == 75 and hud.level_label.text == "Lv. 3",
-		"EXP and level payloads update the bar and the label")
+	check(hud.exp_bar.value == 75 and player.level == 3,
+		"EXP and level payloads update progression without a HUD level label")
 
 	# Potion use, through the inventory panel the player clicks.
 	var before_toast: int = hud.feedback.toasts_shown

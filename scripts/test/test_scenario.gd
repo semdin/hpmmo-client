@@ -45,7 +45,7 @@ func _ready() -> void:
 	player.take_damage(30, "melee", null)
 	check(hud.hp_bar.value == player.current_hp, "Damage updates HP immediately")
 	player.add_exp(210)
-	check(player.level == 2 and hud.level_label.text == "Lv. 2" and hud.exp_bar.value == player.current_exp, "EXP rollover and level update HUD")
+	check(player.level == 2 and hud.exp_bar.value == player.current_exp, "EXP rollover and level update HUD")
 	player.current_mana = player.max_mana
 	player.cast_spell("protego")
 	check(player.is_protego_active and hud.mana_bar.value == player.current_mana, "Skill mana payment updates HUD")
