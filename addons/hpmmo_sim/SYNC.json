@@ -1,7 +1,7 @@
 {
  "generated": "2026-10-10",
  "source_repository": "hpmmo-server",
- "source_revision": "fd7559607813b8ecf077b1ff43509ca0ad29da2e",
+ "source_revision": "4191f255bd14ea2eb4ee477bb58972ec13e5577c",
  "note": "Generated from server/world/addons/hpmmo_sim by dev.ps1 sync-sim. Never edit these files in the client repository.",
  "files": {
   "admin.gd": "8605e27d706abc3eeafd3a7cce41de451734ff9d56652998b973fb4eacb7257c",
@@ -29,7 +29,7 @@
   "rules.gd.uid": "134b46a58d7033f250bd6c8ca999b72838f72833f27d3cbc77039939361326f5",
   "snapshots.gd": "9434d15c45e6524a02ba8d39e79a0c1c449e1d9c20d1f896cd5a6f20f5f43c71",
   "snapshots.gd.uid": "31a3aaa68eca08224dcfbaadcb73cff29d5b07a5bb998df20adb178d5e0eb776",
-  "staircase.gd": "a0b0306e2583d6fb65d70f0be73111505a0929dfe5c71daed58c054eb12c9b90",
+  "staircase.gd": "b06e0afda45d4a423501b2de8b4ec843e6123207b472c626b49c885c21c5a70c",
   "staircase.gd.uid": "ce583ed579f21b572afc2505fd42b91d337ff48859425188c6a48bfa849225ac",
   "staircase_net.gd": "418092d25237e60e5ef47d9e5debf4cd92cc97ab02d4a06cad5e96fa523fff61",
   "staircase_net.gd.uid": "5178d60d3c8844b466dc486d021f426273146c0d2a217ecda544239ade8825d0"

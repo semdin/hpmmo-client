@@ -1,0 +1,6 @@
+[gd_scene format=3]
+[ext_resource type="PackedScene" path="res://scenes/world/game_world.tscn" id="1"]
+[ext_resource type="Script" path="res://scripts/test/map_audit.gd" id="2"]
+[node name="MapAudit" type="Node"]
+script = ExtResource("2")
+[node name="GameWorld" parent="." instance=ExtResource("1")]

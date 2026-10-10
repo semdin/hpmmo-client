@@ -362,10 +362,11 @@ func _instance_count(root: Node3D, module_name: String) -> int:
 	for node in root.find_children("*", "MeshInstance3D", true, false):
 		if String(node.get_meta("kit_module", "")) == module_name:
 			total += 1
-	for node in root.find_children("KitBatch_" + module_name, "MultiMeshInstance3D", true, false):
-		var mm := (node as MultiMeshInstance3D).multimesh
-		if mm != null:
-			total += mm.instance_count
+	for node in root.find_children("*", "MultiMeshInstance3D", true, false):
+		if String(node.name).begins_with("KitBatch_" + module_name):
+			var mm := (node as MultiMeshInstance3D).multimesh
+			if mm != null:
+				total += mm.instance_count
 	return total
 
 func _ramp_ok(interior: Node3D, flight: Array) -> bool:
