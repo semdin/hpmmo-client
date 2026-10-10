@@ -9,6 +9,11 @@ plays a single 5-second sample and stops - which is exactly what "looping
 ambience" is not. Long beds keep the engine's compressed mode (QOA by default)
 rather than being forced to PCM.
 
+Music is the exception: the classical beds are stereo and must keep both their
+loop points and their channels, so they import as PCM with the forward flag.
+IMA-ADPCM (used for the mono ambience beds) is the wrong tool here - it is a
+mono codec, and QOA carries no loop points.
+
 Run this after synth_spell_sfx.py and before the Godot import pass. `--check`
 verifies the settings without writing (used by run_vfx_checks.ps1).
 """
@@ -89,6 +94,29 @@ def write_params(path, params, order):
         handle.write("\n".join(out) + "\n")
 
 
+def wanted_settings(entry, params):
+    """The import parameters one manifest entry must have."""
+    wanted = dict(DEFAULTS)
+    if entry.get("loop_mode") == "forward":
+        wanted["edit/loop_mode"] = LOOP_FORWARD
+        wanted["edit/loop_begin"] = "0"
+        wanted["edit/loop_end"] = "-1"
+        # Looping beds use IMA-ADPCM: QOA (the engine default) carries no
+        # loop points, so a QOA bed plays once and stops - the exact
+        # failure "looping ambience" must not have. Still compressed, so a
+        # multi-second bed never ships as PCM.
+        wanted["compress/mode"] = "1"
+    else:
+        wanted["edit/loop_mode"] = "0"
+    # Music is stereo and loop-critical: PCM keeps both channels and the loop.
+    if str(entry.get("bus", "")) == "music":
+        wanted["compress/mode"] = "0"
+    # anything long and non-looping stays in the engine's compressed mode
+    if not entry.get("loop", False) and float(entry.get("seconds", 0.0)) >= 2.0:
+        wanted["compress/mode"] = params.get("compress/mode", "2")
+    return wanted
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--client", required=True)
@@ -104,26 +132,12 @@ def main():
     drift = []
     checked = 0
     for key, entry in sorted(manifest.get("sounds", {}).items()):
-        path = import_path(parsed.client, String(entry["path"]))
+        path = import_path(parsed.client, str(entry["path"]))
         if not os.path.exists(path):
             drift.append("%s: no .import file yet (run the Godot import pass)" % key)
             continue
         params = read_params(path)
-        wanted = dict(DEFAULTS)
-        if entry.get("loop_mode") == "forward":
-            wanted["edit/loop_mode"] = LOOP_FORWARD
-            wanted["edit/loop_begin"] = "0"
-            wanted["edit/loop_end"] = "-1"
-            # Looping beds use IMA-ADPCM: QOA (the engine default) carries no
-            # loop points, so a QOA bed plays once and stops - the exact
-            # failure "looping ambience" must not have. Still compressed, so a
-            # multi-second bed never ships as PCM.
-            wanted["compress/mode"] = "1"
-        else:
-            wanted["edit/loop_mode"] = "0"
-        # anything long and non-looping stays in the engine's compressed mode
-        if not entry.get("loop", False) and float(entry.get("seconds", 0.0)) >= 2.0:
-            wanted["compress/mode"] = params.get("compress/mode", "2")
+        wanted = wanted_settings(entry, params)
         checked += 1
         needs = {k: v for k, v in wanted.items() if params.get(k) != v}
         if needs:
@@ -145,10 +159,6 @@ def main():
     else:
         print("tune_imports: %d sounds checked, %d import files updated (re-run the Godot import pass)"
               % (checked, len(changed)))
-
-
-def String(value):
-    return "" if value is None else str(value)
 
 
 if __name__ == "__main__":

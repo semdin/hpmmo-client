@@ -42,4 +42,16 @@ The earlier PNG kit (Kenney *Fantasy UI Borders*, Kenney *UI Pack* and the
 procedural shapes) was removed in the same pass: nothing in the project loads
 those files any more, and their licence copies went with them.
 
+# Audio pass (2026-10-10)
+
+The whole sound set was regenerated from `tools/audio/synth_spell_sfx.py`
+(still project-original synthesis; still zero downloaded audio): a loudness
+mastering stage levels every file, the interface speaks one wand-chime
+material, footsteps are five-layer material recordings, each creature species
+owns its voice family (spider, snatcher, inferi, boss), and five stereo
+classical music beds were added (menu, overworld, castle, dungeon, combat).
+The classical beds are original synthesised arrangements of public-domain works
+by Grieg, Pachelbel, Bach, Beethoven and Satie - no recording or arrangement by
+a third party is used. Full provenance: `assets/audio/CREDITS-spell-audio.md`.
+
 Existing KayKit character/environment files are retained. This document records the provenance of newly added assets; it does not change the terms of existing assets.

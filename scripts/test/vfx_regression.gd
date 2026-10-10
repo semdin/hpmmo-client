@@ -72,7 +72,7 @@ func _ready() -> void:
 	_check_effect_scenes()
 	_check_audio_assets()
 	_check_quality_variants()
-	_check_audio_system()
+	await _check_audio_system()
 	await get_tree().create_timer(0.6).timeout
 	await _check_effects_runtime()
 	await _check_effect_behaviour()
@@ -344,6 +344,10 @@ func _check_audio_assets() -> void:
 			"robe_1", "mount", "dismount", "broom_wind", "landing",
 			"spider_move_1", "spider_bite", "spider_death", "boss_slam_cast",
 			"boss_slam_release", "boss_death", "map_transition",
+			"snatcher_move_1", "snatcher_alert", "snatcher_attack", "snatcher_death",
+			"inferi_move_1", "inferi_alert", "inferi_attack", "inferi_death",
+			"spider_alert", "boss_alert", "ui_death", "ui_respawn", "ui_coin",
+			"amb_dungeon_whisper_1",
 			"amb_exterior_wind", "amb_exterior_birds", "amb_great_hall", "amb_library",
 			"amb_dungeon", "amb_fire", "amb_candles", "amb_distant", "amb_stairs"]:
 		check(sounds.has(key), "Soundscape covers '%s'" % key)
@@ -462,6 +466,46 @@ func _check_audio_system() -> void:
 	check((zones["great_hall"] as Dictionary)["room_size"] != (zones["library"] as Dictionary)["room_size"]
 		and (zones["library"] as Dictionary)["room_size"] != (zones["dungeon"] as Dictionary)["room_size"],
 		"Great Hall, library and dungeon are acoustically distinct")
+	# music: a classical bed per state, stereo, looping, on the Music bus
+	var music_states: Dictionary = audio.get("MUSIC_STATES")
+	check(music_states.size() >= 5, "Music states are wired: menu, map, castle, dungeon, combat (%d)" % music_states.size())
+	var beds_ok := 0
+	for state_name in music_states:
+		var key := String(music_states[state_name])
+		var entry: Dictionary = sound_library.get("sounds", {}).get(key, {})
+		if entry.is_empty():
+			continue
+		var wav := load("res://" + String(entry["path"])) as AudioStreamWAV
+		check(String(entry.get("bus", "")) == "music" and not bool(entry.get("spatial", true)) \
+			and wav != null and wav.stereo and wav.loop_mode != AudioStreamWAV.LOOP_DISABLED \
+			and float(entry.get("seconds", 0.0)) >= 20.0,
+			"Music bed '%s' is a long stereo looping bed on the music bus" % key)
+		beds_ok += 1
+	check(beds_ok == music_states.size(), "Every music state resolves to a real bed (%d/%d)" % [beds_ok, music_states.size()])
+	# the rooms a player lives in each ask for their own bed
+	check(String(audio.call("music_state_for_zone", "exterior")) == "map", "The overworld asks for the map bed")
+	check(String(audio.call("music_state_for_zone", "great_hall")) == "castle", "The Great Hall asks for the castle bed")
+	check(String(audio.call("music_state_for_zone", "library")) == "castle", "The library stays on the castle bed")
+	check(String(audio.call("music_state_for_zone", "dungeon")) == "dungeon", "The dungeon asks for its own bed")
+	# combat overrides the room, then hands it back by itself
+	audio.call("_find_local_player")
+	var has_listener: bool = audio.get("_local_player") != null
+	check(has_listener, "The music system finds the local listener")
+	if has_listener:
+		audio.call("notify_combat", 0.05)
+		check(bool(audio.call("combat_music_active")), "A cast or a landed blow raises the combat override")
+		check(String(audio.call("_music_target_state")) == "combat", "Combat owns the soundtrack while it lasts")
+		await get_tree().create_timer(0.12).timeout
+		check(not bool(audio.call("combat_music_active")), "The combat override expires on its own")
+		check(String(audio.call("_music_target_state")) != "combat", "The room gets its bed back after the fight")
+	# the front menu pins its bed, and an unknown state is refused
+	audio.call("set_music_state", "menu")
+	check(String(audio.call("get_music_state")) == "menu", "The front menu can pin its own bed")
+	audio.call("set_music_state", "circus")
+	check(String(audio.call("get_music_state")) == "menu", "An unknown music state is refused")
+	audio.call("release_music_pin")
+	check(int((audio.call("describe") as Dictionary).get("music_tracks", 0)) >= 5,
+		"The audio report names the music states")
 
 
 # ------------------------------------------------------------------ runtime
@@ -964,10 +1008,15 @@ func _check_sound_integration() -> void:
 			break
 	check(victim != null, "A non-boss mob is available to voice")
 	if victim != null:
+		# Every species carries its own voice family (spider / snatcher /
+		# inferi), so the death cue is whatever the body itself resolves.
+		var death_key := String(victim.call("_voice_key", "death"))
+		check(death_key != "", "The mob resolves a death cue from its voice family")
 		victim.call("on_authoritative_death", world.local_player)
 		await get_tree().process_frame
 		var played: Array = audio.call("played_keys")
-		check(played.has("spider_death"), "A spider death plays its own death voice")
+		check(played.has(death_key),
+			"The %s death plays its own death voice ('%s')" % [String(victim.get("mob_name")), death_key])
 		victim.call("_respawn")
 	# footsteps come from the rig's own animation events
 	audio.call("clear_played_log")
