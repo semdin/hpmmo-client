@@ -305,6 +305,10 @@ func _test_persistence() -> void:
 	var bridge := FakePersistence.new()
 	add_child(bridge)
 	var sheet := bridge.character_payload(player,record)
+	# Reproduce a real HTTP JSON load, not only an in-memory integer fixture.
+	player.restore_character(JSON.parse_string(JSON.stringify(sheet)))
+	sheet = bridge.character_payload(player,record)
+	check(sheet.equipment.values().all(func(entry): return typeof(entry.tier) == TYPE_INT), "JSON-loaded equipment is saved with integer tiers")
 	sheet.inventory.append({"id":"legacy_keepsake","amount":2,"tier":3})
 	player.restore_character(sheet)
 	check(player.inventory.any(func(e):return e.id == "legacy_keepsake" and e.amount == 2 and e.tier == 3),"loading preserves retired catalog entries and their tiers")

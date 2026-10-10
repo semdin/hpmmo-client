@@ -33,6 +33,7 @@ func _ready() -> void:
 	await _capture_castle()
 	await _capture_maintenance()
 	await _capture_onboarding()
+	await _capture_mounted()
 	await _capture_settings()
 	_report_layout()
 	world.queue_free()
@@ -153,6 +154,44 @@ func _capture_onboarding() -> void:
 	print("UI CAPTURE onboarding: step %d, %s" % [hud.onboarding.current_index, hud.onboarding._title.text])
 	# Leave the saved route at the start: the capture staged its progress.
 	hud.onboarding.reset()
+
+## ---------------------------------------------------------------- mounted
+
+## The flight indicator: mounted over open ground, refused high up (blocked
+## badge) and accepted at the ground (ready badge). The panel is the one the
+## player sees while riding, not a staged copy of it.
+func _capture_mounted() -> void:
+	var hud = world.hud
+	var player = world.local_player
+	player.global_position = Vector3(0, 0.2, 18)
+	player.velocity = Vector3.ZERO
+	await get_tree().physics_frame
+	if not player.is_mounted:
+		player._mount_lock = 0.0
+		player._cast_lock = 0.0
+		player.toggle_broom_mount()
+	await get_tree().create_timer(0.3).timeout
+	# High above the courtyard: the landing gate refuses, so the badge must say so.
+	player.global_position = Vector3(0, 12.0, 18)
+	await get_tree().physics_frame
+	await get_tree().create_timer(0.7).timeout
+	_frame(player.global_position, player.global_position + Vector3(2.6, 1.4, 4.2))
+	await RenderingServer.frame_post_draw
+	_save("ui-hud-mounted-blocked.png")
+	print("UI CAPTURE mounted blocked: reason=%s panel=%s" % [
+		hud.travel.last_landing_reason, hud.travel._mounted_panel.get_rect()])
+	# Down on the ground: the gate accepts and the badge flips to ready.
+	player.global_position = Vector3(0, 0.2, 18)
+	player.velocity = Vector3.ZERO
+	await get_tree().physics_frame
+	await get_tree().create_timer(0.7).timeout
+	_frame(player.global_position, player.global_position + Vector3(2.6, 1.4, 4.2))
+	await RenderingServer.frame_post_draw
+	_save("ui-hud-mounted-ready.png")
+	print("UI CAPTURE mounted ready: %s" % hud.travel.mounted_text().replace("\n", " | "))
+	if player.is_mounted:
+		player.toggle_broom_mount()
+	await get_tree().create_timer(0.2).timeout
 
 ## ---------------------------------------------------------------- settings
 
