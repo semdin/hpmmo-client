@@ -186,6 +186,19 @@ func _test_authority() -> void:
 	player.global_position = loot_record.node.global_position
 	check(SimAuthority.request_pickup(record.peer_id,loot_uid).ok,"accessory world loot is obtainable through authority pickup")
 	check(totals(player.inventory,player.equipment).get("hat_apprentice:0",0) == bag_before_pickup.get("hat_apprentice:0",0)+1,"pickup credits exactly one bag copy")
+	# One drop, one marker. A drop that lands while the player is watching
+	# arrives twice (the spawn broadcast and the interest scan's first-sight
+	# send); a second view would be untracked, so the pickup's despawn would
+	# remove only one of them and leave a copy of the item on the ground.
+	SimAuthority.loot_spawned.emit(900001,"potion_health",1,player.global_position)
+	SimAuthority.loot_spawned.emit(900001,"potion_health",1,player.global_position)
+	var markers := 0
+	for child in world.get_children():
+		if int(child.get_meta("sim_uid",0)) == 900001: markers += 1
+	check(markers == 1,"a repeated loot spawn for one uid makes exactly one marker")
+	var stray = world._views.get(900001)
+	if is_instance_valid(stray): stray.queue_free()
+	world._views.erase(900001)
 
 func _test_gestures() -> void:
 	SimNet._equipment_request_id = sequence
