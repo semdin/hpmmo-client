@@ -18,7 +18,7 @@ func _init() -> void:
 		_report(root)
 		var sk := _find(root, "Skeleton3D")
 		if sk:
-			var sockets := ["Hips", "Wrist_R", "Wrist.L", "Foot_L", "Foot.L", "Chest", "Head"]
+			var sockets := ["Hips", "RightHand", "LeftHand", "LeftFoot", "RightFoot", "UpperChest", "Head"]
 			for s in sockets:
 				var idx: int = (sk as Skeleton3D).find_bone(s)
 				if idx >= 0:

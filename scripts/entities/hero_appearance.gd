@@ -9,9 +9,10 @@ class_name HeroAppearance
 ## KayKit model (`wizard.glb`) and tinted a `Mage_Cape` node that only that model
 ## has, so the podium showed a character nobody could ever play.
 ##
-## The tint is material-only and keyed on material name, so it survives a
-## re-export of the GLB: `Hero_Trim` takes the house primary, `Hero_Robe` a
-## darkened house primary. Nothing is duplicated onto the rig.
+## The body (art/hero, Rigify-rigged) is ONE baked PBR surface, `Hero_Body`, so
+## there is no separate trim/robe material to recolour. The tint stays keyed on
+## material name: a body that ships `Hero_Trim` / `Hero_Robe` slots (or a future
+## house-mask material) is tinted, and the current body is left as authored.
 
 const MODEL := preload("res://assets/models/characters/hero_wizard.glb")
 const WAND := preload("res://assets/models/props/wand.gltf")
@@ -33,15 +34,8 @@ static func wand_grip_transform(skeleton: Skeleton3D) -> Transform3D:
 	return Transform3D(Basis(Quaternion(Vector3.UP, grip.basis.x)), grip.origin)
 
 
-## The bone index for `bone`, accepting the importer's sanitised spelling
-## (`Foot.L` -> `Foot_L`) so a renamed track cannot silently drop the grip.
 static func _bone_index(skeleton: Skeleton3D, bone: String) -> int:
-	var index := skeleton.find_bone(bone)
-	if index < 0:
-		index = skeleton.find_bone(bone.replace(".", "_"))
-	if index < 0:
-		index = skeleton.find_bone(bone.replace("_", "."))
-	return index
+	return RigIK.bone_index(skeleton, bone)
 
 
 ## The tip of the equipped wand, as a live node that rides the animation, or null
@@ -76,9 +70,8 @@ static func show_equipped_wand(root: Node, entry: Dictionary) -> void:
 		return
 	var skeleton: Skeleton3D = _skeleton(root)
 	if skeleton == null: return
-	var bone := "Wrist.R"
-	if skeleton.find_bone(bone) < 0: bone = "Wrist_R"
-	if skeleton.find_bone(bone) < 0: return
+	var bone := HeroBones.hand("R")
+	if RigIK.bone_index(skeleton, bone) < 0: return
 
 	# Curl fingers of right hand to firmly grasp the wand
 	if wand_grip == null:

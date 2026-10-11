@@ -46,7 +46,7 @@ PNG frames go to `tools/downloads/motion-preview/`. The first review GIF is
 
 ## Validation
 
-`tools/run_rig_checks.ps1` runs the existing 125 rig checks and the new 26 motion
+`tools/run_rig_checks.ps1` runs the 132 rig checks and the new 26 motion
 checks. The motion suite measures actual foot/hip pose changes, planted idle,
 cadence, repeated hits, playback speed, jump/fall selection, cast sampling,
 release events with a full history, and remote cast lifecycle. The 93-check
@@ -54,9 +54,9 @@ gameplay suite also passes after the changes.
 
 ## Remaining art work
 
-This pass retains the existing hero mesh and imported animation sources. It is
-not the new wizard costume/model. Robe geometry, face/hair, secondary cloth
-motion, foot locking on uneven ground and separately authored wand gestures
-still require an art pass. Playback-rate limits reduce sliding but are not a
-foot-lock solver. Remote release timing uses the latest replicated tick and
-has not been validated under induced network latency in this pass.
+The hero is now the Rigify-rigged body described in `docs/hero-rig.md`; the
+imported animation sources were retargeted onto it unchanged. Separately
+authored wand gestures, secondary cloth motion and foot locking on uneven
+ground still require an art pass. Playback-rate limits reduce sliding but are
+not a foot-lock solver. Remote release timing uses the latest replicated tick
+and has not been validated under induced network latency in this pass.

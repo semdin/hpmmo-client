@@ -39,9 +39,9 @@ func _ready() -> void:
 	# ---- standing: the wand in the hand
 	await _stage(player, Vector3(0, 0.15, 5), 0.0)
 	await get_tree().create_timer(0.6).timeout
-	var wrist: Vector3 = _bone(player, "Wrist.R")
+	var wrist: Vector3 = _bone(player, HeroBones.hand("R"))
 	print("CAPTURE idle wrist.R=%s" % wrist)
-	var chest: Vector3 = _bone(player, "Chest")
+	var chest: Vector3 = _bone(player, HeroBones.UPPER_CHEST)
 	await _shot(camera, "rig-0-body-front", chest + Vector3(0.0, 0.15, 3.4), chest)
 	await _shot(camera, "rig-1-wand-idle", wrist + Vector3(-1.15, 0.35, 1.45), wrist)
 	await _shot(camera, "rig-1-wand-idle-far", wrist + Vector3(-0.35, 0.75, 2.35), wrist)
@@ -111,7 +111,7 @@ func _ready() -> void:
 	var line_a: Vector3 = player.broom.grip_socket.global_position + player.broom.get("model_root_ref").global_basis.y * BroomGripModifier.SHAFT_RISE
 	var shaft_dir: Vector3 = player.broom.broom_forward()
 	for side in ["L", "R"]:
-		var wrist_frame: Transform3D = rendered_bones["Wrist." + side]
+		var wrist_frame: Transform3D = rendered_bones[HeroBones.hand(side)]
 		var palm := wrist_frame * RigIK.grip_frame(sk2, side, BroomGripModifier.PALM_DEPTH).origin
 		print("CAPTURE hand %s dist_to_wood=%.3f" % [side, RigIK.distance_to_line(palm, line_a, shaft_dir)])
 	await _follow(camera, player, "rig-3-grip-closeup", Vector3(1.25, 0.55, 1.0), focus)
@@ -130,7 +130,7 @@ func _ready() -> void:
 	await _stage(player, Vector3(0, 0.15, 5), 0.0)
 	Input.action_press("move_forward")
 	await get_tree().create_timer(0.7).timeout
-	var foot: Vector3 = _bone(player, "Foot.L")
+	var foot: Vector3 = _bone(player, HeroBones.foot("L"))
 	print("CAPTURE walk clip=%s foot=%s origin=%s" % [
 		player.hero_anim.current_clip, foot, player.global_position])
 	# Follow the runner: the camera re-aims every frame, so the body stays framed.
@@ -167,7 +167,7 @@ func _bone(player, name: String) -> Vector3:
 ## `1H_Wand` too, and a camera can end up inside one), so the capture transcript
 ## names each of them instead of leaving it to the eye.
 func _report_wand_nodes(player) -> void:
-	var wrist := _bone(player, "Wrist.R")
+	var wrist := _bone(player, HeroBones.hand("R"))
 	for node in _wand_like(get_tree().root):
 		var parent: Node = node.get_parent()
 		print("CAPTURE wandnode %s parent=%s pos=%s wrist=%s dist=%.3f" % [

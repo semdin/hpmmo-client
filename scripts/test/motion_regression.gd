@@ -155,7 +155,7 @@ func advance(seconds: float) -> void:
 
 func pose() -> Array[Vector3]:
 	var result: Array[Vector3] = []
-	for name in ["Foot.L", "Foot.R", "Hips"]:
+	for name in [HeroBones.foot("L"), HeroBones.foot("R"), HeroBones.HIPS]:
 		result.append(skeleton.get_bone_global_pose(RigIK.bone_index(skeleton, name)).origin)
 	return result
 
@@ -167,7 +167,7 @@ func distance(a: Array[Vector3], b: Array[Vector3]) -> float:
 
 func all_rotations() -> Array[Quaternion]:
 	var result: Array[Quaternion] = []
-	for name in ["Hips", "Abdomen", "Torso", "UpperArm.L", "UpperArm.R"]:
+	for name in [HeroBones.HIPS, HeroBones.SPINE, HeroBones.CHEST, HeroBones.upper_arm("L"), HeroBones.upper_arm("R")]:
 		result.append(skeleton.get_bone_pose_rotation(RigIK.bone_index(skeleton, name)))
 	return result
 

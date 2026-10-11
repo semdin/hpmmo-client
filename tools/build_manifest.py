@@ -138,6 +138,21 @@ IMPORT_NOTES = {
 }
 
 
+# The player hero: generated mesh, rigged with Rigify in Blender; source,
+# pipeline scripts and 4K textures live in the workspace's art/hero folder.
+HERO_ENTRY = {
+    "purpose": "player hero (Rigify rig, 53-bone SkeletonProfileHumanoid game skeleton, 41 clips)",
+    "status": "integrated",
+    "author": "Project original (mesh generated with Hunyuan3D via fal.ai; rigged in Blender/Rigify)",
+    "source_url": "art/hero/hero_new.blend (workspace, outside this repo)",
+    "license": "project-owned; confirm the Hunyuan3D output terms before release",
+    "license_url": "", "license_file": "",
+    "textures": {"channels": ["albedo", "normal", "metallic_roughness"], "note": "embedded, 2048 px"},
+    "acceptance": "scenes/test/rig_regression.tscn + motion_regression.tscn",
+    "notes": "Clips retargeted from the previous Quaternius-rig hero (art/hero/scripts/retarget.py).",
+}
+
+
 def sha256(path):
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -212,7 +227,9 @@ def main():
             "collision": "none (scene/generated)", "lods": "none",
             "acceptance": "",
         }
-        if "characters/wizard" in p:
+        if "characters/hero_wizard" in p:
+            entry.update(HERO_ENTRY)
+        elif "characters/wizard" in p:
             entry["purpose"] = "player hero (KayKit Mage, byte-identical to the shipped placeholder)"
             entry["status"] = "placeholder"
             entry["acceptance"] = "tools/downloads/asset-review-actors-neutral.png"

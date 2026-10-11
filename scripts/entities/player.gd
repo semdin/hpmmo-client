@@ -17,12 +17,13 @@ signal equipment_answer(result: Dictionary)
 signal animation_event(event_name: String)
 
 ## --------------------------------------------------------------- the rig body
-## Measured from hero_wizard.glb (hooded adventurer, 1.835 m crown). Every
+## Measured from hero_wizard.glb (the Rigify hero, 1.75 m crown; art/hero). Every
 ## distance that depends on body size is derived from these, so a second resize
-## is a constant change, not a hunt through the file.
-const HERO_CROWN_HEIGHT := 1.84
+## is a constant change, not a hunt through the file. The capsule and camera are
+## gameplay values and deliberately unchanged by the art swap.
+const HERO_CROWN_HEIGHT := 1.75
 const CAMERA_HEIGHT := 1.55          # pivot at chest/eye level of the new body
-const NAMEPLATE_HEIGHT := 2.18       # crown + 0.34 headroom for the label
+const NAMEPLATE_HEIGHT := 2.09       # crown + 0.34 headroom for the label
 const CAPSULE_RADIUS := 0.35         # art-direction section 2 silhouette
 const CAPSULE_HEIGHT := 1.85
 const CAST_ORIGIN_HEIGHT := 1.25     # wand hand height when standing
@@ -180,12 +181,12 @@ const BroomGripModifierScript = preload("res://scripts/entities/broom_grip_modif
 ## Rig socket convention: one socket per attachment point, bound to the
 ## skeleton by bone name.
 const SOCKET_BONES := {
-	"Socket_Wand": "Wrist.R",
-	"Socket_Hand_L": "Wrist.L",
-	"Socket_Hand_R": "Wrist.R",
-	"Socket_Foot_L": "Foot.L",
-	"Socket_Foot_R": "Foot.R",
-	"Socket_Torso": "Chest",
+	"Socket_Wand": "RightHand",
+	"Socket_Hand_L": "LeftHand",
+	"Socket_Hand_R": "RightHand",
+	"Socket_Foot_L": "LeftFoot",
+	"Socket_Foot_R": "RightFoot",
+	"Socket_Torso": "UpperChest",
 	"Socket_Head": "Head",
 	"Socket_Hips": "Hips",
 }
@@ -299,13 +300,8 @@ func _setup_sockets() -> void:
 	for socket_name in SOCKET_BONES.keys():
 		var bone: String = SOCKET_BONES[socket_name]
 		if skeleton.find_bone(bone) < 0:
-			# Godot sanitises dots in bone names (`Foot.L` -> `Foot_L`); accept
-			# either spelling rather than silently missing a socket.
-			var dotted := bone.replace("_L", ".L").replace("_R", ".R")
-			if skeleton.find_bone(dotted) >= 0:
-				bone = dotted
-			else:
-				continue
+			push_warning("Hero skeleton has no bone %s for %s" % [bone, socket_name])
+			continue
 		var attachment := BoneAttachment3D.new()
 		attachment.name = socket_name
 		attachment.bone_name = bone
