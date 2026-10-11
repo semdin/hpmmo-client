@@ -19,17 +19,16 @@ func _init() -> void:
 	print("Skeleton found: %s" % skel.name)
 	
 	# Let's inspect local rest bases of finger bones on R hand
-	var fingers = ["Index", "Middle", "Ring", "Pinky"]
-	for f in fingers:
-		for k in [1, 2, 3, 4]:
-			var bname = "%s%d.R" % [f, k]
+	for f in HeroBones.FINGERS:
+		for k in [0, 1, 2]:
+			var bname = HeroBones.finger("R", f, k)
 			var idx = skel.find_bone(bname)
 			if idx >= 0:
 				var rest = skel.get_bone_rest(idx)
 				print("%-10s rest basis: X=%s Y=%s Z=%s" % [bname, rest.basis.x, rest.basis.y, rest.basis.z])
 	
-	for k in [1, 2, 3]:
-		var bname = "Thumb%d.R" % k
+	for k in [0, 1, 2]:
+		var bname = HeroBones.thumb("R", k)
 		var idx = skel.find_bone(bname)
 		if idx >= 0:
 			var rest = skel.get_bone_rest(idx)

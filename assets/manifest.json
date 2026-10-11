@@ -124,34 +124,38 @@
   },
   {
    "id": "asset-hero_wizard-glb",
-   "purpose": "unused character variant (dark wizard / inferi / knight)",
-   "status": "candidate",
-   "author": "KayKit (Kay Lousberg)",
-   "source_url": "assets/ASSET_CREDITS.md",
-   "license": "CC0 1.0",
-   "license_url": "assets/ASSET_CREDITS.md",
-   "license_file": "assets/models/KayKit-LICENSE.txt",
+   "purpose": "player hero (Rigify rig, 53-bone SkeletonProfileHumanoid game skeleton, 41 clips)",
+   "status": "integrated",
+   "author": "Project original (mesh generated with Hunyuan3D via fal.ai; rigged in Blender/Rigify)",
+   "source_url": "art/hero/hero_new.blend (workspace, outside this repo)",
+   "license": "project-owned; confirm the Hunyuan3D output terms before release",
+   "license_url": "",
+   "license_file": "",
    "attribution_required": false,
    "local_paths": [
     "assets/models/characters/hero_wizard.glb"
    ],
    "sha256": {
-    "assets/models/characters/hero_wizard.glb": "2bc34c1fbf7c1aec1083755d82c9b83075ec2c256b3b1060f011dea22c58cd90"
+    "assets/models/characters/hero_wizard.glb": "ad27e3b2fabe21b37bd94d32270fa815fd3d1946da27c7f4df8fbf4491a63c4c"
    },
    "scale_m": [
-    1.649,
-    1.877,
-    0.375
+    1.05,
+    1.75,
+    0.34
    ],
-   "triangles": 6404,
-   "material_slots": 5,
+   "triangles": 40000,
+   "material_slots": 1,
    "textures": {
-    "channels": [],
-    "note": "none (flat materials)"
+    "channels": [
+     "albedo",
+     "normal",
+     "metallic_roughness"
+    ],
+    "note": "embedded, 2048 px"
    },
    "rig": {
     "skinned": true,
-    "joints": 62,
+    "joints": 53,
     "clips": [
      "Broom_Accelerate",
      "Broom_Bank_L",
@@ -197,7 +201,9 @@
     ]
    },
    "collision": "none (scene/generated)",
-   "lods": "none"
+   "lods": "none",
+   "acceptance": "scenes/test/rig_regression.tscn + motion_regression.tscn",
+   "notes": "Clips retargeted from the previous Quaternius-rig hero (art/hero/scripts/retarget.py)."
   },
   {
    "id": "asset-inferi_ghoul-glb",

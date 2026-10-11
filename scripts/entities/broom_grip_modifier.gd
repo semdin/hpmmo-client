@@ -3,7 +3,7 @@ class_name BroomGripModifier
 
 ## Solve the rider onto the shaft after the animated pose and cast layer.
 ## Bone poses are temporary inside this pass: never reapply them deferred.
-const LEAN_SHARE := {"Abdomen": 0.5, "Torso": 0.3, "Chest": 0.2}
+const LEAN_SHARE := {"Spine": 0.5, "Chest": 0.3, "UpperChest": 0.2}
 const LEAN_DEG := 50.0
 const GRIP_SPREAD := 0.065
 const PALM_DEPTH := 0.039
@@ -12,8 +12,8 @@ const PALM_DEPTH := 0.039
 const SHAFT_RISE := 0.045
 
 const ARMS := [
-	{"side": "L", "root": "UpperArm.L", "mid": "LowerArm.L", "end": "Wrist.L", "offset": -GRIP_SPREAD},
-	{"side": "R", "root": "UpperArm.R", "mid": "LowerArm.R", "end": "Wrist.R", "offset": GRIP_SPREAD},
+	{"side": "L", "root": "LeftUpperArm", "mid": "LeftLowerArm", "end": "LeftHand", "offset": -GRIP_SPREAD},
+	{"side": "R", "root": "RightUpperArm", "mid": "RightLowerArm", "end": "RightHand", "offset": GRIP_SPREAD},
 ]
 
 ## The broom rig to solve onto (a BroomFlight). Set once by player.gd.

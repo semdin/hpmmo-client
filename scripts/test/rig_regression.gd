@@ -41,6 +41,7 @@ func _ready() -> void:
 			rendered_poses[i] = sk.get_bone_global_pose(i)
 			rendered_rotations[i] = sk.get_bone_pose_rotation(i)
 	)
+	await _check_rig_conventions(player)
 	await _check_body(player)
 	await _check_clip_metrics(player)
 	await _check_wand_grip(player)
@@ -67,6 +68,63 @@ func _settle_on_floor(player, spot: Vector3) -> void:
 			await get_tree().physics_frame
 			return
 
+## ---------------------------------------------------------------- rig conventions
+
+## HeroBones documents the axes the procedural layers rely on; measure them on
+## the shipped skeleton so a re-rig cannot silently invert a grip.
+func _check_rig_conventions(player) -> void:
+	var sk: Skeleton3D = player._find_skeleton()
+	var expected := HeroBones.upper_body()
+	expected.append_array([HeroBones.ROOT, HeroBones.HIPS])
+	for side in ["L", "R"]:
+		expected.append_array([HeroBones.upper_leg(side), HeroBones.lower_leg(side),
+			HeroBones.foot(side), HeroBones.toes(side)])
+	var missing: Array[String] = []
+	for bone in expected:
+		if sk.find_bone(bone) < 0:
+			missing.append(bone)
+	check(missing.is_empty(), "Every HeroBones name exists on the skeleton (missing %s)" % [missing])
+	if not missing.is_empty():
+		return
+	for side in ["L", "R"]:
+		var hand := sk.find_bone(HeroBones.hand(side))
+		var rest := sk.get_bone_global_rest(hand)
+		# Arms hang at the sides: out of the palm is toward the body's midline.
+		var toward_body := Vector3(-signf(rest.origin.x), 0, 0)
+		var palm_world := (rest.basis * HeroBones.palm_axis(side)).normalized()
+		check(palm_world.dot(toward_body) > 0.6,
+			"%s palm_axis faces the body at rest (dot %.2f)" % [HeroBones.side_name(side), palm_world.dot(toward_body)])
+		var palm_local := HeroBones.palm_axis(side)
+		var mid := sk.find_bone(HeroBones.finger(side, "Middle", 1))
+		var tip := sk.find_bone(HeroBones.finger(side, "Middle", 2))
+		var thumb := sk.find_bone(HeroBones.thumb(side, 1))
+		var thumb_tip := sk.find_bone(HeroBones.thumb(side, 2))
+		check(_curl_moves(sk, hand, mid, tip, HeroBones.CURL_SIGN).dot(palm_local) > 0.005,
+			"%s fingers curl into the palm with CURL_SIGN" % HeroBones.side_name(side))
+		var across := (_hand_local(sk, hand, HeroBones.finger(side, "Little", 0))
+			- _hand_local(sk, hand, HeroBones.finger(side, "Index", 0))).normalized()
+		check(_curl_moves(sk, hand, thumb, thumb_tip, HeroBones.THUMB_CURL_SIGN).dot(across) > 0.005,
+			"%s thumb closes across the palm with THUMB_CURL_SIGN" % HeroBones.side_name(side))
+
+## How far `child` moves in the hand's frame when `bone` turns 0.6 rad about its
+## local X with `sign`; restores the pose afterwards.
+func _curl_moves(sk: Skeleton3D, hand: int, bone: int, child: int, sign: float) -> Vector3:
+	var frame := sk.get_bone_global_rest(hand).affine_inverse()
+	var saved := sk.get_bone_pose_rotation(bone)
+	sk.reset_bone_poses()
+	sk.force_update_all_bone_transforms()
+	var before := (frame * sk.get_bone_global_pose(child)).origin
+	sk.set_bone_pose_rotation(bone, sk.get_bone_rest(bone).basis.get_rotation_quaternion()
+		* Quaternion(Vector3.RIGHT, 0.6 * sign))
+	sk.force_update_all_bone_transforms()
+	var after := (frame * sk.get_bone_global_pose(child)).origin
+	sk.set_bone_pose_rotation(bone, saved)
+	sk.force_update_all_bone_transforms()
+	return after - before
+
+func _hand_local(sk: Skeleton3D, hand: int, bone: String) -> Vector3:
+	return (sk.get_bone_global_rest(hand).affine_inverse() * sk.get_bone_global_rest(sk.find_bone(bone))).origin
+
 ## ---------------------------------------------------------------- body
 
 func _check_body(player) -> void:
@@ -78,8 +136,10 @@ func _check_body(player) -> void:
 	var bind_height := 0.0
 	if body is MeshInstance3D and (body as MeshInstance3D).mesh:
 		bind_height = (body as MeshInstance3D).mesh.get_aabb().size.y
-	check(bind_height > 1.75 and bind_height < 1.90,
-		"Hero binds within the approved 1.75-1.90 m band (measured %.3f m)" % bind_height)
+	# The Rigify hero is built at 1.75 m (art/hero); the band keeps a re-export
+	# from shrinking or doubling it.
+	check(bind_height > 1.70 and bind_height < 1.90,
+		"Hero binds within the approved 1.70-1.90 m band (measured %.3f m)" % bind_height)
 	var head_socket: Node3D = player.socket("Socket_Head")
 	var foot_socket: Node3D = player.socket("Socket_Foot_L")
 	var crown := 0.0
@@ -87,25 +147,21 @@ func _check_body(player) -> void:
 		crown = head_socket.global_position.y - foot_socket.global_position.y
 	check(crown > 1.2 and crown < 1.9,
 		"Deployed rig stands at human scale (head socket above foot socket by %.2f m)" % crown)
-	# House variation is material-only (no second rig): the shipped hero must
-	# carry a tinted trim slot after _apply_house_customization.
+	# The body is one PBR surface (albedo + normal + packed ORM), as baked for
+	# the Rigify hero; every texture has to survive the import.
 	var hero_body: Node = player.visuals.find_child("Hero_Body", true, false)
-	var house_colour: Color = GameData.HOUSES[player.house].primary_color if GameData.HOUSES.has(player.house) else Color.WHITE
-	var tinted := 0
-	if hero_body is MeshInstance3D:
-		var mesh_instance := hero_body as MeshInstance3D
-		for i in range(mesh_instance.mesh.get_surface_count()):
-			var slot_name := ""
-			var source: Material = mesh_instance.mesh.surface_get_material(i)
-			if source:
-				slot_name = source.resource_name
-			var override: Material = mesh_instance.get_surface_override_material(i)
-			if slot_name == "Hero_Trim" and override is StandardMaterial3D:
-				if (override as StandardMaterial3D).albedo_color.is_equal_approx(house_colour):
-					tinted += 1
-	check(tinted == 1, "House colour is applied to the hero's trim material (house %s)" % player.house)
-	check(hero_body is MeshInstance3D and (hero_body as MeshInstance3D).mesh.get_surface_count() == 9,
-		"Hero ships 9 material slots (skin / robe / dark / leather / trim / hair / shirt / brass / waistcoat)")
+	var surfaces := -1
+	var pbr_ok := false
+	if hero_body is MeshInstance3D and (hero_body as MeshInstance3D).mesh:
+		var mesh := (hero_body as MeshInstance3D).mesh
+		surfaces = mesh.get_surface_count()
+		var material := mesh.surface_get_material(0)
+		if material is StandardMaterial3D:
+			var standard := material as StandardMaterial3D
+			pbr_ok = standard.albedo_texture != null and standard.normal_enabled \
+				and standard.normal_texture != null and standard.roughness_texture != null
+	check(surfaces == 1, "Hero ships a single body surface (%d)" % surfaces)
+	check(pbr_ok, "The body material carries its albedo, normal and roughness/metal textures")
 	var shape: CapsuleShape3D = player.get_node("CollisionShape3D").shape
 	check(is_equal_approx(shape.radius, 0.35) and is_equal_approx(shape.height, 1.85),
 		"Collision capsule follows the documented silhouette (r %.2f h %.2f)" % [shape.radius, shape.height])
@@ -130,25 +186,20 @@ func _check_body(player) -> void:
 
 ## ---------------------------------------------------------------- clip metrics
 
-## The exported clips must already be in metric bone space. This rig positions
-## `Foot.L`, `Foot.R`, `PT.L` and `PT.R` by their own translation only (they hang
-## off `Root`, which does not move), so a channel left in the unit the body pack
-## authors it in pins the boots in space while the shins swing through them.
-## `tools/blender/build_hero.py` re-units those channels inside the build
-## (hero_common.reunit_pose_translations); nothing repairs them at runtime, so
-## the shipped GLB is measured here both on the resource and through the pose.
+## The exported clips must already be in metric bone space. Only `Root` and
+## `Hips` carry translation (the rest of the skeleton is driven by rotation from
+## the Rigify bake), so a channel exported in the wrong unit would show up as
+## the hips leaving the body or not moving at all. Measured on the resource and
+## then through the pose.
 func _check_clip_metrics(player) -> void:
 	var skeleton: Skeleton3D = player._find_skeleton()
 	var player_anim: AnimationPlayer = player.hero_anim.anim_player
-	# The artifact first: a band, so neither the un-reunited residue nor a double
-	# scale can pass. Measured on the shipped asset: 0.612 m running, 0.512 m
-	# walking.
-	var run_dev := _track_deviation(player_anim, skeleton, "Running_A", "Foot.L")
-	check(run_dev > 0.4 and run_dev < 1.0,
-		"The shipped Running_A foot track is in metres (%.3f m from rest)" % run_dev)
-	var walk_dev := _track_deviation(player_anim, skeleton, "Walk_A", "Foot.L")
-	check(walk_dev > 0.3 and walk_dev < 0.9,
-		"The shipped Walk_A foot track is in metres (%.3f m from rest)" % walk_dev)
+	var run_dev := _track_deviation(player_anim, skeleton, "Running_A", HeroBones.HIPS)
+	check(run_dev > 0.01 and run_dev < 0.3,
+		"The shipped Running_A hips track is in metres (%.3f m from rest)" % run_dev)
+	var idle_dev := _track_deviation(player_anim, skeleton, "Idle", HeroBones.HIPS)
+	check(idle_dev >= 0.0 and idle_dev < 0.1,
+		"The shipped Idle hips track stays over the feet (%.3f m from rest)" % idle_dev)
 	for clip in ["Running_A", "Walk_A"]:
 		var travel := await _ankle_travel(player, skeleton, clip)
 		check(travel > 0.12 and travel < 1.3,
@@ -194,9 +245,7 @@ func _ankle_travel(player, skeleton: Skeleton3D, clip: String) -> float:
 	var was_active: bool = player.hero_anim.tree.active
 	player.hero_anim.tree.active = false
 	var animation := player_anim.get_animation(clip)
-	var index := skeleton.find_bone("Foot.L")
-	if index < 0:
-		index = skeleton.find_bone("Foot_L")
+	var index := RigIK.bone_index(skeleton, HeroBones.foot("L"))
 	var low := Vector3(1e9, 1e9, 1e9)
 	var high := Vector3(-1e9, -1e9, -1e9)
 	for step in range(25):
@@ -227,9 +276,7 @@ func _check_wand_grip(player) -> void:
 	check(wand is Node3D, "The wand prop hangs off its holder")
 	if wand == null:
 		return
-	var wrist := skeleton.find_bone("Wrist.R")
-	if wrist < 0:
-		wrist = skeleton.find_bone("Wrist_R")
+	var wrist := RigIK.bone_index(skeleton, HeroBones.hand("R"))
 	# The prop follows the hand's final pose, not a stale clip pose: this is the
 	# bug that left the wand behind whenever a cast aimed the arm.
 	var before: Vector3 = wand.global_position
@@ -246,9 +293,9 @@ func _check_wand_grip(player) -> void:
 		check(RigIK.distance_to_line(fist_world, holder.global_position,
 			axis) < 0.07, "The handle runs through the closed fingers")
 	var closed := true
-	for finger in ["Index", "Middle", "Ring", "Pinky"]:
-		var base := RigIK.bone_index(skeleton, finger + "2.R")
-		var tip := RigIK.bone_index(skeleton, finger + "4.R")
+	for finger in HeroBones.FINGERS:
+		var base := RigIK.bone_index(skeleton, HeroBones.finger("R", finger, 0))
+		var tip := RigIK.bone_index(skeleton, HeroBones.finger("R", finger, 2))
 		var proximal: Transform3D = rendered_poses[base]
 		var distal: Transform3D = rendered_poses[tip]
 		closed = closed and (distal.origin - proximal.origin).length() < 0.065
@@ -266,8 +313,8 @@ func _check_wand_grip(player) -> void:
 func _grip_centre(skeleton: Skeleton3D, side: String) -> Vector3:
 	var acc := Vector3.ZERO
 	var counted := 0
-	for bone in ["Index2", "Middle2", "Ring2", "Pinky2"]:
-		var index := RigIK.bone_index(skeleton, "%s.%s" % [bone, side])
+	for finger in HeroBones.FINGERS:
+		var index := RigIK.bone_index(skeleton, HeroBones.finger(side, finger, 0))
 		if index < 0:
 			continue
 		acc += (rendered_poses[index] as Transform3D).origin
@@ -416,12 +463,12 @@ func _check_broom_grip(player) -> void:
 		var shaft_start: Vector3 = player.broom.grip_socket.global_position + player.broom.model_root_ref.global_basis.y * BroomGripModifier.SHAFT_RISE
 		var shaft_axis: Vector3 = player.broom.broom_forward()
 		for side in ["L", "R"]:
-			var wrist: Transform3D = rendered_poses[RigIK.bone_index(sk, "Wrist." + side)]
+			var wrist: Transform3D = rendered_poses[RigIK.bone_index(sk, HeroBones.hand(side))]
 			var palm := wrist * RigIK.grip_frame(sk, side, BroomGripModifier.PALM_DEPTH).origin
 			var hips_pose: Transform3D = rendered_poses[RigIK.bone_index(sk, "Hips")]
 			hands_ahead = hands_ahead and palm.z - hips_pose.origin.z > 0.3
-			for finger in ["Index", "Middle", "Ring", "Pinky"]:
-				var tip: Transform3D = rendered_poses[RigIK.bone_index(sk, finger + "4." + side)]
+			for finger in HeroBones.FINGERS:
+				var tip: Transform3D = rendered_poses[RigIK.bone_index(sk, HeroBones.finger(side, finger, 2))]
 				fingers_around = fingers_around and RigIK.distance_to_line(sk.global_transform * tip.origin, shaft_start, shaft_axis) < 0.075
 		check(hands_ahead, "Hands grip in front of the seat in " + clip)
 		check(fingers_around, "Both hands' fingers wrap the wood in " + clip)
@@ -478,7 +525,7 @@ func _check_cast_aim(player) -> void:
 	# Where the wand sits while the arm aims: the grip has to survive the cast
 	# layer as well as the idle pose (`_check_wand_grip` covers the hit clip).
 	var held_worst := 0.0
-	var wrist_bone := RigIK.bone_index(skeleton, "Wrist.R")
+	var wrist_bone := RigIK.bone_index(skeleton, HeroBones.hand("R"))
 	for _i in range(40):
 		await get_tree().physics_frame
 		var wand := holder.get_child(0) as Node3D
@@ -632,12 +679,8 @@ func _check_animation_graph(player) -> void:
 	# reset tracks the cast clip does not animate, the with-cast legs would jump
 	# by much more than the reference.
 	await _settle_on_floor(player, Vector3(0, 0.1, 5))
-	var leg_index: int = player.hero_anim.skeleton.find_bone("UpperLeg_L")
-	if leg_index < 0:
-		leg_index = player.hero_anim.skeleton.find_bone("UpperLeg.L")
-	var arm_index: int = player.hero_anim.skeleton.find_bone("UpperArm_L")
-	if arm_index < 0:
-		arm_index = player.hero_anim.skeleton.find_bone("UpperArm.L")
+	var leg_index: int = RigIK.bone_index(player.hero_anim.skeleton, HeroBones.upper_leg("L"))
+	var arm_index: int = RigIK.bone_index(player.hero_anim.skeleton, HeroBones.upper_arm("L"))
 	player.hero_anim.set_locomotion("idle_ref", "Idle", true)
 	await get_tree().physics_frame
 	var ref_leg_a: Quaternion = (rendered_rotations[leg_index] as Quaternion)

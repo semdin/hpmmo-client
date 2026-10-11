@@ -151,10 +151,8 @@ func setup(animation_player: AnimationPlayer, skeleton_node: Skeleton3D, host: N
 				for t in range(anim.get_track_count() - 1, -1, -1):
 					if anim.track_get_type(t) == Animation.TYPE_POSITION_3D:
 						var path := String(anim.track_get_path(t))
-						for f in ["Index", "Middle", "Ring", "Pinky", "Thumb"]:
-							if f in path:
-								anim.remove_track(t)
-								break
+						if HeroBones.is_digit(path.get_slice(":", path.get_slice_count(":") - 1)):
+							anim.remove_track(t)
 
 
 ## Restrict the cast layer to the bone paths an upper-body clip owns, so every
@@ -169,18 +167,7 @@ func _configure_upper_filter() -> void:
 		var first := String(probe_clip.track_get_path(0))
 		if first.contains(":"):
 			prefix = first.split(":")[0] + ":"
-	var bones: Array[String] = ["Abdomen", "Torso", "Chest", "Neck", "Head"]
-	for side in ["L", "R"]:
-		for bone in ["Shoulder", "UpperArm", "LowerArm", "Wrist"]:
-			bones.append("%s_%s" % [bone, side])
-			bones.append("%s.%s" % [bone, side])
-		for finger in ["Index", "Middle", "Ring", "Pinky"]:
-			for n in range(1, 5):
-				bones.append("%s%d_%s" % [finger, n, side])
-				bones.append("%s%d.%s" % [finger, n, side])
-		for n in range(1, 4):
-			bones.append("Thumb%d_%s" % [n, side])
-			bones.append("Thumb%d.%s" % [n, side])
+	var bones: Array[String] = HeroBones.upper_body()
 	for bone in bones:
 		upper_node.set_filter_path(NodePath(prefix + bone), true)
 
@@ -443,9 +430,7 @@ func _scan_footsteps(delta: float) -> void:
 			_foot_high.clear()
 			return
 	for side in ["L", "R"]:
-		var idx := skeleton.find_bone("Foot_%s" % side)
-		if idx < 0:
-			idx = skeleton.find_bone("Foot.%s" % side)
+		var idx := RigIK.bone_index(skeleton, HeroBones.foot(side))
 		if idx < 0:
 			continue
 		var y := skeleton.get_bone_global_pose(idx).origin.y
