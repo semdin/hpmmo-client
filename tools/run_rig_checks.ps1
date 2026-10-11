@@ -58,3 +58,12 @@ if ($code -ne 0 -or (Select-String -Path $outLog, $errLog -Pattern 'SCRIPT ERROR
     throw 'Rig regression failed; inspect tools/downloads/rig-check.log.'
 }
 Write-Output 'Rig regression passed: character, broom and mount.'
+
+$motionLog = Join-Path $logDirectory 'motion-check.log'
+$motionErr = Join-Path $logDirectory 'motion-check.err.log'
+$motionCode = Invoke-Godot @('--headless', '--path', $projectPath, 'res://scenes/test/motion_regression.tscn', '--fixed-fps', '60', '--quit-after', '1800') $motionLog $motionErr
+Get-Content $motionLog, $motionErr
+if ($motionCode -ne 0 -or (Select-String -Path $motionLog, $motionErr -Pattern 'SCRIPT ERROR|ERROR:|FAIL:' -Quiet) -or -not (Select-String -Path $motionLog -Pattern 'MOTION RESULT: [1-9]\d* checks, 0 failures' -Quiet)) {
+    throw 'Motion regression failed; inspect tools/downloads/motion-check.log.'
+}
+Write-Output 'Motion regression passed: transitions, cadence, jump, hits and cast timing.'

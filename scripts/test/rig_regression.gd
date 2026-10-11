@@ -104,8 +104,8 @@ func _check_body(player) -> void:
 				if (override as StandardMaterial3D).albedo_color.is_equal_approx(house_colour):
 					tinted += 1
 	check(tinted == 1, "House colour is applied to the hero's trim material (house %s)" % player.house)
-	check(hero_body is MeshInstance3D and (hero_body as MeshInstance3D).mesh.get_surface_count() == 5,
-		"Hero ships 5 material slots (skin / robe / dark / leather / trim)")
+	check(hero_body is MeshInstance3D and (hero_body as MeshInstance3D).mesh.get_surface_count() == 9,
+		"Hero ships 9 material slots (skin / robe / dark / leather / trim / hair / shirt / brass / waistcoat)")
 	var shape: CapsuleShape3D = player.get_node("CollisionShape3D").shape
 	check(is_equal_approx(shape.radius, 0.35) and is_equal_approx(shape.height, 1.85),
 		"Collision capsule follows the documented silhouette (r %.2f h %.2f)" % [shape.radius, shape.height])

@@ -142,6 +142,8 @@ print("[hero] joined %d meshes into %s" % (len(hero_meshes), target.name))
 hero_meshes = [target]
 hero_meshes[0].name = "Hero_Body"
 hero_meshes[0].data.name = "Hero_Body"
+import hero_costume
+hero_costume.dress(hero_arm, hero_meshes[0])
 slots = [m.name for m in hero_meshes[0].data.materials if m]
 used = {}
 for poly in hero_meshes[0].data.polygons:
