@@ -44,6 +44,14 @@ const ALIASES := {
 	"Stun_Loop": "Stun",
 }
 
+## Whole-body one-shots that only dress a transition. They hand the body back to
+## the stride as soon as it is actually travelling: a full-weight landing pose
+## held under an 8 m/s run read as the hero sliding across the ground (measured
+## 1.2 s of planted feet after every dismount and every running jump).
+const MOTION_INTERRUPTIBLE := ["Land", "Dismount_Broom", "Broom_Land"]
+## Ground speed (m/s) above which those one-shots yield to locomotion.
+const INTERRUPT_SPEED := 1.2
+
 ## Nominal length used when a clip is missing entirely, so a machine-driven game
 ## loop never divides by zero on a bad import.
 const FALLBACK_LENGTH := 0.5
@@ -138,7 +146,7 @@ func setup(animation_player: AnimationPlayer, skeleton_node: Skeleton3D, host: N
 			anim.loop_mode = Animation.LOOP_LINEAR
 	for one_shot in ["Jump_Start", "Land", "Mount_Broom", "Dismount_Broom", "Revive",
 			"Death_A", "Hit_A", "Hit_B", "Interact", "Melee_Chop_A", "Melee_Chop_B",
-			"Spellcast_Shoot", "Spellcast_Raise", "Cast_Exit", "Broom_Takeoff", "Broom_Land"]:
+			"Spellcast_Shoot", "Spellcast_Raise", "Spellcast_Heavy", "Cast_Exit", "Broom_Takeoff", "Broom_Land"]:
 		var anim := _animation(one_shot)
 		if anim:
 			anim.loop_mode = Animation.LOOP_NONE
@@ -239,6 +247,8 @@ func set_ground_motion(local_velocity: Vector2) -> void:
 	if not enabled:
 		return
 	_ground_speed = local_velocity.length()
+	if oneshot_left > 0.0 and _ground_speed > INTERRUPT_SPEED and oneshot_clip in MOTION_INTERRUPTIBLE:
+		cancel_oneshot()
 	var direction := local_velocity / maxf(0.001, absf(local_velocity.x) + absf(local_velocity.y))
 	# Gait follows actual metres/second, not the current gameplay speed cap.
 	var strength := clampf(_ground_speed / RUN_REFERENCE_SPEED, 0.0, 1.0)

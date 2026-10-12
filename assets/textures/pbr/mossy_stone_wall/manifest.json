@@ -1,0 +1,36 @@
+{
+ "id": "mossy-stone-wall",
+ "name": "Mossy Stone Wall",
+ "source_page": "https://polyhaven.com/a/mossy_stone_wall",
+ "author": "Poly Haven",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "license.txt",
+   "bytes": 814,
+   "sha256": "ea8bb1198174f3ee38137b8c79de2a12f902c54e539f97056099f600eb84b69c"
+  },
+  {
+   "file": "mossy_stone_wall_ao_2k.jpg",
+   "bytes": 2613663,
+   "sha256": "0152e7cded27a63eba92ecc74eba841ad50151f436d528b7a561c4470dc0fc95"
+  },
+  {
+   "file": "mossy_stone_wall_diff_2k.jpg",
+   "bytes": 3808852,
+   "sha256": "4c41e62e3c6b0af73b89bd3c9c46c55f3723a36789475d3ff76fe112d89d45e2"
+  },
+  {
+   "file": "mossy_stone_wall_nor_gl_2k.jpg",
+   "bytes": 5143278,
+   "sha256": "5b0bc44304093ebb2307d91fe6f7f7b0c4af1ccbd84025a8c36c97da981be5cb"
+  },
+  {
+   "file": "mossy_stone_wall_rough_2k.jpg",
+   "bytes": 1901225,
+   "sha256": "ecb8c608fdcea5a21bfd9ad553dbb6b0a74c7d2cdd5f8a3a16e9e83b18126c42"
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+License: CC0 1.0 Universal (Public Domain Dedication)
+SPDX: CC0-1.0
+License URL: https://polyhaven.com/license
+Retrieved: 2026-10-03
+
+Statement from the Poly Haven license page (full snapshot saved next to this file as license.html):
+  "All assets (HDRIs, textures and 3D models) on this site are the original work of Poly Haven staff,
+   or artists who willingly and directly donate/sell their work to Poly Haven. Our assets are all
+   licensed as CC0, which is effectively Public Domain even in jurisdictions that do not support the
+   Public Domain."
+  "You can use our assets for any purpose, including commercial work. You do not need to give credit
+   or attribution when using them... You can redistribute them, share them around, include them when
+   sharing your own work, or even in a product you sell."

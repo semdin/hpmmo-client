@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_a_lod0.res" id="1_3vxtj"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_a_lod1.res" id="2_2lt4q"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_a_lod2.res" id="3_f8uel"]
+
+[node name="pine_a" type="Node3D" unique_id=100393991]
+
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=21569244]
+mesh = ExtResource("1_3vxtj")
+
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=435465742]
+mesh = ExtResource("2_2lt4q")
+
+[node name="LOD2" type="MeshInstance3D" parent="." unique_id=1671490730]
+mesh = ExtResource("3_f8uel")

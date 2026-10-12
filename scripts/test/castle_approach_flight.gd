@@ -1,9 +1,12 @@
 extends Node
 
-## Bug 3 probe: fly the REAL mounted player from the broom landing pad along the
-## castle approach line (x = 0, toward the entrance at z = -47) at fixed
-## altitudes, sampling every step. A stall is reported as a measurement: where
-## the body stopped, how fast it was going, and what the forward rays hit.
+## Approach-flight probe: fly the REAL mounted player along the castle approach
+## (x = 0, from the courtyard side toward the great doors at z = 5) at fixed
+## heights above the ground, sampling every step. The castle is a shell entered
+## on foot through the door portal, so a low line must reach the doors' porch
+## and a high line must reach the facade - neither may stall on an invisible
+## blocker in open air. A stall is reported as a measurement: where the body
+## stopped, how fast it was going, and what the forward rays hit.
 ##
 ## Headless-safe: real world scene, real collision, real mounted movement rules.
 ##
@@ -11,8 +14,11 @@ extends Node
 ##   godot --headless --path client res://scenes/test/castle_approach_flight.tscn \
 ##     --fixed-fps 60 --quit-after 7200
 
-const START := Vector3(0.0, 0.0, -38.0)
-const FINISH_Z := -50.0
+## Start of the approach line (x, z) and the porch line a low flight must reach.
+const START := Vector3(0.0, 0.0, 18.0)
+const FINISH_Z := 9.0
+## Facade of the entrance hall (world z) - the great doors stand against it.
+const FACADE_Z := 5.0
 const FLY_SECONDS := 7.0
 const SAMPLE_EVERY := 0.1
 const HOLD_BAND := 0.35
@@ -20,11 +26,15 @@ const HOLD_BAND := 0.35
 ## One line of travel per run. The low run starts on the pad and lets the real
 ## take-off settle (the owner's profile: the hover band coasts the rider to
 ## ~1.7 m); the others hold a commanded altitude.
+## start_y is metres above the approach ground (negative: real take-off).
 const RUNS := [
 	{"label": "takeoff-hover", "start_y": -1.0},
 	{"label": "5m", "start_y": 5.0},
 	{"label": "20m", "start_y": 20.0},
 ]
+
+## Ground height on the approach (the terrain the castle threshold is flush with).
+var base_y := 0.0
 
 var checks := 0
 var failures: Array[String] = []
@@ -48,6 +58,7 @@ func _ready() -> void:
 	if player == null:
 		_finish()
 		return
+	base_y = GroundsTerrain.height_at(START.x, START.z)
 
 	for run in RUNS:
 		await _fly_line(player, run)
@@ -56,30 +67,34 @@ func _ready() -> void:
 
 	_finish()
 
-## Hypothesis check: is the collision surface on the approach the same surface
-## the player sees (flat core, y = 0), and is the corridor clear at hover height?
+## Is the collision surface on the approach the ground the player sees (the
+## terrain, or the stone apron flush with it), and is the corridor clear at
+## hover height?
 func _scan_corridor(player) -> void:
 	var space: PhysicsDirectSpaceState3D = player.get_world_3d().direct_space_state
 	var worst_floor := 0.0
 	var floor_rows: Array = []
 	var blocked: Array = []
-	for x in [-4.0, -2.0, 0.0, 2.0, 4.0]:
-		for z in [-36.0, -40.0, -44.0, -46.0]:
+	# (off the 1 m vertex grid: a ray exactly through a heightfield vertex can slip
+	# between its triangles in the physics engine)
+	for x in [-3.93, -1.93, 0.07, 2.07, 3.93]:
+		for z in [16.07, 13.07, 11.07, 9.57]:
+			var ground := GroundsTerrain.height_at(x, z)
 			var query := PhysicsRayQueryParameters3D.create(
-				Vector3(x, 12.0, z), Vector3(x, -2.0, z), 1)
+				Vector3(x, ground + 12.0, z), Vector3(x, ground - 2.0, z), 1)
 			var hit: Dictionary = space.intersect_ray(query)
-			var y := 999.0 if hit.is_empty() else float((hit["position"] as Vector3).y)
-			floor_rows.append("(%.0f,%.0f)->%.2f" % [x, z, y])
-			if absf(y) > absf(worst_floor):
-				worst_floor = y
+			var dy := 999.0 if hit.is_empty() else float((hit["position"] as Vector3).y) - ground
+			floor_rows.append("(%.0f,%.0f)->%+.2f" % [x, z, dy])
+			if absf(dy) > absf(worst_floor):
+				worst_floor = dy
 			var fwd := PhysicsRayQueryParameters3D.create(
-				Vector3(x, 1.7, z), Vector3(x, 1.7, z - 1.5), 1)
+				Vector3(x, ground + 1.7, z), Vector3(x, ground + 1.7, z - 1.5), 1)
 			var fhit: Dictionary = space.intersect_ray(fwd)
-			if not fhit.is_empty() and float((fhit["position"] as Vector3).z) > -46.6:
+			if not fhit.is_empty() and float((fhit["position"] as Vector3).z) > FINISH_Z:
 				blocked.append("(%.0f,%.0f)" % [x, z])
 	print("FLIGHT corridor floors: %s" % " ".join(floor_rows))
-	check(absf(worst_floor) <= 0.15,
-		"the approach collision surface is the flat ground the player sees (worst |y|=%.2f)" % absf(worst_floor))
+	check(absf(worst_floor) <= 0.35,
+		"the approach collision surface is the ground the player sees (worst %.2f m off the terrain)" % absf(worst_floor))
 	check(blocked.is_empty(),
 		"the approach corridor at hover height is clear of invisible blockers (%s)" % str(blocked))
 
@@ -92,14 +107,14 @@ func _wall_run(player) -> void:
 		player._apply_mount_state(false)
 	player.velocity = Vector3.ZERO
 	player.camera_rot_y = 0.0
-	player.global_position = Vector3(8.0, 0.6, -36.0)
+	player.global_position = Vector3(8.0, base_y + 0.6, START.z)
 	await get_tree().create_timer(0.35).timeout
 	player._mount_lock = 0.0
 	player._cast_lock = 0.0
 	if not player.is_mounted:
 		player.toggle_broom_mount()
 	player.velocity = Vector3.ZERO
-	player.global_position = Vector3(8.0, 1.7, -36.0)
+	player.global_position = Vector3(8.0, base_y + 1.7, START.z)
 	player.camera_rot_y = 0.0
 	await get_tree().create_timer(0.25).timeout
 
@@ -118,7 +133,7 @@ func _wall_run(player) -> void:
 	var wall_z: float = player.global_position.z
 	for sample in push:
 		print("  FLIGHT-TICK wall-push %s" % JSON.stringify(sample))
-	check(wall_z > -47.0 and wall_z < -44.5,
+	check(wall_z > FACADE_Z and wall_z < FACADE_Z + 2.5,
 		"wall-push: the rider is stopped by the castle front wall (z=%.2f)" % wall_z)
 
 	# 2. Retreat: a trapped body cannot back away from the wall.
@@ -159,7 +174,7 @@ func _fly_line(player, run: Dictionary) -> void:
 		player._apply_mount_state(false)
 	player.velocity = Vector3.ZERO
 	player.camera_rot_y = 0.0
-	player.global_position = Vector3(START.x, 0.6, START.z)
+	player.global_position = Vector3(START.x, base_y + 0.6, START.z)
 	await get_tree().create_timer(0.35).timeout
 	# Mount through the real path (a direct `is_mounted = true` is overwritten by
 	# the next authoritative stats push, which is why it cannot drive a flight).
@@ -173,7 +188,7 @@ func _fly_line(player, run: Dictionary) -> void:
 
 	player.velocity = Vector3.ZERO
 	if float(run["start_y"]) >= 0.0:
-		player.global_position = Vector3(START.x, float(run["start_y"]), START.z)
+		player.global_position = Vector3(START.x, base_y + float(run["start_y"]), START.z)
 	else:
 		player.velocity.y = 3.0   # the real take-off impulse
 	await get_tree().create_timer(0.3).timeout
@@ -183,6 +198,7 @@ func _fly_line(player, run: Dictionary) -> void:
 	var next_sample := 0.0
 	var samples: Array = []
 	var reach_y := float(run["start_y"])
+	var hold_y := base_y + reach_y
 	var stalled := false
 	var passed := false
 	while t < FLY_SECONDS:
@@ -193,9 +209,9 @@ func _fly_line(player, run: Dictionary) -> void:
 			# Hold the commanded altitude with the real rise/descend inputs.
 			Input.action_release("jump")
 			Input.action_release("flight_descend")
-			if pos.y < reach_y - HOLD_BAND:
+			if pos.y < hold_y - HOLD_BAND:
 				Input.action_press("jump")
-			elif pos.y > reach_y + HOLD_BAND:
+			elif pos.y > hold_y + HOLD_BAND:
 				Input.action_press("flight_descend")
 		if t >= next_sample:
 			next_sample = t + SAMPLE_EVERY
@@ -228,16 +244,15 @@ func _fly_line(player, run: Dictionary) -> void:
 	for sample in samples:
 		print("  FLIGHT-TICK %s %s" % [label, JSON.stringify(sample)])
 
-	# What "passed" means per line: the entrance doorway is x -5..5 up to y 7.4
-	# (the lintel above it), so the low lines must fly through it. The 20 m line
-	# is expected to be stopped by the wall above the door - as geometry, not a
-	# movement-rule stall; it must still reach the wall instead of hanging in
-	# open ground.
+	# What "passed" means per line: the porch in front of the doors is 6 m wide
+	# and 9 m high, so the low lines must fly into it (FINISH_Z). The 20 m line
+	# meets the facade above the porch - as geometry, not a movement-rule stall;
+	# it must still reach the wall instead of hanging in open air.
 	if label == "20m":
-		check(final_pos.z <= -44.0 or passed,
-			"%s: the rider advances to the wall, not an invisible blocker (%s)" % [label, summary])
+		check(final_pos.z <= FACADE_Z + 4.0 or passed,
+			"%s: the rider advances to the facade, not an invisible blocker (%s)" % [label, summary])
 	else:
-		check(passed, "%s: the rider flies through the castle entrance (%s)" % [label, summary])
+		check(passed, "%s: the rider flies into the castle porch (%s)" % [label, summary])
 
 ## Colliders this body touched in the last physics step (empty when free). The
 ## body's own name is generic ("Body"), so its named parent is reported too.

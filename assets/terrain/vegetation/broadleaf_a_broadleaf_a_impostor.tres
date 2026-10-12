@@ -1,0 +1,24 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/broadleaf_a_broadleaf_a_impostor_alb.png" id="1_uy0cp"]
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/broadleaf_a_broadleaf_a_impostor_nrm.png" id="2_snq5b"]
+
+[resource]
+resource_name = "broadleaf_a_impostor"
+transparency = 2
+alpha_scissor_threshold = 0.45
+alpha_antialiasing_mode = 1
+alpha_antialiasing_edge = 0.3
+cull_mode = 2
+diffuse_mode = 2
+albedo_color = Color(0.62, 0.7, 0.5, 1)
+albedo_texture = ExtResource("1_uy0cp")
+metallic_specular = 0.25
+roughness = 0.85
+normal_enabled = true
+normal_scale = 0.6
+normal_texture = ExtResource("2_snq5b")
+backlight_enabled = true
+backlight = Color(0.22, 0.27, 0.1, 1)
+texture_filter = 5
+metadata/_gltf_primary_texture_coord = 0

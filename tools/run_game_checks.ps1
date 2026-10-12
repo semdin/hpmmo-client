@@ -78,6 +78,16 @@ if ($testCode -ne 0 -or (Select-String -Path $testLog, $testErr -Pattern 'SCRIPT
 }
 Write-Output 'Godot import, gameplay regression, and shutdown checks passed.'
 
+# The grounds suite covers the outdoor terrain data, painting, server-side collision and walking.
+$groundsLog = Join-Path $logDirectory 'check-grounds.log'
+$groundsErr = Join-Path $logDirectory 'check-grounds.err.log'
+$groundsCode = Invoke-Godot @('--headless', '--path', $projectPath, 'res://scenes/test/grounds_regression.tscn', '--fixed-fps', '60', '--quit-after', '3600') $groundsLog $groundsErr
+Get-Content $groundsLog, $groundsErr
+if ($groundsCode -ne 0 -or (Select-String -Path $groundsLog, $groundsErr -Pattern 'SCRIPT ERROR|ERROR:|leaked at exit|Leaked instance' -Quiet) -or -not (Select-String -Path $groundsLog -Pattern 'GROUNDS RESULT: [1-9]\d* checks, 0 failures' -Quiet)) {
+    throw 'Grounds terrain regression failed; inspect tools/downloads/check-grounds.log.'
+}
+Write-Output 'Grounds terrain data, collision and walking checks passed.'
+
 # The equipment suite covers ownership, authority gates, GUI gestures and save retries.
 $equipmentLog = Join-Path $logDirectory 'check-equipment.log'
 $equipmentErr = Join-Path $logDirectory 'check-equipment.err.log'

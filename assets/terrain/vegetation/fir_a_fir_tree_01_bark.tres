@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/fir_a_fir_tree_01_bark_diff_1k.jpg" id="1_u53q1"]
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/fir_a_fir_tree_01_bark_arm_1k.jpg" id="2_f65ii"]
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/fir_a_fir_tree_01_bark_nor_gl_1k.jpg" id="3_1g7qy"]
+
+[resource]
+resource_name = "fir_tree_01_bark"
+albedo_color = Color(0.85, 0.8, 0.76, 1)
+albedo_texture = ExtResource("1_u53q1")
+metallic_texture = ExtResource("2_f65ii")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_f65ii")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_texture = ExtResource("3_1g7qy")
+uv1_scale = Vector3(1.2, 0.099999934, 1)
+uv1_offset = Vector3(0, 0.9000001, 0)
+texture_filter = 5
+metadata/_gltf_primary_texture_coord = 0

@@ -1,0 +1,36 @@
+{
+ "id": "roof-slates-02",
+ "name": "Roof Slates 02",
+ "source_page": "https://polyhaven.com/a/roof_slates_02",
+ "author": "Poly Haven",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "license.txt",
+   "bytes": 814,
+   "sha256": "ea8bb1198174f3ee38137b8c79de2a12f902c54e539f97056099f600eb84b69c"
+  },
+  {
+   "file": "roof_slates_02_ao_2k.jpg",
+   "bytes": 1701208,
+   "sha256": "45f4853c971b3ac9c9a8a66d11461c382b2e78c2a5da8d270eeb947080024f27"
+  },
+  {
+   "file": "roof_slates_02_diff_2k.jpg",
+   "bytes": 1838933,
+   "sha256": "5be7e739997e9f5560b07ee42f335d7ad70213359d48cbffc9c04ad129e9a2c4"
+  },
+  {
+   "file": "roof_slates_02_nor_gl_2k.jpg",
+   "bytes": 2919261,
+   "sha256": "4ff2618aa5f2eac52f728b8b4f7e715d87c410719effc66eb6f528378ef9f49e"
+  },
+  {
+   "file": "roof_slates_02_rough_2k.jpg",
+   "bytes": 1126001,
+   "sha256": "641b51370745e7e990c93542716bf46219e7415808a4cea999bb3f0683ec01bf"
+  }
+ ]
+}

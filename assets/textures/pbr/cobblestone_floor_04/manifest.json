@@ -1,0 +1,36 @@
+{
+ "id": "cobblestone-floor-04",
+ "name": "Cobblestone Floor 04",
+ "source_page": "https://polyhaven.com/a/cobblestone_floor_04",
+ "author": "Poly Haven",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "cobblestone_floor_04_ao_2k.jpg",
+   "bytes": 1499291,
+   "sha256": "706458c309283ddf8698f3e4dc7acf4cce9525fc75480e3b67f127dd42e6493d"
+  },
+  {
+   "file": "cobblestone_floor_04_diff_2k.jpg",
+   "bytes": 2261344,
+   "sha256": "82be42e9e666d8da3da306cd47505e0940260389394ff68f74073261577252ac"
+  },
+  {
+   "file": "cobblestone_floor_04_nor_gl_2k.jpg",
+   "bytes": 2937425,
+   "sha256": "6b0846bd7f9bb6f9092da7144ac12960118d1c7721ccceaca7a17c8f1e68f0ff"
+  },
+  {
+   "file": "cobblestone_floor_04_rough_2k.jpg",
+   "bytes": 1697046,
+   "sha256": "0a115827914a1cd8773ee8aed84f69417171d501c376882f04b74ec3c898b052"
+  },
+  {
+   "file": "license.txt",
+   "bytes": 814,
+   "sha256": "ea8bb1198174f3ee38137b8c79de2a12f902c54e539f97056099f600eb84b69c"
+  }
+ ]
+}

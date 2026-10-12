@@ -1,0 +1,36 @@
+{
+ "id": "medieval-wood",
+ "name": "Medieval Wood",
+ "source_page": "https://polyhaven.com/a/medieval_wood",
+ "author": "Poly Haven",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "license.txt",
+   "bytes": 814,
+   "sha256": "ea8bb1198174f3ee38137b8c79de2a12f902c54e539f97056099f600eb84b69c"
+  },
+  {
+   "file": "medieval_wood_ao_2k.jpg",
+   "bytes": 1548023,
+   "sha256": "77cab1f170ff7d5b06259f9c80bc70495a7a40508bddf2be4c85ad076d1e007b"
+  },
+  {
+   "file": "medieval_wood_diff_2k.jpg",
+   "bytes": 3034644,
+   "sha256": "90f32ac00dcd02df8fcad16ea80801a1c0014842eb077b5fe1b9496a1ae55413"
+  },
+  {
+   "file": "medieval_wood_nor_gl_2k.jpg",
+   "bytes": 2928634,
+   "sha256": "499b784619a59b140155120a51e3b9ac24a88d8cc15fa186706b521f39f61a56"
+  },
+  {
+   "file": "medieval_wood_rough_2k.jpg",
+   "bytes": 1358722,
+   "sha256": "1354a7af595ce39464523fa3fe3d99222ebcbb29a9bcfd5e091d72190f2e3da0"
+  }
+ ]
+}

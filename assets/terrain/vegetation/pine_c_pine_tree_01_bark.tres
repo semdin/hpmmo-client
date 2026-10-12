@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/pine_c_pine_tree_01_bark_diff_1k.jpg" id="1_nwc21"]
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/pine_c_pine_tree_01_bark_arm_1k.jpg" id="2_q831j"]
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/pine_c_pine_tree_01_bark_nor_gl_1k.jpg" id="3_q3cyt"]
+
+[resource]
+resource_name = "pine_tree_01_bark"
+albedo_color = Color(0.9, 0.8, 0.72, 1)
+albedo_texture = ExtResource("1_nwc21")
+metallic_texture = ExtResource("2_q831j")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_q831j")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_texture = ExtResource("3_q3cyt")
+uv1_scale = Vector3(1.2, 0.099999934, 1)
+uv1_offset = Vector3(0, 0.9000001, 0)
+texture_filter = 5
+metadata/_gltf_primary_texture_coord = 0

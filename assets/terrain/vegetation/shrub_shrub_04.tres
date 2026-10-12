@@ -1,0 +1,29 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/shrub_shrub_04_diff_1k.png" id="1_af1jg"]
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/shrub_shrub_04_arm_1k.jpg" id="2_2gifb"]
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/shrub_shrub_04_nor_gl_1k.jpg" id="3_43u86"]
+
+[resource]
+resource_name = "shrub_04"
+transparency = 2
+alpha_scissor_threshold = 0.45
+alpha_antialiasing_mode = 1
+alpha_antialiasing_edge = 0.3
+cull_mode = 2
+diffuse_mode = 2
+albedo_color = Color(0.7, 0.76, 0.6, 1)
+albedo_texture = ExtResource("1_af1jg")
+metallic_specular = 0.25
+metallic_texture = ExtResource("2_2gifb")
+metallic_texture_channel = 2
+roughness = 0.85
+roughness_texture = ExtResource("2_2gifb")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.6
+normal_texture = ExtResource("3_43u86")
+backlight_enabled = true
+backlight = Color(0.22, 0.27, 0.1, 1)
+texture_filter = 5
+metadata/_gltf_primary_texture_coord = 0

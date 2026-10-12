@@ -55,3 +55,51 @@ by Grieg, Pachelbel, Bach, Beethoven and Satie - no recording or arrangement by
 a third party is used. Full provenance: `assets/audio/CREDITS-spell-audio.md`.
 
 Existing KayKit character/environment files are retained. This document records the provenance of newly added assets; it does not change the terms of existing assets.
+- `models/characters/hero_wizard.glb` animations: ground, combat and spell clips retargeted from **Quaternius Universal Animation Library 1**, CC0 1.0, https://quaternius.itch.io/universal-animation-library (source GLB and license in `candidates/character/quaternius-universal-animation-library`). Broom, stun and two-handed cast clips are project-authored.
+
+# Grounds terrain (2026-10-12)
+
+The outdoor map's terrain runs on **Terrain3D** 1.0.2 by Cory Petkovsek and
+Roope Palmroos (MIT; `addons/terrain_3d/LICENSE.txt`). Heights and painting are
+project-original, generated from `art/map/layout.json` by the scripts in
+`art/map/scripts/`.
+
+Ground textures in `assets/terrain/textures/` (repacked to Terrain3D's
+albedo+height / normal+roughness layout at 1024 px by
+`art/map/scripts/pack_terrain_textures.py`), all CC0 1.0:
+
+| Slot | Source |
+| --- | --- |
+| grass_meadow | ambientCG *Ground037* (as shipped in the Terrain3D demo) |
+| cliff_rock | ambientCG *Rock023* (as shipped in the Terrain3D demo) |
+| forest_floor, sand_shore (also the tinted dirt_path), grass_lush | CC0 Textures leaves / sand / grass sets, as shipped in Zylann's *godot_hterrain* demo |
+| gravel | CC0 Textures *Rocks07* (now ambientCG), via the same demo |
+| cobblestone | Poly Haven *stone_tiles_02* (already in `assets/textures/pbr/`) |
+
+# Grounds vegetation, props and architecture textures (2026-10-12)
+
+All CC0 1.0 from **Poly Haven** (https://polyhaven.com). The models were
+rebuilt into game LODs (decimated wood, clustered leaf cards rendered from the
+source sprays, a crossed-quad impostor) by
+`art/vegetation/scripts/build_foliage.py` and `build_props.py`; the cooked game
+scenes live in `assets/terrain/vegetation/`.
+
+| Game model (`assets/models/vegetation/`) | Poly Haven source |
+| --- | --- |
+| fir_a, fir_b, fir_c | *fir_tree_01* |
+| pine_a, pine_b, pine_c | *pine_tree_01* |
+| broadleaf_a | *tree_small_02* |
+| broadleaf_b | *island_tree_01* |
+| fern_a, fern_b | *fern_02* |
+| shrub | *shrub_04* |
+| rock_boulder | *boulder_01* |
+| rock_slab | *namaqualand_boulder_05* |
+| rock_moss_a0-a2, rock_moss_b0-b2 | *rock_moss_set_01*, *rock_moss_set_02* |
+| stump | *tree_stump_01* |
+| log | *dead_tree_trunk_02* |
+
+Castle and village textures in `assets/textures/pbr/` (2k, Poly Haven, CC0 1.0):
+*castle_wall_varriation*, *stone_wall*, *roof_slates_02*, *grey_roof_tiles*,
+*medieval_wood*, *wooden_planks*, *white_rough_plaster*, *mossy_stone_wall*,
+*cobblestone_floor_04*. The castle, village and site buildings themselves are
+project-original geometry (`scripts/world/grounds/`).

@@ -141,7 +141,7 @@ IMPORT_NOTES = {
 # The player hero: generated mesh, rigged with Rigify in Blender; source,
 # pipeline scripts and 4K textures live in the workspace's art/hero folder.
 HERO_ENTRY = {
-    "purpose": "player hero (Rigify rig, 53-bone SkeletonProfileHumanoid game skeleton, 41 clips)",
+    "purpose": "player hero (Rigify rig, 53-bone SkeletonProfileHumanoid game skeleton)",
     "status": "integrated",
     "author": "Project original (mesh generated with Hunyuan3D via fal.ai; rigged in Blender/Rigify)",
     "source_url": "art/hero/hero_new.blend (workspace, outside this repo)",
@@ -149,7 +149,7 @@ HERO_ENTRY = {
     "license_url": "", "license_file": "",
     "textures": {"channels": ["albedo", "normal", "metallic_roughness"], "note": "embedded, 2048 px"},
     "acceptance": "scenes/test/rig_regression.tscn + motion_regression.tscn",
-    "notes": "Clips retargeted from the previous Quaternius-rig hero (art/hero/scripts/retarget.py).",
+    "notes": "Ground/combat clips from Quaternius UAL1 (CC0); broom, stun and two-handed cast authored (art/hero/scripts).",
 }
 
 

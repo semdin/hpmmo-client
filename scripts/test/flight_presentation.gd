@@ -22,13 +22,13 @@ func _ready() -> void:
 	world.overlay.hide()
 
 	# Stage on open ground, mount, then hover clear of the fountain and walls.
-	player.global_position = Vector3(0, 0.15, 5)
+	player.global_position = TestGround.at(0, 0.15, 5)
 	player.velocity = Vector3.ZERO
 	await get_tree().create_timer(0.4).timeout
 	player._mount_lock = 0.0
 	player._cast_lock = 0.0
 	player.toggle_broom_mount()
-	player.global_position = Vector3(0, 3.2, 20)
+	player.global_position = TestGround.at(0, 3.2, 20)
 	player.velocity = Vector3.ZERO
 	player.visuals.rotation.y = 0.0
 	await get_tree().create_timer(0.8).timeout
@@ -49,7 +49,7 @@ func _ready() -> void:
 	await get_tree().create_timer(0.6).timeout
 
 	# Landing: descend, then take the landing clip and a last shot.
-	player.global_position = Vector3(0, 1.0, 20)
+	player.global_position = TestGround.at(0, 1.0, 20)
 	player.velocity = Vector3.ZERO
 	await get_tree().create_timer(0.2).timeout
 	if player.hero_anim:
