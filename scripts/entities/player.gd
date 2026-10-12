@@ -144,6 +144,8 @@ var _facing_target_yaw := 0.0
 var _auto_facing := false
 ## Spells whose recovery commits the caster in place.
 const COMMITTED_SPELLS := {"bombarda": 0.35, "ultimate": 0.5}
+## Spells cast with both hands (Spellcast_Heavy); every other cast is one-handed.
+const HEAVY_CAST_SPELLS := ["bombarda", "ultimate"]
 const COMMITTED_MELEE := 0.45
 ## Deceleration (m/s^2) once a WALKING body's movement input is released. The
 ## authored value was `walk_speed * 12` = 102, which left 0.28 m of glide over 4
@@ -249,6 +251,8 @@ func _ready() -> void:
 	_setup_sockets()
 	
 	_setup_character_model()
+	if is_local_player and camera:
+		HeroAppearance.add_character_fill(camera)
 	if broom_particles:
 		ParticleKit.configure(broom_particles, true)
 		broom_particles.amount = 55
@@ -1238,7 +1242,11 @@ func _play_cast_animation(anim_name: String = "Spellcast_Shoot", aim: Variant = 
 	is_casting_anim = true
 	_cast_generation += 1
 	var generation := _cast_generation
-	if spell in ["protego", "ultimate"]:
+	# A wand cast is one-handed (the wand hand). The power spells add the off
+	# hand: wand raised back, both hands thrust together.
+	if spell in HEAVY_CAST_SPELLS:
+		anim_name = "Spellcast_Heavy"
+	elif spell == "protego":
 		anim_name = "Spellcast_Raise"
 	var upper := anim_name + "_Upper"
 	var hold := 0.42

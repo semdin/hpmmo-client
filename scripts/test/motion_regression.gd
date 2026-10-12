@@ -104,6 +104,29 @@ func _ready() -> void:
 	advance(0.09)
 	check(rotation_distance(hit_pose, all_rotations()) < 0.06, "A 2x hit reaches the same pose in half the time")
 
+	# Transition one-shots yield to the stride once the body travels: a held
+	# landing pose under a run read as sliding after every dismount and jump.
+	graph.set_ground_motion(Vector2.ZERO)
+	advance(0.4)
+	for clip in ["Land", "Dismount_Broom", "Broom_Land"]:
+		graph.play_oneshot(clip)
+		graph.tree.advance(0.0)
+		advance(0.05)
+		graph.set_ground_motion(Vector2(0, 8.5))
+		advance(0.25)
+		check(not graph.has_oneshot() and graph.oneshot_weight() < 0.05,
+			"%s hands the body to the stride once it moves (weight %.2f)" % [clip, graph.oneshot_weight()])
+		graph.set_ground_motion(Vector2.ZERO)
+		advance(0.4)
+	graph.play_oneshot("Hit_A")
+	graph.tree.advance(0.0)
+	graph.set_ground_motion(Vector2(0, 8.5))
+	advance(0.05)
+	check(graph.has_oneshot(), "A hit reaction is not cut short by movement")
+	graph.cancel_oneshot()
+	graph.set_ground_motion(Vector2.ZERO)
+	advance(0.4)
+
 	for duration in [0.3, 0.48, 0.72]:
 		graph.start_cast("Spellcast_Shoot_Upper", duration)
 		graph.align_cast(duration * 0.6, 0.45)
@@ -142,6 +165,8 @@ func _ready() -> void:
 	check(player._cast_generation == generation, "Remote release does not restart the windup gesture")
 	await get_tree().create_timer(0.65).timeout
 
+	_check_cast_hands()
+
 	print("MOTION RESULT: %d checks, %d failures" % [checks, failures])
 	get_tree().quit(0 if failures == 0 else 1)
 
@@ -176,3 +201,35 @@ func rotation_distance(a: Array[Quaternion], b: Array[Quaternion]) -> float:
 	for i in range(a.size()):
 		result = maxf(result, a[i].angle_to(b[i]))
 	return result
+
+
+## A wand cast is one-handed: the off hand stays low. The power cast brings both
+## hands up and forward together. Sampled straight off the clips.
+func _check_cast_hands() -> void:
+	graph.tree.active = false
+	var ap := graph.anim_player
+	var hips := RigIK.bone_index(skeleton, HeroBones.HIPS)
+	var off := RigIK.bone_index(skeleton, HeroBones.hand("L"))
+	var wand := RigIK.bone_index(skeleton, HeroBones.hand("R"))
+	var off_peak := {}
+	var both_up := false
+	for clip in ["Spellcast_Shoot_Upper", "Spellcast_Raise_Upper", "Spellcast_Heavy_Upper"]:
+		var anim := ap.get_animation(clip)
+		off_peak[clip] = -1.0
+		for step in range(13):
+			ap.play(clip)
+			ap.seek(anim.length * float(step) / 12.0, true)
+			skeleton.force_update_all_bone_transforms()
+			var h := skeleton.get_bone_global_pose(hips).origin
+			var l := skeleton.get_bone_global_pose(off).origin
+			var r := skeleton.get_bone_global_pose(wand).origin
+			off_peak[clip] = maxf(off_peak[clip], l.y - h.y)
+			if clip == "Spellcast_Heavy_Upper" and l.y - h.y > 0.3 and r.y - h.y > 0.3 \
+					and l.z - h.z > 0.3 and r.z - h.z > 0.3:
+				both_up = true
+	ap.stop()
+	graph.tree.active = true
+	for clip in ["Spellcast_Shoot_Upper", "Spellcast_Raise_Upper"]:
+		check(off_peak[clip] < 0.25,
+			"%s keeps the off hand low (peak %.2f m above the hips)" % [clip, off_peak[clip]])
+	check(both_up, "Spellcast_Heavy_Upper thrusts both hands forward together")

@@ -136,7 +136,7 @@
     "assets/models/characters/hero_wizard.glb"
    ],
    "sha256": {
-    "assets/models/characters/hero_wizard.glb": "ad27e3b2fabe21b37bd94d32270fa815fd3d1946da27c7f4df8fbf4491a63c4c"
+    "assets/models/characters/hero_wizard.glb": "3d3516b7eaf713e4c0c6002c6821fbe2cbffc776896cc3df0f9bff0f43096e76"
    },
    "scale_m": [
     1.05,
@@ -171,8 +171,6 @@
      "Cast_Idle_Loop",
      "Death_A",
      "Dismount_Broom",
-     "Drive_Reference",
-     "Emote_Wave",
      "Fall_Loop",
      "Hit_A",
      "Hit_B",
@@ -189,6 +187,8 @@
      "Sit_Chair_Idle",
      "Sit_Enter",
      "Sit_Exit",
+     "Spellcast_Heavy",
+     "Spellcast_Heavy_Upper",
      "Spellcast_Raise",
      "Spellcast_Raise_Upper",
      "Spellcast_Shoot",
@@ -203,7 +203,7 @@
    "collision": "none (scene/generated)",
    "lods": "none",
    "acceptance": "scenes/test/rig_regression.tscn + motion_regression.tscn",
-   "notes": "Clips retargeted from the previous Quaternius-rig hero (art/hero/scripts/retarget.py)."
+   "notes": "Ground/combat clips from Quaternius UAL1 (CC0); broom, stun and two-handed cast authored (art/hero/scripts)."
   },
   {
    "id": "asset-inferi_ghoul-glb",

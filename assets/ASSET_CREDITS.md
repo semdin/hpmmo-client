@@ -55,3 +55,4 @@ by Grieg, Pachelbel, Bach, Beethoven and Satie - no recording or arrangement by
 a third party is used. Full provenance: `assets/audio/CREDITS-spell-audio.md`.
 
 Existing KayKit character/environment files are retained. This document records the provenance of newly added assets; it does not change the terms of existing assets.
+- `models/characters/hero_wizard.glb` animations: ground, combat and spell clips retargeted from **Quaternius Universal Animation Library 1**, CC0 1.0, https://quaternius.itch.io/universal-animation-library (source GLB and license in `candidates/character/quaternius-universal-animation-library`). Broom, stun and two-handed cast clips are project-authored.

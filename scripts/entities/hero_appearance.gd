@@ -179,6 +179,7 @@ static func apply_house_tint(visuals: Node, primary: Color) -> void:
 	if not (body is MeshInstance3D):
 		return
 	var mesh_instance := body as MeshInstance3D
+	dress_body(mesh_instance)
 	var mesh: Mesh = mesh_instance.mesh
 	if mesh == null:
 		return
@@ -198,6 +199,58 @@ static func apply_house_tint(visuals: Node, primary: Color) -> void:
 				var robe := base.duplicate() as StandardMaterial3D
 				robe.albedo_color = Color("242936").lerp(primary.darkened(0.65), 0.16)
 				mesh_instance.set_surface_override_material(surface, robe)
+
+
+## ---------------------------------------------------------------- lighting
+
+## Render layer (1-based 20) that only characters sit on, so a character light
+## can brighten them without touching the world.
+const CHARACTER_LAYER := 1 << 19
+## The world's sky ambient is tuned for bright stone; dark clothing facing away
+## from the sun reads as a black silhouette under it. A soft, shadowless light
+## from the camera lifts only characters (light_cull_mask), the usual
+## third-person "character fill".
+const FILL_ENERGY := 0.4
+const FILL_COLOR := Color(0.92, 0.95, 1.0)
+## Woven cloth scatters light at grazing angles; a little rim gives the
+## silhouette an edge against the background.
+const CLOTH_RIM := 0.3
+const CLOTH_RIM_TINT := 0.5
+
+static var _dressed_material: StandardMaterial3D = null
+
+
+## Put the body on the character layer and give its material the cloth rim.
+## Idempotent; every hero shares one dressed material.
+static func dress_body(body: MeshInstance3D) -> void:
+	body.layers |= CHARACTER_LAYER
+	var source := body.mesh.surface_get_material(0) if body.mesh else null
+	if not (source is StandardMaterial3D) or body.mesh.get_surface_count() != 1:
+		return
+	if _dressed_material == null:
+		_dressed_material = (source as StandardMaterial3D).duplicate()
+		_dressed_material.rim_enabled = true
+		_dressed_material.rim = CLOTH_RIM
+		_dressed_material.rim_tint = CLOTH_RIM_TINT
+	if body.get_surface_override_material(0) == null:
+		body.set_surface_override_material(0, _dressed_material)
+
+
+## Attach the character fill to `camera` (once) and return it.
+static func add_character_fill(camera: Camera3D) -> DirectionalLight3D:
+	var existing := camera.get_node_or_null("CharacterFill")
+	if existing is DirectionalLight3D:
+		return existing
+	var fill := DirectionalLight3D.new()
+	fill.name = "CharacterFill"
+	fill.light_cull_mask = CHARACTER_LAYER
+	fill.light_energy = FILL_ENERGY
+	fill.light_color = FILL_COLOR
+	fill.shadow_enabled = false
+	fill.light_specular = 0.2
+	fill.rotation_degrees = Vector3(-12, 18, 0)
+	camera.add_child(fill)
+	return fill
 
 
 ## The body's animation player, wherever the importer put it.
