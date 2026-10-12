@@ -1,12 +1,16 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/stump_lod0.res" id="1_xyj7k"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/stump_lod1.res" id="2_k5c3g"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/stump_lod0.res" id="1_k5c3g"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/stump_lod1.res" id="2_pk47g"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/stump_lod2.res" id="3_ncvtw"]
 
-[node name="stump" type="Node3D" unique_id=1785378546]
+[node name="stump" type="Node3D" unique_id=714010589]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=312932849]
-mesh = ExtResource("1_xyj7k")
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=27486354]
+mesh = ExtResource("1_k5c3g")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=288695093]
-mesh = ExtResource("2_k5c3g")
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=1766234725]
+mesh = ExtResource("2_pk47g")
+
+[node name="LOD2" type="MeshInstance3D" parent="." unique_id=1971480422]
+mesh = ExtResource("3_ncvtw")

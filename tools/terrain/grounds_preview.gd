@@ -1,5 +1,7 @@
 extends Node3D
 
+const QualityPreset = preload("res://scripts/world/quality_preset.gd")
+
 ## Walk / fly preview of the grounds terrain, outside the game.
 ##
 ## Open tools/terrain/grounds_preview.tscn in the editor and press F6.
@@ -202,5 +204,8 @@ func _render_shots(out_dir: String, only: PackedStringArray) -> void:
 			await get_tree().process_frame
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_jpg(out_dir.path_join("%s.jpg" % s[0]), 0.9)
-		print("SHOT ", s[0])
+		print("SHOT %s quality=%s objects=%d draws=%d primitives=%d" % [s[0], QualityPreset.current(),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)])
 	get_tree().quit()

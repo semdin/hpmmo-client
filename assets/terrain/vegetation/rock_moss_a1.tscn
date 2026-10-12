@@ -1,12 +1,16 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_a1_lod0.res" id="1_c43wh"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_a1_lod1.res" id="2_55g0p"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_a1_lod0.res" id="1_55g0p"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_a1_lod1.res" id="2_sngnd"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_a1_lod2.res" id="3_omkae"]
 
-[node name="rock_moss_a1" type="Node3D" unique_id=387256100]
+[node name="rock_moss_a1" type="Node3D" unique_id=425872651]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1876190565]
-mesh = ExtResource("1_c43wh")
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1793200727]
+mesh = ExtResource("1_55g0p")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=1949661425]
-mesh = ExtResource("2_55g0p")
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=336104895]
+mesh = ExtResource("2_sngnd")
+
+[node name="LOD2" type="MeshInstance3D" parent="." unique_id=1160048957]
+mesh = ExtResource("3_omkae")

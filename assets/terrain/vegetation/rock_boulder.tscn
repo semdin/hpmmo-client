@@ -1,12 +1,16 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_boulder_lod0.res" id="1_xcl0q"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_boulder_lod1.res" id="2_ylw7e"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_boulder_lod0.res" id="1_ylw7e"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_boulder_lod1.res" id="2_dfk15"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_boulder_lod2.res" id="3_11wlk"]
 
-[node name="rock_boulder" type="Node3D" unique_id=270217398]
+[node name="rock_boulder" type="Node3D" unique_id=379980310]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1054963584]
-mesh = ExtResource("1_xcl0q")
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1162709127]
+mesh = ExtResource("1_ylw7e")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=780624914]
-mesh = ExtResource("2_ylw7e")
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=932710342]
+mesh = ExtResource("2_dfk15")
+
+[node name="LOD2" type="MeshInstance3D" parent="." unique_id=941284478]
+mesh = ExtResource("3_11wlk")

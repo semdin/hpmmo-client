@@ -4,13 +4,13 @@
 [ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/broadleaf_a_lod1.res" id="2_y0q1b"]
 [ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/broadleaf_a_lod2.res" id="3_esyih"]
 
-[node name="broadleaf_a" type="Node3D" unique_id=777457115]
+[node name="broadleaf_a" type="Node3D" unique_id=1048031353]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1130688990]
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=596516784]
 mesh = ExtResource("1_6fltq")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=257146362]
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=1323758186]
 mesh = ExtResource("2_y0q1b")
 
-[node name="LOD2" type="MeshInstance3D" parent="." unique_id=1257633670]
+[node name="LOD2" type="MeshInstance3D" parent="." unique_id=1639403500]
 mesh = ExtResource("3_esyih")

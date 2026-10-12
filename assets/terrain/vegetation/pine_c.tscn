@@ -4,13 +4,13 @@
 [ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_c_lod1.res" id="2_eiagw"]
 [ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_c_lod2.res" id="3_ujqlq"]
 
-[node name="pine_c" type="Node3D" unique_id=1801532126]
+[node name="pine_c" type="Node3D" unique_id=1394972639]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1719385556]
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1836929758]
 mesh = ExtResource("1_astjj")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=483475621]
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=1495041091]
 mesh = ExtResource("2_eiagw")
 
-[node name="LOD2" type="MeshInstance3D" parent="." unique_id=663277422]
+[node name="LOD2" type="MeshInstance3D" parent="." unique_id=533065897]
 mesh = ExtResource("3_ujqlq")

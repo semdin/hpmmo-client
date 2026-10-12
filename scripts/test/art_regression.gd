@@ -194,6 +194,26 @@ func _check_quality_preset() -> void:
 	check(int(settings["msaa"]) == 0, "Reduced preset disables MSAA")
 	check(float(settings["foliage_density"]) <= 0.6, "Reduced preset halves vegetation density")
 	check(float(settings["particle_scale"]) <= 0.6, "Reduced preset halves particle density")
+	# The three presets share one shape and only ever trade detail upward.
+	var keys: Array = QualityPreset.PRESETS["low"].keys()
+	var same_shape := true
+	for name in QualityPreset.NAMES:
+		same_shape = same_shape and QualityPreset.PRESETS[name].keys() == keys
+	check(same_shape, "Low, medium and high presets set the same options")
+	var monotonic := true
+	for key in ["render_scale", "shadow_max_distance", "view_distance", "foliage_density", "vegetation_lod_scale", "vegetation_far_scale", "particle_scale"]:
+		var lo := float(QualityPreset.PRESETS["low"][key])
+		var mid := float(QualityPreset.PRESETS["medium"][key])
+		var hi := float(QualityPreset.PRESETS["high"][key])
+		monotonic = monotonic and lo <= mid and mid <= hi
+	check(monotonic, "Each preset step adds detail (resolution, shadows, view distance, vegetation, particles)")
+	# Fog keeps the far plane hidden: at the view distance less than ~45 % of the
+	# scene shows through on every preset.
+	var hidden := true
+	for name in QualityPreset.NAMES:
+		var p: Dictionary = QualityPreset.PRESETS[name]
+		hidden = hidden and exp(-float(p["fog_density"]) * float(p["view_distance"])) < 0.45
+	check(hidden, "Fog density matches each preset's view distance")
 	if world != null:
 		var built_env: Environment = world.get_node("WorldEnvironment").environment
 		check(not built_env.glow_enabled and not built_env.ssao_enabled,

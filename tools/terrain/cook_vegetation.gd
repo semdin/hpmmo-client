@@ -38,10 +38,15 @@ static func cook(variant: String, spec: Dictionary) -> String:
 	root.name = variant
 	var lods: Array = src.find_children("*_LOD*", "MeshInstance3D", true, false)
 	lods.sort_custom(func(a, b): return String(a.name) < String(b.name))
+	var meshes: Array = lods.map(func(mi): return (mi as MeshInstance3D).mesh as ArrayMesh)
+	# Scans exported with a single detail level (or a too-heavy one) get their
+	# chain from the catalogue: `simplify` lists each LOD's triangle budget as a
+	# fraction of the source LOD0 (meshoptimizer, via ImporterMesh).
+	if spec.has("simplify"):
+		meshes = _simplified_chain(meshes[0], spec["simplify"])
 	var materials := {}
-	for i in lods.size():
-		var mi: MeshInstance3D = lods[i]
-		var mesh: ArrayMesh = (mi.mesh as ArrayMesh).duplicate()
+	for i in meshes.size():
+		var mesh: ArrayMesh = (meshes[i] as ArrayMesh).duplicate()
 		for s in mesh.get_surface_count():
 			var src_mat := mesh.surface_get_material(s) as BaseMaterial3D
 			var key := src_mat.resource_name if src_mat else "surface%d" % s
@@ -62,6 +67,63 @@ static func cook(variant: String, spec: Dictionary) -> String:
 	ResourceSaver.save(packed, scene_path)
 	root.free()
 	return scene_path
+
+
+## LODs from one source mesh: for each fraction, the generated detail level
+## whose index count is closest to that share of the source (1.0 = the source).
+## Vertices are compacted so a low LOD does not carry the full vertex buffer.
+static func _simplified_chain(source: ArrayMesh, fractions: Array) -> Array:
+	var im := ImporterMesh.new()
+	for s in source.get_surface_count():
+		im.add_surface(source.surface_get_primitive_type(s), source.surface_get_arrays(s), [], {},
+			source.surface_get_material(s), source.surface_get_name(s))
+	im.generate_lods(60.0, 25.0, [])
+	var out: Array = []
+	for f in fractions:
+		var mesh := ArrayMesh.new()
+		for s in im.get_surface_count():
+			var arrays: Array = im.get_surface_arrays(s)
+			var full: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			var best := full
+			if float(f) < 1.0:
+				var target := float(full.size()) * float(f)
+				for l in im.get_surface_lod_count(s):
+					var cand: PackedInt32Array = im.get_surface_lod_indices(s, l)
+					if absf(cand.size() - target) < absf(best.size() - target):
+						best = cand
+			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _compact(arrays, best))
+			mesh.surface_set_material(s, im.get_surface_material(s))
+			mesh.surface_set_name(s, im.get_surface_name(s))
+		out.append(mesh)
+	return out
+
+
+static func _compact(arrays: Array, indices: PackedInt32Array) -> Array:
+	var remap := {}
+	var order := PackedInt32Array()
+	var new_idx := PackedInt32Array()
+	new_idx.resize(indices.size())
+	for k in indices.size():
+		var v := indices[k]
+		if not remap.has(v):
+			remap[v] = order.size()
+			order.append(v)
+		new_idx[k] = remap[v]
+	var out := []
+	out.resize(Mesh.ARRAY_MAX)
+	for a in Mesh.ARRAY_MAX:
+		var src = arrays[a]
+		if src == null or a == Mesh.ARRAY_INDEX or a == Mesh.ARRAY_BONES or a == Mesh.ARRAY_WEIGHTS:
+			continue
+		var per := 4 if a == Mesh.ARRAY_TANGENT else 1
+		var dst = src.duplicate()
+		dst.resize(order.size() * per)
+		for k in order.size():
+			for c in per:
+				dst[k * per + c] = src[order[k] * per + c]
+		out[a] = dst
+	out[Mesh.ARRAY_INDEX] = new_idx
+	return out
 
 
 static func _cook_material(src: BaseMaterial3D, variant: String, key: String, leaf_tint: Color, wood_tint: Color) -> Material:

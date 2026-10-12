@@ -4,13 +4,13 @@
 [ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fir_a_lod1.res" id="2_rhomu"]
 [ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fir_a_lod2.res" id="3_rbanj"]
 
-[node name="fir_a" type="Node3D" unique_id=1478438024]
+[node name="fir_a" type="Node3D" unique_id=394162039]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1705735335]
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=2039793109]
 mesh = ExtResource("1_xmbsj")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=1311021962]
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=420274794]
 mesh = ExtResource("2_rhomu")
 
-[node name="LOD2" type="MeshInstance3D" parent="." unique_id=2145245282]
+[node name="LOD2" type="MeshInstance3D" parent="." unique_id=639700779]
 mesh = ExtResource("3_rbanj")

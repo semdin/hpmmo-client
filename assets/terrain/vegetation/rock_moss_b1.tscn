@@ -1,12 +1,16 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_b1_lod0.res" id="1_sqm8o"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_b1_lod1.res" id="2_e2v8t"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_b1_lod0.res" id="1_e2v8t"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_b1_lod1.res" id="2_kxq2x"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_b1_lod2.res" id="3_kk7y6"]
 
-[node name="rock_moss_b1" type="Node3D" unique_id=1209378054]
+[node name="rock_moss_b1" type="Node3D" unique_id=703803194]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=532788952]
-mesh = ExtResource("1_sqm8o")
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=89157434]
+mesh = ExtResource("1_e2v8t")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=711391576]
-mesh = ExtResource("2_e2v8t")
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=824480344]
+mesh = ExtResource("2_kxq2x")
+
+[node name="LOD2" type="MeshInstance3D" parent="." unique_id=1617671849]
+mesh = ExtResource("3_kk7y6")

@@ -1,12 +1,16 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_slab_lod0.res" id="1_ai7ie"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_slab_lod1.res" id="2_ft4aj"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_slab_lod0.res" id="1_ft4aj"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_slab_lod1.res" id="2_mli6l"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_slab_lod2.res" id="3_tq14h"]
 
-[node name="rock_slab" type="Node3D" unique_id=1407036518]
+[node name="rock_slab" type="Node3D" unique_id=2093710691]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1689644048]
-mesh = ExtResource("1_ai7ie")
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1756313187]
+mesh = ExtResource("1_ft4aj")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=1932618965]
-mesh = ExtResource("2_ft4aj")
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=743975496]
+mesh = ExtResource("2_mli6l")
+
+[node name="LOD2" type="MeshInstance3D" parent="." unique_id=1696391769]
+mesh = ExtResource("3_tq14h")

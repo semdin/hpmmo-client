@@ -493,6 +493,7 @@ func _check_settings() -> void:
 	settings.set_flash_intensity(1.4)
 	settings.set_binding("spell_1", KEY_7)
 	settings.set_volume("UI", 0.35)
+	settings.set_graphics_quality("medium")
 	check(FileAccess.file_exists(path), "The settings file is written on change")
 	check(get_window().content_scale_factor == 1.25 or DisplayServer.get_name() == "headless",
 		"The UI scale is applied to the canvas content scale (%.2f)" % get_window().content_scale_factor)
@@ -507,6 +508,9 @@ func _check_settings() -> void:
 	check(is_equal_approx(reloaded.shake_intensity, 0.0), "Shake intensity persists and reloads")
 	check(is_equal_approx(reloaded.flash_intensity, 1.4), "Flash intensity persists and reloads")
 	check(int(reloaded.binding_keycode("spell_1")) == KEY_7, "Key bindings persist and reload")
+	check(reloaded.graphics_quality == "medium", "The graphics quality choice persists and reloads")
+	reloaded.set_graphics_quality("bogus")
+	check(reloaded.graphics_quality == "auto", "An unknown graphics quality falls back to Auto")
 	check(is_equal_approx(reloaded.get_volume("UI"), 0.35),
 		"UI volume persists through the spell effects audio settings")
 	check(is_equal_approx(reloaded.get_volume("Music"), AudioManager.get_volume("Music")),
@@ -540,6 +544,7 @@ func _check_settings() -> void:
 	reloaded.set_shake_intensity(1.0)
 	reloaded.set_flash_intensity(1.0)
 	reloaded.set_volume("UI", 0.9)
+	reloaded.set_graphics_quality("auto")
 
 ## ------------------------------------------------------------ onboarding
 

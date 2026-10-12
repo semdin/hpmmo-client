@@ -167,22 +167,22 @@ name = "rock_boulder"
 id = 11
 scene_file = ExtResource("12_incts")
 density = 4.2257805
-last_lod = 1
+last_lod = 2
 last_shadow_lod = 1
-lod0_range = 45.0
-lod1_range = 160.0
-lod2_range = 600.0
+lod0_range = 40.0
+lod1_range = 120.0
+lod2_range = 350.0
 fade_margin = 4.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_8jobc"]
 name = "rock_slab"
 id = 12
 scene_file = ExtResource("13_0xxod")
-last_lod = 1
+last_lod = 2
 last_shadow_lod = 1
-lod0_range = 45.0
-lod1_range = 160.0
-lod2_range = 600.0
+lod0_range = 40.0
+lod1_range = 120.0
+lod2_range = 350.0
 fade_margin = 4.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_qunkv"]
@@ -190,11 +190,11 @@ name = "rock_moss_a0"
 id = 13
 scene_file = ExtResource("14_v23tr")
 density = 0.8908866
-last_lod = 1
+last_lod = 2
 last_shadow_lod = 1
-lod0_range = 45.0
-lod1_range = 160.0
-lod2_range = 600.0
+lod0_range = 40.0
+lod1_range = 120.0
+lod2_range = 350.0
 fade_margin = 4.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_agrj7"]
@@ -202,11 +202,11 @@ name = "rock_moss_a1"
 id = 14
 scene_file = ExtResource("15_txxs4")
 density = 1.3379825
-last_lod = 1
+last_lod = 2
 last_shadow_lod = 1
-lod0_range = 45.0
-lod1_range = 160.0
-lod2_range = 600.0
+lod0_range = 40.0
+lod1_range = 120.0
+lod2_range = 350.0
 fade_margin = 4.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_mbrny"]
@@ -214,11 +214,11 @@ name = "rock_moss_a2"
 id = 15
 scene_file = ExtResource("16_i0d3j")
 density = 1.5157259
-last_lod = 1
+last_lod = 2
 last_shadow_lod = 1
-lod0_range = 45.0
-lod1_range = 160.0
-lod2_range = 600.0
+lod0_range = 40.0
+lod1_range = 120.0
+lod2_range = 350.0
 fade_margin = 4.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_yak2r"]
@@ -226,11 +226,11 @@ name = "rock_moss_b0"
 id = 16
 scene_file = ExtResource("17_rruik")
 density = 3.8066475
-last_lod = 1
+last_lod = 2
 last_shadow_lod = 1
-lod0_range = 45.0
-lod1_range = 160.0
-lod2_range = 600.0
+lod0_range = 40.0
+lod1_range = 120.0
+lod2_range = 350.0
 fade_margin = 4.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_httaj"]
@@ -238,11 +238,11 @@ name = "rock_moss_b1"
 id = 17
 scene_file = ExtResource("18_awi3b")
 density = 2.5645232
-last_lod = 1
+last_lod = 2
 last_shadow_lod = 1
-lod0_range = 45.0
-lod1_range = 160.0
-lod2_range = 600.0
+lod0_range = 40.0
+lod1_range = 120.0
+lod2_range = 350.0
 fade_margin = 4.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_5ydx0"]
@@ -250,11 +250,11 @@ name = "rock_moss_b2"
 id = 18
 scene_file = ExtResource("19_gl0ec")
 density = 3.330901
-last_lod = 1
+last_lod = 2
 last_shadow_lod = 1
-lod0_range = 45.0
-lod1_range = 160.0
-lod2_range = 600.0
+lod0_range = 40.0
+lod1_range = 120.0
+lod2_range = 350.0
 fade_margin = 4.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_wvton"]
@@ -262,11 +262,11 @@ name = "stump"
 id = 19
 scene_file = ExtResource("20_xbhux")
 density = 7.7319503
-last_lod = 1
+last_lod = 2
 last_shadow_lod = 1
-lod0_range = 30.0
-lod1_range = 80.0
-lod2_range = 160.0
+lod0_range = 25.0
+lod1_range = 70.0
+lod2_range = 140.0
 fade_margin = 4.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_w8dxt"]
@@ -274,11 +274,11 @@ name = "log"
 id = 20
 scene_file = ExtResource("21_yndf0")
 density = 2.2324507
-last_lod = 1
+last_lod = 2
 last_shadow_lod = 1
-lod0_range = 30.0
-lod1_range = 80.0
-lod2_range = 160.0
+lod0_range = 25.0
+lod1_range = 70.0
+lod2_range = 140.0
 fade_margin = 4.0
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_xdrpm"]
