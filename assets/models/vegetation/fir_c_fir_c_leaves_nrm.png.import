@@ -2,14 +2,11 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://brd68csc742h"
+uid="uid://3qnlrp5ua1s8"
 path.s3tc="res://.godot/imported/fir_c_fir_c_leaves_nrm.png-f7e73b89994971362c6248249a6c5cf1.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
-}
-generator_parameters={
-"md5": "e59687193e37c1e7e284f689930386bc"
 }
 
 [deps]

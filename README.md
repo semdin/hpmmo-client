@@ -63,7 +63,7 @@ A 3D Wizarding MMO Action RPG inspired by Metin2 mechanics, built with real-time
 | **Right Mouse (Hold & Drag)** | Orbit Camera / Free Aim |
 | **Wheel** | Camera Zoom |
 | **Left Click / 1-4** | Aimed Skillshot Spell / 3-Hit Wand Combo |
-| **Left / Right Arrow (Select Screen)** | Rotate Character Podium (Slot 1 / Slot 2) |
+| **Left / Right Arrow (Select Screen)** | Switch character slot; drag on the dais to turn the wizard |
 | **Tab** | Cycle Target |
 | **1 (Stupefy)** | Red energy bolt + 1.8s Stun Shockwave |
 | **2 (Incendio)** | Flame cone plume (200% damage vs Inferi) |
@@ -76,7 +76,11 @@ A 3D Wizarding MMO Action RPG inspired by Metin2 mechanics, built with real-time
 | **Z** | Pick up ground loot |
 | **F** | Interact with nearby NPC |
 | **I / O** | Bag Inventory / Ollivander Wand Refine (+0 to +9) |
-| **Enter** | World / System Chat |
+| **F1 - F4** | Quick slots: potions (drag one from the bag onto a slot; right-click clears) |
+| **Enter** | Chat - nearby players hear you (speech bubble); start with `!` to shout to the whole server |
+| **M** | World map |
+| **J** | Training guide |
+| **Esc** | Close the top-most window; with nothing open, the game menu (Settings, Change Character, Quit) |
 
 ---
 

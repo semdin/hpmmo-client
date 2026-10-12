@@ -218,7 +218,9 @@ func _check_tween_safety() -> void:
 		"Mana takes the newest value over an in-flight tween (%.0f)" % hud.mana_bar.value)
 	check(hud.exp_bar.value == 490.0, "EXP takes the newest value over an in-flight tween")
 	await get_tree().create_timer(0.8).timeout
-	check(absf(hud.mana_bar.value - hud._mana_stat.lag.value) <= 1.0
+	# Mana regenerates on the authority while this waits, so the bar keeps
+	# moving by a point or two a tick; the lag layer trails that by one step.
+	check(absf(hud.mana_bar.value - hud._mana_stat.lag.value) <= 3.0
 		and absf(hud.exp_bar.value - hud._exp_stat.lag.value) <= 1.0,
 		"Mana and EXP lag layers settle on the newest value")
 
@@ -552,7 +554,13 @@ func _check_onboarding() -> void:
 	var onboarding: OnboardingUI = hud.onboarding
 	onboarding.reset()
 	check(not onboarding.is_complete() and onboarding.current_index == 0, "The onboarding route starts fresh")
-	check(onboarding._panel.visible, "The onboarding panel is shown at the start of the route")
+	# The collapsed guide lives in the objective tracker under the minimap; the
+	# full guide opens as a window (J or a click on the tracker row).
+	var tracker = world.overlay.get("tracker")
+	if tracker != null:
+		tracker.refresh()
+	check(onboarding._panel.visible or (tracker != null and tracker._guide_row.visible),
+		"The guide is shown at the start of the route (tracker row or panel)")
 
 	# 1. Dummy practice - an authoritative hit on a DUMMY entity.
 	var dummy_uid := _first_entity_of_kind(HPProtocol.Kind.DUMMY)

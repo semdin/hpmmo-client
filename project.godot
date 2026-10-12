@@ -42,7 +42,7 @@ enabled=PackedStringArray("res://addons/terrain_3d/plugin.cfg")
 
 [gui]
 
-theme/custom_font="res://assets/fonts/AlegreyaSans-Regular.ttf"
+theme/custom_font="res://assets/fonts/Philosopher-Regular.ttf"
 theme/custom_font_size=15
 theme/custom_theme="res://assets/ui/hpmmo.tres"
 

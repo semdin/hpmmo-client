@@ -15,9 +15,9 @@
 
 [gd_resource type="Theme" load_steps=36 format=3]
 
-[ext_resource type="FontFile" path="res://assets/fonts/AlegreyaSans-Regular.ttf" id="1_body"]
-[ext_resource type="FontFile" path="res://assets/fonts/AlegreyaSans-Medium.ttf" id="2_body_medium"]
-[ext_resource type="FontFile" path="res://assets/fonts/AlegreyaSans-Bold.ttf" id="3_body_bold"]
+[ext_resource type="FontFile" path="res://assets/fonts/Philosopher-Regular.ttf" id="1_body"]
+[ext_resource type="FontFile" path="res://assets/fonts/Philosopher-Bold.ttf" id="2_body_medium"]
+[ext_resource type="FontFile" path="res://assets/fonts/Philosopher-Bold.ttf" id="3_body_bold"]
 [ext_resource type="FontFile" path="res://assets/fonts/Cinzel-Variable.ttf" id="4_title"]
 
 [sub_resource type="FontVariation" id="fv_title"]

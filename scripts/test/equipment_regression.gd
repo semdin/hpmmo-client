@@ -276,8 +276,10 @@ func _test_gestures() -> void:
 	ui.hide()
 	check(ui._preview.view.render_target_update_mode == SubViewport.UPDATE_DISABLED,"closed inventory suspends preview rendering")
 	var presses := [0]
-	world.hud.slot_1.pressed.connect(func(): presses[0] += 1)
-	_mouse_click(world.hud.slot_1, false)
+	# The action bar's first spell cell (the scene's old Slot1 is kept hidden).
+	var spell_cell: Button = world.hud.action_bar.spell_slots[0]
+	spell_cell.pressed.connect(func(): presses[0] += 1)
+	_mouse_click(spell_cell, false)
 	check(presses[0] == 1, "one hotbar click emits one pressed signal")
 
 func _mouse_click(control: Control, double_click: bool) -> void:
