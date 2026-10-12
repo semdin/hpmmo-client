@@ -56,3 +56,22 @@ a third party is used. Full provenance: `assets/audio/CREDITS-spell-audio.md`.
 
 Existing KayKit character/environment files are retained. This document records the provenance of newly added assets; it does not change the terms of existing assets.
 - `models/characters/hero_wizard.glb` animations: ground, combat and spell clips retargeted from **Quaternius Universal Animation Library 1**, CC0 1.0, https://quaternius.itch.io/universal-animation-library (source GLB and license in `candidates/character/quaternius-universal-animation-library`). Broom, stun and two-handed cast clips are project-authored.
+
+# Grounds terrain (2026-10-12)
+
+The outdoor map's terrain runs on **Terrain3D** 1.0.2 by Cory Petkovsek and
+Roope Palmroos (MIT; `addons/terrain_3d/LICENSE.txt`). Heights and painting are
+project-original, generated from `art/map/layout.json` by the scripts in
+`art/map/scripts/`.
+
+Ground textures in `assets/terrain/textures/` (repacked to Terrain3D's
+albedo+height / normal+roughness layout at 1024 px by
+`art/map/scripts/pack_terrain_textures.py`), all CC0 1.0:
+
+| Slot | Source |
+| --- | --- |
+| grass_meadow | ambientCG *Ground037* (as shipped in the Terrain3D demo) |
+| cliff_rock | ambientCG *Rock023* (as shipped in the Terrain3D demo) |
+| forest_floor, sand_shore (also the tinted dirt_path), grass_lush | CC0 Textures leaves / sand / grass sets, as shipped in Zylann's *godot_hterrain* demo |
+| gravel | CC0 Textures *Rocks07* (now ambientCG), via the same demo |
+| cobblestone | Poly Haven *stone_tiles_02* (already in `assets/textures/pbr/`) |

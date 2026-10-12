@@ -1,0 +1,138 @@
+[gd_resource type="Terrain3DAssets" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_meadow_alb_ht.png" id="1_gth22"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_meadow_nrm_rgh.png" id="2_l08sk"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/cliff_rock_alb_ht.png" id="3_2usll"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/cliff_rock_nrm_rgh.png" id="4_ww6w2"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/forest_floor_alb_ht.png" id="5_fj4ln"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/forest_floor_nrm_rgh.png" id="6_imjm0"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/sand_shore_alb_ht.png" id="7_e7lup"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/sand_shore_nrm_rgh.png" id="8_cfcww"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/gravel_alb_ht.png" id="9_788r0"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/gravel_nrm_rgh.png" id="10_wtubu"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/cobblestone_alb_ht.png" id="11_rj5a8"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/cobblestone_nrm_rgh.png" id="12_m7a7g"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_lush_alb_ht.png" id="13_ellch"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_lush_nrm_rgh.png" id="14_njdv4"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5i13t"]
+transparency = 4
+cull_mode = 2
+vertex_color_use_as_albedo = true
+backlight_enabled = true
+backlight = Color(0.5, 0.5, 0.5, 1)
+distance_fade_mode = 1
+distance_fade_min_distance = 128.0
+distance_fade_max_distance = 96.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_etyew"]
+generated_type = 1
+height_offset = 0.5
+material_override = SubResource("StandardMaterial3D_5i13t")
+last_lod = 0
+last_shadow_lod = 0
+lod0_range = 128.0
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_jsjvw"]
+name = "grass_meadow"
+albedo_color = Color(0.52, 0.6, 0.48, 1)
+albedo_texture = ExtResource("1_gth22")
+normal_texture = ExtResource("2_l08sk")
+normal_depth = 1.0
+ao_strength = 1.5
+uv_scale = 0.16
+detiling_rotation = 0.2
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_kxvah"]
+name = "cliff_rock"
+id = 1
+albedo_color = Color(0.6, 0.58, 0.56, 1)
+albedo_texture = ExtResource("3_2usll")
+normal_texture = ExtResource("4_ww6w2")
+normal_depth = 1.2
+ao_strength = 1.5
+uv_scale = 0.06
+detiling_rotation = 0.12
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_2bbw7"]
+name = "forest_floor"
+id = 2
+albedo_color = Color(0.52, 0.46, 0.36, 1)
+albedo_texture = ExtResource("5_fj4ln")
+normal_texture = ExtResource("6_imjm0")
+normal_depth = 1.0
+ao_strength = 1.5
+roughness = 0.05
+uv_scale = 0.22
+detiling_rotation = 0.3
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_c3wax"]
+name = "sand_shore"
+id = 3
+albedo_color = Color(0.92, 0.88, 0.8, 1)
+albedo_texture = ExtResource("7_e7lup")
+normal_texture = ExtResource("8_cfcww")
+normal_depth = 0.8
+ao_strength = 1.5
+uv_scale = 0.2
+detiling_rotation = 0.25
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_yn1lh"]
+name = "gravel"
+id = 4
+albedo_color = Color(0.8, 0.78, 0.76, 1)
+albedo_texture = ExtResource("9_788r0")
+normal_texture = ExtResource("10_wtubu")
+normal_depth = 1.0
+ao_strength = 1.5
+uv_scale = 0.3
+detiling_rotation = 0.25
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_a68ch"]
+name = "dirt_path"
+id = 5
+albedo_color = Color(0.7, 0.58, 0.45, 1)
+albedo_texture = ExtResource("7_e7lup")
+normal_texture = ExtResource("8_cfcww")
+normal_depth = 1.0
+ao_strength = 1.5
+roughness = 0.05
+uv_scale = 0.24
+detiling_rotation = 0.25
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_dg6ea"]
+name = "cobblestone"
+id = 6
+albedo_color = Color(0.82, 0.8, 0.78, 1)
+albedo_texture = ExtResource("11_rj5a8")
+normal_texture = ExtResource("12_m7a7g")
+normal_depth = 1.2
+ao_strength = 1.5
+uv_scale = 0.35
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_y3x72"]
+name = "grass_lush"
+id = 7
+albedo_color = Color(0.48, 0.56, 0.42, 1)
+albedo_texture = ExtResource("13_ellch")
+normal_texture = ExtResource("14_njdv4")
+normal_depth = 1.0
+ao_strength = 1.5
+uv_scale = 0.18
+detiling_rotation = 0.2
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_u7u1a"]
+name = "moor_grass"
+id = 8
+albedo_color = Color(0.56, 0.54, 0.42, 1)
+albedo_texture = ExtResource("1_gth22")
+normal_texture = ExtResource("2_l08sk")
+normal_depth = 1.0
+ao_strength = 1.5
+roughness = 0.05
+uv_scale = 0.14
+detiling_rotation = 0.2
+
+[resource]
+mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_etyew")])
+texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_jsjvw"), SubResource("Terrain3DTextureAsset_kxvah"), SubResource("Terrain3DTextureAsset_2bbw7"), SubResource("Terrain3DTextureAsset_c3wax"), SubResource("Terrain3DTextureAsset_yn1lh"), SubResource("Terrain3DTextureAsset_a68ch"), SubResource("Terrain3DTextureAsset_dg6ea"), SubResource("Terrain3DTextureAsset_y3x72"), SubResource("Terrain3DTextureAsset_u7u1a")])
