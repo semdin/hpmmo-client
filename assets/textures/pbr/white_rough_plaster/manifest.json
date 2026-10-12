@@ -1,0 +1,36 @@
+{
+ "id": "white-rough-plaster",
+ "name": "White Rough Plaster",
+ "source_page": "https://polyhaven.com/a/white_rough_plaster",
+ "author": "Poly Haven",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "license.txt",
+   "bytes": 814,
+   "sha256": "ea8bb1198174f3ee38137b8c79de2a12f902c54e539f97056099f600eb84b69c"
+  },
+  {
+   "file": "white_rough_plaster_ao_2k.jpg",
+   "bytes": 1545973,
+   "sha256": "d0f0a25d4b840bdbb84e97237577536b640e17310ae8d61bb6dd6ede4ca9c9a2"
+  },
+  {
+   "file": "white_rough_plaster_diff_2k.jpg",
+   "bytes": 2828405,
+   "sha256": "4fb1f54ac26b28b23c8f8efa708d3062684fe6122e3f001b18bcd268027fcb17"
+  },
+  {
+   "file": "white_rough_plaster_nor_gl_2k.jpg",
+   "bytes": 2551147,
+   "sha256": "75668cb16a244c3647e78fd3dd4601616a15bf59e90bb090655b19a8095da71c"
+  },
+  {
+   "file": "white_rough_plaster_rough_2k.jpg",
+   "bytes": 1055407,
+   "sha256": "eb3983e5c8688efe58f311446e681fd27624fdd1bc5d0e60b617b408d6488125"
+  }
+ ]
+}

@@ -86,18 +86,18 @@ var gravity: float = 24.0
 ## frame; the animation state reads it to play a paddle instead of a fall.
 var is_swimming: bool = false
 var _was_swimming: bool = false
-## Black Lake swim datum (mirrors OutdoorTerrain.LAKE_*; duplicated here so the
-## entity script never preloads the world builder).
-const LAKE_CENTER_X := -220.0
-const LAKE_CENTER_Z := 185.0
-const LAKE_HALF_X := 85.0
-const LAKE_HALF_Z := 75.0
-const WATER_SURFACE_Y := -7.0
-## Where the swim buoyancy holds the body: the water collider's top, a third of
-## a metre under the visual waterline, so a swimmer is in the water rather than
-## standing on it.
-const SWIM_FLOAT_Y := -7.35
-const KILL_PLANE_Y := -16.0
+## Black Lake swimming: the water line is the grounds' datum (y = 0) and a body is
+## in the water wherever GroundsLake says the bed is deep enough under it.
+const WATER_SURFACE_Y := 0.0
+## Where the swim buoyancy holds the body: a third of a metre under the
+## waterline, so a swimmer is in the water rather than standing on it.
+const SWIM_FLOAT_Y := -0.35
+## Below the lake bed (-16 m) with margin; matches the grounds band in maps.json.
+const KILL_PLANE_Y := -30.0
+## Broom ceiling: at most this high above the ground under the rider, and never
+## above the absolute cap (the castle interior map is authored from y = 185 up).
+const FLIGHT_MAX_ABOVE_GROUND := 120.0
+const FLIGHT_CEILING_Y := 175.0
 ## How tall a ledge the body can walk up. `move_and_slide` treats anything
 ## above the floor snap as a wall, so without this a 0.2 m stair tread stops the
 ## body dead: every authored flight (world and castle) relied on a separate ramp
@@ -508,12 +508,21 @@ func _spawn_water_splash() -> void:
 	tw.tween_property(ring_mat, "albedo_color:a", 0.0, 1.0)
 	tw.chain().tween_callback(fx.queue_free)
 
+## Highest a rider may climb here: terrain-relative over the grounds, capped
+## below the castle interior band.
+func _flight_ceiling() -> float:
+	var ground := GroundsTerrain.height_at(global_position.x, global_position.z)
+	if is_nan(ground):
+		return FLIGHT_CEILING_Y
+	return minf(ground + FLIGHT_MAX_ABOVE_GROUND, FLIGHT_CEILING_Y)
+
+
 func _physics_process(delta: float) -> void:
-	# World Boundaries & Safeguards: fall kill-plane matches grounds y_min (-16).
-	# The lakebed (-13.5) and the swim volume (-7) both sit above it, so swimming
-	# never triggers a rescue; only a genuine void fall does.
+	# World Boundaries & Safeguards: the fall kill-plane sits below the grounds
+	# band (the lake bed is -16 m, the water line 0), so swimming never triggers a
+	# rescue; only a genuine void fall does.
 	if is_local_player and SimAuthority.is_authority() and global_position.y < KILL_PLANE_Y:
-		global_position = Vector3(0, 1.0, 5.0) # Courtyard Fountain
+		global_position = HPRules.respawn_position()
 		velocity = Vector3.ZERO
 		current_hp = max_hp
 		_spawn_floating_text("Kadim Koruma Kalkanı Seni Kurtardı!", Color(0.3, 0.8, 1.0), 1.6)
@@ -522,10 +531,9 @@ func _physics_process(delta: float) -> void:
 	# Black Lake swim state: inside the lake rect and at/below water level.
 	# The water surface now has collision, so the body stands on it instead of
 	# falling through; buoyancy + drag here make it feel like water, not stone.
-	var in_lake_rect := absf(global_position.x - LAKE_CENTER_X) <= LAKE_HALF_X \
-		and absf(global_position.z - LAKE_CENTER_Z) <= LAKE_HALF_Z
-	is_swimming = in_lake_rect and not is_mounted and global_position.y < SWIM_FLOAT_Y + 0.7 \
-		and global_position.y > WATER_SURFACE_Y - 3.0
+	is_swimming = not is_mounted and global_position.y < SWIM_FLOAT_Y + 0.7 \
+		and global_position.y > WATER_SURFACE_Y - 3.0 \
+		and GroundsLake.is_water_at(global_position.x, global_position.z)
 	if is_swimming != _was_swimming:
 		_was_swimming = is_swimming
 		_spawn_water_splash()
@@ -582,7 +590,7 @@ func _physics_process(delta: float) -> void:
 		var ground := _ground_below(3.0)
 		if not ground.is_empty() and global_position.y - ground.position.y < 1.4 and vertical >= 0:
 			vertical = 0.5
-		if global_position.y > 45.0:
+		if global_position.y > _flight_ceiling():
 			vertical = minf(vertical, -0.5)
 		velocity.y = move_toward(velocity.y, vertical * 7.0, delta * 18.0)
 	elif not input_blocked() and _intent_jump_edge() and not is_swimming:

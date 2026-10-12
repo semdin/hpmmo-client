@@ -1,0 +1,17 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/rock_slab_namaqualand_boulder_05_diff_1k.jpg" id="1_pnqo1"]
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/rock_slab_namaqualand_boulder_05_arm_1k.jpg" id="2_3dce4"]
+[ext_resource type="Texture2D" path="res://assets/models/vegetation/rock_slab_namaqualand_boulder_05_nor_gl_1k.jpg" id="3_e282x"]
+
+[resource]
+resource_name = "namaqualand_boulder_05"
+albedo_texture = ExtResource("1_pnqo1")
+metallic_texture = ExtResource("2_3dce4")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_3dce4")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_texture = ExtResource("3_e282x")
+texture_filter = 5
+metadata/_gltf_primary_texture_coord = 0

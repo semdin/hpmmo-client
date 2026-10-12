@@ -14,7 +14,7 @@ const EXPECTED_HEIGHTS := {
 	"hogsmeade": [Vector3(680, 0, -140), 38.0],
 	"hagrid": [Vector3(-280, 0, -20), 22.0],
 	"quidditch": [Vector3(330, 0, -330), 32.0],
-	"highlands": [Vector3(280, 0, -760), 116.0],
+	"highlands": [Vector3(280, 0, -760), 121.0],
 	"station": [Vector3(610, 0, 260), 3.0],
 }
 const HEIGHT_TOLERANCE := 2.0

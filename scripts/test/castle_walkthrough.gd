@@ -51,7 +51,9 @@ func _ready() -> void:
 	check(controller.current_map == "grounds", "The world starts on the outdoor map")
 
 	var door: Dictionary = controller._portal_entries("grounds")[0]
-	player.global_position = Vector3(0, 0.6, -47.0)
+	# Stand on the threshold in front of the great doors (the portal's own centre).
+	var doorway: Vector3 = door["center"]
+	player.global_position = doorway + Vector3(0, -0.5, 0.5)
 	await get_tree().create_timer(0.4).timeout
 	check(not controller._active_portal.is_empty(), "Standing in the castle doorway raises the portal prompt")
 	check(controller._prompt_label.text.begins_with("Press"), "The doorway shows an interaction prompt")
@@ -158,7 +160,7 @@ func _ready() -> void:
 			"Round trip %d: the interior is unloaded on return" % (i + 1))
 		check(world.has_node("HogwartsCastle"), "Round trip %d: the grounds are rebuilt" % (i + 1))
 		counts.append(_counts("grounds #%d" % (i + 2)))
-		controller._place_player(Vector3(0, 0.6, -46.0))
+		controller._place_player(doorway + Vector3(0, -0.5, 0.5))
 		await get_tree().create_timer(0.4).timeout
 		_press_interact()
 		await _await_map(controller, "castle_interior")

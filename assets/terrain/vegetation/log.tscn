@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/log_lod0.res" id="1_hw8x1"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/log_lod1.res" id="2_fmsrc"]
+
+[node name="log" type="Node3D" unique_id=778610586]
+
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=291024827]
+mesh = ExtResource("1_hw8x1")
+
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=919975002]
+mesh = ExtResource("2_fmsrc")

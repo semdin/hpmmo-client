@@ -1,132 +1,380 @@
 [gd_resource type="Terrain3DAssets" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_meadow_alb_ht.png" id="1_gth22"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_meadow_nrm_rgh.png" id="2_l08sk"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/cliff_rock_alb_ht.png" id="3_2usll"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/cliff_rock_nrm_rgh.png" id="4_ww6w2"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/forest_floor_alb_ht.png" id="5_fj4ln"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/forest_floor_nrm_rgh.png" id="6_imjm0"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/sand_shore_alb_ht.png" id="7_e7lup"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/sand_shore_nrm_rgh.png" id="8_cfcww"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/gravel_alb_ht.png" id="9_788r0"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/gravel_nrm_rgh.png" id="10_wtubu"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/cobblestone_alb_ht.png" id="11_rj5a8"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/cobblestone_nrm_rgh.png" id="12_m7a7g"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_lush_alb_ht.png" id="13_ellch"]
-[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_lush_nrm_rgh.png" id="14_njdv4"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/fir_a.tscn" id="1_a68ch"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/fir_b.tscn" id="2_dg6ea"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/fir_c.tscn" id="3_y3x72"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/pine_a.tscn" id="4_u7u1a"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/pine_b.tscn" id="5_ofqoa"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/pine_c.tscn" id="6_uffp2"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/broadleaf_a.tscn" id="7_rg4m0"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/broadleaf_b.tscn" id="8_6s4is"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/fern_a.tscn" id="9_idhv4"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/fern_b.tscn" id="10_b3p51"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/shrub.tscn" id="11_7l2ic"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/rock_boulder.tscn" id="12_incts"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/rock_slab.tscn" id="13_0xxod"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/rock_moss_a0.tscn" id="14_v23tr"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/rock_moss_a1.tscn" id="15_txxs4"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/rock_moss_a2.tscn" id="16_i0d3j"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/rock_moss_b0.tscn" id="17_rruik"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/rock_moss_b1.tscn" id="18_awi3b"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/rock_moss_b2.tscn" id="19_gl0ec"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/stump.tscn" id="20_xbhux"]
+[ext_resource type="PackedScene" path="res://assets/terrain/vegetation/log.tscn" id="21_yndf0"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_meadow_alb_ht.png" id="22_dnxwt"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_meadow_nrm_rgh.png" id="23_6boq2"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/cliff_rock_alb_ht.png" id="24_kvuff"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/cliff_rock_nrm_rgh.png" id="25_i1cyr"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/forest_floor_alb_ht.png" id="26_6tgn4"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/forest_floor_nrm_rgh.png" id="27_t4wto"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/sand_shore_alb_ht.png" id="28_o0kpu"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/sand_shore_nrm_rgh.png" id="29_h3jgn"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/gravel_alb_ht.png" id="30_xx7o4"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/gravel_nrm_rgh.png" id="31_vy3ql"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/cobblestone_alb_ht.png" id="32_tk75d"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/cobblestone_nrm_rgh.png" id="33_fno0s"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_lush_alb_ht.png" id="34_hq3ux"]
+[ext_resource type="Texture2D" path="res://assets/terrain/textures/grass_lush_nrm_rgh.png" id="35_1h5sa"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5i13t"]
-transparency = 4
-cull_mode = 2
-vertex_color_use_as_albedo = true
-backlight_enabled = true
-backlight = Color(0.5, 0.5, 0.5, 1)
-distance_fade_mode = 1
-distance_fade_min_distance = 128.0
-distance_fade_max_distance = 96.0
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_pyve2"]
+name = "fir_a"
+scene_file = ExtResource("1_a68ch")
+density = 0.010913828
+last_lod = 2
+last_shadow_lod = 1
+lod0_range = 36.0
+lod1_range = 130.0
+lod2_range = 1100.0
+fade_margin = 4.0
 
-[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_etyew"]
-generated_type = 1
-height_offset = 0.5
-material_override = SubResource("StandardMaterial3D_5i13t")
-last_lod = 0
-last_shadow_lod = 0
-lod0_range = 128.0
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_uw1r4"]
+name = "fir_b"
+id = 1
+scene_file = ExtResource("2_dg6ea")
+density = 0.01936717
+last_lod = 2
+last_shadow_lod = 1
+lod0_range = 36.0
+lod1_range = 130.0
+lod2_range = 1100.0
+fade_margin = 4.0
 
-[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_jsjvw"]
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_3ohop"]
+name = "fir_c"
+id = 2
+scene_file = ExtResource("3_y3x72")
+density = 0.01692565
+last_lod = 2
+last_shadow_lod = 1
+lod0_range = 36.0
+lod1_range = 130.0
+lod2_range = 1100.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_vpleh"]
+name = "pine_a"
+id = 3
+scene_file = ExtResource("4_u7u1a")
+density = 0.01
+last_lod = 2
+last_shadow_lod = 1
+lod0_range = 36.0
+lod1_range = 130.0
+lod2_range = 1100.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_ty723"]
+name = "pine_b"
+id = 4
+scene_file = ExtResource("5_ofqoa")
+density = 0.010671841
+last_lod = 2
+last_shadow_lod = 1
+lod0_range = 36.0
+lod1_range = 130.0
+lod2_range = 1100.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_gvaex"]
+name = "pine_c"
+id = 5
+scene_file = ExtResource("6_uffp2")
+density = 0.01
+last_lod = 2
+last_shadow_lod = 1
+lod0_range = 36.0
+lod1_range = 130.0
+lod2_range = 1100.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_cmcek"]
+name = "broadleaf_a"
+id = 6
+scene_file = ExtResource("7_rg4m0")
+density = 0.14551157
+last_lod = 2
+last_shadow_lod = 1
+lod1_range = 110.0
+lod2_range = 800.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_4axdg"]
+name = "broadleaf_b"
+id = 7
+scene_file = ExtResource("8_6s4is")
+density = 0.07634151
+last_lod = 2
+last_shadow_lod = 1
+lod1_range = 110.0
+lod2_range = 800.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_o8xam"]
+name = "fern_a"
+id = 8
+scene_file = ExtResource("9_idhv4")
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 18.0
+lod1_range = 45.0
+lod2_range = 70.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_12brf"]
+name = "fern_b"
+id = 9
+scene_file = ExtResource("10_b3p51")
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 18.0
+lod1_range = 45.0
+lod2_range = 70.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_mm22q"]
+name = "shrub"
+id = 10
+scene_file = ExtResource("11_7l2ic")
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 20.0
+lod1_range = 50.0
+lod2_range = 80.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_af4ib"]
+name = "rock_boulder"
+id = 11
+scene_file = ExtResource("12_incts")
+density = 4.2257805
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 45.0
+lod1_range = 160.0
+lod2_range = 600.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_8jobc"]
+name = "rock_slab"
+id = 12
+scene_file = ExtResource("13_0xxod")
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 45.0
+lod1_range = 160.0
+lod2_range = 600.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_qunkv"]
+name = "rock_moss_a0"
+id = 13
+scene_file = ExtResource("14_v23tr")
+density = 0.8908866
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 45.0
+lod1_range = 160.0
+lod2_range = 600.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_agrj7"]
+name = "rock_moss_a1"
+id = 14
+scene_file = ExtResource("15_txxs4")
+density = 1.3379825
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 45.0
+lod1_range = 160.0
+lod2_range = 600.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_mbrny"]
+name = "rock_moss_a2"
+id = 15
+scene_file = ExtResource("16_i0d3j")
+density = 1.5157259
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 45.0
+lod1_range = 160.0
+lod2_range = 600.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_yak2r"]
+name = "rock_moss_b0"
+id = 16
+scene_file = ExtResource("17_rruik")
+density = 3.8066475
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 45.0
+lod1_range = 160.0
+lod2_range = 600.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_httaj"]
+name = "rock_moss_b1"
+id = 17
+scene_file = ExtResource("18_awi3b")
+density = 2.5645232
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 45.0
+lod1_range = 160.0
+lod2_range = 600.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_5ydx0"]
+name = "rock_moss_b2"
+id = 18
+scene_file = ExtResource("19_gl0ec")
+density = 3.330901
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 45.0
+lod1_range = 160.0
+lod2_range = 600.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_wvton"]
+name = "stump"
+id = 19
+scene_file = ExtResource("20_xbhux")
+density = 7.7319503
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 30.0
+lod1_range = 80.0
+lod2_range = 160.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_w8dxt"]
+name = "log"
+id = 20
+scene_file = ExtResource("21_yndf0")
+density = 2.2324507
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 30.0
+lod1_range = 80.0
+lod2_range = 160.0
+fade_margin = 4.0
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_xdrpm"]
 name = "grass_meadow"
 albedo_color = Color(0.52, 0.6, 0.48, 1)
-albedo_texture = ExtResource("1_gth22")
-normal_texture = ExtResource("2_l08sk")
+albedo_texture = ExtResource("22_dnxwt")
+normal_texture = ExtResource("23_6boq2")
 normal_depth = 1.0
 ao_strength = 1.5
 uv_scale = 0.16
 detiling_rotation = 0.2
 
-[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_kxvah"]
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_431o4"]
 name = "cliff_rock"
 id = 1
 albedo_color = Color(0.6, 0.58, 0.56, 1)
-albedo_texture = ExtResource("3_2usll")
-normal_texture = ExtResource("4_ww6w2")
+albedo_texture = ExtResource("24_kvuff")
+normal_texture = ExtResource("25_i1cyr")
 normal_depth = 1.2
 ao_strength = 1.5
 uv_scale = 0.06
 detiling_rotation = 0.12
 
-[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_2bbw7"]
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_r1gny"]
 name = "forest_floor"
 id = 2
-albedo_color = Color(0.52, 0.46, 0.36, 1)
-albedo_texture = ExtResource("5_fj4ln")
-normal_texture = ExtResource("6_imjm0")
+albedo_color = Color(0.43, 0.39, 0.31, 1)
+albedo_texture = ExtResource("26_6tgn4")
+normal_texture = ExtResource("27_t4wto")
 normal_depth = 1.0
 ao_strength = 1.5
 roughness = 0.05
 uv_scale = 0.22
 detiling_rotation = 0.3
 
-[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_c3wax"]
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_grw8e"]
 name = "sand_shore"
 id = 3
 albedo_color = Color(0.92, 0.88, 0.8, 1)
-albedo_texture = ExtResource("7_e7lup")
-normal_texture = ExtResource("8_cfcww")
+albedo_texture = ExtResource("28_o0kpu")
+normal_texture = ExtResource("29_h3jgn")
 normal_depth = 0.8
 ao_strength = 1.5
 uv_scale = 0.2
 detiling_rotation = 0.25
 
-[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_yn1lh"]
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_gwgjs"]
 name = "gravel"
 id = 4
 albedo_color = Color(0.8, 0.78, 0.76, 1)
-albedo_texture = ExtResource("9_788r0")
-normal_texture = ExtResource("10_wtubu")
+albedo_texture = ExtResource("30_xx7o4")
+normal_texture = ExtResource("31_vy3ql")
 normal_depth = 1.0
 ao_strength = 1.5
 uv_scale = 0.3
 detiling_rotation = 0.25
 
-[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_a68ch"]
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_htbev"]
 name = "dirt_path"
 id = 5
 albedo_color = Color(0.7, 0.58, 0.45, 1)
-albedo_texture = ExtResource("7_e7lup")
-normal_texture = ExtResource("8_cfcww")
+albedo_texture = ExtResource("28_o0kpu")
+normal_texture = ExtResource("29_h3jgn")
 normal_depth = 1.0
 ao_strength = 1.5
 roughness = 0.05
 uv_scale = 0.24
 detiling_rotation = 0.25
 
-[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_dg6ea"]
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_yqt6l"]
 name = "cobblestone"
 id = 6
 albedo_color = Color(0.82, 0.8, 0.78, 1)
-albedo_texture = ExtResource("11_rj5a8")
-normal_texture = ExtResource("12_m7a7g")
+albedo_texture = ExtResource("32_tk75d")
+normal_texture = ExtResource("33_fno0s")
 normal_depth = 1.2
 ao_strength = 1.5
 uv_scale = 0.35
 
-[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_y3x72"]
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_eh8vp"]
 name = "grass_lush"
 id = 7
 albedo_color = Color(0.48, 0.56, 0.42, 1)
-albedo_texture = ExtResource("13_ellch")
-normal_texture = ExtResource("14_njdv4")
+albedo_texture = ExtResource("34_hq3ux")
+normal_texture = ExtResource("35_1h5sa")
 normal_depth = 1.0
 ao_strength = 1.5
 uv_scale = 0.18
 detiling_rotation = 0.2
 
-[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_u7u1a"]
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_tny8j"]
 name = "moor_grass"
 id = 8
 albedo_color = Color(0.56, 0.54, 0.42, 1)
-albedo_texture = ExtResource("1_gth22")
-normal_texture = ExtResource("2_l08sk")
+albedo_texture = ExtResource("22_dnxwt")
+normal_texture = ExtResource("23_6boq2")
 normal_depth = 1.0
 ao_strength = 1.5
 roughness = 0.05
@@ -134,5 +382,5 @@ uv_scale = 0.14
 detiling_rotation = 0.2
 
 [resource]
-mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_etyew")])
-texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_jsjvw"), SubResource("Terrain3DTextureAsset_kxvah"), SubResource("Terrain3DTextureAsset_2bbw7"), SubResource("Terrain3DTextureAsset_c3wax"), SubResource("Terrain3DTextureAsset_yn1lh"), SubResource("Terrain3DTextureAsset_a68ch"), SubResource("Terrain3DTextureAsset_dg6ea"), SubResource("Terrain3DTextureAsset_y3x72"), SubResource("Terrain3DTextureAsset_u7u1a")])
+mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_pyve2"), SubResource("Terrain3DMeshAsset_uw1r4"), SubResource("Terrain3DMeshAsset_3ohop"), SubResource("Terrain3DMeshAsset_vpleh"), SubResource("Terrain3DMeshAsset_ty723"), SubResource("Terrain3DMeshAsset_gvaex"), SubResource("Terrain3DMeshAsset_cmcek"), SubResource("Terrain3DMeshAsset_4axdg"), SubResource("Terrain3DMeshAsset_o8xam"), SubResource("Terrain3DMeshAsset_12brf"), SubResource("Terrain3DMeshAsset_mm22q"), SubResource("Terrain3DMeshAsset_af4ib"), SubResource("Terrain3DMeshAsset_8jobc"), SubResource("Terrain3DMeshAsset_qunkv"), SubResource("Terrain3DMeshAsset_agrj7"), SubResource("Terrain3DMeshAsset_mbrny"), SubResource("Terrain3DMeshAsset_yak2r"), SubResource("Terrain3DMeshAsset_httaj"), SubResource("Terrain3DMeshAsset_5ydx0"), SubResource("Terrain3DMeshAsset_wvton"), SubResource("Terrain3DMeshAsset_w8dxt")])
+texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_xdrpm"), SubResource("Terrain3DTextureAsset_431o4"), SubResource("Terrain3DTextureAsset_r1gny"), SubResource("Terrain3DTextureAsset_grw8e"), SubResource("Terrain3DTextureAsset_gwgjs"), SubResource("Terrain3DTextureAsset_htbev"), SubResource("Terrain3DTextureAsset_yqt6l"), SubResource("Terrain3DTextureAsset_eh8vp"), SubResource("Terrain3DTextureAsset_tny8j")])

@@ -27,6 +27,13 @@ const SHOTS := [
 	["highlands", Vector3(150, 150, -520), Vector3(320, 115, -780)],
 	["broom_high", Vector3(-200, 230, 300), Vector3(200, 40, -200)],
 	["shore_low", Vector3(-185, 2.5, 130), Vector3(200, 0, 330)],
+	["forest_edge", Vector3(-250, 30, 40), Vector3(-420, 25, -60)],
+	["forest_inside", Vector3(-520, 36, -20), Vector3(-560, 36, 60)],
+	["meadow_grove", Vector3(150, 30, 560), Vector3(300, 20, 700)],
+	["castle_close", Vector3(-30, 66, 60), Vector3(0, 75, -10)],
+	["hogsmeade_street", Vector3(600, 46, -110), Vector3(690, 42, -150)],
+	["hagrid_hut", Vector3(-262, 27, 8), Vector3(-282, 23, -20)],
+	["castle_from_lake_air", Vector3(120, 70, 300), Vector3(0, 75, -30)],
 ]
 
 const WALK_SPEED := 6.0
@@ -45,9 +52,9 @@ var _hud: Label
 
 func _ready() -> void:
 	_build_environment()
-	_terrain = preload("res://scenes/world/grounds_terrain.tscn").instantiate()
-	add_child(_terrain)
-	_build_water()
+	# The same build the game runs (terrain, castle, sites, lake, lamps, horizon).
+	GroundsBuilder.build(self)
+	_terrain = GroundsTerrain.active()
 	_body = CharacterBody3D.new()
 	var col := CollisionShape3D.new()
 	var cap := CapsuleShape3D.new()
@@ -104,9 +111,11 @@ func _build_environment() -> void:
 	env.fog_sky_affect = 0.3
 	env.ssao_enabled = true
 	var we := WorldEnvironment.new()
+	we.name = "WorldEnvironment"
 	we.environment = env
 	add_child(we)
 	var sun := DirectionalLight3D.new()
+	sun.name = "DirectionalLight3D"
 	sun.light_color = Color(1.0, 0.96, 0.89)
 	sun.light_energy = 1.1
 	sun.rotation_degrees = Vector3(-38, -30, 0)
@@ -115,23 +124,6 @@ func _build_environment() -> void:
 	sun.directional_shadow_max_distance = 400.0
 	sun.directional_shadow_blend_splits = true
 	add_child(sun)
-
-
-## Placeholder lake surface at the datum (y = 0) until the real water (phase 4).
-func _build_water() -> void:
-	var water := MeshInstance3D.new()
-	var plane := PlaneMesh.new()
-	plane.size = Vector2(1300, 760)
-	water.mesh = plane
-	water.position = Vector3(0, 0, 330)
-	var m := StandardMaterial3D.new()
-	m.albedo_color = Color(0.06, 0.14, 0.18, 0.88)
-	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m.roughness = 0.05
-	m.metallic = 0.3
-	m.metallic_specular = 0.8
-	water.material_override = m
-	add_child(water)
 
 
 func _teleport(xz: Vector3, ground: bool) -> void:

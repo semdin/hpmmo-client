@@ -16,7 +16,6 @@ extends Node
 
 const PBR = preload("res://scripts/assets/pbr_kit.gd")
 const QualityPreset = preload("res://scripts/world/quality_preset.gd")
-const OutdoorTerrain = preload("res://scripts/world/outdoor_terrain.gd")
 
 ## Documented module sizes from tools/blender/kit_models.py, as
 ## [x, y, z] with a tolerance. These are the grid the rooms are assembled on.
@@ -220,56 +219,69 @@ func _check_quality_preset() -> void:
 # ------------------------------------------------------------------ outdoors
 
 func _check_outdoor_collision() -> void:
-	check(world != null and world.has_node("TerrainPass"),
-		"The shaped terrain pass is built outdoors")
-	# The hills collide exactly where the mesh draws them: sample the same
-	# function the mesh and the heightfield are both built from.
+	check(world != null and world.has_node("GroundsTerrain"),
+		"The grounds terrain (Terrain3D) is loaded outdoors")
+	# The ground collides exactly where it is drawn: ray the collider and compare
+	# with the terrain's own height data, across plateau, slopes and lake shore.
 	var space := world.get_world_3d().direct_space_state
 	var worst := 0.0
 	var samples := 0
-	for probe in [Vector3(-150, 0, -30), Vector3(150, 0, -60), Vector3(0, 0, 130),
-			Vector3(-190, 0, 60), Vector3(60, 0, 150)]:
-		var expected := OutdoorTerrain._height(probe.x, probe.z)
-		if expected < 0.5:
-			continue
+	# Open ground only (no building over the probe): courtyard edge, west meadow,
+	# east meadow, Hogsmeade square edge, pitch centre, forest, lake shore, moor.
+	# (Probes sit off the 1 m vertex grid: a ray exactly through a heightfield
+	# vertex can slip between its triangles in the physics engine.)
+	for probe in [Vector3(0.37, 0, 90.41), Vector3(-120.37, 0, -210.41), Vector3(150.37, 0, -60.41), Vector3(700.37, 0, -140.41),
+			Vector3(330.37, 0, -330.41), Vector3(-600.37, 0, 300.41), Vector3(-300.37, 0, 120.41), Vector3(280.37, 0, -750.41)]:
+		var expected := GroundsTerrain.height_at(probe.x, probe.z)
 		var query := PhysicsRayQueryParameters3D.create(
-			probe + Vector3(0, expected + 30.0, 0), probe + Vector3(0, expected - 30.0, 0), 1)
+			Vector3(probe.x, expected + 30.0, probe.z), Vector3(probe.x, expected - 30.0, probe.z), 1)
+		query.exclude = _vegetation_rids()
 		var hit: Dictionary = space.intersect_ray(query)
 		if hit.is_empty():
-			check(false, "Hill terrain collides at %s" % probe)
+			check(false, "Grounds terrain collides at %s" % probe)
 			continue
-		var got: float = (hit["position"] as Vector3).y
-		worst = maxf(worst, absf(got - expected))
+		worst = maxf(worst, absf((hit["position"] as Vector3).y - expected))
 		samples += 1
-	check(samples > 0 and worst < 1.5,
-		"Hill collision matches the drawn terrain (worst error %.2f m over %d samples)" % [worst, samples])
-	# The playable core stays flat: an encounter area, the landing pad and the
-	# approach must still ray to y ~ 0.
-	for point in [Vector2(17, -33), Vector2(-91, -74), Vector2(53, -91), Vector2(0, -40), Vector2(0, -47)]:
-		check(absf(OutdoorTerrain._height(point.x, point.y)) < 0.01,
-			"Encounter/route ground stays flat at (%s)" % point)
-	# Safe-zone boundary is marked (visual line + ward stones).
+	check(samples >= 6 and worst < 0.3,
+		"Ground collision matches the drawn terrain (worst error %.2f m over %d samples)" % [worst, samples])
+	# Every encounter area offers standable ground (not water, not cliff).
+	for pack in HPRules.spawn_tables().get("packs", []):
+		var area: Array = pack.get("area", [0, 0, 1, 1])
+		var cx := float(area[0]) + float(area[2]) * 0.5
+		var cz := float(area[1]) + float(area[3]) * 0.5
+		var n := (GroundsTerrain.active().data.get_normal(Vector3(cx, 0, cz)) as Vector3)
+		check(not GroundsLake.is_water_at(cx, cz) and n.y > 0.72,
+			"Encounter %s stands on walkable ground" % pack.get("encounter_id", "?"))
+	# Safe-zone boundary is marked (visual line following the ground).
 	var ward_lines := 0
-	for node in world.find_children("WardLine", "MeshInstance3D", true, false):
+	for node in world.find_children("WardLine*", "MeshInstance3D", true, false):
 		ward_lines += 1
-	check(ward_lines >= 1, "The safe-zone boundary is drawn as a visible ward line (%d)" % ward_lines)
-	# Instanced vegetation, not per-node scatter.
-	var instanced := 0
-	for node in world.find_children("*", "MultiMeshInstance3D", true, false):
-		instanced += 1
-	check(instanced >= 6, "Repeated vegetation and props are instanced (%d MultiMesh draws)" % instanced)
+	check(ward_lines >= 3, "Every safe zone's boundary is drawn as a ward line (%d)" % ward_lines)
+	# Trees and boulders are solid for players and mobs (instanced visuals have
+	# no collision of their own).
+	var shapes := 0
+	var veg := world.get_node_or_null("VegetationColliders")
+	if veg:
+		for body in veg.get_children():
+			shapes += body.get_child_count()
+	check(shapes > 5000, "Trees and boulders carry colliders (%d shapes)" % shapes)
+
+func _vegetation_rids() -> Array[RID]:
+	var out: Array[RID] = []
+	var veg := world.get_node_or_null("VegetationColliders")
+	if veg:
+		for body in veg.get_children():
+			if body is CollisionObject3D:
+				out.append((body as CollisionObject3D).get_rid())
+	return out
 
 func _check_outdoor_dressing() -> void:
-	var labels: Array = []
-	for node in world.find_children("*", "Label3D", true, false):
-		labels.append(String((node as Label3D).text))
-	var sealed := 0
-	for text in labels:
-		if String(text).contains("TOWER SEALED"):
-			sealed += 1
-	check(sealed >= 2, "Inactive exterior towers are visibly non-enterable (%d sealed plaques)" % sealed)
-	check(world.has_node("BroomLanding"), "The broom landing pad survives the terrain pass")
-	check(world.has_node("StonePaths"), "The cobbled paths survive the terrain pass")
+	for node_name in ["HogwartsCastle", "Courtyard", "BroomLanding", "Sites", "WorldBoundaries"]:
+		check(world.has_node(node_name), "The grounds carry %s" % node_name)
+	var sites := world.get_node_or_null("Sites")
+	for site in ["HogsmeadeVillage", "HagridsHut", "Greenhouses", "Boathouse", "HogsmeadeStation",
+			"QuidditchPitch", "StoneCircle", "SmugglersCamp", "Crypt"]:
+		check(sites != null and sites.has_node(site), "Site %s is built" % site)
 
 # ------------------------------------------------------------------ interior
 

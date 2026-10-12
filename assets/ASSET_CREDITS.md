@@ -75,3 +75,31 @@ albedo+height / normal+roughness layout at 1024 px by
 | forest_floor, sand_shore (also the tinted dirt_path), grass_lush | CC0 Textures leaves / sand / grass sets, as shipped in Zylann's *godot_hterrain* demo |
 | gravel | CC0 Textures *Rocks07* (now ambientCG), via the same demo |
 | cobblestone | Poly Haven *stone_tiles_02* (already in `assets/textures/pbr/`) |
+
+# Grounds vegetation, props and architecture textures (2026-10-12)
+
+All CC0 1.0 from **Poly Haven** (https://polyhaven.com). The models were
+rebuilt into game LODs (decimated wood, clustered leaf cards rendered from the
+source sprays, a crossed-quad impostor) by
+`art/vegetation/scripts/build_foliage.py` and `build_props.py`; the cooked game
+scenes live in `assets/terrain/vegetation/`.
+
+| Game model (`assets/models/vegetation/`) | Poly Haven source |
+| --- | --- |
+| fir_a, fir_b, fir_c | *fir_tree_01* |
+| pine_a, pine_b, pine_c | *pine_tree_01* |
+| broadleaf_a | *tree_small_02* |
+| broadleaf_b | *island_tree_01* |
+| fern_a, fern_b | *fern_02* |
+| shrub | *shrub_04* |
+| rock_boulder | *boulder_01* |
+| rock_slab | *namaqualand_boulder_05* |
+| rock_moss_a0-a2, rock_moss_b0-b2 | *rock_moss_set_01*, *rock_moss_set_02* |
+| stump | *tree_stump_01* |
+| log | *dead_tree_trunk_02* |
+
+Castle and village textures in `assets/textures/pbr/` (2k, Poly Haven, CC0 1.0):
+*castle_wall_varriation*, *stone_wall*, *roof_slates_02*, *grey_roof_tiles*,
+*medieval_wood*, *wooden_planks*, *white_rough_plaster*, *mossy_stone_wall*,
+*cobblestone_floor_04*. The castle, village and site buildings themselves are
+project-original geometry (`scripts/world/grounds/`).

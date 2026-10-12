@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fern_a_lod0.res" id="1_lapfo"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fern_a_lod1.res" id="2_cu55j"]
+
+[node name="fern_a" type="Node3D" unique_id=829228012]
+
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=899765984]
+mesh = ExtResource("1_lapfo")
+
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=1845309678]
+mesh = ExtResource("2_cu55j")

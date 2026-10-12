@@ -1,0 +1,36 @@
+{
+ "id": "stone-wall",
+ "name": "Stone Wall",
+ "source_page": "https://polyhaven.com/a/stone_wall",
+ "author": "Poly Haven",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "license.txt",
+   "bytes": 814,
+   "sha256": "ea8bb1198174f3ee38137b8c79de2a12f902c54e539f97056099f600eb84b69c"
+  },
+  {
+   "file": "stone_wall_ao_2k.jpg",
+   "bytes": 2092401,
+   "sha256": "051f84fdb6cec51138f7be10d697d44b41614f900edcd0f38bce1d516eb125d1"
+  },
+  {
+   "file": "stone_wall_diff_2k.jpg",
+   "bytes": 3180415,
+   "sha256": "131494c5be0531bb230d4e47c21750d94d44555a66396d2b21da962ef635c0c2"
+  },
+  {
+   "file": "stone_wall_nor_gl_2k.jpg",
+   "bytes": 4198819,
+   "sha256": "fd6f6c1a27c741fb2a2c680c76a32ba5812e4ca03c94132d163212efaeed9b60"
+  },
+  {
+   "file": "stone_wall_rough_2k.jpg",
+   "bytes": 1222030,
+   "sha256": "0e4512383fcdef01c0e4f85b7caaea09ec277aeb056f0723be88ef07785dd034"
+  }
+ ]
+}

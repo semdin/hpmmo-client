@@ -1,0 +1,36 @@
+{
+ "id": "castle-wall-varriation",
+ "name": "Castle Wall Varriation",
+ "source_page": "https://polyhaven.com/a/castle_wall_varriation",
+ "author": "Poly Haven",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "castle_wall_varriation_ao_2k.jpg",
+   "bytes": 1600880,
+   "sha256": "2923714c9866f29792379ef0ebe4f4dec3c399030141462baa695d7a92937a9b"
+  },
+  {
+   "file": "castle_wall_varriation_diff_2k.jpg",
+   "bytes": 2386019,
+   "sha256": "47d50ed57e111e3abfbd367872b5d23e3ab128c45b7172886752ce985f5b9f2b"
+  },
+  {
+   "file": "castle_wall_varriation_nor_gl_2k.jpg",
+   "bytes": 3537669,
+   "sha256": "b78d76a84e3b37a936f8bd3fb870f8740f3e0c5dd56179cef4b35bd1341a4ee5"
+  },
+  {
+   "file": "castle_wall_varriation_rough_2k.jpg",
+   "bytes": 1643779,
+   "sha256": "1f407860d6e9ce2ab074fddf6a0cbbfd3cd751e842bd115ab0ce6b6500e9eb24"
+  },
+  {
+   "file": "license.txt",
+   "bytes": 814,
+   "sha256": "ea8bb1198174f3ee38137b8c79de2a12f902c54e539f97056099f600eb84b69c"
+  }
+ ]
+}

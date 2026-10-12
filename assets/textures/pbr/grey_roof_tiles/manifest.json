@@ -1,0 +1,36 @@
+{
+ "id": "grey-roof-tiles",
+ "name": "Grey Roof Tiles",
+ "source_page": "https://polyhaven.com/a/grey_roof_tiles",
+ "author": "Poly Haven",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt + license.html (snapshot of https://polyhaven.com/license retrieved 2026-10-03) in this folder",
+ "files": [
+  {
+   "file": "grey_roof_tiles_ao_2k.jpg",
+   "bytes": 1008759,
+   "sha256": "183cffb4232eeeaf4e1d85f80a6de6fe7088f476bec4170ce456596d87ae609d"
+  },
+  {
+   "file": "grey_roof_tiles_diff_2k.jpg",
+   "bytes": 2039152,
+   "sha256": "f0ccddb07c8b21cd7825fd2c4cdf04cff23ec9fc52a92578122036ccf22a8a90"
+  },
+  {
+   "file": "grey_roof_tiles_nor_gl_2k.jpg",
+   "bytes": 1504796,
+   "sha256": "e91134466a2aec440eae42ccef20f7055d87bf8caac208555eb1f069578eb29a"
+  },
+  {
+   "file": "grey_roof_tiles_rough_2k.jpg",
+   "bytes": 1009346,
+   "sha256": "404d04cfdb77f2537d5cf4f9249bd7c8d265a303c73b7bf362af1f109c88299c"
+  },
+  {
+   "file": "license.txt",
+   "bytes": 814,
+   "sha256": "ea8bb1198174f3ee38137b8c79de2a12f902c54e539f97056099f600eb84b69c"
+  }
+ ]
+}

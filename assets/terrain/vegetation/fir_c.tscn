@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fir_c_lod0.res" id="1_3h8af"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fir_c_lod1.res" id="2_s0o8n"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fir_c_lod2.res" id="3_06s0a"]
+
+[node name="fir_c" type="Node3D" unique_id=353226251]
+
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1973573937]
+mesh = ExtResource("1_3h8af")
+
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=694614845]
+mesh = ExtResource("2_s0o8n")
+
+[node name="LOD2" type="MeshInstance3D" parent="." unique_id=446259750]
+mesh = ExtResource("3_06s0a")

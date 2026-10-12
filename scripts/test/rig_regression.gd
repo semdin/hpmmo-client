@@ -344,14 +344,14 @@ func _check_broom_axes(player) -> void:
 ## ---------------------------------------------------------------- mounting
 
 func _check_mount_round_trips(player) -> void:
-	player.global_position = Vector3(0, 0.1, 5)
+	player.global_position = TestGround.at(0, 0.1, 5)
 	player.velocity = Vector3.ZERO
 	await get_tree().create_timer(0.3).timeout
 	var mount_ok := 0
 	var dismount_ok := 0
 	var phases_seen := {}
 	for turn in range(4):
-		await _settle_on_floor(player, Vector3(0, 0.1, 5))
+		await _settle_on_floor(player, TestGround.at(0, 0.1, 5))
 		player.visuals.rotation.y = TAU * float(turn) / 4.0
 		player._mount_lock = 0.0
 		player._cast_lock = 0.0
@@ -367,7 +367,7 @@ func _check_mount_round_trips(player) -> void:
 				seat_gap = player.broom.seat_socket.global_position.distance_to(player.socket("Socket_Hips").global_position)
 			check(seat_gap <= 0.35,
 				"Rider sits on the saddle while turned %d deg (gap %.2f m)" % [turn * 90, seat_gap])
-			player.global_position.y = 1.2
+			player.global_position.y = TestGround.at(player.global_position.x, 0.0, player.global_position.z - TestGround.NEW_ORIGIN.y + TestGround.OLD_ORIGIN_Z).y + 1.2
 			player.velocity = Vector3.ZERO
 			player._mount_lock = 0.0
 			await get_tree().create_timer(0.1).timeout
@@ -375,12 +375,12 @@ func _check_mount_round_trips(player) -> void:
 			if not player.is_mounted:
 				dismount_ok += 1
 		await get_tree().create_timer(0.2).timeout
-		check(player.global_position.y > -1.0,
+		check(player.global_position.y > TestGround.at(0, 0, 5).y - 1.0,
 			"Dismount never drops the rider through the floor (round %d)" % turn)
 	check(mount_ok == 4 and dismount_ok == 4,
 		"Repeated mount/dismount while turning stays consistent (%d mounts, %d dismounts)" % [mount_ok, dismount_ok])
 	check(phases_seen.size() >= 1, "A mounted rider reports a presented phase (%d distinct)" % phases_seen.size())
-	check(player.global_position.y > -1.0, "No dismount-through-floor: the rider ends above the courtyard floor")
+	check(player.global_position.y > TestGround.at(0, 0, 5).y - 1.0, "No dismount-through-floor: the rider ends above the courtyard floor")
 
 ## ---------------------------------------------------------------- broom grip
 
@@ -392,7 +392,7 @@ const GRIP_TOLERANCE := 0.035
 ## because `_update_flight_pose` and the mount state machine rewrite the visual
 ## bank and the mounted clip every frame.
 func _check_broom_grip(player) -> void:
-	await _settle_on_floor(player, Vector3(0, 0.1, 5))
+	await _settle_on_floor(player, TestGround.at(0, 0.1, 5))
 	player.visuals.rotation.y = 0.0
 	player._mount_lock = 0.0
 	player._cast_lock = 0.0
@@ -480,7 +480,7 @@ func _check_broom_grip(player) -> void:
 	view.is_local_player = false
 	view.sim_puppet = true
 	world.add_child(view)
-	view.global_position = Vector3(6, 0.1, 5)
+	view.global_position = TestGround.at(6, 0.1, 5)
 	await get_tree().process_frame
 	view.is_mounted = true
 	view.sim_mount_phase = HPProtocol.MountPhase.CRUISE
@@ -492,7 +492,7 @@ func _check_broom_grip(player) -> void:
 		check(false, "A replicated rider carries the grip solver")
 	view.queue_free()
 	await get_tree().process_frame
-	player.global_position.y = 1.0
+	player.global_position = TestGround.at(0, 1.0, 5)
 	player.velocity = Vector3.ZERO
 	player._mount_lock = 0.0
 	await get_tree().create_timer(0.1).timeout
@@ -503,7 +503,7 @@ func _check_broom_grip(player) -> void:
 
 ## At the release moment the wand must point at the target, not down the leg.
 func _check_cast_aim(player) -> void:
-	await _settle_on_floor(player, Vector3(0, 0.1, 5))
+	await _settle_on_floor(player, TestGround.at(0, 0.1, 5))
 	player.visuals.rotation.y = 0.0
 	player._mount_lock = 0.0
 	player._cast_lock = 0.0
@@ -580,7 +580,7 @@ func _check_refusals(player) -> void:
 	# Clearance, measured against a fixture we own: a slab lowered over the
 	# courtyard until the headroom a broom needs is gone. Deterministic, and it
 	# tests the rule rather than one level geometry.
-	await _settle_on_floor(player, Vector3(0, 0.1, 5))
+	await _settle_on_floor(player, TestGround.at(0, 0.1, 5))
 	check(player._flight_clearance_ok(), "Flight clearance measured true in the open courtyard")
 	check(player.mount_block_reason() == "", "Mount is allowed in the open courtyard")
 	var slab := StaticBody3D.new()
@@ -592,7 +592,7 @@ func _check_refusals(player) -> void:
 	slab_shape.shape = box
 	slab.add_child(slab_shape)
 	world.add_child(slab)
-	slab.global_position = Vector3(0, 2.2, 5)
+	slab.global_position = TestGround.at(0, 2.2, 5)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	var reason: String = player.mount_block_reason()
@@ -607,7 +607,7 @@ func _check_refusals(player) -> void:
 	check(player.mount_block_reason() == "",
 		"Mount is allowed again once the ceiling is gone (%s)" % player.mount_block_reason())
 	# Recorded for the report: the castle doorway also refuses a takeoff.
-	await _settle_on_floor(player, Vector3(0, 0.15, -38))
+	await _settle_on_floor(player, TestGround.at(0, 0.15, -38))
 	var doorway_reason: String = player.mount_block_reason()
 	print("NOTE doorway mount reason: %s (on_floor=%s)" % [doorway_reason, player.is_on_floor()])
 
@@ -621,7 +621,7 @@ func _check_remote_agreement() -> void:
 	view.is_local_player = false
 	view.sim_puppet = true
 	world.add_child(view)
-	view.global_position = Vector3(6, 0.1, 5)
+	view.global_position = TestGround.at(6, 0.1, 5)
 	await get_tree().process_frame
 	view.is_mounted = true
 	view.sim_mount_phase = phase
@@ -678,7 +678,13 @@ func _check_animation_graph(player) -> void:
 	# clip is sampled once without the cast layer and once with it. If the blend
 	# reset tracks the cast clip does not animate, the with-cast legs would jump
 	# by much more than the reference.
-	await _settle_on_floor(player, Vector3(0, 0.1, 5))
+	await _settle_on_floor(player, TestGround.at(0, 0.1, 5))
+	# The teleport onto the spot reads as a burst of ground speed and the drop
+	# can play the landing one-shot: let both finish before sampling.
+	for _i in range(240):
+		if _i >= 30 and not player.hero_anim.has_oneshot() and player.hero_anim.oneshot_weight() <= 0.0:
+			break
+		await get_tree().physics_frame
 	var leg_index: int = RigIK.bone_index(player.hero_anim.skeleton, HeroBones.upper_leg("L"))
 	var arm_index: int = RigIK.bone_index(player.hero_anim.skeleton, HeroBones.upper_arm("L"))
 	player.hero_anim.set_locomotion("idle_ref", "Idle", true)
@@ -725,10 +731,10 @@ func _check_animation_graph(player) -> void:
 	player.hero_anim.tick(0.5)
 	# Committed attack roots the caster; the event fires on the release beat.
 	if player.is_mounted:
-		player.global_position.y = 1.0
+		player.global_position = TestGround.at(0, 1.0, 5)
 		player._mount_lock = 0.0
 		player.toggle_broom_mount()
-	await _settle_on_floor(player, Vector3(0, 0.1, 5))
+	await _settle_on_floor(player, TestGround.at(0, 0.1, 5))
 	player._hit_recovery = 0.0
 	player._combat_until = 0.0
 	check(player._committed_until <= 0.0, "No committed window before the attack")

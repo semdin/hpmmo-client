@@ -153,7 +153,10 @@ func _check_transitions() -> void:
 	SimAuthority.level_changed.emit(_uid(), 4)
 	check(hud.feedback.toasts_shown == before_level + 1, "Level-up: a level change gets a toast")
 
-	# Death and respawn.
+	# Death and respawn. A full body first: a regeneration tick in the same
+	# frame would otherwise re-send the mirror's own (alive) life state.
+	_push_stats({"hp": int(player.max_hp), "mana": int(player.max_mana)})
+	await get_tree().process_frame
 	SimAuthority.entity_died.emit(_uid(), 0)
 	await get_tree().process_frame
 	check(hud.binder.dead and hud.feedback._death_panel.visible,
@@ -387,7 +390,7 @@ func _check_mounted_feedback() -> void:
 	world.map_controller._start_transfer("grounds", "castle_approach", 0)
 	await _await_map("grounds", 8.0)
 	await get_tree().create_timer(0.3).timeout
-	player.global_position = Vector3(0, 0.2, 18)
+	player.global_position = TestGround.at(0, 0.2, 18)
 	player.velocity = Vector3.ZERO
 	await get_tree().physics_frame
 	player._mount_lock = 0.0
@@ -396,7 +399,7 @@ func _check_mounted_feedback() -> void:
 	await get_tree().create_timer(0.2).timeout
 	check(player.is_mounted, "The body mounted for the feedback check")
 	# Fly high: the landing gate must refuse and the panel must say why.
-	player.global_position = Vector3(0, 12.0, 18)
+	player.global_position = TestGround.at(0, 12.0, 18)
 	await get_tree().physics_frame
 	await get_tree().create_timer(0.6).timeout
 	var text := travel.mounted_text()
@@ -406,7 +409,7 @@ func _check_mounted_feedback() -> void:
 		"An invalid landing spot is reported with its reason (%s)" % text.replace("\n", " | "))
 	check(travel.invalid_landing_warnings >= 1, "The invalid-landing warning was raised")
 	# Descend and land: the panel must now offer the landing.
-	player.global_position = Vector3(0, 0.2, 18)
+	player.global_position = TestGround.at(0, 0.2, 18)
 	player.velocity = Vector3.ZERO
 	await get_tree().physics_frame
 	await get_tree().create_timer(0.6).timeout
@@ -569,17 +572,17 @@ func _check_onboarding() -> void:
 	check(onboarding.current_index == 3, "The pack step completes on authoritative damage from a pack member")
 
 	# 4. Broom - mount, be airborne, land on a spot the gate accepts.
-	player.global_position = Vector3(0, 0.2, 18)
+	player.global_position = TestGround.at(0, 0.2, 18)
 	player.velocity = Vector3.ZERO
 	await get_tree().physics_frame
 	player._mount_lock = 0.0
 	player._cast_lock = 0.0
 	player.toggle_broom_mount()
 	await get_tree().create_timer(0.2).timeout
-	player.global_position = Vector3(0, 6.0, 18)
+	player.global_position = TestGround.at(0, 6.0, 18)
 	await get_tree().physics_frame
 	await get_tree().create_timer(0.35).timeout
-	player.global_position = Vector3(0, 0.2, 18)
+	player.global_position = TestGround.at(0, 0.2, 18)
 	player.velocity = Vector3.ZERO
 	await get_tree().physics_frame
 	player._mount_lock = 0.0
@@ -625,9 +628,9 @@ func _first_pack_mob() -> int:
 ## Search a small authored-point grid for a point inside a protection volume.
 func _find_protected_point() -> Vector3:
 	var candidates := [
-		Vector3(0, 0.5, 5), Vector3(0, 0.5, 0), Vector3(0, 0.5, -10),
-		Vector3(5, 0.5, 5), Vector3(-5, 0.5, 5), Vector3(0, 0.5, 12),
-		Vector3(14, 0.5, 5), Vector3(-14, 0.5, 5), Vector3(0, 0.5, -20),
+		TestGround.at(0, 0.5, 5), TestGround.at(0, 0.5, 0), TestGround.at(0, 0.5, -10),
+		TestGround.at(5, 0.5, 5), TestGround.at(-5, 0.5, 5), TestGround.at(0, 0.5, 12),
+		TestGround.at(14, 0.5, 5), TestGround.at(-14, 0.5, 5), TestGround.at(0, 0.5, -20),
 	]
 	for point in candidates:
 		if HPRules.is_protected_point(point):

@@ -21,6 +21,11 @@ func check(condition: bool, message: String) -> void:
 		failures.append(message)
 		push_error("FAIL: " + message)
 
+## A point on the grounds terrain, 0.1 m up.
+func _g(x: float, z: float) -> Vector3:
+	var h := GroundsTerrain.height_at(x, z)
+	return Vector3(x, (0.0 if is_nan(h) else h) + 0.1, z)
+
 func _ready() -> void:
 	await get_tree().create_timer(0.4).timeout
 	var player = world.local_player
@@ -81,7 +86,7 @@ func _ready() -> void:
 	# Ordinary mobs are reactive; protected volumes gate damage.
 	# Fixed staging point far from every authored volume keeps these checks
 	# deterministic regardless of the random pack anchors.
-	var staging := Vector3(-70, 0.1, 20)
+	var staging := _g(250, -150)
 	var passive_pack = director.packs[1]
 	var passive_mob = passive_pack.members[0]
 	var staged: Array = [passive_mob, passive_pack.members[1], passive_pack.members[2]]
@@ -113,20 +118,20 @@ func _ready() -> void:
 	passive_pack.members[2].aggro_mode = "reactive"
 	passive_pack.members[2].aggro_radius = 9.0
 	passive_pack.members[2]._respawn()
-	player.global_position = Vector3(0, 0.1, 5)
+	player.global_position = _g(0, 78)
 	await get_tree().create_timer(0.12).timeout
 	check(passive_mob.target_player == null and passive_pack.members[1].target_player == null and passive_mob.state not in [passive_mob.State.CHASE, passive_mob.State.ATTACK], "Mobs drop the fight when the target enters the courtyard")
 	var zone_mob = director.packs[2].members[0]
-	check(SafeZone.is_protected_point(Vector3(0, 0, 5)) and not SafeZone.is_protected_point(Vector3(60, 0, 60)), "Safe-zone volumes are authored at specific locations")
+	check(SafeZone.is_protected_point(_g(0, 65)) and SafeZone.is_protected_point(_g(0, 10)) and not SafeZone.is_protected_point(_g(250, -150)), "Safe-zone volumes are authored at specific locations")
 	check(not Rules.can_damage(zone_mob, player), "Mobs cannot attack a player inside the courtyard")
 	check(not Rules.can_damage(player, zone_mob), "Protected players cannot snipe outdoor mobs")
 	check(Rules.can_damage(player, dummy), "Training dummies remain practiceable inside the courtyard")
-	zone_mob.global_position = Vector3(-70, 0.1, -20)
-	player.global_position = Vector3(-62, 0.1, -20)
+	zone_mob.global_position = _g(250, -180)
+	player.global_position = _g(258, -180)
 	check(Rules.can_damage(player, zone_mob), "Outside protected space, combat is allowed")
-	check(not director._formation_clear(Vector3(0, 0.1, 0), 5) and director._formation_clear(Vector3(60, 0.1, 60), 5), "Encounter spawn sampling rejects protected anchors and rings")
+	check(not director._formation_clear(_g(0, 65), 5) and director._formation_clear(_g(250, -150), 5), "Encounter spawn sampling rejects protected anchors and rings")
 	var stray = director.packs[3].members[0]
-	stray.global_position = Vector3(0, 0.1, -2)
+	stray.global_position = _g(0, 70)
 	await get_tree().create_timer(0.12).timeout
 	check(stray.state == stray.State.RETURN, "Enemies displaced inside a protected volume are sent home")
 	stray._respawn()
@@ -150,7 +155,7 @@ func _ready() -> void:
 	check(pack.timer >= 25 and pack.timer <= 35, "Pack respawn timer begins only when every member dies")
 	check(mob.state == mob.State.DEAD and not mob.is_in_group("targetable"), "Dead mobs cannot be targeted")
 	await get_tree().create_timer(0.1).timeout
-	player.global_position = Vector3(0, 0.1, 5)
+	player.global_position = _g(0, 78)
 	director._spawn_pack(0)
 	check(mob.current_hp == mob.max_hp and mob.pack_anchor != old_anchor, "Whole pack respawns at a new valid anchor")
 	var commander = director.packs[6].members[0]
@@ -166,26 +171,23 @@ func _ready() -> void:
 	commander._show_warning()
 	commander.take_damage(100000, "test", player)
 	check(commander._windup == 0 and commander._warning == null, "Boss death cancels the telegraphed attack")
-	# Structural collision sweeps prove a connected indoor route and solid walls.
+	# The castle is a solid shell; its great doors are reached on foot from the
+	# castle approach (the interior is its own map, checked by the walkthrough).
 	await get_tree().physics_frame
 	var space = world.get_world_3d().direct_space_state
-	for route in [[Vector3(0, 1, -38), Vector3(0, 1, -86)], [Vector3(0, 1, -72), Vector3(-24, 1, -72)], [Vector3(0, 1, -72), Vector3(26, 1, -72)]]:
-		var query := PhysicsRayQueryParameters3D.create(route[0], route[1], 1)
-		check(space.intersect_ray(query).is_empty(), "Castle entrance and both side rooms are traversable")
-	check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(0, 2, -57), Vector3(18, 2, -57), 1)).is_empty(), "Great Hall walls block movement/spells")
+	var approach := _g(0, 20)
+	var hit: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(approach + Vector3(-30, 6, -6), approach + Vector3(-30, 6, -60), 1))
+	check(not hit.is_empty() and float(hit["position"].z) > -40.0, "The castle front is solid to movement and spells")
 	player.set_target(null)
-	player.global_position = Vector3(0, 0.15, -38)
+	player.global_position = approach + Vector3(0, 0.15, 0)
 	player.velocity = Vector3.ZERO
 	Input.action_press("move_forward")
 	await get_tree().create_timer(3.0).timeout
 	Input.action_release("move_forward")
-	check(player.global_position.z < -59, "Actual character movement enters the castle through the doorway")
-	player.global_position = Vector3(0, 0.15, -72)
-	player.velocity = Vector3.ZERO
-	Input.action_press("move_left")
-	await get_tree().create_timer(3.0).timeout
-	Input.action_release("move_left")
-	check(player.global_position.x < -22, "Actual character movement reaches the library through the cross aisle")
+	var door: Dictionary = HPMaps.portal("castle_door")
+	var door_center := Vector3(door["trigger"]["center"][0], door["trigger"]["center"][1], door["trigger"]["center"][2])
+	check(Vector2(player.global_position.x - door_center.x, player.global_position.z - door_center.z).length() < 3.5,
+		"Actual character movement reaches the great doors from the approach (%.1f m off)" % Vector2(player.global_position.x - door_center.x, player.global_position.z - door_center.z).length())
 	player.velocity = Vector3.ZERO
 	hud.chat_input.grab_focus()
 	Input.action_press("move_forward")
@@ -198,7 +200,7 @@ func _ready() -> void:
 	player.add_loot("galleons", 37)
 	check(world.inventory_ui.galleons_label.text == "Galleons: %d" % player.galleons, "Open bag refreshes currency after loot")
 	world.inventory_ui.hide()
-	player.global_position = Vector3(0, 0.1, 5)
+	player.global_position = _g(0, 78)
 	await get_tree().create_timer(0.2).timeout
 	player._cast_lock = 0
 	player._mount_lock = 0
@@ -222,11 +224,12 @@ func _ready() -> void:
 		if child is Node3D and child.scene_file_path.ends_with("floating_text.tscn"):
 			texts_after += 1
 	check(texts_after - texts_before <= 1, "Held attack while mounted does not spawn feedback every frame")
-	player.global_position.y = 12
+	var ground_y: float = _g(player.global_position.x, player.global_position.z).y
+	player.global_position.y = ground_y + 12.0
 	player.toggle_broom_mount()
 	check(player.is_mounted, "High-altitude dismount is rejected")
 	await get_tree().create_timer(0.35).timeout
-	player.global_position.y = 1.5
+	player.global_position.y = ground_y + 1.5
 	player.toggle_broom_mount()
 	check(not player.is_mounted, "Dismount near the ground succeeds")
 	check(player.broom_particles.mesh is QuadMesh, "Flight uses textured translucent particles")

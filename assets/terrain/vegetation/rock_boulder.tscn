@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_boulder_lod0.res" id="1_xcl0q"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_boulder_lod1.res" id="2_ylw7e"]
+
+[node name="rock_boulder" type="Node3D" unique_id=270217398]
+
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1054963584]
+mesh = ExtResource("1_xcl0q")
+
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=780624914]
+mesh = ExtResource("2_ylw7e")
