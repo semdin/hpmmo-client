@@ -126,6 +126,28 @@ jobs:
           sudo apt-get install -y -qq python3 python3-pip ninja-build cmake mingw-w64
           python3 -m pip install --quiet cryptography
 
+      - name: Build the launcher
+        run: |
+          set -eu
+          # The -posix toolchain: the default win32-thread variant has no std::thread/std::mutex.
+          cmake -S launcher_cpp -B launcher_cpp/build-mingw -G Ninja \
+            -DCMAKE_SYSTEM_NAME=Windows \
+            -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc-posix \
+            -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++-posix \
+            -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DHPMMO_LAUNCHER_VERSION="${{ steps.v.outputs.launcher }}"
+          # Compiler errors become annotations, readable without the job log.
+          if ! ninja -k 0 -C launcher_cpp/build-mingw HPMMO_Launcher > "$RUNNER_TEMP/launcher-build.log" 2>&1; then
+            grep -E "error|Error" "$RUNNER_TEMP/launcher-build.log" | head -25 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            tail -60 "$RUNNER_TEMP/launcher-build.log"
+            exit 1
+          fi
+          mkdir -p dist
+          cp launcher_cpp/build-mingw/HPMMO_Launcher.exe dist/HPMMO_Launcher.exe
+
       - name: Fetch the pinned Godot engine and export templates
         id: godot
         run: |
@@ -159,20 +181,6 @@ jobs:
           test -f build/client/HPMMO.exe
           test -f build/client/HPMMO.pck
           ls -la build/client
-
-      - name: Build the launcher
-        run: |
-          set -eu
-          cmake -S launcher_cpp -B launcher_cpp/build-mingw -G Ninja \
-            -DCMAKE_SYSTEM_NAME=Windows \
-            -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
-            -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
-            -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DHPMMO_LAUNCHER_VERSION="${{ steps.v.outputs.launcher }}"
-          ninja -C launcher_cpp/build-mingw HPMMO_Launcher
-          mkdir -p dist
-          cp launcher_cpp/build-mingw/HPMMO_Launcher.exe dist/HPMMO_Launcher.exe
 
       - name: Package the client (refuses user data, caches and secrets)
         run: |
