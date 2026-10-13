@@ -7,6 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(VENDOR_ED25519 ${CMAKE_CURRENT_SOURCE_DIR}/vendor/ed25519)
 
+# The launcher's own version (self-update compares it with the manifest's
+# launcher_version). CI passes -DHPMMO_LAUNCHER_VERSION=3.0.<unix time of the
+# last commit touching launcher_cpp/>, so only launcher changes trigger it.
+set(HPMMO_LAUNCHER_VERSION "3.0.0" CACHE STRING "Launcher version stamped into the build")
+add_compile_definitions(HPMMO_LAUNCHER_VERSION="${HPMMO_LAUNCHER_VERSION}")
+
 # Shared launcher/updater core. Ed25519 (vendored, public-domain-style zlib
 # license - see vendor/PROVENANCE.md) is the only third-party code.
 add_library(hpmmo_core STATIC
@@ -33,12 +39,16 @@ target_link_libraries(hpmmo_core PUBLIC
 )
 target_compile_options(hpmmo_core PRIVATE -O2)
 
-# GUI launcher (unchanged distribution path, now updater-aware).
+# GUI launcher: update/install/play only (signing in happens in the game).
 # app.rc embeds the exe/taskbar/titlebar icon + version info.
 add_executable(HPMMO_Launcher WIN32
     src/main.cpp
     app.rc
 )
+# windres finds the embedded art/fonts (app.rc) through the include path, and
+# the Vista+ shell/DWM/DPI APIs need an explicit target version under GCC mingw.
+target_include_directories(HPMMO_Launcher PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(HPMMO_Launcher PRIVATE _WIN32_WINNT=0x0A00 WINVER=0x0A00 _WIN32_IE=0x0A00)
 target_link_libraries(HPMMO_Launcher PRIVATE
     hpmmo_core
     ws2_32
@@ -50,6 +60,7 @@ target_link_libraries(HPMMO_Launcher PRIVATE
     comctl32
     shlwapi
     ole32
+    dwmapi
 )
 
 # Headless CLI used by the release tests and by operators.

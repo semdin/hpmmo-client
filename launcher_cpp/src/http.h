@@ -1,4 +1,5 @@
-// WinHTTP transport with SPKI certificate pinning (HTTPS only).
+// WinHTTP transport: HTTPS with SPKI certificate pinning or Windows chain
+// validation (systemTrust), plus plain HTTP for advisory documents.
 #pragma once
 
 #include <cstdint>
@@ -21,7 +22,13 @@ struct HttpOutcome {
 struct HttpRequestOptions {
     std::wstring url;
     uint64_t resumeFrom = 0;              // adds "Range: bytes=N-"
-    std::wstring pinnedSpkiHex;           // required; fails closed when empty
+    std::wstring pinnedSpkiHex;           // required unless systemTrust; fails closed when empty
+    // Validate the certificate chain against the Windows trust store instead
+    // of a pin (GitHub release hosts rotate their certificates). What makes a
+    // download trustworthy is still the Ed25519-signed manifest and its hashes.
+    bool systemTrust = false;
+    // Accept http:// (advisory documents only, e.g. the server status).
+    bool allowPlainHttp = false;
     size_t maxBodyBytes = 32u << 20;      // memory responses only
     int receiveTimeoutMs = 30000;
     // (received total, expected total or 0) -> false cancels the transfer.

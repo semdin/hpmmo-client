@@ -36,7 +36,18 @@ std::string ToLowerString(const std::string& s) { return ToLowerAscii(s); }
 std::wstring ResolveInstallRoot(const CliOptions& cli, const AppConfig& cfg) {
     if (!cli.installRoot.empty()) return NormalizePath(cli.installRoot);
     if (!cfg.installRoot.empty()) return NormalizePath(cfg.installRoot);
-    return NormalizePath(GetExeDir());
+    // A launcher that sits beside an install (or is marked portable) keeps it
+    // there; a freshly downloaded launcher does not litter its own folder (the
+    // Desktop, Downloads) with game files and installs per user instead.
+    std::wstring exeDir = GetExeDir();
+    if (FileExists(JoinPath(exeDir, L"current.json")) || FileExists(JoinPath(exeDir, L"portable.txt")) ||
+        DirExists(JoinPath(exeDir, L"versions"))) {
+        return NormalizePath(exeDir);
+    }
+    wchar_t local[MAX_PATH] = {0};
+    DWORD n = GetEnvironmentVariableW(L"LOCALAPPDATA", local, MAX_PATH);
+    if (n > 0 && n < MAX_PATH) return NormalizePath(JoinPath(local, L"HPMMO"));
+    return NormalizePath(exeDir);
 }
 
 std::string JoinUrlBase(const std::wstring& baseIn, const std::string& rel) {
@@ -102,10 +113,7 @@ UpdaterContext MakeContext(const CliOptions& cli, AppConfig cfg) {
     ctx.paths.userDir = userDir.empty() ? JoinPath(ctx.paths.installRoot, L"user")
                                         : NormalizePath(userDir);
     ctx.releaseBase = !cli.releaseBase.empty() ? cli.releaseBase : cfg.releaseBaseUrl;
-    ctx.statusUrl = !cli.statusUrl.empty() ? cli.statusUrl : cfg.statusUrl;
-    if (ctx.statusUrl.empty() && !ctx.releaseBase.empty()) {
-        ctx.statusUrl = Utf8ToWide(JoinUrlBase(ctx.releaseBase, "status.json"));
-    }
+    ctx.statusUrl = StatusUrl(cli, cfg);
     ctx.pinnedSpkiHex = ToLower(!cli.pinnedSpkiHex.empty() ? cli.pinnedSpkiHex : cfg.pinnedSpkiSha256);
     ctx.stagingQuotaBytes =
         cli.stagingQuota > 0 ? cli.stagingQuota : cfg.stagingQuotaBytes;
@@ -150,6 +158,7 @@ bool ParseManifest(const std::string& raw, ReleaseManifest& m, std::string& err)
     m.channel = root.str("channel");
     m.clientVersion = root.str("client_version");
     m.minLauncherVersion = root.str("min_launcher_version");
+    m.launcherVersion = root.str("launcher_version");
     m.protocolVersion = root.str("protocol_version");
     m.protocolMin = root.str("protocol_min");
     m.protocolMax = root.str("protocol_max");
@@ -218,7 +227,7 @@ struct DocFetch {
 };
 
 DocFetch FetchDoc(UpdaterContext& ctx, const std::wstring& url, std::string& body, size_t maxBytes,
-                  bool retry) {
+                  bool retry, bool allowPlainHttp = false) {
     DocFetch res;
     int attempts = retry ? kDocAttempts : 1;
     for (int i = 0; i < attempts; i++) {
@@ -230,6 +239,8 @@ DocFetch FetchDoc(UpdaterContext& ctx, const std::wstring& url, std::string& bod
         HttpRequestOptions opts;
         opts.url = url;
         opts.pinnedSpkiHex = ctx.pinnedSpkiHex;
+        opts.systemTrust = ctx.pinnedSpkiHex.empty();
+        opts.allowPlainHttp = allowPlainHttp;
         opts.maxBodyBytes = maxBytes;
         HttpOutcome out = HttpGetToString(opts, body);
         res.status = out.status;
@@ -310,7 +321,9 @@ bool FetchStatus(UpdaterContext& ctx, StatusDoc& st, std::string& message) {
         return false;
     }
     std::string body;
-    DocFetch f = FetchDoc(ctx, ctx.statusUrl, body, kMaxStatusBytes, true);
+    // The status is advisory (it never authorizes an install), so the account
+    // service's plain-HTTP /api/status is acceptable here.
+    DocFetch f = FetchDoc(ctx, ctx.statusUrl, body, kMaxStatusBytes, false, true);
     if (!f.ok) {
         message = "status fetch failed: " + f.error;
         st.state = "OFFLINE";
@@ -325,6 +338,9 @@ bool FetchStatus(UpdaterContext& ctx, StatusDoc& st, std::string& message) {
     }
     st.state = root.str("state", "UNKNOWN");
     for (auto& c : st.state) c = (char)toupper((unsigned char)c);
+    // /api/status reports the countdown states (ANNOUNCING, DRAINING, ...) with
+    // maintenance=true: for a player they all mean "the server is closed".
+    if (root.boolean("maintenance", false)) st.state = "MAINTENANCE";
     st.release = root.str("release");
     st.previousRelease = root.str("previous_release");
     st.since = root.str("since");
@@ -522,6 +538,7 @@ bool CheckDiskSpace(UpdaterContext& ctx, uint64_t required, std::string& message
 }
 
 void ReportProgress(UpdaterContext& ctx, const wchar_t* phase, uint64_t done, uint64_t total) {
+    if (ctx.progress) ctx.progress(done, total);
     if (!ctx.status) return;
     static int lastPct = -1;
     int pct = total ? (int)((done * 100) / total) : -1;
@@ -590,6 +607,7 @@ bool DownloadArtifact(UpdaterContext& ctx, const Artifact& art, std::wstring& fi
         opts.url = url;
         opts.resumeFrom = have;
         opts.pinnedSpkiHex = ctx.pinnedSpkiHex;
+        opts.systemTrust = ctx.pinnedSpkiHex.empty();
         opts.progress = [&](uint64_t done, uint64_t total) {
             if (ctx.cancel && ctx.cancel->load()) return false;
             ReportProgress(ctx, L"Downloading", done, art.size);
@@ -886,6 +904,22 @@ bool SameVersion(const std::string& a, const std::string& b) {
     return CompareVersions(a, b) == 0;
 }
 
+// The launcher replaces itself when the release requires a newer launcher, or
+// simply ships one (launcher_version newer than this build) - but only when the
+// manifest actually carries a launcher executable to install.
+bool LauncherUpdateNeeded(const ReleaseManifest& m) {
+    if (!m.minLauncherVersion.empty() && CompareVersions(m.minLauncherVersion, kLauncherVersion) > 0) {
+        return true;
+    }
+    if (m.launcherVersion.empty() || CompareVersions(m.launcherVersion, kLauncherVersion) <= 0) {
+        return false;
+    }
+    for (const auto& a : m.artifacts) {
+        if (a.kind == "launcher") return true;
+    }
+    return false;
+}
+
 // ------------------------------------------------------------ self-update --
 
 bool PerformSelfUpdate(UpdaterContext& ctx, const ReleaseManifest& m, std::string& message,
@@ -914,6 +948,8 @@ bool PerformSelfUpdate(UpdaterContext& ctx, const ReleaseManifest& m, std::strin
     std::wstring target = GetExePath();
     std::wstring cmd = L"\"" + newExe + L"\" --self-update-swap " +
                        std::to_wstring(GetCurrentProcessId()) + L" \"" + target + L"\"";
+    // The GUI launcher comes back by itself once the new executable is in place.
+    if (ctx.interactive) cmd += L" --relaunch";
     STARTUPINFOW si = {sizeof(si)};
     PROCESS_INFORMATION pi;
     std::vector<wchar_t> buf(cmd.begin(), cmd.end());
@@ -962,8 +998,7 @@ bool RunFetchAndCompare(UpdaterContext& ctx, ReleaseManifest& m, StatusDoc& st,
     }
     std::string serverProto, protoReason;
     bool protoOk = ProtocolCompatible(m, st, serverProto, protoReason);
-    bool selfUpdate = !m.minLauncherVersion.empty() &&
-                      CompareVersions(m.minLauncherVersion, kLauncherVersion) > 0;
+    bool selfUpdate = LauncherUpdateNeeded(m);
     bool update = !inst.present || !SameVersion(inst.version, m.clientVersion);
     if (summary) {
         summary->ok = true;
@@ -1017,8 +1052,7 @@ CommandResult CheckImpl(UpdaterContext& ctx, CheckSummary* summary) {
     }
     std::string serverProto, protoReason;
     bool protoOk = ProtocolCompatible(m, st, serverProto, protoReason);
-    bool selfUpdate = !m.minLauncherVersion.empty() &&
-                      CompareVersions(m.minLauncherVersion, kLauncherVersion) > 0;
+    bool selfUpdate = LauncherUpdateNeeded(m);
     bool update = !inst.present || !SameVersion(inst.version, m.clientVersion);
     std::vector<RunningProcess> running;
     bool gameRunning = IsGameRunningNowImpl(ctx.paths, ctx.cfg, &running);
@@ -1085,8 +1119,7 @@ CommandResult UpdateImpl(UpdaterContext& ctx, CheckSummary* summary) {
     }
     std::string serverProto, protoReason;
     bool protoOk = ProtocolCompatible(m, st, serverProto, protoReason);
-    bool selfUpdate = !m.minLauncherVersion.empty() &&
-                      CompareVersions(m.minLauncherVersion, kLauncherVersion) > 0;
+    bool selfUpdate = LauncherUpdateNeeded(m);
 
     if (selfUpdate) {
         int selfCode = kExitOk;
@@ -1504,6 +1537,9 @@ std::wstring StatusUrl(const CliOptions& cli, const AppConfig& cfg) {
     if (!cfg.statusUrl.empty()) return cfg.statusUrl;
     std::wstring base = ReleaseBaseUrl(cli, cfg);
     if (base.empty()) return L"";
+    // GitHub hosts the releases; the live server state comes from the account
+    // service. Any other release host serves its own status.json.
+    if (base == HPMMO_DEFAULT_RELEASE_BASE) return HPMMO_DEFAULT_STATUS_URL;
     return Utf8ToWide(JoinUrlBase(base, "status.json"));
 }
 
@@ -1538,10 +1574,12 @@ CheckSummary DoCheck(const CliOptions& opts, AppConfig cfg, std::atomic<bool>* c
 }
 
 CommandResult DoUpdate(const CliOptions& opts, AppConfig cfg, std::atomic<bool>* cancel,
-                       const std::function<void(const std::wstring&)>& status) {
+                       const std::function<void(const std::wstring&)>& status,
+                       const std::function<void(uint64_t, uint64_t)>& progress) {
     UpdaterContext ctx = MakeContext(opts, cfg);
     ctx.cancel = cancel;
     ctx.status = status;
+    ctx.progress = progress;
     ctx.interactive = true;
     return UpdateImpl(ctx, nullptr);
 }
@@ -1612,6 +1650,56 @@ bool LaunchInstalledGame(const UpdaterPaths& paths, const AppConfig& cfg, bool s
         return true;
     }
     return false;
+}
+
+UpdaterPaths ResolvePathsForGui(AppConfig cfg) {
+    CliOptions cli;
+    return MakeContext(cli, cfg).paths;
+}
+
+bool LaunchGameClient(const UpdaterPaths& paths, const AppConfig& cfg, const std::string& clientVersion) {
+    if (paths.gameExe.empty() || !FileExists(paths.gameExe)) return false;
+    // No scene argument: export templates refuse path overrides, and the main
+    // scene is the login screen anyway.
+    std::wstring cmd = L"\"" + paths.gameExe + L"\"";
+    std::vector<std::wstring> entries;
+    LPWCH current = GetEnvironmentStringsW();
+    if (current) {
+        for (LPWCH p = current; *p; p += wcslen(p) + 1) {
+            if (_wcsnicmp(p, L"HPMMO_TICKET=", 13) == 0) continue;
+            if (_wcsnicmp(p, L"HPMMO_API_URL=", 14) == 0) continue;
+            if (_wcsnicmp(p, L"HPMMO_USER_DIR=", 15) == 0) continue;
+            if (_wcsnicmp(p, L"HPMMO_CLIENT_VERSION=", 21) == 0) continue;
+            entries.emplace_back(p);
+        }
+        FreeEnvironmentStringsW(current);
+    }
+    entries.push_back(L"HPMMO_API_URL=http://" + cfg.serverIp + L":" + std::to_wstring(cfg.apiPort));
+    entries.push_back(L"HPMMO_USER_DIR=" + paths.userDir);
+    if (!clientVersion.empty()) entries.push_back(L"HPMMO_CLIENT_VERSION=" + Utf8ToWide(clientVersion));
+    std::sort(entries.begin(), entries.end(), [](const std::wstring& a, const std::wstring& b) {
+        return _wcsicmp(a.c_str(), b.c_str()) < 0;
+    });
+    std::vector<wchar_t> envBlock;
+    for (const auto& entry : entries) {
+        envBlock.insert(envBlock.end(), entry.begin(), entry.end());
+        envBlock.push_back(L'\0');
+    }
+    envBlock.push_back(L'\0');
+    std::wstring workDir = paths.gameExe.substr(0, paths.gameExe.find_last_of(L"\\/"));
+    STARTUPINFOW si = {sizeof(si)};
+    PROCESS_INFORMATION pi;
+    std::vector<wchar_t> buf(cmd.begin(), cmd.end());
+    buf.push_back(0);
+    if (!CreateProcessW(NULL, buf.data(), NULL, NULL, FALSE, CREATE_UNICODE_ENVIRONMENT,
+                        envBlock.data(), workDir.empty() ? NULL : workDir.c_str(), &si, &pi)) {
+        LogMsg("[Launcher] cannot start the game (error " + std::to_string(GetLastError()) + ")");
+        return false;
+    }
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    LogMsg("[Launcher] game started: " + WideToUtf8(paths.gameExe));
+    return true;
 }
 
 int RunSelfUpdateSwap(const std::string& pidStr, const std::wstring& target,

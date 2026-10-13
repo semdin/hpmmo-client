@@ -61,8 +61,10 @@ MANIFEST_FIELDS = (
     "channel", "client_version", "min_launcher_version", "protocol_version",
     "protocol_min", "protocol_max", "content_version", "content_sha256",
     "server_version", "schema_version", "platform", "published_at",
-    "release_notes", "artifacts",
+    "release_notes", "artifacts", "launcher_version",
 )
+#: Fields a manifest may omit (older manifests predate them).
+OPTIONAL_MANIFEST_FIELDS = ("launcher_version",)
 ARTIFACT_FIELDS = ("kind", "from_version", "url", "size", "sha256")
 
 
@@ -161,6 +163,20 @@ def make_manifest(args: argparse.Namespace) -> dict:
             "size": os.path.getsize(path),
             "sha256": rc.sha256_file(path),
         })
+    # The launcher's own executable: what a launcher self-update downloads when
+    # the manifest's launcher_version is newer than the running launcher.
+    if args.launcher_artifact:
+        if not os.path.isfile(args.launcher_artifact):
+            rc.fail("launcher artifact %s does not exist" % args.launcher_artifact, 2)
+        if not args.launcher_artifact.lower().endswith(".exe"):
+            rc.fail("the launcher artifact must be a raw .exe (self-update swaps the executable)", 2)
+        artifacts.append({
+            "kind": "launcher",
+            "from_version": None,
+            "url": args.base_url.rstrip("/") + "/" + os.path.basename(args.launcher_artifact),
+            "size": os.path.getsize(args.launcher_artifact),
+            "sha256": rc.sha256_file(args.launcher_artifact),
+        })
     artifacts.sort(key=lambda entry: (entry["kind"], entry["from_version"] or "", entry["url"]))
 
     if args.kind == "delta" and len(artifacts) != 1:
@@ -190,6 +206,7 @@ def make_manifest(args: argparse.Namespace) -> dict:
         "published_at": args.published_at or rc.utc_now_iso(),
         "release_notes": args.release_notes,
         "artifacts": artifacts,
+        "launcher_version": args.launcher_version,
     }
 
 
@@ -248,7 +265,8 @@ def load_manifest(manifest_path: str) -> tuple[bytes, dict]:
 
 def check_schema(doc: dict) -> list[str]:
     problems = []
-    missing = [field for field in MANIFEST_FIELDS if field not in doc]
+    missing = [field for field in MANIFEST_FIELDS
+               if field not in doc and field not in OPTIONAL_MANIFEST_FIELDS]
     if missing:
         problems.append("missing field(s): %s" % ", ".join(missing))
     extra = [field for field in doc if field not in MANIFEST_FIELDS]
@@ -481,6 +499,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--base-url", default="https://213.250.145.75:8443/releases")
     parser.add_argument("--release-notes", default="")
     parser.add_argument("--release-notes-file", default="")
+    parser.add_argument("--launcher-artifact", default="", help="the launcher .exe for self-update (optional)")
+    parser.add_argument("--launcher-version", default="", help="version of --launcher-artifact")
     parser.add_argument("--published-at", default="", help="pin published_at for a reproducible manifest")
     parser.add_argument("--key", default="", help="Ed25519 private key (PEM) - never in a repository")
     parser.add_argument("--key-id", default="", help="expected SPKI sha256 of the signing key")
@@ -519,6 +539,8 @@ def cmd_build(args: argparse.Namespace) -> int:
         rc.validate_version(args.client_version, "client version")
         rc.validate_version(args.min_launcher_version, "min_launcher_version")
         rc.validate_version(args.server_version, "server version")
+        if args.launcher_version:
+            rc.validate_version(args.launcher_version, "launcher version")
         rc.validate_content_version(args.content_version)
         rc.validate_platform(args.platform)
     except ValueError as exc:

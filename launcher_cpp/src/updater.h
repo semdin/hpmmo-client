@@ -12,8 +12,14 @@
 
 namespace hpmmo {
 
-// The running launcher's version. Compared against manifest.min_launcher_version.
-constexpr const char* kLauncherVersion = "2.0.0";
+// The running launcher's version, stamped by the build (CMake
+// HPMMO_LAUNCHER_VERSION; CI derives it from the last commit that touched
+// launcher_cpp/). A manifest whose launcher_version (or min_launcher_version)
+// is newer makes the launcher replace itself before anything else.
+#ifndef HPMMO_LAUNCHER_VERSION
+#define HPMMO_LAUNCHER_VERSION "3.0.0"
+#endif
+constexpr const char* kLauncherVersion = HPMMO_LAUNCHER_VERSION;
 // Default documented key id; the real id comes from client_config.json.
 constexpr const char* kDefaultPinnedKeyId = "hpmmo-release-key-unprovisioned";
 
@@ -68,7 +74,7 @@ struct Artifact {
 };
 
 struct ReleaseManifest {
-    std::string channel, clientVersion, minLauncherVersion;
+    std::string channel, clientVersion, minLauncherVersion, launcherVersion;
     std::string protocolVersion, protocolMin, protocolMax;
     std::string contentVersion, contentSha256;
     std::string serverVersion, schemaVersion, platform, publishedAt, releaseNotes;
@@ -117,6 +123,7 @@ struct UpdaterContext {
     std::string keyId;
     std::atomic<bool>* cancel = nullptr;
     std::function<void(const std::wstring&)> status;  // progress text (GUI)
+    std::function<void(uint64_t, uint64_t)> progress; // download bytes (done, total) (GUI)
     bool interactive = false;
 };
 
@@ -152,13 +159,19 @@ CheckSummary DoCheck(const CliOptions& opts, AppConfig cfg, std::atomic<bool>* c
                      const std::function<void(const std::wstring&)>& status);
 // Runs the full update (or self-update); returns the exit code and a message.
 CommandResult DoUpdate(const CliOptions& opts, AppConfig cfg, std::atomic<bool>* cancel,
-                       const std::function<void(const std::wstring&)>& status);
+                       const std::function<void(const std::wstring&)>& status,
+                       const std::function<void(uint64_t, uint64_t)>& progress = nullptr);
 CommandResult DoRepair(const CliOptions& opts, AppConfig cfg, std::atomic<bool>* cancel,
                        const std::function<void(const std::wstring&)>& status);
 bool IsGameRunningNow(const UpdaterPaths& paths, const AppConfig& cfg,
                       std::vector<RunningProcess>* matches);
 bool LaunchInstalledGame(const UpdaterPaths& paths, const AppConfig& cfg, bool solo,
                          const std::wstring& username, const std::wstring& ticket);
+// Starts the installed game at its own login screen (the launcher no longer
+// signs in). clientVersion is shown on the login screen.
+bool LaunchGameClient(const UpdaterPaths& paths, const AppConfig& cfg, const std::string& clientVersion);
+// Paths for the GUI (install root, game exe) without running a command.
+UpdaterPaths ResolvePathsForGui(AppConfig cfg);
 
 // Helper entry points (invoked via command-line flags).
 int RunSelfUpdateSwap(const std::string& pidStr, const std::wstring& target,

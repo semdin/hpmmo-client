@@ -348,6 +348,8 @@ func _check_maintenance() -> void:
 	check(maintenance.countdown_seconds() > 0 and maintenance.countdown_seconds() <= 45,
 		"The countdown starts from the authority's deadline (%d s)" % maintenance.countdown_seconds())
 	check(maintenance.countdown_text() == "0:45", "The countdown renders as mm:ss (%s)" % maintenance.countdown_text())
+	check(hud.chat != null and hud.chat._lines.any(func(l): return str(l.get("bb", "")).contains("saniye içinde herkes oyundan")),
+		"The countdown announcement is also written to the chat log")
 	var first := maintenance.countdown_seconds()
 	# The countdown runs on the wall clock (the authority's deadline is real
 	# seconds), so the wait is a real-time wait, not a simulated one.
@@ -359,7 +361,7 @@ func _check_maintenance() -> void:
 		"The panel title carries the live countdown")
 	SimAuthority.maintenance_event.emit("MAINTENANCE", "scheduled maintenance", 0)
 	await get_tree().process_frame
-	check(maintenance._title.text.contains("closed") and maintenance.active,
+	check(maintenance._title.text.contains("kapatıldı") and maintenance.active,
 		"The closed state latches so the reason survives the disconnect")
 	SimAuthority.maintenance_event.emit("ONLINE", "", 0)
 	await get_tree().process_frame

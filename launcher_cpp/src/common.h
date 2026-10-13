@@ -77,6 +77,24 @@ bool IsGameRunning(const std::wstring& installRoot,
                    std::vector<RunningProcess>* matches);
 
 // ------------------------------------------------------------------- config --
+// Built-in release source: a lone HPMMO_Launcher.exe with no client_config.json
+// next to it still knows where updates live and which key signs them.
+// GitHub's "latest" alias always resolves to the newest published release.
+#ifndef HPMMO_DEFAULT_RELEASE_BASE
+#define HPMMO_DEFAULT_RELEASE_BASE L"https://github.com/semdin/hpmmo-client/releases/latest/download"
+#endif
+#ifndef HPMMO_DEFAULT_STATUS_URL
+#define HPMMO_DEFAULT_STATUS_URL L"http://213.250.145.75:8081/api/status"
+#endif
+// Raw 32-byte Ed25519 public key (base64) of the release signing key; its
+// private half is the HPMMO_CLIENT_SIGNING_KEY GitHub secret.
+#ifndef HPMMO_DEFAULT_RELEASE_KEY
+#define HPMMO_DEFAULT_RELEASE_KEY L"1fnIuBa9qYMhOphM0O94gAeYXy8o50pfHhBSsu+7zdI="
+#endif
+#ifndef HPMMO_DEFAULT_RELEASE_KEY_ID
+#define HPMMO_DEFAULT_RELEASE_KEY_ID L"d540e9f5467ba5a12aa290900249fa6ceb0824dd29f9a60ad57c6d463230842f"
+#endif
+
 struct AppConfig {
     // Existing launcher fields (behaviour preserved).
     std::wstring serverIp = L"213.250.145.75";
@@ -86,13 +104,15 @@ struct AppConfig {
     bool rememberMe = true;
 
     // the release pipeline updater fields (all optional; empty/0 disables the updater).
-    std::wstring releaseBaseUrl;      // e.g. https://releases.example/hpmmo/stable
-    std::wstring statusUrl;           // default: <release_base>/status.json
-    std::wstring releasePublicKey;    // base64, 32-byte pinned Ed25519 public key
-    std::wstring releasePublicKeyId;  // documented key id (informational)
+    std::wstring releaseBaseUrl = HPMMO_DEFAULT_RELEASE_BASE;
+    std::wstring statusUrl;           // empty: HPMMO_DEFAULT_STATUS_URL for the built-in
+                                      // release base, else <release_base>/status.json
+    std::wstring releasePublicKey = HPMMO_DEFAULT_RELEASE_KEY;    // base64, 32-byte Ed25519 key
+    std::wstring releasePublicKeyId = HPMMO_DEFAULT_RELEASE_KEY_ID;  // informational
     std::wstring releaseChannel;      // optional expected channel
-    std::wstring pinnedSpkiSha256;    // hex sha256 of the pinned certificate SPKI
-    std::wstring installRoot;         // empty = launcher exe directory
+    std::wstring pinnedSpkiSha256;    // hex sha256 of a pinned certificate SPKI; empty = Windows trust store
+    std::wstring installRoot;         // empty = exe directory when it already holds an
+                                      // install (current.json / portable.txt), else %LOCALAPPDATA%\HPMMO
     std::wstring userDataDir;         // empty = <installRoot>/user
     std::wstring gameExeName;         // empty = auto-detect
     std::vector<std::wstring> gameProcessNames;  // extra process names to detect

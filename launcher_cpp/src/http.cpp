@@ -21,9 +21,10 @@ struct UrlParts {
     std::wstring host;
     std::wstring path;  // path + query
     WORD port = 0;
+    bool secure = true;
 };
 
-bool ParseHttpsUrl(const std::wstring& url, UrlParts& out, std::string& err) {
+bool ParseHttpsUrl(const std::wstring& url, UrlParts& out, std::string& err, bool allowPlain) {
     out = UrlParts{};
     URL_COMPONENTS uc = {};
     uc.dwStructSize = sizeof(uc);
@@ -37,10 +38,12 @@ bool ParseHttpsUrl(const std::wstring& url, UrlParts& out, std::string& err) {
         err = "malformed URL";
         return false;
     }
-    if (uc.nScheme != INTERNET_SCHEME_HTTPS) {
+    if (uc.nScheme != INTERNET_SCHEME_HTTPS &&
+        !(allowPlain && uc.nScheme == INTERNET_SCHEME_HTTP)) {
         err = "URL is not HTTPS";
         return false;
     }
+    out.secure = (uc.nScheme == INTERNET_SCHEME_HTTPS);
     if (uc.lpszUserName && uc.dwUserNameLength > 0) {
         err = "credentials are not allowed in URLs";
         return false;
@@ -108,10 +111,13 @@ static HttpOutcome RunRequest(const HttpRequestOptions& opts, std::wstring* dest
                               uint64_t* outExpectedTotal) {
     HttpOutcome out;
     UrlParts parts;
-    if (!ParseHttpsUrl(opts.url, parts, out.error)) {
+    if (!ParseHttpsUrl(opts.url, parts, out.error, opts.allowPlainHttp)) {
         out.errorKind = "config";
         return out;
     }
+    // A pin only means something on TLS; system trust replaces it by design.
+    if (!parts.secure || opts.systemTrust) requirePin = false;
+    const bool checkPin = parts.secure && !opts.systemTrust;
     if (requirePin && opts.pinnedSpkiHex.empty()) {
         out.errorKind = "config";
         out.error = "no pinned certificate configured";
@@ -119,7 +125,7 @@ static HttpOutcome RunRequest(const HttpRequestOptions& opts, std::wstring* dest
     }
 
     RequestHandles h;
-    h.session = WinHttpOpen(L"HPMMO_Launcher/2.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+    h.session = WinHttpOpen(L"HPMMO-Launcher/3", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
                             WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (!h.session) {
         out.errorKind = "network";
@@ -136,7 +142,7 @@ static HttpOutcome RunRequest(const HttpRequestOptions& opts, std::wstring* dest
     }
     h.request = WinHttpOpenRequest(h.connect, L"GET", parts.path.c_str(), NULL,
                                    WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
-                                   WINHTTP_FLAG_SECURE);
+                                   parts.secure ? WINHTTP_FLAG_SECURE : 0);
     if (!h.request) {
         out.errorKind = "network";
         out.error = "cannot create request (" + std::to_string(GetLastError()) + ")";
@@ -146,10 +152,13 @@ static HttpOutcome RunRequest(const HttpRequestOptions& opts, std::wstring* dest
     // Certificate handling: the pinned SPKI is the authentication decision, so
     // chain/name/expiry errors are tolerated and then replaced by an exact pin
     // comparison. Without a pin we refuse to talk to the server at all.
-    DWORD secFlags = SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_CERT_CN_INVALID |
-                     SECURITY_FLAG_IGNORE_CERT_DATE_INVALID |
-                     SECURITY_FLAG_IGNORE_CERT_WRONG_USAGE;
-    WinHttpSetOption(h.request, WINHTTP_OPTION_SECURITY_FLAGS, &secFlags, sizeof(secFlags));
+    // With systemTrust the defaults stay: Windows validates chain, name and date.
+    if (checkPin) {
+        DWORD secFlags = SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_CERT_CN_INVALID |
+                         SECURITY_FLAG_IGNORE_CERT_DATE_INVALID |
+                         SECURITY_FLAG_IGNORE_CERT_WRONG_USAGE;
+        WinHttpSetOption(h.request, WINHTTP_OPTION_SECURITY_FLAGS, &secFlags, sizeof(secFlags));
+    }
 
     std::wstring headers;
     if (opts.resumeFrom > 0) {
@@ -176,9 +185,9 @@ static HttpOutcome RunRequest(const HttpRequestOptions& opts, std::wstring* dest
 
     // Pin check before reading any body bytes.
     std::string pinErr;
-    std::string observed = QueryServerCertPin(h.request, pinErr);
+    std::string observed = checkPin ? QueryServerCertPin(h.request, pinErr) : std::string();
     out.certPinHex = observed;
-    if (observed.empty()) {
+    if (checkPin && observed.empty()) {
         out.errorKind = "pin";
         out.error = pinErr;
         return out;

@@ -25,6 +25,7 @@ import hashlib
 import http.server
 import io
 import json
+import re
 import os
 import shutil
 import socket
@@ -278,6 +279,7 @@ class Release:
         content_version: str = "1",
         platform: str = "windows-x86_64",
         artifacts: list[dict] | None = None,
+        launcher_version: str | None = None,
     ) -> bytes:
         manifest = {
             "channel": channel,
@@ -295,6 +297,8 @@ class Release:
             "release_notes": release_notes,
             "artifacts": artifacts if artifacts is not None else self.artifacts,
         }
+        if launcher_version is not None:
+            manifest["launcher_version"] = launcher_version
         raw = json.dumps(manifest, separators=(",", ":"), sort_keys=False).encode()
         (self.root / "manifest.json").write_bytes(raw)
         sig = self.key.sign(raw)
@@ -424,7 +428,7 @@ def test_install_and_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25
 
     rc, js, _ = run_cli(common_args(root, server.base, pin, pubkey) + ["--print-state"])
     check("print-state: reports installed version", rc == 0 and js.get("installed_version") == "1.2.0", str(js))
-    check("print-state: launcher version", js.get("launcher_version") == "2.0.0", str(js))
+    check("print-state: launcher version", bool(re.match(r"^\d+\.\d+\.\d+$", str(js.get("launcher_version", "")))), str(js))
 
 
 def test_resume(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateKey,
@@ -773,6 +777,27 @@ def test_self_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519Priv
           "self-update" in log_file.read_text(errors="ignore"))
 
 
+def test_launcher_version_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateKey,
+                                 pin: str, pubkey: str):
+    """A release that merely ships a newer launcher (launcher_version above the
+    running build, min_launcher_version unchanged) still makes the launcher
+    replace itself; an equal or older launcher_version does not."""
+    root = t / "install"
+    rel = t / "rel"
+    rel.mkdir()
+    server.httpd.release_root = rel
+    release = Release(rel, signer)
+    release.add_package("game-1.2.0.zip", build_package({"HPMMO.exe": b"GAME"}))
+    release.add_package("launcher-99.0.0.exe", b"MZ-new-launcher", kind="launcher")
+    release.write_manifest("1.2.0", launcher_version="99.0.0")
+    release.write_status("ONLINE")
+    rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--check"])
+    check("launcher_version: newer launcher requires a self-update", rc == 0 and js.get("self_update_required") is True, log)
+    release.write_manifest("1.2.0", launcher_version="0.0.1")
+    rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--check"])
+    check("launcher_version: older launcher is ignored", rc == 0 and js.get("self_update_required") is False, log)
+
+
 def test_pinning(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateKey,
                  pin: str, pubkey: str):
     root = t / "install"
@@ -799,8 +824,10 @@ def test_pinning(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateK
     rc, js, log = run_cli(["--config", str(root / "client_config.json"),
                            "--install-root", str(root), "--release-base", server.base,
                            "--pinned-spki", pin, "--check"])
-    check("pin: unprovisioned key fails closed", rc == 3, log)
-    check("pin: message names the public key", bool(js and "public key" in js.get("message", "")), str(js))
+    # No key in the config: the launcher falls back to its built-in release
+    # key, which did not sign this test manifest - so it still fails closed.
+    check("pin: unconfigured key falls back to the built-in key and fails closed", rc == 11, log)
+    check("pin: message names the signature", bool(js and "signature" in js.get("message", "")), str(js))
 
 
 def test_unsafe_archive(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateKey,
@@ -950,6 +977,7 @@ def main() -> int:
         test_protocol,
         test_game_running,
         test_self_update,
+        test_launcher_version_update,
         test_pinning,
         test_unsafe_archive,
         test_compression_methods,
