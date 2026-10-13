@@ -1,0 +1,31 @@
+{
+ "id": "sandstone-blocks-08",
+ "name": "Sandstone Blocks 08",
+ "source_page": "https://polyhaven.com/a/sandstone_blocks_08",
+ "author": "Rob Tuytel",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt in this folder (snapshot of https://polyhaven.com/license)",
+ "files": [
+  {
+   "file": "sandstone_blocks_08_diff_2k.jpg",
+   "bytes": 1129500,
+   "sha256": "da2f453c7c3683f5b01ca8b365ccf81ebce488afab7661adecd83208fc9aec97"
+  },
+  {
+   "file": "sandstone_blocks_08_nor_gl_2k.jpg",
+   "bytes": 954422,
+   "sha256": "735f205de2d44f2e7edddf22d6b7dca5cd2ace000f3f637546302508dd9616c2"
+  },
+  {
+   "file": "sandstone_blocks_08_rough_2k.jpg",
+   "bytes": 877815,
+   "sha256": "676d9f00b54f303dc19856123312110be3859066661b224dececc3bc857c8f21"
+  },
+  {
+   "file": "sandstone_blocks_08_ao_2k.jpg",
+   "bytes": 674306,
+   "sha256": "8c77ecef52727a13a3e6afa731390c37c285692de9703da426402fe1e61b611f"
+  }
+ ]
+}

@@ -27,7 +27,12 @@ extends Node
 ##     [--keep-scene]   # instantiate the world in-process instead of changing scene
 
 const WORLD_SCENE := "res://scenes/world/game_world.tscn"
-const COURTYARD := Vector3(0.0, 0.6, 5.0)
+## Broom cruising height above the higher of the ground under the rider, ahead
+## of it and at the goal: clears the trees and the ~57 m castle plateau cliff.
+const CRUISE_CLEARANCE := 25.0
+## How far short of a pack's authored area the fight trip lands: inside the
+## 70 m interest radius, outside the pack's aggro radius.
+const PACK_LANDING_OFFSET := 30.0
 const ENGAGE_RANGE := 22.0
 const CAST_SPELLS := ["basic_cast", "stupefy", "incendio", "bombarda", "expelliarmus", "protego"]
 
@@ -82,9 +87,19 @@ var _staircase_reported := false
 var _ride_low := 0.0
 var _ride_high := 0.0
 var _state_at_logout := {}
+## The courtyard spawn of the grounds catalog (where the journey casts and lands).
+var _courtyard := Vector3.ZERO
+## Fight trip: 0 pick a pack, 1 mount, 2 fly, 3 land and dismount, 4 arrived.
+var _trip_state := 0
+var _trip_goal := Vector3.ZERO
+var _trip_timer := 0.0
+var _trip_attempts := 0
 
 func _ready() -> void:
 	_parse_args()
+	# From the catalog, never a constant: the grounds moved onto the Terrain3D
+	# map, where the old (0, 0.6, 5) is underground at the castle door.
+	_courtyard = HPMaps.spawn_point("grounds", "courtyard")
 	if out_path != "":
 		_file = FileAccess.open(out_path, FileAccess.WRITE)
 	if api_url != "":
@@ -281,10 +296,10 @@ func _step_enter_world() -> void:
 func _step_courtyard() -> void:
 	if not _alive():
 		return
-	var to_yard := COURTYARD - _auth_pos()
+	var to_yard := _courtyard - _auth_pos()
 	to_yard.y = 0.0
 	if to_yard.length() > 3.5:
-		_walk_toward(COURTYARD)
+		_walk_toward(_courtyard)
 		return
 	SimNet.forced_intent = {}
 	_cast_timer -= get_physics_process_delta_time()
@@ -307,9 +322,19 @@ func _step_courtyard() -> void:
 func _step_fight() -> void:
 	if not _alive():
 		return
+	# A trip under way lands first: the pack comes into interest range (70 m)
+	# while the broom is still in the air, and a mounted body cannot fight.
+	if _trip_state > 0 and _trip_state < 4 and _fly_to_pack():
+		return
 	if _pack_id == 0:
 		_pack_id = _choose_pack()
 		if _pack_id == 0:
+			# On the Terrain3D grounds the nearest pack is ~350 m from the
+			# courtyard, far outside the 70 m interest radius, so none is ever
+			# replicated there. Fly out to it like a player would, land short of
+			# it, and only then start the 30 s visibility window.
+			if _fly_to_pack():
+				return
 			if _t - _step_t > 30.0:
 				_fail("fight", "no pack was ever visible")
 				_goto("mount")
@@ -370,7 +395,7 @@ func _step_mount() -> void:
 			if mounted:
 				_record("mounted", {})
 				_mount_state = 2
-				_mount_timer = 8.0
+				_mount_timer = 90.0
 			elif _mount_timer <= 0.0:
 				if _attempts < 3:
 					_attempts += 1
@@ -380,14 +405,14 @@ func _step_mount() -> void:
 					_fail("mount", "mount request refused on open ground")
 					_goto("castle")
 		2:
-			# Climb and cruise back toward the courtyard: dismount needs LEVEL
-			# ground within 3 m, and a fight usually ends on forest slope.
-			SimNet.forced_intent = _flight_intent_yard(true)
-			if _mount_timer <= 0.0:
+			# Climb and cruise back to the courtyard: dismount needs LEVEL
+			# ground within 3 m, and a fight ends on forest slope ~350 m away.
+			SimNet.forced_intent = _flight_intent_to(_courtyard)
+			if _flat_distance(_courtyard) <= 4.0 or _mount_timer <= 0.0:
 				_mount_state = 3
 				_mount_timer = 8.0
 		3:
-			SimNet.forced_intent = _flight_intent_yard(false)
+			SimNet.forced_intent = _flight_intent_to(_courtyard)
 			if _mount_timer <= 0.0 or not mounted:
 				_mount_state = 4
 				_mount_timer = 3.0
@@ -397,7 +422,7 @@ func _step_mount() -> void:
 				_goto("castle")
 				return
 			# Still mounted: keep losing height over level ground and ask again.
-			SimNet.forced_intent = _flight_intent_yard(false)
+			SimNet.forced_intent = _flight_intent_to(_courtyard)
 			if _mount_timer <= 0.0:
 				_mount_timer = 1.5
 				SimNet.submit_mount(player, false)
@@ -481,7 +506,16 @@ func _step_castle() -> void:
 			# foot from above, under the ramp) can never be collected. Only a
 			# body in front of the foot walks up the ramp - which is how the
 			# staircase probe boards.
-			var in_front := deck_space.z < 0.2 and absf(deck_space.x) < 2.5
+			# Near the foot too, not anywhere along the line behind it: a walker
+			# across the hall can be "in line" with the deck 50 m away.
+			var in_front := deck_space.z < 0.2 and deck_space.z > -3.0 and absf(deck_space.x) < 2.5
+			if _t - _castle_trace_t >= 1.0:
+				# One line a second: where the walker is and which branch it is in,
+				# so a stuck route reads straight off the transcript.
+				_castle_trace_t = _t
+				_record("castle_trace", {"pos": str(auth.round()), "deck": str(deck_space.round()),
+					"in_front": in_front, "route": _castle_route_index, "dock": dock,
+					"docked_here": docked_here, "state": String(staircase.get("state"))})
 			if docked_here and bool(staircase.call("on_deck", auth, tick, 2.4, 0.8)) \
 					and deck_space.z >= 1.2:
 				SimNet.forced_intent = {}
@@ -501,9 +535,17 @@ func _step_castle() -> void:
 			else:
 				_walk_toward(_dock_wait_point())
 			return
-	# No staircase (or its window passed): leave through the vestibule exit.
+	# No staircase (or its window passed): leave through the vestibule exit,
+	# back out of the staircase tower first when the ride ended in it.
+	if staircase != null and _walk_route(_castle_exit_route(), "_castle_exit_index"):
+		return
 	var exit_centre := _portal_center(HPMaps.portal("vestibule_exit"))
-	if _auth_pos().distance_to(exit_centre) > 2.0:
+	# Flat distance, like _walk_toward's own stop radius: the portal centre is
+	# a metre above the floor, and a 3D test left a dead band where the walker
+	# had stopped (flat < 1.5 m) but was still "too far" (3D > 2 m).
+	var to_exit := exit_centre - _auth_pos()
+	to_exit.y = 0.0
+	if to_exit.length() > 2.0:
 		_walk_toward(exit_centre)
 		return
 	SimNet.forced_intent = {}
@@ -536,9 +578,8 @@ func _ride_tick() -> void:
 		_ride_aboard = false
 		_ride_done = true
 		_step_t = _t
-		# The rider is now on an upper landing; walk back to the vestibule exit
-		# (the route may drop it into the hall, which is a short fall onto the
-		# ground floor, not a fall rescue).
+		# The flight swung round the Grand Staircase well with the rider on it;
+		# step off its foot and walk back out to the vestibule exit.
 		return
 
 # ------------------------------------------------------------------ 8. logout
@@ -706,14 +747,111 @@ func _is_dead(uid: int) -> bool:
 
 ## Fly toward the courtyard, climbing or descending: level ground is where a
 ## rider is allowed to get off.
-func _flight_intent_yard(climb: bool) -> Dictionary:
-	var to_yard := COURTYARD - _auth_pos()
-	to_yard.y = 0.0
-	var yaw := rad_to_deg(atan2(-to_yard.x, -to_yard.z))
-	var move := Vector2.ZERO
-	if to_yard.length() > 4.0:
-		move = Vector2(0, -1)
-	return {"move": move, "yaw": yaw, "jump": climb, "descend": not climb}
+## Broom steering over the grounds: hold CRUISE_CLEARANCE above the highest
+## ground here, a little ahead and at the goal, and only fly on once near that
+## height (the castle plateau is a cliff above the lake). Over the goal: descend.
+func _flight_intent_to(goal: Vector3) -> Dictionary:
+	var pos := _auth_pos()
+	var flat := goal - pos
+	flat.y = 0.0
+	var yaw := rad_to_deg(atan2(-flat.x, -flat.z))
+	if flat.length() <= 4.0:
+		return {"move": Vector2.ZERO, "yaw": yaw, "jump": false, "descend": true}
+	var ahead := pos + flat.normalized() * minf(flat.length(), 40.0)
+	var cruise := maxf(maxf(_ground_y(pos), _ground_y(ahead)), _ground_y(goal)) + CRUISE_CLEARANCE
+	return {
+		"move": Vector2(0, -1) if pos.y > cruise - 10.0 else Vector2.ZERO,
+		"yaw": yaw,
+		"jump": pos.y < cruise - 2.0,
+		"descend": pos.y > cruise + 6.0,
+	}
+
+func _ground_y(at: Vector3) -> float:
+	var h := GroundsTerrain.height_at(at.x, at.z)
+	return at.y if is_nan(h) else h
+
+func _flat_distance(goal: Vector3) -> float:
+	var flat := goal - _auth_pos()
+	flat.y = 0.0
+	return flat.length()
+
+## The fight trip: mount, fly to a landing short of the nearest active
+## (non-boss) pack, land and dismount. True while under way; false once there,
+## or when there is nowhere to go (then the caller's own timeout reports it).
+func _fly_to_pack() -> bool:
+	var record: Dictionary = SimAuthority.entities.get(SimAuthority.local_uid, {})
+	var mounted: bool = bool(record.get("mounted", false))
+	_trip_timer -= get_physics_process_delta_time()
+	match _trip_state:
+		0:
+			var area := _nearest_pack_area(_auth_pos())
+			if area == Vector3.INF:
+				_trip_state = 4
+				return false
+			var back := _auth_pos() - area
+			back.y = 0.0
+			back = back.normalized() if back.length() > 0.1 else Vector3.BACK
+			_trip_goal = area + back * PACK_LANDING_OFFSET
+			_trip_goal.y = _ground_y(_trip_goal)
+			_record("pack_trip", {"area": str(area.round()), "landing": str(_trip_goal.round())})
+			_trip_state = 1
+			_trip_timer = 0.0
+		1:
+			if mounted:
+				_trip_state = 2
+				_trip_timer = 90.0
+			elif player.has_method("is_on_floor") and player.is_on_floor() and _trip_timer <= 0.0:
+				_trip_attempts += 1
+				if _trip_attempts > 4:
+					_record("pack_trip_failed", {"reason": "mount refused"})
+					_trip_state = 4
+					return false
+				SimNet.submit_mount(player, true)
+				_trip_timer = 4.0
+			else:
+				SimNet.forced_intent = {}
+		2:
+			SimNet.forced_intent = _flight_intent_to(_trip_goal)
+			if _flat_distance(_trip_goal) <= 4.0 or _trip_timer <= 0.0:
+				_trip_state = 3
+				_trip_timer = 60.0
+		3:
+			if not mounted:
+				SimNet.forced_intent = {}
+				_record("pack_trip_landed", {"pos": str(_auth_pos().round())})
+				_trip_state = 4
+				_step_t = _t
+				return false
+			SimNet.forced_intent = _flight_intent_to(_trip_goal)
+			if fmod(_trip_timer, 1.5) < get_physics_process_delta_time():
+				SimNet.submit_mount(player, false)
+			if _trip_timer <= 0.0:
+				_record("pack_trip_failed", {"reason": "dismount refused at %s" % str(_auth_pos().round())})
+				_trip_state = 4
+				_step_t = _t
+				return false
+		_:
+			return false
+	return true
+
+## Centre of the nearest active, non-boss pack's authored area (the server's
+## data, shipped with the client), or Vector3.INF when there is none.
+func _nearest_pack_area(from: Vector3) -> Vector3:
+	var best := Vector3.INF
+	var best_distance := INF
+	for region in HPRules.regions():
+		for pack in HPRules.active_encounters_for(String((region as Dictionary).get("id", ""))):
+			if HPRules.is_boss_encounter(pack):
+				continue
+			var area: Array = (pack as Dictionary).get("area", [])
+			if area.size() != 4:
+				continue
+			var centre := Vector3(float(area[0]) + float(area[2]) * 0.5, from.y, float(area[1]) + float(area[3]) * 0.5)
+			var distance := Vector2(centre.x - from.x, centre.z - from.z).length()
+			if distance < best_distance:
+				best_distance = distance
+				best = centre
+	return best
 
 func _portal_center(entry: Dictionary) -> Vector3:
 	var trigger: Dictionary = entry.get("trigger", {})
@@ -754,34 +892,67 @@ func _deck_point(tick: int, along: float) -> Vector3:
 
 ## The waiting spot in front of the ground dock's foot, on the floor: inside the
 ## authority's boarding-approach volume but outside `on_deck`, so the rider can
-## wait "at the gate" while the platform is away or locked.
+## wait "at the gate" while the platform is away or locked. "In front" is in the
+## dock's own frame (the castle's flights point every way round the well).
 func _dock_wait_point() -> Vector3:
-	return staircase.global_transform * (staircase.call("dock_origin", 0) + Vector3(0.0, 0.05, -1.0))
+	return _dock_point(0, -1.0)
 
-## Walk around the grand staircase hall to the ground dock's apron: arrival
-## plate -> east corridor -> apron. The staircase's own landing plates define
-## this ring; the straight line from the vestibule crosses the shaft and cannot
-## reach the foot. Returns false once the apron waypoint is reached, so the
-## caller can switch to the waiting/boarding logic.
+func _dock_point(index: int, along: float) -> Vector3:
+	var dock: Transform3D = staircase.call("_dock_xform", index)
+	return staircase.global_transform * (dock * Vector3(0.0, 0.05, along))
+
+## From the vestibule to the Grand Staircase's first flight: up the west side of
+## the Entrance Hall (clear of the marble stair and the dungeon opening), through
+## the tower's west ground-floor door, to the foot of the first flight's ground
+## dock. Map-local points under the StaircaseSlot (layout origin, y 200).
+## Returns false once the last waypoint is reached, so the caller can switch to
+## the waiting/boarding logic.
 var _castle_route_index := 0
+var _castle_exit_index := 0
+var _castle_trace_t := -10.0
 
 func _walk_castle_route() -> bool:
-	var route: Array = [
-		staircase.global_transform * Vector3(0.0, 0.05, 12.0),
-		staircase.global_transform * Vector3(19.0, 0.05, 10.0),
-		staircase.global_transform * Vector3(19.0, 0.05, -10.0),
-		staircase.global_transform * Vector3(0.0, 0.05, -10.0),
+	return _walk_route([
+		staircase.global_transform * Vector3(-16.0, 0.05, 50.0),
+		staircase.global_transform * Vector3(-16.0, 0.05, 24.0),
+		staircase.global_transform * Vector3(-16.0, 0.05, 14.0),
+		staircase.global_transform * Vector3(-8.0, 0.05, 11.5),
+	], "_castle_route_index")
+
+## Back out after the ride: off the foot of the dock the flight swung to, across
+## the tower floor, the same west door and the Entrance Hall's west side.
+## Fixed when the ride ends: the flight may swing again while the rider walks.
+var _exit_route: Array = []
+
+func _castle_exit_route() -> Array:
+	if not _ride_done:
+		return []
+	if _exit_route.is_empty():
+		_exit_route = _build_exit_route()
+	return _exit_route
+
+func _build_exit_route() -> Array:
+	return [
+		_dock_point(int(staircase.get("dock_index")), -2.0),
+		staircase.global_transform * Vector3(-12.0, 0.05, 11.5),
+		staircase.global_transform * Vector3(-16.0, 0.05, 14.0),
+		staircase.global_transform * Vector3(-16.0, 0.05, 24.0),
+		staircase.global_transform * Vector3(-16.0, 0.05, 50.0),
 	]
-	if _castle_route_index >= route.size():
+
+func _walk_route(route: Array, index_name: String) -> bool:
+	var index := int(get(index_name))
+	if index >= route.size():
 		return false
-	var target: Vector3 = route[_castle_route_index]
+	var target: Vector3 = route[index]
 	var flat := target - _auth_pos()
 	flat.y = 0.0
 	if flat.length() < 2.0:
-		_castle_route_index += 1
-		if _castle_route_index >= route.size():
+		index += 1
+		set(index_name, index)
+		if index >= route.size():
 			return false
-		target = route[_castle_route_index]
+		target = route[index]
 	_walk_toward(target)
 	return true
 

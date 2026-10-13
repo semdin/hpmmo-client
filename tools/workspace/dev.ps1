@@ -129,6 +129,16 @@ function Invoke-ServerSmoke {
         & $python $integration
         if ($LASTEXITCODE -ne 0) { throw 'integration tests failed' }
     }
+    if (Test-Path (Join-Path $world 'project.godot')) {
+        $godot = Get-Godot
+        # Import before anything boots the world: an asset that is new to the
+        # export (e.g. a glb) is not loadable until its import exists.
+        Write-Host '[server] world import pass'
+        Invoke-GodotText @('--headless', '--path', $world, '--editor', '--import', '--quit') |
+            Select-String -Pattern 'SCRIPT ERROR|ERROR:' | Select-Object -First 10
+        if ($LASTEXITCODE -ne 0) { throw 'world import failed' }
+        Test-SimSync
+    }
     $multiplayer = Join-Path $serverRepo 'tests\multiplayer_sim.py'
     if (Test-Path $multiplayer) {
         Write-Host '[server] multiplayer proof (world server + two headless clients)'
@@ -136,12 +146,6 @@ function Invoke-ServerSmoke {
         if ($LASTEXITCODE -ne 0) { throw 'multiplayer agreement test failed' }
     }
     if (Test-Path (Join-Path $world 'project.godot')) {
-        $godot = Get-Godot
-        Write-Host '[server] world import pass'
-        Invoke-GodotText @('--headless', '--path', $world, '--editor', '--import', '--quit') |
-            Select-String -Pattern 'SCRIPT ERROR|ERROR:' | Select-Object -First 10
-        if ($LASTEXITCODE -ne 0) { throw 'world import failed' }
-        Test-SimSync
         Write-Host '[server] world boot smoke (headless, 300 frames)'
         Invoke-GodotText @('--headless', '--path', $world, 'res://server/world_server.tscn', '--quit-after', '300') |
             Select-String -Pattern 'WorldServer|ERROR|SCRIPT' | Select-Object -First 20

@@ -1,0 +1,31 @@
+{
+ "id": "large-floor-tiles-02",
+ "name": "Large Floor Tiles 02",
+ "source_page": "https://polyhaven.com/a/large_floor_tiles_02",
+ "author": "Rob Tuytel",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt in this folder (snapshot of https://polyhaven.com/license)",
+ "files": [
+  {
+   "file": "large_floor_tiles_02_diff_2k.jpg",
+   "bytes": 2409892,
+   "sha256": "a18c67aedef1099f5ad24abd4e65d9a9fcc44e2b9e60aba27ec255f9220708cd"
+  },
+  {
+   "file": "large_floor_tiles_02_nor_gl_2k.jpg",
+   "bytes": 1272020,
+   "sha256": "436117e6fc10a4e76a7d2d31ebb1e56372709068b52875baa9468ae414330ea3"
+  },
+  {
+   "file": "large_floor_tiles_02_rough_2k.jpg",
+   "bytes": 1895686,
+   "sha256": "0838441397c114faecb89c4e1fae56ce8df195748b2128d0eb1a9bb116407731"
+  },
+  {
+   "file": "large_floor_tiles_02_ao_2k.jpg",
+   "bytes": 1208024,
+   "sha256": "ceb98043a24a92fcb42b7589560006b52595298d04ac8374db3f089f4d61c779"
+  }
+ ]
+}

@@ -100,6 +100,8 @@ var _sidestep_timer := 0.0
 var stair_role := "observe"
 var staircase: Node3D = null
 var _stair_samples: Array = []
+## Last sim tick `_sample_stair` saw (-1: none yet), to spot a stalled client's catch-up.
+var _stair_last_seen_tick := -1
 var _stair_notices: Array = []
 var _stair_events: Array = []
 var _stair_ride: Dictionary = {}
@@ -1104,10 +1106,12 @@ func _nearest_mob() -> Node3D:
 ##   rider_logout  ride, then drop the connection mid-flight
 
 const STAIRCASE_SCENE = preload("res://scenes/world/castle/staircase.tscn")
-## Inside the art pass flat core and clear of the encounter regions. The old
-## (150, 0, 120) is in the hill ring the terrain pass raises, and the hillside
-## there intersects the upper flight and the landings.
-const STAIR_DEV_ORIGIN := Vector3(90.0, 0.0, -15.0)
+## The centre of the Quidditch pitch: the flattest open ground on the Terrain3D
+## grounds (31.8..32.25 m under the whole footprint), clear of colliders and
+## encounter regions. The old valley sites ((150, 0, 120), then (90, 0, -15))
+## are inside the hills / under the castle plateau on the new map.
+## Keep in step with STAIR_ORIGIN in server/tests/staircase_sim.py.
+const STAIR_DEV_ORIGIN := Vector3(330.0, 32.3, -330.0)
 
 func _staircase_origin() -> Vector3:
 	var raw := OS.get_environment("HPMMO_DEV_STAIRCASE")
@@ -1200,6 +1204,14 @@ func _sample_stair() -> void:
 		return
 	var tick := int(SimAuthority.sim_tick)
 	if not _stair_samples.is_empty() and int(_stair_samples[-1]["tick"]) == tick:
+		return
+	# A client that stalled (the grounds load hitches a fresh client for ~1 s)
+	# catches up in one frame: the snapshot carrying the new tick can be
+	# dispatched before the staircase publish queued on another channel, so that
+	# one tick reads a stale state. Skip the catch-up frame; sample from the next.
+	var jumped := _stair_last_seen_tick >= 0 and tick - _stair_last_seen_tick > 3
+	_stair_last_seen_tick = tick
+	if jumped:
 		return
 	var origin: Vector3 = staircase.platform_world_transform(tick).origin
 	var body := player.global_position
@@ -1333,7 +1345,12 @@ func _stair_fallback_tick() -> void:
 	var goal: Vector3 = waypoints[index]
 	var flat := goal - player.global_position
 	flat.y = 0.0
-	if flat.length() < 1.8 and absf(goal.y - player.global_position.y) < 2.2:
+	# Waypoints 0 and 6 are the feet of the two 3 m wide flights: reaching them
+	# loosely (1.8 m) let the walker head for the next point diagonally, cross the
+	# landing's edge beside the ramp, drop onto the grass and walk in under the
+	# rising flight. Line up on them first.
+	var reach := 0.6 if index == 0 or index == 6 else 1.8
+	if flat.length() < reach and absf(goal.y - player.global_position.y) < 2.2:
 		_stair_walk["waypoint"] = index + 1
 		_stair_walk["reached_%d" % index] = [player.global_position.x, player.global_position.y, player.global_position.z]
 		return
@@ -1900,7 +1917,11 @@ func _run_transfer_local() -> void:
 	SimAuthority.apply_damage(player, 999999, "melee", null)
 	results["dead_refused"] = String(SimAuthority.request_transfer(peer, "castle_door", "castle_interior").get("reason", ""))
 	SimAuthority.submit_respawn(peer)
-	player.global_position = Vector3(0, 0.6, 5)
+	# Door-relative, never absolute: on the Terrain3D grounds the approach is on
+	# the ~58 m castle plateau, and the old valley point (0, 0.6, 5) is inside the
+	# ground (the body fell, so the mount below was refused and every later
+	# request read transfer_pending). 4 m out from the porch, on open ground.
+	player.global_position = door + Vector3(0.0, 0.0, 4.0)
 	for _i in range(20):
 		await get_tree().physics_frame
 
@@ -1913,7 +1934,7 @@ func _run_transfer_local() -> void:
 	SimAuthority.submit_mount(peer, false)
 
 	# 3) a request from outside the portal volume is refused
-	player.global_position = Vector3(0, 0.6, 20)
+	player.global_position = door + Vector3(0.0, 0.0, 12.0)
 	results["range_refused"] = String(SimAuthority.request_transfer(peer, "castle_door", "castle_interior").get("reason", ""))
 	player.global_position = door
 

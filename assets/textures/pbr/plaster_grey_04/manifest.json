@@ -1,0 +1,31 @@
+{
+ "id": "plaster-grey-04",
+ "name": "Plaster Grey 04",
+ "source_page": "https://polyhaven.com/a/plaster_grey_04",
+ "author": "Rob Tuytel",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt in this folder (snapshot of https://polyhaven.com/license)",
+ "files": [
+  {
+   "file": "plaster_grey_04_diff_2k.jpg",
+   "bytes": 1987693,
+   "sha256": "f8fd4a4263dc257060f34021bd537d968cc04b38b332f29ddd516f1fdd5ec201"
+  },
+  {
+   "file": "plaster_grey_04_nor_gl_2k.jpg",
+   "bytes": 3886433,
+   "sha256": "25a501bd78e1b55d62bebe2f9fd5ff77ed796a66e092b2efbd5339e4bee15f0a"
+  },
+  {
+   "file": "plaster_grey_04_rough_2k.jpg",
+   "bytes": 1616488,
+   "sha256": "8c7ecda523877e06f3f0e67cd7cefe4cf999972d9ef46d1ddc28cf3a16a8c35d"
+  },
+  {
+   "file": "plaster_grey_04_ao_2k.jpg",
+   "bytes": 1750625,
+   "sha256": "9fabc7288b5b62580828f79e4c6e73a1754b7fd45ff3a992c8d8214031bcd093"
+  }
+ ]
+}

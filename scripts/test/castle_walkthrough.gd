@@ -11,8 +11,10 @@ extends Node
 ##     --fixed-fps 60 --quit-after 5400
 ##
 ## It is not part of the 93-check regression (scenes/test/test_scenario.tscn);
-## it is the castle proof scene.
+## it is the castle proof scene. Room, door and stair checks are derived from
+## assets/castle/castle_layout.json (docs/castle-interior.md).
 
+const CastleBlockout = preload("res://scripts/world/castle/castle_blockout.gd")
 const ROUTE_TIMEOUT := 30.0
 
 var checks := 0
@@ -87,48 +89,73 @@ func _ready() -> void:
 	check(is_instance_valid(world.hud) and is_instance_valid(world.local_player), "HUD bindings and the player controller stay alive")
 	counts.append(_counts("interior #1"))
 
-	# --- 3. StaircaseSlot (owned by the staircase workstream) -----------------
+	# --- 3. the Grand Staircase: one moving flight per catalog entry -----------
 	var slot = interior.get_node_or_null("StaircaseSlot")
-	check(slot is Node3D, "The grand staircase hall exposes a StaircaseSlot marker")
+	check(slot is Node3D, "The castle exposes a StaircaseSlot marker")
+	var expected_flights := HPStaircase.catalog_staircase_count()
+	check(expected_flights == 7, "The map catalog lists the seven Grand Staircase flights (%d)" % expected_flights)
 	if slot is Node3D:
-		var slot_children := (slot as Node3D).get_child_count()
-		check(slot_children <= 1, "StaircaseSlot holds at most one staircase (found %d)" % slot_children)
-		if ResourceLoader.exists("res://scenes/world/castle/staircase.tscn"):
-			note("res://scenes/world/castle/staircase.tscn exists and was instantiated into StaircaseSlot " +
-				"(%d child node(s)); the slot, not this scene, is what this workstream owns." % slot_children)
-		else:
-			note("res://scenes/world/castle/staircase.tscn is not present in this build; " +
-				"StaircaseSlot was left empty and the file was not created or edited here.")
+		var stairs: Array = []
+		for child in (slot as Node3D).get_children():
+			if child.has_method("platform_world_transform"):
+				stairs.append(child)
+		check(stairs.size() == expected_flights,
+			"StaircaseSlot holds one staircase per catalog flight (%d / %d)" % [stairs.size(), expected_flights])
+		var ids := {}
+		for stair in stairs:
+			ids[int(stair.get("object_id"))] = true
+			check(bool((stair.get("spec") as Dictionary).get("map_geometry", false)),
+				"%s runs a castle flight spec (map geometry, swing pivot)" % stair.name)
+		check(ids.size() == stairs.size(), "Every flight replicates under its own object id (%s)" % str(ids.keys()))
+		await get_tree().physics_frame
+		var deck_space := interior.get_world_3d().direct_space_state as PhysicsDirectSpaceState3D
+		for stair in stairs:
+			# Every flight starts docked at its first dock: a ray down onto the
+			# middle of the deck lands on that flight's moving platform.
+			var deck_xform: Transform3D = stair.call("platform_world_transform", SimAuthority.sim_tick)
+			var deck_mid: Vector3 = deck_xform * Vector3(0.0, float(stair.call("rise")) * 0.5 + 0.5, float(stair.call("run_length")) * 0.5)
+			var hit := deck_space.intersect_ray(PhysicsRayQueryParameters3D.create(deck_mid + Vector3.UP * 2.0, deck_mid + Vector3.DOWN * 3.0))
+			var on_platform: bool = not hit.is_empty() and (hit["collider"] as Node).get_parent() == stair
+			check(on_platform, "%s's deck is solid where the authority says it is (%s)" % [stair.name, str(deck_mid.round())])
 
 	# --- 4. floor-aware labels -------------------------------------------------
-	var ground_floor: String = interior.floor_display(200.2)
-	var first_floor: String = interior.floor_display(206.2)
-	var second_floor: String = interior.floor_display(212.2)
-	var dungeon: String = interior.floor_display(194.2)
-	check(ground_floor.contains("Ground"), "Ground level reports its floor name (%s)" % ground_floor)
-	check(first_floor.contains("First"), "First floor reports its floor name (%s)" % first_floor)
-	check(second_floor.contains("Second"), "Second floor reports its floor name (%s)" % second_floor)
-	check(dungeon.contains("Dungeon"), "Basement reports its floor name (%s)" % dungeon)
+	for probe in [[190.2, "Dungeons"], [200.2, "Ground"], [210.2, "First"], [220.2, "Second"],
+			[240.2, "Fourth"], [270.2, "Seventh"]]:
+		var label: String = interior.floor_display(float(probe[0]))
+		check(label.contains(String(probe[1])), "y %.0f reports its floor name (%s)" % [float(probe[0]), label])
 	controller._update_labels()
 	check(controller._location_label.text.contains("Hogwarts Castle"),
 		"The HUD location label names the map and floor the player is on (%s)" % controller._location_label.text)
-	var signs := _label_texts(interior)
-	for keyword in ["GREAT HALL", "LIBRARY", "CLASSROOM", "GRAND STAIRCASE", "VESTIBULE",
-			"TOWER LANDING", "DUNGEON", "FUTURE ENCOUNTER"]:
-		check(_signs_contain(signs, keyword), "Signage names %s" % keyword)
 
-	# --- 5. the whole route is walkable on foot --------------------------------
-	# Horizontal sweeps at torso height through every doorway and room.
-	for leg in _route_legs():
-		var from: Vector3 = leg[0]
-		var to: Vector3 = leg[1]
-		check(interior.route_clear(from, to), "Route is walkable on foot: %s" % String(leg[2]))
-	# Vertical sweeps up every flight: collision under the feet and headroom above.
-	for flight in _flights():
-		check(_ramp_ok(interior, flight), "Stairs are walkable (collision under the feet, headroom): %s" % String(flight[0]))
+	# --- 5. the whole layout is walkable on foot --------------------------------
+	# Derived from the layout the blockout was built from, so a layout edit is
+	# checked without editing this file.
+	var layout: Dictionary = CastleBlockout.load_layout()
+	check(not layout.is_empty(), "The castle layout ships with the build")
+	var space := interior.get_world_3d().direct_space_state as PhysicsDirectSpaceState3D
+	var map_y: float = interior.MAP_Y
+	for r in layout.get("rooms", []):
+		if String(r["id"]) == "dungeon_stairwell":
+			continue   # the whole room is the flight, checked below
+		var rect: Array = r["rect"]
+		var level := map_y + float(r["y"])
+		var probe := Vector3(float(rect[1]) - 1.5, level + 1.0, float(rect[3]) - 1.5)
+		var floor_hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(probe, probe + Vector3.DOWN * 3.0))
+		check(not floor_hit.is_empty() and absf((floor_hit["position"] as Vector3).y - level) < 0.05,
+			"%s has a walkable floor at y %.0f" % [String(r["label"]), level])
+	for d in layout.get("doors", []):
+		if d.has("sealed"):
+			continue
+		var at: Array = d["at"]
+		var c := Vector3(float(at[0]), map_y + float(d["y"]) + 1.2, float(at[1]))
+		var through_z: bool = interior.route_clear(c + Vector3(0, 0, -3.5), c + Vector3(0, 0, 3.5))
+		var through_x: bool = interior.route_clear(c + Vector3(-3.5, 0, 0), c + Vector3(3.5, 0, 0))
+		check(through_z or through_x, "Doorway %s is passable at torso height" % String(d["id"]))
+	for flight in layout.get("stairs", []):
+		check(_ramp_ok(interior, flight, map_y), "Stairs are walkable (collision under the feet, headroom): %s" % String(flight["id"]))
 
-	# --- 6. actually walk up and back down the conventional staircase --------
-	controller._place_player(Vector3(41, 200.4, 25.5))
+	# --- 6. actually walk up and back down the marble staircase ---------------
+	controller._place_player(Vector3(-11, 200.4, 51.5))
 	player.camera_rot_y = 0.0
 	player.velocity = Vector3.ZERO
 	await get_tree().create_timer(0.4).timeout
@@ -137,12 +164,12 @@ func _ready() -> void:
 	await get_tree().create_timer(2.4).timeout
 	Input.action_release("move_forward")
 	var climbed_y: float = player.global_position.y
-	check(climbed_y > start_y + 4.5, "Walking forward climbs the conventional staircase (%.1f -> %.1f)" % [start_y, climbed_y])
-	check(climbed_y < 207.5, "The stair does not launch the walker off the top (%.1f)" % climbed_y)
+	check(climbed_y > start_y + 4.5, "Walking forward climbs the marble staircase (%.1f -> %.1f)" % [start_y, climbed_y])
+	check(climbed_y < 211.5, "The stair does not launch the walker off the top (%.1f)" % climbed_y)
 	player.camera_rot_y = 180.0   # degrees: the controller's camera yaw is degrees, not radians
 	await get_tree().create_timer(0.2).timeout
 	Input.action_press("move_forward")
-	await get_tree().create_timer(3.6).timeout
+	await get_tree().create_timer(4.4).timeout
 	Input.action_release("move_forward")
 	var descended: Vector3 = player.global_position
 	check(descended.y < 202.5, "Walking back down the staircase descends cleanly (%s)" % descended)
@@ -151,8 +178,10 @@ func _ready() -> void:
 	# Every leg goes through the real doorway and the real server handshake, so
 	# the counts below are taken after a full request -> grant -> load -> ready
 	# -> commit cycle, never after a developer teleport.
+	var exit_portal: Dictionary = controller._portal_entries("castle_interior")[0]
+	var exit_spot: Vector3 = exit_portal["center"] + Vector3(0, -1.2, 0)
 	for i in range(3):
-		controller._place_player(Vector3(0, 200.4, 30.0))
+		controller._place_player(exit_spot)
 		await get_tree().create_timer(0.4).timeout
 		_press_interact()
 		await _await_map(controller, "grounds")
@@ -234,90 +263,21 @@ func _report() -> void:
 	for line in notes:
 		print("  NOTE: " + line)
 
-func _label_texts(root: Node) -> Array:
-	var out: Array = []
-	for node in root.find_children("*", "Label3D", true, false):
-		out.append(String((node as Label3D).text))
-	return out
-
-func _signs_contain(signs: Array, keyword: String) -> bool:
-	for text in signs:
-		if String(text).contains(keyword):
-			return true
-	return false
-
-## Ground-floor and upper-floor legs, each a straight walk a body can make.
-## Heights are 1.2 m above the local floor (torso height for a 1.8 m capsule).
-func _route_legs() -> Array:
-	return [
-		[Vector3(0, 201.2, 33), Vector3(0, 201.2, 20), "vestibule to the grand staircase hall"],
-		[Vector3(20, 201.2, 20), Vector3(41, 201.2, 25.5), "hall to the foot of the staircase"],
-		[Vector3(-11, 201.2, 20), Vector3(-11, 201.2, 3), "hall west bay"],
-		[Vector3(0, 201.2, 10), Vector3(-30, 201.2, 10), "great hall, east arcade to west aisle"],
-		[Vector3(-36, 201.2, 18), Vector3(-36, 201.2, -18), "great hall, south end to dais"],
-		[Vector3(-36, 201.2, -21), Vector3(-36, 201.2, -27), "great hall north door to the side corridor"],
-		[Vector3(-46, 201.2, -27), Vector3(-46, 201.2, -22), "side corridor to the dungeon stair"],
-		[Vector3(-61, 201.2, -27), Vector3(-61, 201.2, 0), "west side corridor"],
-		[Vector3(-61, 201.2, 23), Vector3(-20, 201.2, 23), "south side corridor"],
-		[Vector3(-20, 201.2, 23), Vector3(-15.5, 201.2, 23), "south corridor to the stair hall"],
-		[Vector3(20, 201.2, 30), Vector3(20, 201.2, -20), "stair hall east side"],
-		[Vector3(37, 207.2, 20), Vector3(37, 207.2, 6), "first-floor gallery walkway"],
-		[Vector3(41, 207.2, 10), Vector3(37, 207.2, 10), "first-floor stair arrival to the gallery"],
-		[Vector3(37, 207.2, 6), Vector3(37, 207.2, -20), "first-floor gallery to the corridor"],
-		[Vector3(-6, 207.2, -27), Vector3(-34, 207.2, -27), "first-floor corridor"],
-		[Vector3(-34, 207.2, -27), Vector3(-34, 207.2, -34), "library doorway"],
-		[Vector3(-34, 207.2, -34), Vector3(-38, 207.2, -44), "library interior"],
-		[Vector3(-4, 207.2, -27), Vector3(-4, 207.2, -34), "classroom doorway"],
-		[Vector3(-4, 207.2, -34), Vector3(4, 207.2, -44), "classroom interior"],
-		[Vector3(20, 207.2, 30), Vector3(20, 207.2, -20), "first-floor gallery, east side"],
-		[Vector3(41, 213.2, -6), Vector3(41, 213.2, -14), "second-floor arrival landing"],
-		[Vector3(37, 213.2, -6), Vector3(37, 213.2, -20), "second-floor gallery walkway"],
-		[Vector3(10, 213.2, -27), Vector3(-34, 213.2, -27), "second-floor corridor"],
-		[Vector3(-4, 213.2, -27), Vector3(-4, 213.2, -44), "upper classroom interior"],
-		[Vector3(-34, 213.2, -34), Vector3(-38, 213.2, -44), "upper study interior"],
-		[Vector3(20, 213.2, 20), Vector3(20, 213.2, -20), "second-floor gallery"],
-		[Vector3(40, 213.2, 8), Vector3(46, 213.2, 8), "tower bridge"],
-		[Vector3(50, 213.2, 8), Vector3(56, 213.2, 8), "tower landing"],
-		[Vector3(-14, 213.2, 16), Vector3(-20, 213.2, 16), "great hall balcony"],
-		[Vector3(-46, 195.2, -20), Vector3(-46, 195.2, -13), "dungeon stair bay"],
-		[Vector3(-46, 195.2, -13), Vector3(-46, 195.2, -9), "dungeon divider doorway"],
-		[Vector3(-46, 195.2, -8), Vector3(-46, 195.2, 6), "dungeon classroom"],
-		[Vector3(-46, 195.2, 6), Vector3(-52, 195.2, 8), "dungeon classroom west end"],
-		[Vector3(-52, 195.2, 8), Vector3(-52, 195.2, 9.2), "future encounter entrance"],
-	]
-
-## Flights as [label, axis, cross, start, y0, dir, width, rise, run].
-func _flights() -> Array:
-	return [
-		["conventional stair, ground to first", "z", 41.0, 24.0, 200.0, -1.0, 5.0, 6.0, 12.0],
-		["conventional stair, first to second", "z", 41.0, 8.0, 206.0, -1.0, 5.0, 6.0, 12.0],
-		["dungeon stair, ground to basement", "z", -46.0, -24.0, 200.0, 1.0, 6.0, 6.0, 12.0],
-	]
-
-## Walk the collision of one flight: every sample must have floor within half a
-## step of the authored rise/run line, and clear headroom above it.
-func _ramp_ok(interior: Node3D, flight: Array) -> bool:
-	var axis := String(flight[1])
-	var cross := float(flight[2])
-	var start := float(flight[3])
-	var y0 := float(flight[4])
-	var dir := float(flight[5])
-	var rise := float(flight[7])
-	var run := float(flight[8])
+## Walk the collision of one layout flight: every sample must have floor within
+## half a step of the authored line, and clear headroom above it.
+func _ramp_ok(interior: Node3D, flight: Dictionary, map_y: float) -> bool:
+	var a := Vector3(float(flight["from"][0]), float(flight["from"][1]) + map_y, float(flight["from"][2]))
+	var b := Vector3(float(flight["to"][0]), float(flight["to"][1]) + map_y, float(flight["to"][2]))
 	var space := interior.get_world_3d().direct_space_state
 	var samples := 12
 	for i in range(samples):
 		var t := (float(i) + 0.5) / float(samples)
-		var along := start + dir * run * t
-		var expected := y0 + rise * t
-		var point := Vector3(cross, 0, along) if axis == "z" else Vector3(along, 0, cross)
-		var down := PhysicsRayQueryParameters3D.create(
-			point + Vector3.UP * (expected + 1.6), point + Vector3.UP * (expected - 1.6), 1)
+		var point := a.lerp(b, t)
+		var down := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 1.6, point + Vector3.DOWN * 1.6, 1)
 		var hit: Dictionary = space.intersect_ray(down)
-		if hit.is_empty() or absf((hit["position"] as Vector3).y - expected) > 0.45:
+		if hit.is_empty() or absf((hit["position"] as Vector3).y - point.y) > 0.45:
 			return false
-		var up := PhysicsRayQueryParameters3D.create(
-			point + Vector3.UP * (expected + 1.0), point + Vector3.UP * (expected + 3.4), 1)
+		var up := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 1.0, point + Vector3.UP * 3.4, 1)
 		if not space.intersect_ray(up).is_empty():
 			return false
 	return true

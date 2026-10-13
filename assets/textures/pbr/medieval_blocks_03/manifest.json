@@ -1,0 +1,31 @@
+{
+ "id": "medieval-blocks-03",
+ "name": "Medieval Blocks 03",
+ "source_page": "https://polyhaven.com/a/medieval_blocks_03",
+ "author": "Rob Tuytel",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt in this folder (snapshot of https://polyhaven.com/license)",
+ "files": [
+  {
+   "file": "medieval_blocks_03_diff_2k.jpg",
+   "bytes": 3839924,
+   "sha256": "63cc2220ed9e72c8dda620474c10fc26657552c5309c77c114b5ac725edfb902"
+  },
+  {
+   "file": "medieval_blocks_03_nor_gl_2k.jpg",
+   "bytes": 5073770,
+   "sha256": "16c8a4e4828752992725a57b2b69d32021f15dbc3548bced3f786a03e40cf5fe"
+  },
+  {
+   "file": "medieval_blocks_03_rough_2k.jpg",
+   "bytes": 1865375,
+   "sha256": "6d84d13c65a63e968aaa3f77f7e06d8866f1323698a56ef3ca6d88a7b99d5c08"
+  },
+  {
+   "file": "medieval_blocks_03_ao_2k.jpg",
+   "bytes": 1843687,
+   "sha256": "bc5ae6fd51cd89e977adfeefc5c9ebe41dbf156c39f0d975c4bff7378b513247"
+  }
+ ]
+}
