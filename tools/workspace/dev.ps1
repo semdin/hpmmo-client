@@ -101,6 +101,21 @@ function Test-WorldFileList {
     if ($LASTEXITCODE -ne 0) { throw 'world file list is stale (run: python client/tools/workspace/gen_world_files.py --client client)' }
 }
 
+## Run Godot and hand back its output as plain text lines. Godot prints engine
+## warnings (e.g. a GDExtension calling a deprecated API) on stderr, and under
+## `$ErrorActionPreference = 'Stop'` PowerShell 5.1 turns every redirected
+## stderr line into a terminating error. Failure is still judged by the exit
+## code and by the ERROR / SCRIPT lines the callers filter for.
+function Invoke-GodotText([string[]]$GodotArgs) {
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $godot @GodotArgs 2>&1 | ForEach-Object { "$_" }
+    } finally {
+        $ErrorActionPreference = $previous
+    }
+}
+
 function Invoke-ServerSmoke {
     $world = Join-Path $serverRepo 'world'
     Test-WorldFileList
@@ -123,12 +138,12 @@ function Invoke-ServerSmoke {
     if (Test-Path (Join-Path $world 'project.godot')) {
         $godot = Get-Godot
         Write-Host '[server] world import pass'
-        & $godot --headless --path $world --editor --import --quit 2>&1 |
+        Invoke-GodotText @('--headless', '--path', $world, '--editor', '--import', '--quit') |
             Select-String -Pattern 'SCRIPT ERROR|ERROR:' | Select-Object -First 10
         if ($LASTEXITCODE -ne 0) { throw 'world import failed' }
         Test-SimSync
         Write-Host '[server] world boot smoke (headless, 300 frames)'
-        & $godot --headless --path $world res://server/world_server.tscn --quit-after 300 2>&1 |
+        Invoke-GodotText @('--headless', '--path', $world, 'res://server/world_server.tscn', '--quit-after', '300') |
             Select-String -Pattern 'WorldServer|ERROR|SCRIPT' | Select-Object -First 20
         if ($LASTEXITCODE -ne 0) { throw 'world boot smoke failed' }
     }

@@ -497,7 +497,7 @@ func _check_settings() -> void:
 	settings.set_volume("UI", 0.35)
 	settings.set_graphics_quality("medium")
 	check(FileAccess.file_exists(path), "The settings file is written on change")
-	check(get_window().content_scale_factor == 1.25 or DisplayServer.get_name() == "headless",
+	check(is_equal_approx(get_window().content_scale_factor, 1.25 * GameSettings.UI_SCALE_BASE) or DisplayServer.get_name() == "headless",
 		"The UI scale is applied to the canvas content scale (%.2f)" % get_window().content_scale_factor)
 	check(int(settings.binding_keycode("spell_1")) == KEY_7, "The rebound key is recorded")
 	check(InputMap.action_get_events("spell_1").size() > 0

@@ -372,7 +372,9 @@ func _physics_process(delta: float) -> void:
 	if _t >= duration:
 		_finish_forged()
 
-const SPAWN_REFERENCE := Vector3(0.0, 0.5, 5.0)
+## Where the pack under test stood when it was chosen: retreating means walking
+## away from it, so a wiped pack is free to respawn.
+var _pack_anchor := Vector3.INF
 ## The clients are placed beside the pack, so engagement is immediate.
 const ENGAGE_RANGE := 22.0
 
@@ -387,6 +389,7 @@ func _update_target() -> void:
 			return
 		_pack_id = pack
 		_pack_uids = _pack_members(pack)
+		_pack_anchor = _uid_position(int(_pack_uids[0])) if not _pack_uids.is_empty() else player.global_position
 		_record("pack_selected", {"pack_id": pack, "members": _pack_uids.duplicate()})
 	# Keep the current target while it lives; otherwise take the next live member
 	# of the same pack (a pack respawns together only when all of it is dead).
@@ -400,6 +403,17 @@ func _update_target() -> void:
 	if _target_uid == 0 and not _pack_uids.is_empty():
 		_set_target(int(_pack_uids[0]))
 
+func _uid_position(uid: int) -> Vector3:
+	var record = SimAuthority.entities.get(uid, {})
+	if record is Dictionary:
+		var node = record.get("node")
+		if node != null and is_instance_valid(node):
+			return (node as Node3D).global_position
+		var pos = record.get("pos", null)
+		if pos is Vector3:
+			return pos
+	return player.global_position
+
 func _pack_wiped() -> bool:
 	if _pack_uids.is_empty():
 		return false
@@ -409,7 +423,7 @@ func _pack_wiped() -> bool:
 	return true
 
 func _retreat() -> void:
-	var away := player.global_position - SPAWN_REFERENCE
+	var away := player.global_position - (_pack_anchor if _pack_anchor != Vector3.INF else player.global_position)
 	away.y = 0.0
 	if away.length() < 1.0:
 		away = Vector3(0, 0, 1)
@@ -889,8 +903,11 @@ func _run_protection() -> void:
 	add_child(world)
 	await get_tree().create_timer(0.8).timeout
 	player = world.get("local_player")
-	var courtyard := Vector3(0, 0.5, 5)
-	var outside := Vector3(60, 0.5, 60)
+	# The positions below were laid out on the old flat map; on the terrain they
+	# keep their x/z (the zones did not move relative to them) and take the
+	# ground height, or every body would stand inside the hill.
+	var courtyard := _ground(0, 5)
+	var outside := _ground(60, 60)
 	var mob := _nearest_mob()
 	if mob == null or player == null:
 		_record("error", {"message": "no mob or player"})
@@ -903,9 +920,9 @@ func _run_protection() -> void:
 
 	# Geometry: the attacker stands just outside the courtyard edge so every
 	# attack below is comfortably in range; protection is the only variable.
-	var attacker_pos := Vector3(38.0, 0.5, 5.0)
-	var inside_pos := Vector3(4.0, 0.5, 5.0)
-	var outside_pos := Vector3(24.0, 0.5, 5.0)
+	var attacker_pos := _ground(38.0, 5.0)
+	var inside_pos := _ground(4.0, 5.0)
+	var outside_pos := _ground(24.0, 5.0)
 	mob.global_position = attacker_pos
 	_revive_attacker(mob)
 
@@ -930,8 +947,8 @@ func _run_protection() -> void:
 	# The same shot with the victim outside protection: proof the shot was real.
 	# Attacker and victim stand 8 m apart on open ground, so the control turns on
 	# protection alone - not on whether a long ray happened to clear the terrain.
-	var yard_mob := Vector3(34.0, 0.5, 32.0)
-	var yard_victim := Vector3(26.0, 0.5, 32.0)
+	var yard_mob := _ground(34.0, 32.0)
+	var yard_victim := _ground(26.0, 32.0)
 	_revive_attacker(mob)
 	mob.global_position = yard_mob
 	player.global_position = yard_victim
@@ -946,7 +963,7 @@ func _run_protection() -> void:
 	# --- (2) burn ticks: a REAL incendio hit (damage + burn) on the mob, which
 	# then walks into the zone while the burn is still ticking.
 	player.global_position = outside_pos
-	mob.global_position = Vector3(28.0, 0.5, 5.0)
+	mob.global_position = _ground(28.0, 5.0)
 	var mob_record := SimAuthority.record_for(mob)
 	mob_record["hp"] = int(mob.max_hp)
 	mob.set("current_hp", int(mob.max_hp))
@@ -1004,10 +1021,10 @@ func _run_protection() -> void:
 	# --- (3) boss AoE centred outside whose circle covers a player inside.
 	player.global_position = inside_pos
 	_revive_attacker(mob)
-	mob.global_position = Vector3(25.0, 0.5, 5.0)
+	mob.global_position = _ground(25.0, 5.0)
 	record["hp"] = hp_before
 	player.set("current_hp", hp_before)
-	var hits: Array = SimAuthority.mob_area_attack(mob, Vector3(25.0, 0.5, 5.0), 30.0, 800, "boss_slam")
+	var hits: Array = SimAuthority.mob_area_attack(mob, _ground(25.0, 5.0), 30.0, 800, "boss_slam")
 	results["boss_aoe_over_zone"] = {"hits": hits.size(), "before": hp_before, "after": int(player.current_hp)}
 
 	# Same slam, same radius: the player simply stands outside the circle.
@@ -1023,6 +1040,15 @@ func _run_protection() -> void:
 	_record("protection", results)
 	_done = true
 	_finish(0)
+
+## A point on the ground at map x/z (0.6 m up), from a physics ray: the protection
+## layout is authored in x/z, the terrain decides the height.
+func _ground(x: float, z: float) -> Vector3:
+	var space := (world as Node3D).get_world_3d().direct_space_state
+	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, 400.0, z), Vector3(x, -60.0, z)))
+	if hit.is_empty():
+		return Vector3(x, 0.5, z)
+	return (hit.position as Vector3) + Vector3(0, 0.6, 0)
 
 ## A dead mob cannot attack: every protection case starts from a live attacker,
 ## otherwise the "positive control" would silently test nothing.
@@ -2423,7 +2449,7 @@ func _run_encounter_local() -> void:
 ## Walk away from the pack under test (the lifecycle scenario vacates the old
 ## anchor so a respawn is allowed to happen somewhere clear of the corpse).
 func _retreat_from_pack() -> void:
-	var reference: Vector3 = SimAuthority.entities.get(_target_uid, {}).get("pos", SPAWN_REFERENCE)
+	var reference: Vector3 = SimAuthority.entities.get(_target_uid, {}).get("pos", player.global_position)
 	var away := player.global_position - reference
 	away.y = 0.0
 	if away.length() < 1.0:

@@ -15,3 +15,15 @@ Retain existing third-party licence notices for assets that remain in use. The
 gnola14 CC0 pack this set replaced is no longer distributed: its licence text stays
 at `assets/ui/LICENSES/oga-rpg-icons-496.txt` and `assets/manifest.json` records the
 pack as superseded. Do not delete those records automatically.
+
+## 2026-10-13 additions (fal.ai)
+
+Tool: fal.ai `fal-ai/nano-banana-2.1` (1K, 1:1), same text-prompt template as the
+spell and potion icons. No third-party image was used as an input.
+
+* `icon_menu_{inventory,ollivander,mount,journal,map,settings}.png` - full-bleed
+  square paintings for the bottom-right menu cells, resized to 256 px.
+* `icon_minimap_{player,mob,boss,npc,monolith,zoom_in,zoom_out}.png` - single
+  objects generated on flat white, cut out by `tools/ui/cutout_icons.py`
+  (border-connected white removed, soft edge alpha with the white un-mixed),
+  trimmed square and resized to 128 px. They replace the previous minimap set.

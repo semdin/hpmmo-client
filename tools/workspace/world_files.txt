@@ -407,6 +407,7 @@ scripts/ui/combat_feedback.gd
 scripts/ui/cursor_kit.gd
 scripts/ui/floating_text.gd
 scripts/ui/game_settings.gd
+scripts/ui/gauge_flow.gd
 scripts/ui/hud.gd
 scripts/ui/hud_action_bar.gd
 scripts/ui/hud_buff_bar.gd
@@ -439,6 +440,7 @@ scripts/ui/ui_layout.gd
 scripts/ui/ui_slot.gd
 scripts/ui/ui_theme.gd
 scripts/ui/ui_window.gd
+scripts/ui/world_labels.gd
 scripts/ui/world_loader.gd
 scripts/world/castle/magical_staircase.gd
 scripts/world/castle_interior.gd

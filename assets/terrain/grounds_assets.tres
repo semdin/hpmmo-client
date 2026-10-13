@@ -288,17 +288,19 @@ albedo_texture = ExtResource("22_dnxwt")
 normal_texture = ExtResource("23_6boq2")
 normal_depth = 1.0
 ao_strength = 1.5
+roughness = 0.1
 uv_scale = 0.16
 detiling_rotation = 0.2
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_431o4"]
 name = "cliff_rock"
 id = 1
-albedo_color = Color(0.6, 0.58, 0.56, 1)
+albedo_color = Color(0.5, 0.485, 0.47, 1)
 albedo_texture = ExtResource("24_kvuff")
 normal_texture = ExtResource("25_i1cyr")
 normal_depth = 1.2
 ao_strength = 1.5
+roughness = 0.3
 uv_scale = 0.06
 detiling_rotation = 0.12
 
@@ -310,7 +312,7 @@ albedo_texture = ExtResource("26_6tgn4")
 normal_texture = ExtResource("27_t4wto")
 normal_depth = 1.0
 ao_strength = 1.5
-roughness = 0.05
+roughness = 0.2
 uv_scale = 0.22
 detiling_rotation = 0.3
 
@@ -322,6 +324,7 @@ albedo_texture = ExtResource("28_o0kpu")
 normal_texture = ExtResource("29_h3jgn")
 normal_depth = 0.8
 ao_strength = 1.5
+roughness = 0.25
 uv_scale = 0.2
 detiling_rotation = 0.25
 
@@ -333,6 +336,7 @@ albedo_texture = ExtResource("30_xx7o4")
 normal_texture = ExtResource("31_vy3ql")
 normal_depth = 1.0
 ao_strength = 1.5
+roughness = 0.15
 uv_scale = 0.3
 detiling_rotation = 0.25
 
@@ -344,7 +348,7 @@ albedo_texture = ExtResource("28_o0kpu")
 normal_texture = ExtResource("29_h3jgn")
 normal_depth = 1.0
 ao_strength = 1.5
-roughness = 0.05
+roughness = 0.2
 uv_scale = 0.24
 detiling_rotation = 0.25
 
@@ -356,6 +360,7 @@ albedo_texture = ExtResource("32_tk75d")
 normal_texture = ExtResource("33_fno0s")
 normal_depth = 1.2
 ao_strength = 1.5
+roughness = 0.2
 uv_scale = 0.35
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_eh8vp"]
@@ -366,6 +371,7 @@ albedo_texture = ExtResource("34_hq3ux")
 normal_texture = ExtResource("35_1h5sa")
 normal_depth = 1.0
 ao_strength = 1.5
+roughness = 0.15
 uv_scale = 0.18
 detiling_rotation = 0.2
 
