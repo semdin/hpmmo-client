@@ -12,6 +12,9 @@ set(VENDOR_ED25519 ${CMAKE_CURRENT_SOURCE_DIR}/vendor/ed25519)
 # last commit touching launcher_cpp/>, so only launcher changes trigger it.
 set(HPMMO_LAUNCHER_VERSION "3.0.0" CACHE STRING "Launcher version stamped into the build")
 add_compile_definitions(HPMMO_LAUNCHER_VERSION="${HPMMO_LAUNCHER_VERSION}")
+# Vista+/Win10 APIs (QueryFullProcessImageNameW, SHCreateMemStream, DWM, DPI):
+# GCC mingw-w64 defaults to an older _WIN32_WINNT and hides them.
+add_compile_definitions(_WIN32_WINNT=0x0A00 WINVER=0x0A00 _WIN32_IE=0x0A00)
 
 # Shared launcher/updater core. Ed25519 (vendored, public-domain-style zlib
 # license - see vendor/PROVENANCE.md) is the only third-party code.
@@ -45,10 +48,8 @@ add_executable(HPMMO_Launcher WIN32
     src/main.cpp
     app.rc
 )
-# windres finds the embedded art/fonts (app.rc) through the include path, and
-# the Vista+ shell/DWM/DPI APIs need an explicit target version under GCC mingw.
+# windres finds the embedded art/fonts (app.rc) through the include path.
 target_include_directories(HPMMO_Launcher PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_definitions(HPMMO_Launcher PRIVATE _WIN32_WINNT=0x0A00 WINVER=0x0A00 _WIN32_IE=0x0A00)
 target_link_libraries(HPMMO_Launcher PRIVATE
     hpmmo_core
     ws2_32

@@ -2,8 +2,10 @@
 
 #include "common.h"
 
-#include <bcrypt.h>
 #include <windows.h>
+#include <bcrypt.h>
+
+#include <mutex>
 
 namespace hpmmo {
 
