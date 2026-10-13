@@ -22,6 +22,10 @@ struct HttpOutcome {
 struct HttpRequestOptions {
     std::wstring url;
     uint64_t resumeFrom = 0;              // adds "Range: bytes=N-"
+    // A closed range "bytes=resumeFrom-rangeLast" (inclusive); the server must
+    // answer 206 or the request fails with errorKind "range".
+    bool closedRange = false;
+    uint64_t rangeLast = 0;
     std::wstring pinnedSpkiHex;           // required unless systemTrust; fails closed when empty
     // Validate the certificate chain against the Windows trust store instead
     // of a pin (GitHub release hosts rotate their certificates). What makes a

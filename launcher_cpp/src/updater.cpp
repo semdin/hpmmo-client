@@ -1,4 +1,5 @@
 #include "updater.h"
+#include "delta.h"
 
 #include "http.h"
 #include "sha256.h"
@@ -159,6 +160,13 @@ bool ParseManifest(const std::string& raw, ReleaseManifest& m, std::string& err)
     m.clientVersion = root.str("client_version");
     m.minLauncherVersion = root.str("min_launcher_version");
     m.launcherVersion = root.str("launcher_version");
+    if (const JsonValue* ci = root.find("content_index")) {
+        if (ci->isObject()) {
+            m.contentIndexUrl = ci->str("url");
+            m.contentIndexSha256 = ToLowerString(ci->str("sha256"));
+            m.contentIndexSize = (uint64_t)ci->i64("size", 0);
+        }
+    }
     m.protocolVersion = root.str("protocol_version");
     m.protocolMin = root.str("protocol_min");
     m.protocolMax = root.str("protocol_max");
@@ -1103,6 +1111,143 @@ CommandResult CheckImpl(UpdaterContext& ctx, CheckSummary* summary) {
     return r;
 }
 
+// HPMMO_FULL_PACKAGE=1 skips the delta path (diagnostics, tests).
+bool FullPackageForced() {
+    wchar_t v[8] = {0};
+    return GetEnvironmentVariableW(L"HPMMO_FULL_PACKAGE", v, 8) > 0 && v[0] == L'1';
+}
+
+// Chunked (delta) staging: builds <versions>/<ver>.tmp from the chunks the
+// installed version already has plus ranged downloads of the missing ones
+// (delta.cpp). On success stagedDir holds a verified install with its record
+// and .content.json (the next update's source of local chunks).
+bool StageFromChunks(UpdaterContext& ctx, const ReleaseManifest& m, const InstalledState& inst,
+                     const std::wstring& stagedDir, std::string& message, int& code) {
+    if (ctx.status) ctx.status(L"Downloading the changes...");
+    std::string raw;
+    DocFetch f = FetchDoc(ctx, Utf8ToWide(JoinUrlBase(ctx.releaseBase, m.contentIndexUrl)), raw, 64u << 20, true);
+    if (!f.ok) {
+        message = "content index fetch failed: " + f.error;
+        code = CodeForDocError(f);
+        return false;
+    }
+    if ((m.contentIndexSize && raw.size() != m.contentIndexSize) ||
+        Sha256Hex(raw.data(), raw.size()) != m.contentIndexSha256) {
+        message = "the content index does not match the signed manifest";
+        code = kExitIntegrity;
+        return false;
+    }
+    ContentIndex index;
+    std::string err;
+    if (!ParseContentIndex(raw, index, err)) {
+        message = err;
+        code = kExitIntegrity;
+        return false;
+    }
+    if (index.clientVersion != m.clientVersion) {
+        message = "the content index describes " + index.clientVersion + ", not " + m.clientVersion;
+        code = kExitIntegrity;
+        return false;
+    }
+    uint64_t total = 0;
+    for (const auto& file : index.files) total += file.size;
+    if (!CheckDiskSpace(ctx, total + kSpaceSlack, message)) {
+        code = kExitDiskSpace;
+        return false;
+    }
+
+    LocalInstall local;
+    if (inst.present && DirExists(inst.dir)) {
+        local.dir = inst.dir;
+        ReadFileBytes(JoinPath(inst.dir, L".content.json"), local.contentJson, 64u << 20);
+        JsonValue rec;
+        std::string rerr;
+        if (LoadInstallRecord(inst.dir, rec, rerr)) {
+            if (const auto* files = rec.arr("files")) {
+                for (const auto& jf : *files) {
+                    ExtractedFile ef;
+                    ef.relPath = jf.str("path");
+                    ef.size = (uint64_t)jf.i64("size", 0);
+                    ef.sha256 = ToLowerString(jf.str("sha256"));
+                    if (!ef.relPath.empty()) local.files.push_back(ef);
+                }
+            }
+        }
+    }
+
+    if (DirExists(stagedDir)) RemoveDirRecursive(stagedDir);
+    if (!CreateDirs(stagedDir)) {
+        message = "cannot create the staging directory";
+        code = kExitIntegrity;
+        return false;
+    }
+    DeltaCallbacks cb;
+    cb.cancel = ctx.cancel;
+    bool assembling = false;
+    cb.progress = [&](uint64_t done, uint64_t all) {
+        ReportProgress(ctx, L"Downloading", done, all);
+        if (done >= all && !assembling) {
+            assembling = true;   // downloads finished: the files are being built
+            if (ctx.status) ctx.status(L"Verifying and staging the update...");
+        }
+    };
+    cb.fetchRange = [&](const std::string& url, uint64_t first, uint64_t last, std::string& body,
+                        std::string& ferr) {
+        for (int attempt = 0; attempt < kDownloadAttempts; attempt++) {
+            HttpRequestOptions o;
+            o.url = Utf8ToWide(url);
+            o.pinnedSpkiHex = ctx.pinnedSpkiHex;
+            o.systemTrust = ctx.pinnedSpkiHex.empty();
+            o.closedRange = true;
+            o.resumeFrom = first;
+            o.rangeLast = last;
+            o.maxBodyBytes = (size_t)(last - first + 1);
+            o.receiveTimeoutMs = 60000;
+            HttpOutcome out = HttpGetToString(o, body);
+            if (out.ok) return true;
+            ferr = out.error;
+            if (out.errorKind == "range" || out.errorKind == "pin" || out.errorKind == "tls" ||
+                out.errorKind == "config" || out.errorKind == "cancel") {
+                return false;
+            }
+            if (!SleepCancellable(ctx.cancel, 800 * (attempt + 1))) return false;
+        }
+        return false;
+    };
+    std::vector<ExtractedFile> files;
+    DeltaStats stats;
+    bool cancelled = false;
+    if (!BuildFromChunks(index, local, stagedDir, JoinPath(ctx.paths.stagingDir, L"chunks"), cb, files, stats,
+                         cancelled, err)) {
+        RemoveDirRecursive(stagedDir);
+        message = err;
+        code = cancelled ? kExitCancelled : kExitDownload;
+        return false;
+    }
+
+    Artifact contentArt;
+    contentArt.kind = "content";
+    contentArt.url = m.contentIndexUrl;
+    contentArt.sha256 = m.contentIndexSha256;
+    contentArt.size = raw.size();
+    JsonValue rec;
+    VerifyResult vr;
+    std::string verr;
+    if (!WriteFileAtomic(JoinPath(stagedDir, L".install-record.json"),
+                         BuildRecordJson(m.clientVersion, m, contentArt, files)) ||
+        !WriteFileAtomic(JoinPath(stagedDir, L".content.json"), raw) || !LoadInstallRecord(stagedDir, rec, verr) ||
+        !VerifyInstallFiles(stagedDir, rec, vr, verr) || !vr.missing.empty() || !vr.corrupt.empty()) {
+        RemoveDirRecursive(stagedDir);
+        message = "the chunk-built installation failed verification";
+        code = kExitIntegrity;
+        return false;
+    }
+    LogMsg("[Updater] chunked update to " + m.clientVersion + ": downloaded " + FormatU64(stats.downloadBytes) +
+           " bytes in " + std::to_string(stats.requests) + " request(s), reused " + FormatU64(stats.reusedBytes) +
+           " bytes locally");
+    return true;
+}
+
 CommandResult UpdateImpl(UpdaterContext& ctx, CheckSummary* summary) {
     if (summary) *summary = CheckSummary{};
     ReleaseManifest m;
@@ -1161,11 +1306,6 @@ CommandResult UpdateImpl(UpdaterContext& ctx, CheckSummary* summary) {
         return r;
     }
 
-    Artifact art;
-    std::string why;
-    if (!SelectInstallArtifact(m, inst.version, art, why)) {
-        return Fail("update", kExitIntegrity, why);
-    }
     std::vector<RunningProcess> running;
     if (IsGameRunningNowImpl(ctx.paths, ctx.cfg, &running)) {
         std::string names;
@@ -1178,78 +1318,102 @@ CommandResult UpdateImpl(UpdaterContext& ctx, CheckSummary* summary) {
                         "); close it before updating - nothing was written");
     }
 
-    if (ctx.status) ctx.status(L"Downloading the new version...");
-    std::wstring pkgPath;
-    if (!DownloadArtifact(ctx, art, pkgPath, message, code)) {
-        return Fail("update", code, message);
-    }
-    if (ctx.cli.stopAfter == "download" || ctx.cli.stopAfter == "verify") {
-        CommandResult r;
-        JsonValue j = JsonValue::Obj();
-        j.set("command", JsonValue::Str("update"));
-        j.set("ok", JsonValue::Bool(true));
-        j.set("stage", JsonValue::Str(ctx.cli.stopAfter));
-        j.set("package", JsonValue::Str(WideToUtf8(pkgPath)));
-        j.set("from_version", JsonValue::Str(inst.version));
-        j.set("to_version", JsonValue::Str(m.clientVersion));
-        r.json = j.Dump();
-        return r;
-    }
-
-    // Extraction: verify the staged installation before activation.
-    if (ctx.status) ctx.status(L"Verifying and staging the update...");
-    std::wstring tmpDir = JoinPath(ctx.paths.versionsDir, Utf8ToWide(m.clientVersion)) + L".tmp";
     if (!CreateDirs(ctx.paths.versionsDir)) {
         return Fail("update", kExitIntegrity, "cannot create the versions directory");
     }
-    if (DirExists(tmpDir)) {
-        JsonValue rec;
-        VerifyResult vr;
-        std::string verr;
-        bool reusable = LoadInstallRecord(tmpDir, rec, verr) &&
-                        ToLowerString(rec.str("manifest_sha256")) == m.sha256 &&
-                        VerifyInstallFiles(tmpDir, rec, vr, verr) && vr.missing.empty() &&
-                        vr.corrupt.empty();
-        if (!reusable) {
-            LogMsg("[Updater] discarding stale staging directory " + WideToUtf8(tmpDir));
-            RemoveDirRecursive(tmpDir);
+    std::wstring tmpDir = JoinPath(ctx.paths.versionsDir, Utf8ToWide(m.clientVersion)) + L".tmp";
+    std::wstring pkgPath;
+
+    // Delta first: only the changed chunks travel. Any failure other than a
+    // cancel or a full disk falls back to the complete package below.
+    bool chunked = false;
+    if (!m.contentIndexUrl.empty() && ctx.cli.stopAfter.empty() && !FullPackageForced()) {
+        std::string chunkMsg;
+        int chunkCode = kExitOk;
+        chunked = StageFromChunks(ctx, m, inst, tmpDir, chunkMsg, chunkCode);
+        if (chunked) {
+            pkgPath = Utf8ToWide(m.contentIndexUrl);
+        } else {
+            if (chunkCode == kExitCancelled || chunkCode == kExitDiskSpace) return Fail("update", chunkCode, chunkMsg);
+            LogMsg("[Updater] chunked update unavailable (" + chunkMsg + "); downloading the full package");
         }
     }
-    if (!DirExists(tmpDir)) {
-        ZipReader zip;
-        std::string err;
-        if (!zip.Open(pkgPath, err)) {
-            return Fail("update", kExitIntegrity, "package is not a readable zip: " + err);
+
+    if (!chunked) {
+        Artifact art;
+        std::string why;
+        if (!SelectInstallArtifact(m, inst.version, art, why)) {
+            return Fail("update", kExitIntegrity, why);
         }
-        uint64_t uncompressed = 0;
-        for (const auto& e : zip.entries()) uncompressed += e.uncompSize;
-        std::string spaceMsg;
-        if (!CheckDiskSpace(ctx, uncompressed + kSpaceSlack, spaceMsg)) {
-            return Fail("update", kExitDiskSpace, spaceMsg);
+        if (ctx.status) ctx.status(L"Downloading the new version...");
+        if (!DownloadArtifact(ctx, art, pkgPath, message, code)) {
+            return Fail("update", code, message);
         }
-        if (!CreateDirs(tmpDir)) {
-            return Fail("update", kExitIntegrity, "cannot create the staging directory");
+        if (ctx.cli.stopAfter == "download" || ctx.cli.stopAfter == "verify") {
+            CommandResult r;
+            JsonValue j = JsonValue::Obj();
+            j.set("command", JsonValue::Str("update"));
+            j.set("ok", JsonValue::Bool(true));
+            j.set("stage", JsonValue::Str(ctx.cli.stopAfter));
+            j.set("package", JsonValue::Str(WideToUtf8(pkgPath)));
+            j.set("from_version", JsonValue::Str(inst.version));
+            j.set("to_version", JsonValue::Str(m.clientVersion));
+            r.json = j.Dump();
+            return r;
         }
-        std::vector<ExtractedFile> files;
-        if (!zip.ExtractAll(tmpDir, files, err, [&]() { return ctx.cancel && ctx.cancel->load(); })) {
-            RemoveDirRecursive(tmpDir);
-            int c = err == "cancelled" ? kExitCancelled : kExitIntegrity;
-            return Fail("update", c, "package extraction failed: " + err);
+
+        // Extraction: verify the staged installation before activation.
+        if (ctx.status) ctx.status(L"Verifying and staging the update...");
+        if (DirExists(tmpDir)) {
+            JsonValue rec;
+            VerifyResult vr;
+            std::string verr;
+            bool reusable = LoadInstallRecord(tmpDir, rec, verr) &&
+                            ToLowerString(rec.str("manifest_sha256")) == m.sha256 &&
+                            VerifyInstallFiles(tmpDir, rec, vr, verr) && vr.missing.empty() &&
+                            vr.corrupt.empty();
+            if (!reusable) {
+                LogMsg("[Updater] discarding stale staging directory " + WideToUtf8(tmpDir));
+                RemoveDirRecursive(tmpDir);
+            }
         }
-        std::string recordJson = BuildRecordJson(m.clientVersion, m, art, files);
-        if (!WriteFileAtomic(JoinPath(tmpDir, L".install-record.json"), recordJson)) {
-            RemoveDirRecursive(tmpDir);
-            return Fail("update", kExitIntegrity, "cannot write the install record");
+        if (!DirExists(tmpDir)) {
+            ZipReader zip;
+            std::string err;
+            if (!zip.Open(pkgPath, err)) {
+                return Fail("update", kExitIntegrity, "package is not a readable zip: " + err);
+            }
+            uint64_t uncompressed = 0;
+            for (const auto& e : zip.entries()) uncompressed += e.uncompSize;
+            std::string spaceMsg;
+            if (!CheckDiskSpace(ctx, uncompressed + kSpaceSlack, spaceMsg)) {
+                return Fail("update", kExitDiskSpace, spaceMsg);
+            }
+            if (!CreateDirs(tmpDir)) {
+                return Fail("update", kExitIntegrity, "cannot create the staging directory");
+            }
+            std::vector<ExtractedFile> files;
+            if (!zip.ExtractAll(tmpDir, files, err, [&]() { return ctx.cancel && ctx.cancel->load(); })) {
+                RemoveDirRecursive(tmpDir);
+                int c = err == "cancelled" ? kExitCancelled : kExitIntegrity;
+                return Fail("update", c, "package extraction failed: " + err);
+            }
+            std::string recordJson = BuildRecordJson(m.clientVersion, m, art, files);
+            if (!WriteFileAtomic(JoinPath(tmpDir, L".install-record.json"), recordJson)) {
+                RemoveDirRecursive(tmpDir);
+                return Fail("update", kExitIntegrity, "cannot write the install record");
+            }
+            JsonValue rec;
+            VerifyResult vr;
+            std::string verr;
+            if (!LoadInstallRecord(tmpDir, rec, verr) ||
+                !VerifyInstallFiles(tmpDir, rec, vr, verr) || !vr.missing.empty() || !vr.corrupt.empty()) {
+                RemoveDirRecursive(tmpDir);
+                return Fail("update", kExitIntegrity, "staged installation failed verification");
+            }
         }
-        JsonValue rec;
-        VerifyResult vr;
-        std::string verr;
-        if (!LoadInstallRecord(tmpDir, rec, verr) ||
-            !VerifyInstallFiles(tmpDir, rec, vr, verr) || !vr.missing.empty() || !vr.corrupt.empty()) {
-            RemoveDirRecursive(tmpDir);
-            return Fail("update", kExitIntegrity, "staged installation failed verification");
-        }
-    }
+    }  // !chunked
+
     if (!WriteJournal(ctx, m.clientVersion, tmpDir, inst.version, m.sha256)) {
         return Fail("update", kExitIntegrity, "cannot write the activation journal");
     }

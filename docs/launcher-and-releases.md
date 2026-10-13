@@ -17,8 +17,13 @@
    `launcher_cpp/src/common.h`). GitHub's TLS is validated by Windows; the signature is what authorizes an install.
 2. `launcher_version` in the manifest newer than the running launcher -> it downloads `HPMMO_Launcher.exe`
    from the release, swaps itself and restarts.
-3. `client_version` different from the installed one -> it downloads the client zip, checks size + sha256
-   against the signed manifest, installs into `versions/<version>` and activates it.
+3. `client_version` different from the installed one -> **delta update**: it fetches `content.json` (its
+   sha256 is in the signed manifest), which lists every file as content-defined chunks (~256 KiB,
+   `tools/release/chunk_release.py`). Chunks the installed version already has are copied locally; only the
+   missing ones are downloaded with HTTP Range requests into the `chunks-<ver>.bin` of the release that first
+   published them. Every chunk and every file is checked against its sha256, then the version is activated.
+   If anything in that path fails (except a cancel or a full disk) the full zip is installed instead.
+   Measured on the real build: v1.0.3 -> v1.0.4 downloaded 26 MB instead of ~500 MB.
 4. PLAY starts `HPMMO.exe`; the game opens at its own login screen.
 
 Versions are automatic: client `1.0.<workflow run number>`, launcher `3.0.<unix time of the last commit that
@@ -27,6 +32,11 @@ touched launcher_cpp/>`. A release that did not change the launcher does not rei
 Install location: next to the launcher when that folder already holds an install (`current.json`, `versions/`)
 or a `portable.txt`; otherwise `%LOCALAPPDATA%\HPMMO`. Player download link:
 `https://github.com/semdin/hpmmo-client/releases/latest/download/HPMMO_Launcher.exe`.
+
+**Never delete old GitHub releases**: newer releases reference chunks stored in older releases' `chunks-*.bin`.
+The CI keeps the Godot import cache (`.godot`) between runs so unchanged assets re-export byte-identically
+(Godot imports are not bit-reproducible; without the cache ~25 MB of models change every release).
+`HPMMO_FULL_PACKAGE=1` forces the full zip (diagnostics).
 
 ## One-time setup
 
@@ -56,7 +66,7 @@ Manual maintenance: create `/opt/hpmmo/state/maintenance.flag` (any content) and
 
 ## Tests
 
-- `python tools/release/test_updater.py` - launcher updater (102 checks; build `launcher_cpp/build` first).
+- `python tools/release/test_updater.py` - launcher updater incl. delta updates (113 checks; build `launcher_cpp/build` first).
 - `python server/tests/login_screen_e2e.py` - the login screen against the real stack, incl. the maintenance gate.
 - `python server/tests/integration_api.py` - service, incl. `/api/status` and the gate.
 - `godot --path client res://scenes/test/ui_menu_capture.tscn` - login screen screenshots in `tools/downloads/`.

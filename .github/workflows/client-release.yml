@@ -9,8 +9,12 @@
 #   https://github.com/<repo>/releases/latest/download/manifest.json (+ .sig)
 #   -> verifies the Ed25519 signature with the key built into the launcher
 #   -> launcher_version newer than its own build?  replace HPMMO_Launcher.exe first
-#   -> client_version differs from the installed one?  download the zip, check
-#      size + sha256 from the signed manifest, install, activate
+#   -> client_version differs from the installed one?  fetch content.json (its
+#      sha256 is in the signed manifest), copy every chunk the installed version
+#      already has, download only the missing chunks (HTTP Range into the
+#      chunks-<ver>.bin of the release that introduced them), verify each chunk
+#      and file, activate. The full zip stays as the fallback.
+#   Old releases must NOT be deleted: newer releases reference their chunks.
 #   -> PLAY starts the game at its own login screen.
 #
 # Versions are automatic:
@@ -124,7 +128,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq python3 python3-pip ninja-build cmake mingw-w64
-          python3 -m pip install --quiet cryptography
+          python3 -m pip install --quiet cryptography numpy
 
       - name: Build the launcher
         run: |
@@ -164,6 +168,15 @@ jobs:
           mv /tmp/templates/templates "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
           echo "path=$godot" >> "$GITHUB_OUTPUT"
 
+      # The import cache: Godot re-imports only sources that changed, so an
+      # unchanged model or texture keeps byte-identical output and its chunks
+      # are not re-downloaded by players (imports are not bit-reproducible).
+      - uses: actions/cache@v4
+        with:
+          path: .godot
+          key: godot-import-${{ github.sha }}
+          restore-keys: godot-import-
+
       - name: Export the game
         run: |
           set -eu
@@ -189,6 +202,23 @@ jobs:
             --client-version "${{ steps.v.outputs.client }}" \
             --content-version "${{ steps.v.outputs.content }}" \
             --platform "$PLATFORM" \
+            --out dist
+
+      # Delta delivery: chunks the previous release already published are
+      # referenced, only new ones go into chunks-<ver>.bin.
+      - name: Chunk the build (delta updates)
+        run: |
+          set -eu
+          prev="$RUNNER_TEMP/previous-content.json"
+          if ! curl -fsSL "https://github.com/${{ github.repository }}/releases/latest/download/content.json" -o "$prev"; then
+            echo "no previous content index: every chunk is new"
+            rm -f "$prev"
+          fi
+          python3 tools/release/chunk_release.py \
+            --build-dir build/client \
+            --version "${{ steps.v.outputs.client }}" \
+            --download-base "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
+            --previous "$prev" \
             --out dist
 
       - name: Sign the manifest
@@ -220,6 +250,7 @@ jobs:
             --schema-version "$SCHEMA_VERSION" --platform "$PLATFORM" \
             --base-url "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
             --release-notes-file "$RUNNER_TEMP/release_notes.txt" \
+            --content-index dist/content.json \
             --out dist --key "$key"
           openssl pkey -in "$key" -pubout -out "$RUNNER_TEMP/release.pub.pem"
           rm -f "$key"
@@ -240,9 +271,12 @@ jobs:
         run: |
           set -eu
           tag="${{ steps.v.outputs.tag }}"
+          # chunks-<ver>.bin is absent when no chunk changed.
+          chunks=(dist/chunks-*.bin)
+          [ -e "${chunks[0]}" ] || chunks=()
           gh release create "$tag" \
             "dist/hpmmo-client-${{ steps.v.outputs.client }}-$PLATFORM.zip" \
-            dist/HPMMO_Launcher.exe \
+            dist/HPMMO_Launcher.exe dist/content.json "${chunks[@]}" \
             dist/manifest.json dist/manifest.json.sig dist/manifest.json.keyid dist/SHA256SUMS \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \

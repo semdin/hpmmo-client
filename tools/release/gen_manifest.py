@@ -61,10 +61,10 @@ MANIFEST_FIELDS = (
     "channel", "client_version", "min_launcher_version", "protocol_version",
     "protocol_min", "protocol_max", "content_version", "content_sha256",
     "server_version", "schema_version", "platform", "published_at",
-    "release_notes", "artifacts", "launcher_version",
+    "release_notes", "artifacts", "launcher_version", "content_index",
 )
 #: Fields a manifest may omit (older manifests predate them).
-OPTIONAL_MANIFEST_FIELDS = ("launcher_version",)
+OPTIONAL_MANIFEST_FIELDS = ("launcher_version", "content_index")
 ARTIFACT_FIELDS = ("kind", "from_version", "url", "size", "sha256")
 
 
@@ -191,7 +191,7 @@ def make_manifest(args: argparse.Namespace) -> dict:
     if not re.match(r"^[0-9a-f]{64}$", content_sha256 or ""):
         rc.fail("content_sha256 must be 64 lowercase hex characters", 2)
 
-    return {
+    doc = {
         "channel": args.channel,
         "client_version": args.client_version,
         "min_launcher_version": args.min_launcher_version,
@@ -208,6 +208,17 @@ def make_manifest(args: argparse.Namespace) -> dict:
         "artifacts": artifacts,
         "launcher_version": args.launcher_version,
     }
+    # Chunked delivery (chunk_release.py): the content index is signed by
+    # reference, so every chunk hash inside it is as trusted as the manifest.
+    if args.content_index:
+        if not os.path.isfile(args.content_index):
+            rc.fail("content index %s does not exist" % args.content_index, 2)
+        doc["content_index"] = {
+            "url": args.base_url.rstrip("/") + "/" + os.path.basename(args.content_index),
+            "size": os.path.getsize(args.content_index),
+            "sha256": rc.sha256_file(args.content_index),
+        }
+    return doc
 
 
 def sign_manifest(manifest_path: str, key_path: str, key_id: str) -> tuple[str, str]:
@@ -501,6 +512,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--release-notes-file", default="")
     parser.add_argument("--launcher-artifact", default="", help="the launcher .exe for self-update (optional)")
     parser.add_argument("--launcher-version", default="", help="version of --launcher-artifact")
+    parser.add_argument("--content-index", default="", help="content.json from chunk_release.py (optional)")
     parser.add_argument("--published-at", default="", help="pin published_at for a reproducible manifest")
     parser.add_argument("--key", default="", help="Ed25519 private key (PEM) - never in a repository")
     parser.add_argument("--key-id", default="", help="expected SPKI sha256 of the signing key")

@@ -75,6 +75,9 @@ struct Artifact {
 
 struct ReleaseManifest {
     std::string channel, clientVersion, minLauncherVersion, launcherVersion;
+    // Chunked delivery (optional): the signed reference to content.json.
+    std::string contentIndexUrl, contentIndexSha256;
+    uint64_t contentIndexSize = 0;
     std::string protocolVersion, protocolMin, protocolMax;
     std::string contentVersion, contentSha256;
     std::string serverVersion, schemaVersion, platform, publishedAt, releaseNotes;

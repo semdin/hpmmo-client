@@ -100,6 +100,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         data = full.read_bytes()
         start = 0
+        end = len(data) - 1
         status = 200
         headers = {"Content-Type": "application/octet-stream"}
         rng = self.headers.get("Range")
@@ -111,17 +112,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 else:
                     a, b = spec.split("-", 1)
                     start = int(a)
+                    end = min(int(b), len(data) - 1)
                 if start < 0 or start > len(data):
                     self._send(416, b"range not satisfiable",
                                {"Content-Range": f"bytes */{len(data)}"})
                     return
                 status = 206
-                headers["Content-Range"] = f"bytes {start}-{len(data)-1}/{len(data)}"
+                headers["Content-Range"] = f"bytes {start}-{end}/{len(data)}"
                 srv.range_log.append(start)
             except ValueError:
                 start = 0
                 status = 200
-        body = data[start:]
+        body = data[start:end + 1]
+        srv.bytes_served = getattr(srv, "bytes_served", 0) + len(body)
 
         # Interruption simulation: announce the full length, send half, close.
         if srv.drop_mode and srv.drop_target == path:
@@ -280,6 +283,7 @@ class Release:
         platform: str = "windows-x86_64",
         artifacts: list[dict] | None = None,
         launcher_version: str | None = None,
+        content_index: dict | None = None,
     ) -> bytes:
         manifest = {
             "channel": channel,
@@ -299,6 +303,8 @@ class Release:
         }
         if launcher_version is not None:
             manifest["launcher_version"] = launcher_version
+        if content_index is not None:
+            manifest["content_index"] = content_index
         raw = json.dumps(manifest, separators=(",", ":"), sort_keys=False).encode()
         (self.root / "manifest.json").write_bytes(raw)
         sig = self.key.sign(raw)
@@ -800,6 +806,92 @@ def test_launcher_version_update(t: Path, server: ReleaseServer, signer: ed25519
     check("launcher_version: older launcher is ignored", rc == 0 and js.get("self_update_required") is False, log)
 
 
+def _chunk_version(build: Path, version: str, rel: Path, base: str, previous: Path | None) -> dict:
+    import chunk_release  # tools/release, next to this file
+    prev = json.loads(previous.read_text()) if previous and previous.is_file() else None
+    chunk_release.build(str(build), version, base + "/files", prev, str(rel / "files"))
+    raw = (rel / "files" / "content.json").read_bytes()
+    return {"url": "files/content.json", "size": len(raw), "sha256": hashlib.sha256(raw).hexdigest()}
+
+
+def _write_build(build: Path, files: dict[str, bytes]):
+    if build.exists():
+        shutil.rmtree(build)
+    for name, data in files.items():
+        (build / name).parent.mkdir(parents=True, exist_ok=True)
+        (build / name).write_bytes(data)
+
+
+def _installed_matches(root: Path, version: str, files: dict[str, bytes]) -> bool:
+    vdir = root / "versions" / version
+    return all((vdir / n).is_file() and (vdir / n).read_bytes() == d for n, d in files.items())
+
+
+def test_chunked_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateKey,
+                        pin: str, pubkey: str):
+    """Delta delivery: the first install builds from chunks, a small change
+    downloads only the changed chunks (HTTP Range), and a missing chunk file
+    falls back to the full package."""
+    root = t / "install"
+    rel = t / "rel"
+    rel.mkdir()
+    server.httpd.release_root = rel
+    rnd = __import__("random").Random(7)
+    exe = b"MZ" + bytes(rnd.getrandbits(8) for _ in range(300_000))
+    pck = bytes(rnd.getrandbits(8) for _ in range(4_000_000))
+    v1 = {"HPMMO.exe": exe, "HPMMO.pck": pck, "data/notes.txt": b"one"}
+    build = t / "build"
+    _write_build(build, v1)
+    release = Release(rel, signer)
+    release.add_package("game-1.0.0.zip", build_package(v1))
+    ci = _chunk_version(build, "1.0.0", rel, server.base, None)
+    release.write_manifest("1.0.0", content_index=ci)
+    release.write_status("ONLINE")
+    server.httpd.bytes_served = 0
+    rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
+    check("chunked: first install succeeds", rc == 0 and js.get("installed_version") == "1.0.0", log)
+    check("chunked: first install is byte-identical", _installed_matches(root, "1.0.0", v1))
+    check("chunked: the version keeps its content index", (root / "versions" / "1.0.0" / ".content.json").is_file())
+    log_text = (root / "launcher.log").read_text(errors="ignore") if (root / "launcher.log").is_file() else ""
+    check("chunked: the delta path was used", "chunked update to 1.0.0" in log_text, log_text[-800:])
+
+    # v2: a 100 KB edit in the middle of the pack, 10 KB inserted near the start.
+    shutil.copy(rel / "files" / "content.json", t / "prev.json")
+    pck2 = bytearray(pck)
+    pck2[2_000_000:2_100_000] = bytes(rnd.getrandbits(8) for _ in range(100_000))
+    pck2[1_000_000:1_000_000] = bytes(rnd.getrandbits(8) for _ in range(10_000))
+    v2 = {"HPMMO.exe": exe, "HPMMO.pck": bytes(pck2), "data/notes.txt": b"two"}
+    _write_build(build, v2)
+    release = Release(rel, signer)
+    release.add_package("game-1.0.1.zip", build_package(v2))
+    ci = _chunk_version(build, "1.0.1", rel, server.base, t / "prev.json")
+    release.write_manifest("1.0.1", content_index=ci)
+    server.httpd.bytes_served = 0
+    rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
+    served = getattr(server.httpd, "bytes_served", 0)
+    check("chunked: delta update succeeds", rc == 0 and js.get("installed_version") == "1.0.1", log)
+    check("chunked: delta result is byte-identical", _installed_matches(root, "1.0.1", v2))
+    check("chunked: only the changed chunks were downloaded (%d bytes for a %d byte install)" % (served, len(pck) + len(exe)),
+          0 < served < 1_500_000, str(served))
+    staged = [p for p in (root / "staging").rglob("*") if p.is_file()]
+    check("chunked: the chunk store is cleared after activation", not staged, str(staged))
+
+    # v3: the chunk file is missing -> the full package still installs.
+    shutil.copy(rel / "files" / "content.json", t / "prev.json")
+    v3 = {"HPMMO.exe": exe, "HPMMO.pck": bytes(pck2[:-5000]), "data/notes.txt": b"three"}
+    _write_build(build, v3)
+    release = Release(rel, signer)
+    release.add_package("game-1.0.2.zip", build_package(v3))
+    ci = _chunk_version(build, "1.0.2", rel, server.base, t / "prev.json")
+    (rel / "files" / "chunks-1.0.2.bin").unlink()
+    release.write_manifest("1.0.2", content_index=ci)
+    rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
+    check("chunked: a missing chunk file falls back to the full package",
+          rc == 0 and js.get("installed_version") == "1.0.2" and _installed_matches(root, "1.0.2", v3), log)
+    log_text = (root / "launcher.log").read_text(errors="ignore")
+    check("chunked: the fallback is logged", "downloading the full package" in log_text, log_text[-600:])
+
+
 def test_pinning(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateKey,
                  pin: str, pubkey: str):
     root = t / "install"
@@ -980,6 +1072,7 @@ def main() -> int:
         test_game_running,
         test_self_update,
         test_launcher_version_update,
+        test_chunked_update,
         test_pinning,
         test_unsafe_archive,
         test_compression_methods,

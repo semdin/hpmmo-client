@@ -161,7 +161,10 @@ static HttpOutcome RunRequest(const HttpRequestOptions& opts, std::wstring* dest
     }
 
     std::wstring headers;
-    if (opts.resumeFrom > 0) {
+    if (opts.closedRange) {
+        headers = L"Range: bytes=" + std::to_wstring(opts.resumeFrom) + L"-" +
+                  std::to_wstring(opts.rangeLast) + L"\r\n";
+    } else if (opts.resumeFrom > 0) {
         headers = L"Range: bytes=" + std::to_wstring(opts.resumeFrom) + L"-\r\n";
     }
     if (!WinHttpSendRequest(h.request, headers.empty() ? WINHTTP_NO_ADDITIONAL_HEADERS : headers.c_str(),
@@ -211,6 +214,12 @@ static HttpOutcome RunRequest(const HttpRequestOptions& opts, std::wstring* dest
     if (status != 200 && status != 206) {
         out.errorKind = "http";
         out.error = "HTTP " + std::to_string(status);
+        return out;
+    }
+    if (opts.closedRange && status != 206) {
+        // A server that ignores Range would send the whole object.
+        out.errorKind = "range";
+        out.error = "the server does not honour byte ranges (HTTP " + std::to_string(status) + ")";
         return out;
     }
     if (!destFile && !bodyOut) {

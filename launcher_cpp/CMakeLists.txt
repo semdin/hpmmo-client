@@ -27,6 +27,7 @@ add_library(hpmmo_core STATIC
     src/http.cpp
     src/updater.cpp
     src/updater_cli.cpp
+    src/delta.cpp
     ${VENDOR_ED25519}/fe.c
     ${VENDOR_ED25519}/ge.c
     ${VENDOR_ED25519}/sc.c
