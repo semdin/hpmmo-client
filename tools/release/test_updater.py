@@ -388,6 +388,8 @@ def test_install_and_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25
     rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
     check("update/older: exit 0", rc == 0, log)
     check("update/older: activated 1.1.0", bool(js and js.get("installed_version") == "1.1.0"), log)
+    leftovers = [p.name for p in (root / "staging").glob("*") if p.is_file()] if (root / "staging").is_dir() else []
+    check("update/older: the downloaded package is removed after activation", not leftovers, str(leftovers))
     active = root / "versions" / "1.1.0" / "HPMMO.exe"
     check("update/older: game files installed", active.is_file() and
           active.read_bytes() == b"GAME-1.1.0", f"missing {active}")

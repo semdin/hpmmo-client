@@ -1271,6 +1271,18 @@ CommandResult UpdateImpl(UpdaterContext& ctx, CheckSummary* summary) {
                             activateCode)) {
         return Fail("update", activateCode, activateMsg);
     }
+    // The package has served its purpose once the version is active and
+    // verified: keeping it would roughly double the install's disk footprint.
+    // Every staged download goes (older packages, partial files, a finished
+    // launcher self-update); a file still in use is simply left for next time.
+    {
+        std::vector<std::wstring> staged;
+        std::string listErr;
+        if (ListFilesRecursive(ctx.paths.stagingDir, staged, listErr)) {
+            for (const auto& f : staged) DeleteFileQuiet(JoinPath(ctx.paths.stagingDir, f));
+        }
+        LogMsg("[Updater] staging cleared after activating " + m.clientVersion);
+    }
     if (ctx.status) ctx.status(L"Update installed.");
     CommandResult r;
     JsonValue j = JsonValue::Obj();
