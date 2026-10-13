@@ -355,6 +355,9 @@ func _physics_process(delta: float) -> void:
 	if mode == "transfer":
 		_transfer_tick(delta)
 		return
+	if mode == "quest":
+		_quest_tick()
+		return
 	_update_target()
 	if mode == "agree":
 		if _pack_wiped() and _target_respawn_tick < 0:
@@ -2463,6 +2466,73 @@ func _retreat_from_pack() -> void:
 	}
 
 # ---------------------------------------------------------------------- common
+
+# ------------------------------------------------------------------ quests
+
+## Quest mode: the client spawns beside Professor Fig (HPMMO_DEV_SPAWN) and can
+## only ASK to talk. It asks Hagrid (across the map: must be refused), then Fig
+## (in range: the server completes the quest and pays), then Fig again (nothing
+## more may be paid). Progress is read from what the server sent back.
+var _quest_started := false
+var _quest_step := 0
+var _quest_at := 0.0
+var _quest_start := {}
+var _quest_notices: Array = []
+var _quest_completed: Array = []
+
+func _quest_snapshot() -> Dictionary:
+	return {
+		"quest_active": int(player.quest_active),
+		"quest_progress": int(player.quest_progress),
+		"house_rep": int(player.house_rep),
+		"galleons": int(player.galleons),
+		"exp": int(player.current_exp),
+		"level": int(player.level),
+		"view_index": int(QuestManager.active_index),
+	}
+
+func _quest_tick() -> void:
+	if not _quest_started:
+		_quest_started = true
+		_quest_at = _t + 1.5
+		SimAuthority.notice.connect(func(text: String, _colour: Color): _quest_notices.append(text))
+		QuestManager.quest_completed.connect(func(id: String): _quest_completed.append(id))
+		return
+	if _t < _quest_at:
+		return
+	match _quest_step:
+		0:
+			_quest_start = _quest_snapshot()
+			_record("quest_start", _quest_start.duplicate())
+			SimNet.submit_talk(player, "Hagrid")
+		1:
+			_record("after_far_talk", _quest_snapshot())
+			SimNet.submit_talk(player, "Professor Fig")
+		2:
+			_record("after_near_talk", _quest_snapshot())
+			SimNet.submit_talk(player, "Professor Fig")
+		_:
+			_done = true
+			var end := _quest_snapshot()
+			end.merge({
+				"uid": SimAuthority.local_uid,
+				"start": _quest_start,
+				"notices": _quest_notices,
+				"completed": _quest_completed,
+				"rewards": _rewards,
+				"distance_to_fig": _distance_to_npc("Professor Fig"),
+			})
+			_record("final", end)
+			_finish(0)
+			return
+	_quest_step += 1
+	_quest_at = _t + 2.0
+
+func _distance_to_npc(npc_name: String) -> float:
+	for npc in get_tree().get_nodes_in_group("npcs"):
+		if String(npc.get("npc_name")) == npc_name:
+			return (npc as Node3D).global_position.distance_to(player.global_position)
+	return -1.0
 
 func _finish(code: int) -> void:
 	if not _records.is_empty() and out_path != "":

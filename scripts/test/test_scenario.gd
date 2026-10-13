@@ -51,6 +51,8 @@ func _ready() -> void:
 	check(hud.hp_bar.value == player.current_hp, "Damage updates HP immediately")
 	player.add_exp(210)
 	check(player.level == 2 and hud.exp_bar.value == player.current_exp, "EXP rollover and level update HUD")
+	await _check_house_standing(player, hud)
+	await _check_server_quests(player)
 	player.current_mana = player.max_mana
 	player.cast_spell("protego")
 	check(player.is_protego_active and hud.mana_bar.value == player.current_mana, "Skill mana payment updates HUD")
@@ -267,3 +269,137 @@ func _ready() -> void:
 	await get_tree().process_frame
 	print("REGRESSION RESULT: %d checks, %d failures" % [checks, failures.size()])
 	get_tree().quit(0 if failures.is_empty() else 1)
+
+## House standing: quest reputation -> rank 1..7, shown on the HUD, persisted in
+## the `quests` object, and able to gate a spell on the authority.
+func _check_house_standing(player: Node, hud: Node) -> void:
+	check(HPRules.max_house_rank() == 7 and HPRules.house_rank_for(0) == 1 and HPRules.house_rank_for(99) == 1 \
+		and HPRules.house_rank_for(100) == 2 and HPRules.house_rank_for(2400) == 7, "House rank table has seven ranks")
+	check(HPRules.clamp_house_rep(999999) == HPRules.max_house_rep() and HPRules.clamp_house_rep(-5) == 0, "House reputation is clamped to the rank table")
+	check(player.house_rep == 0 and player.house_rank() == 1, "A sheet without house standing starts at rank 1")
+	player.add_house_rep(120)
+	await get_tree().process_frame
+	var record: Dictionary = SimAuthority.record_for(player)
+	var stats: Dictionary = SimAuthority.build_stats(record)
+	check(player.house_rep == 120 and int(record.get("house_rep", -1)) == 120 and int(stats.get("house_rank", 0)) == 2 \
+		and int(stats.get("house_next_rep", 0)) == 250, "Authority grants house reputation and reports the rank")
+	check(hud.unit_frame.house_rank == 2 and hud.unit_frame.house_rep == 120, "Unit frame shows the house rank")
+	check(hud.notices.visible_texts().any(func(t): return String(t).contains("Rank 2")), "Rank up raises a HUD notice")
+	# Persistence: the free-form quests object round-trips, unknown keys survive.
+	player.restore_quest_state({"house_rep": 900.0, "future_key": {"a": 1}})
+	var persisted: Dictionary = player.persisted_quests()
+	check(player.house_rank() == 5 and int(persisted.house_rep) == 900 and persisted.has("future_key"), "House standing restores from and saves into the quests object")
+	var bridge: Node = load("res://addons/hpmmo_sim/persistence.gd").new()
+	var payload: Dictionary = bridge.character_payload(player, record)
+	bridge.free()
+	check(int((payload.get("quests", {}) as Dictionary).get("house_rep", -1)) == 900, "World save payload carries house standing")
+	# Gating: a spell that names a house rank is refused below it.
+	record["house_rep"] = 0
+	var spell: Dictionary = HPRules.spell("protego")
+	spell["requires_house_rank"] = 3
+	var refused: Dictionary = SimAuthority.cast_for_record(record, "protego", Vector3.ZERO, 900001)
+	spell.erase("requires_house_rank")
+	check(String(refused.get("reason", "")) == HPProtocol.REJECT_HOUSE_RANK, "Spells gated by house rank are refused below it")
+	record["house_rep"] = player.house_rep
+
+## Quests are decided by the authority: talk is range-checked against the NPC,
+## kills count by species from the kill credit, refinement counts on the
+## server's own success, a visit is the body's position (and broom), and the
+## reward is paid once. The QuestManager only mirrors the chain position.
+func _check_server_quests(player: Node) -> void:
+	var record: Dictionary = SimAuthority.record_for(player)
+	var peer := int(record.get("peer_id", 0))
+	var home: Vector3 = player.global_position
+	var completed: Array = []
+	var on_completed := func(id: String): completed.append(id)
+	QuestManager.quest_completed.connect(on_completed)
+	_set_quest(record, 0, 0)
+	await get_tree().process_frame
+	check(QuestManager.active_index == 0 and String(QuestManager.current_quest().get("id", "")) == "welcome", "Quest view mirrors the authority's chain position")
+
+	# Talk: the NPC must exist and the body must stand beside it.
+	var fig: Node3D = world.get_node("NPCs/ProfessorFig")
+	player.global_position = fig.global_position + Vector3(30, 0, 0)
+	var far: Dictionary = SimAuthority.request_talk(peer, "Professor Fig")
+	check(String(far.get("reason", "")) == HPProtocol.REJECT_RANGE and int(record.quest_active) == 0, "Talking from out of range does not count")
+	check(String(SimAuthority.request_talk(peer, "Nobody").get("reason", "")) == HPProtocol.REJECT_NO_TARGET, "Talking to an unknown NPC is refused")
+	player.global_position = fig.global_position + Vector3(1.5, 0, 0)
+	var gold_before: int = player.galleons
+	var rep_before: int = player.house_rep
+	var exp_before: int = player.current_exp
+	var level_before: int = player.level
+	var near: Dictionary = SimAuthority.request_talk(peer, "Professor Fig")
+	await get_tree().process_frame
+	check(bool(near.get("ok", false)) and int(record.quest_active) == 1 and player.quest_active == 1 and QuestManager.active_index == 1, "In-range talk completes the talk quest on the authority")
+	check(player.galleons == gold_before + 150 and player.house_rep == rep_before + 25 \
+		and (player.current_exp != exp_before or player.level != level_before), "Quest completion pays EXP, Galleons and house reputation")
+	check(completed == ["welcome"], "Quest view announces the completion once")
+	SimAuthority.request_talk(peer, "Professor Fig")
+	check(int(record.quest_active) == 1 and player.galleons == gold_before + 150, "Repeating a finished conversation pays nothing")
+
+	# Kill: a real kill credit counts by species; another species does not.
+	SimAuthority.quest_event(record, "kill", "inferi")
+	check(int(record.quest_progress) == 0, "A kill of another species does not count")
+	# A summoned spider of its own, far from the authored packs the encounter
+	# checks below stage (the same way a monolith wave brings one in).
+	var spider_node: Node3D = preload("res://scenes/entities/mobs/mob_acromantula.tscn").instantiate()
+	var spot := _g(260, -170)
+	spider_node.summoned = true
+	spider_node.pack_anchor = spot
+	spider_node.spawn_point = spot
+	world.get_node("Mobs").add_child(spider_node)
+	spider_node.global_position = spot
+	SimAuthority.register_mob(spider_node, 0, String(HPRules.zone_id_for(spot)))
+	var spider: Dictionary = SimAuthority.record_for(spider_node)
+	check(SimAuthority._mob_species(spider) == "acromantula", "A kill quest reads the mob's species from its scene")
+	SimAuthority._apply_damage(spider, 999999, "basic_cast", record)
+	check(bool(spider.get("dead", false)) and int(record.quest_progress) == 1, "An authoritative Acromantula kill advances the hunt")
+	for _i in range(4 - int(record.quest_progress)):
+		SimAuthority.quest_event(record, "kill", "acromantula")
+	check(int(record.quest_active) == 2 and completed.has("rats"), "Four Acromantula kills complete the hunt")
+
+	# Monolith credit.
+	_set_quest(record, 3, 0)
+	SimAuthority.quest_event(record, "monolith", "")
+	check(int(record.quest_active) == 4, "Monolith credit completes the monolith quest")
+
+	# Refine: two successful refinements through the real equipment request.
+	record["last_combat_tick"] = -100000
+	player.equipment["main_hand"] = {"id": "wand_hawthorn", "tier": 0}
+	player.add_loot("mat_phoenix_ash", 2)
+	player.galleons += 1000
+	SimAuthority.refresh_equipment(record)
+	for i in range(2):
+		var answer: Dictionary = SimAuthority.request_equipment(peer, 70000 + i, player.inventory_revision, "refine", "main_hand", "", 0)
+		check(String(answer.get("reason", "")) == "refined", "Refinement %d succeeds on the authority" % (i + 1))
+	check(int(record.quest_active) == 5 and completed.has("refine"), "Two refinements complete Ollivander's quest")
+
+	# Visit: the server checks the body's position, and this quest wants the broom.
+	var pitch: Vector3 = _g(330, -330) + Vector3(0, 6, 0)
+	check(HPRules.quest_place_at(HPProtocol.DEFAULT_MAP, pitch) == "Quidditch Pitch" \
+		and world.overlay.zone_at(pitch) == "Quidditch Pitch", "The pitch is a named place for the server and the zone banner")
+	player.global_position = pitch
+	var was_mounted := bool(record.get("mounted", false))
+	record["mounted"] = false
+	SimAuthority._tick_quest_visits()
+	check(int(record.quest_active) == 5, "Walking onto the pitch without the broom does not count")
+	record["mounted"] = true
+	SimAuthority._tick_quest_visits()
+	record["mounted"] = was_mounted
+	await get_tree().process_frame
+	check(int(record.quest_active) == 6 and QuestManager.is_all_done(), "Flying onto the pitch completes the chain")
+
+	# Persistence: the chain position is what the save writes.
+	var bridge: Node = load("res://addons/hpmmo_sim/persistence.gd").new()
+	var saved: Dictionary = (bridge.character_payload(player, record).get("quests", {}) as Dictionary)
+	bridge.free()
+	check(int(saved.get("active", -1)) == 6 and (saved.get("done", []) as Array).has("broom"), "The save carries the quest chain position")
+	QuestManager.quest_completed.disconnect(on_completed)
+	player.global_position = home
+	_set_quest(record, 0, 0)
+
+func _set_quest(record: Dictionary, index: int, progress: int) -> void:
+	record["quest_active"] = index
+	record["quest_progress"] = progress
+	SimAuthority._store_quest_state(record)
+	SimAuthority._push_stats(record)
