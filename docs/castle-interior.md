@@ -208,8 +208,12 @@ Provenance of every AI-generated asset is recorded in
     low on integrated GPUs. Two traps found: a spatial shader that writes
     `SSS_STRENGTH` turns on a full-screen subsurface pass (~5 ms on the iGPU);
     the PBR texture reads are the castle's main per-pixel cost, not the lights.
-  Still to do in F3: hero props via fal image-to-3D (owl lectern, armour),
-  portraits, compass-rose floor, open Great Hall doors.
+  * second pass: 26 framed original portraits (Entrance Hall, every Grand
+    Staircase gallery), a compass-rose inlay (round alpha mask), the Great
+    Hall doors standing open (colliders), and fal image-to-3D hero props
+    (`fal-ai/trellis-2`, ~30k vertices, `assets/castle/props/`): the golden
+    owl lectern on the dais and two suits of armour by the Great Hall doors,
+    placed and height-normalised by `castle_decor.gd _prop`.
 * **F4 Remaining rooms** in this order: Grand Staircase, Dungeons + Potions,
   Library, classrooms, common rooms, Dueling Club, Room of Requirement, Owlery.
 * **F5 Integration** - server collision from the glTF, walkthrough and

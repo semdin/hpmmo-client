@@ -11,3 +11,9 @@ original designs (no film heraldry). Prompts are in the fal request history.
 | banner_yellow.png | 01a136ae-6ead-78e0-8931-b75fc3756490 | Great Hall banner, gold / black badger |
 | stained_side.png | 01a136ae-6eb5-7a32-9c32-2f5abd6e49a6 | Great Hall side lancets |
 | stained_west.png | 01a136ae-6eb4-72d0-a472-473ecd5fb7b3 | Great Hall west window above the dais |
+| portrait_0..7.jpg | 01a136e1-773e…, -773f…, -7737…, -7741…, -773a…, -89d2…, -8a13…, -8a0c… | Original oil-painting portraits (Entrance Hall, Grand Staircase) |
+| compass.png | 01a136e1-76fd-73f1-a06f-c6bc616fd548 | Entrance Hall compass-rose floor inlay (round alpha mask added) |
+
+3D props (`assets/castle/props/`): reference images in `art/castle/concepts/props/`
+(owl lectern 01a136e1-76fe-7751-9472-c60147edee3a, armour
+01a136e1-7701-7cd1-a046-5e16c1199862), meshes by `fal-ai/trellis-2` from them.

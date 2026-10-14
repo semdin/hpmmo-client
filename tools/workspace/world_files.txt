@@ -3,6 +3,8 @@ assets/audio/sound_library.json
 assets/castle/castle_blockout.glb
 assets/castle/castle_interior.glb
 assets/castle/castle_layout.json
+assets/castle/props/armour.glb
+assets/castle/props/owl_lectern.glb
 assets/models/characters/barbarian_texture.png
 assets/models/characters/dark_wizard.glb
 assets/models/characters/dark_wizard_rogue_texture.png

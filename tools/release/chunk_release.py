@@ -51,6 +51,31 @@ def _gear():
 GEAR = _gear()
 
 
+BLOCK = 32 * 1024 * 1024      # bytes hashed at a time (bounded memory)
+
+
+def _cut_candidates(arr: np.ndarray) -> np.ndarray:
+    """Positions whose rolling gear hash has its masked bits clear.
+
+    Hashed in BLOCK-sized slices with WINDOW - 1 bytes of overlap: the hash at
+    byte i depends only on bytes i-WINDOW+1..i, so the result is identical to
+    hashing the whole file at once - which cost ~24 bytes of RAM per byte of
+    input and pushed a 600+ MB .pck past the release runner's memory."""
+    n = len(arr)
+    out = []
+    for start in range(0, n, BLOCK):
+        lead = min(start, WINDOW - 1)
+        part = arr[start - lead: min(start + BLOCK, n)]
+        gv = GEAR[part]
+        m = len(part)
+        h = np.zeros(m, dtype=np.uint64)
+        for k in range(min(WINDOW, m)):
+            h[k:] += gv[: m - k] << np.uint64(k)
+        hits = np.nonzero((h[lead:] & np.uint64(MASK)) == 0)[0]
+        out.append(hits + start)
+    return np.concatenate(out) if out else np.zeros(0, dtype=np.int64)
+
+
 def chunk_boundaries(data: bytes) -> list[tuple[int, int]]:
     """(offset, length) of every chunk. A cut follows byte i when the gear hash
     of the WINDOW bytes ending at i has its low 18 bits clear, at least
@@ -58,12 +83,7 @@ def chunk_boundaries(data: bytes) -> list[tuple[int, int]]:
     n = len(data)
     if n == 0:
         return []
-    arr = np.frombuffer(data, dtype=np.uint8)
-    gv = GEAR[arr]
-    h = np.zeros(n, dtype=np.uint64)
-    for k in range(min(WINDOW, n)):
-        h[k:] += gv[: n - k] << np.uint64(k)
-    candidates = np.nonzero((h & np.uint64(MASK)) == 0)[0]
+    candidates = _cut_candidates(np.frombuffer(data, dtype=np.uint8))
     out = []
     pos = 0
     while pos < n:
