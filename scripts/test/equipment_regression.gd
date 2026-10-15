@@ -136,6 +136,82 @@ func _test_upgrade_kinds() -> void:
 	check(HPEquipment.item_stats("robe_apprentice",9).bonus_hp > HPEquipment.item_stats("robe_apprentice",8).bonus_hp and HPEquipment.item_stats("broom_ashwood",9).mount_speed > HPEquipment.item_stats("broom_ashwood",8).mount_speed,"each +N is worth more than the one before")
 	player.galleons = gold
 
+## Enchantments: imbue adds one bonus from the kind's pool (never a stat twice,
+## never past the cap), reweave rerolls keeping the count, the scroll is spent on
+## every attempt, and worn bonuses reach the derived stats and creature damage.
+func _test_enchant() -> void:
+	var rules := HPEquipment.enchant_rules()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var bag := []
+	HPEquipment.add(bag,"wand_hawthorn",0,1)
+	HPEquipment.add(bag,"scroll_imbue",0,200)
+	HPEquipment.add(bag,"scroll_reweave",0,3)
+	var wand_uid: int = bag[0].uid
+	var gear := {}
+	check(HPEquipment.enchant(bag,gear,"scroll_reweave",wand_uid,rng).reason == "no_bonus","nothing to reweave on a fresh wand")
+	var tries := 0
+	while bag[0].bonuses.size() < int(rules.max_bonuses) and tries < 150:
+		var r := HPEquipment.enchant(bag,gear,"scroll_imbue",wand_uid,rng)
+		if not r.ok: break
+		bag.assign(r.inventory)
+		tries += 1
+		if tries == 1:
+			check(r.reason == "enchanted" and bag.filter(func(e): return e.id == "wand_hawthorn")[0].bonuses.size() == 1,"the first imbue always holds")
+	var wand: Dictionary = bag.filter(func(e): return e.id == "wand_hawthorn")[0]
+	var stats_seen := {}
+	for b in wand.bonuses: stats_seen[b.stat] = true
+	var pool: Array = HPEquipment.enchant_pool("wand_hawthorn")
+	check(wand.bonuses.size() == mini(int(rules.max_bonuses), pool.size()) and stats_seen.size() == wand.bonuses.size() and stats_seen.keys().all(func(st): return st in pool),"imbue fills the wand from its pool, each stat at most once")
+	var scrolls_left := int(bag.filter(func(e): return e.id == "scroll_imbue")[0].amount)
+	check(scrolls_left == 200 - tries,"every imbue attempt spends exactly one scroll")
+	check(HPEquipment.enchant(bag,gear,"scroll_imbue",wand_uid,rng).reason == "bonus_full","a full item refuses another imbue")
+	var before: Array = wand.bonuses.duplicate(true)
+	var rew := HPEquipment.enchant(bag,gear,"scroll_reweave",wand_uid,rng)
+	var after: Array = rew.inventory.filter(func(e): return e.id == "wand_hawthorn")[0].bonuses
+	check(rew.reason == "enchanted" and after.size() == before.size(),"reweave keeps the number of bonuses")
+	check(HPEquipment.enchant(bag,gear,"scroll_imbue",wand_uid + 1,rng).reason == "item_missing","an instance the player does not hold cannot be enchanted")
+	var hat := []
+	HPEquipment.add(hat,"hat_apprentice",0,1)
+	HPEquipment.add(hat,"scroll_imbue",0,1)
+	check(HPEquipment.enchant(hat,{},"scroll_imbue",hat[0].uid,rng).reason == "not_enchantable","accessories have no enchant pool")
+	var plain := HPEquipment.stats(500,300,{"main_hand":{"id":"wand_hawthorn","tier":0,"uid":1,"bonuses":[]}})
+	var rich := HPEquipment.stats(500,300,{"main_hand":{"id":"wand_hawthorn","tier":0,"uid":1,"bonuses":[{"stat":"spell_power","value":10},{"stat":"max_hp","value":120},{"stat":"monster_damage","value":15}]}})
+	check(is_equal_approx(rich.weapon_multiplier, plain.weapon_multiplier * 1.1) and rich.max_hp == plain.max_hp + 120 and is_equal_approx(rich.monster_damage, 15.0),"worn bonuses reach spell power, health and creature damage")
+	check(HPEquipment.bonus_text({"stat":"spell_power","value":6}) == "Spell power +6%","bonus lines read as authored")
+	for kind in ["weapon","armor","mount"]:
+		check((rules.pools[kind] as Array).size() >= int(rules.max_bonuses),"the %s pool can fill every enchant slot" % kind)
+		for stat in rules.pools[kind]:
+			check(rules.stats.has(stat),"%s pool stat %s is defined" % [kind, stat])
+	var effects := HPEquipment.stats(500,300,{"main_hand":{"id":"wand_hawthorn","tier":0,"uid":1,"bonuses":[{"stat":"crit_chance","value":5},{"stat":"mana_regen","value":6}]},
+		"chest":{"id":"robe_apprentice","tier":0,"uid":2,"bonuses":[{"stat":"creature_resist","value":10},{"stat":"hp_regen","value":6}]},
+		"broom":{"id":"broom_ashwood","tier":0,"uid":3,"bonuses":[{"stat":"exp_bonus","value":10},{"stat":"galleon_bonus","value":15}]}})
+	check(effects.crit_chance == 5.0 and effects.creature_resist == 10.0 and effects.hp_regen == 6.0 and effects.mana_regen == 6.0 and effects.exp_bonus == 10.0 and effects.galleon_bonus == 15.0,"every new enchantment reaches the derived stats")
+	# The authority applies them: an EXP grant with +10% and regeneration with +6/s.
+	var saved_eq: Dictionary = player.equipment.duplicate(true)
+	player.equipment["broom"] = {"id":"broom_ashwood","tier":0,"uid":91,"bonuses":[{"stat":"exp_bonus","value":10}]}
+	player.equipment["chest"] = {"id":"robe_apprentice","tier":0,"uid":92,"bonuses":[{"stat":"hp_regen","value":6}]}
+	SimAuthority.refresh_equipment(record)
+	var exp_before: int = player.current_exp
+	var lvl_before: int = player.level
+	SimAuthority._grant_exp(record,100)
+	check(player.level != lvl_before or player.current_exp == exp_before + 110,"enchanted experience bonus scales an EXP grant")
+	player.current_hp = 100
+	player._regen_hp = 0.0
+	player._tick_regeneration(1.0)
+	check(player.current_hp == 110,"enchanted health regeneration adds to the base rate")
+	player.equipment = saved_eq
+	SimAuthority.refresh_equipment(record)
+	# Through the authority on the worn wand: the request names the uid.
+	player.galleons = 100000
+	HPEquipment.add(player.inventory,"scroll_imbue",0,2)
+	record.last_combat_tick = SimAuthority.sim_tick - 5 * HPProtocol.SIM_HZ
+	request("equip","main_hand","wand_hawthorn")
+	var worn_uid: int = player.equipment.main_hand.uid
+	sequence += 1
+	var answer := SimAuthority.request_equipment(record.peer_id,sequence,player.inventory_revision,"enchant","","scroll_imbue",0,worn_uid)
+	check(answer.ok and player.equipment.main_hand.bonuses.size() >= 1 and player.equipment.main_hand.uid == worn_uid,"the authority enchants the worn wand named by uid")
+
 ## Tiered brooms: every `model` loads with the parts the rig binds, and a higher
 ## tier never asks for less level or flies slower.
 func _test_broom_catalog() -> void:
@@ -268,6 +344,7 @@ func _test_authority() -> void:
 	check(request("refine","main_hand").reason == "no_gold" and totals(player.inventory,player.equipment) == preserved,"unaffordable refinement preserves ownership")
 	player.galleons = before_failure_gold
 	_test_upgrade_kinds()
+	_test_enchant()
 	# Incoming attack defense and environmental damage use separate paths.
 	var mob: Node = get_tree().get_first_node_in_group("mobs")
 	player.global_position = Vector3(-70,0.2,20)

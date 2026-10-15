@@ -5,7 +5,7 @@
  "notes": "Asset audit manifest. The audit tools are retired: their input (tools/downloads/asset-audit.json) was removed with the downloaded candidate packs, so this document is hand-maintained. Every local_paths / license_file entry names a file that exists. `status: missing` means the asset is planned and not yet produced; `rejected` holds packs that were evaluated and not adopted. Measured fields (scale_m, triangles, sha256) come from the retired tools and from re-measurement on disk. | the spell effects (2026-10-05): every missing VFX inventory item is now project-original art authored by tools/blender/spell_vfx.py (four coherent 64-frame flipbooks, ripple/rune/mark/lightning atlases, glow/noise/flow/distortion/streak/fracture textures) and tools/blender/spell_meshes.py (trail ribbon, shield shell, projectile core, shards); the whole sound library is original synthesis from tools/audio/synth_spell_sfx.py. The two Kenney stills remain as particle ingredients, not effects. No VFX or audio entry remains missing or placeholder.",
  "summary": {
   "candidate": 31,
-  "integrated": 122,
+  "integrated": 127,
   "placeholder": 3,
   "missing": 8
  },
@@ -4273,6 +4273,8 @@
     "assets/ui/icons/icon_ring_apprentice.png",
     "assets/ui/icons/icon_robe_apprentice.png",
     "assets/ui/icons/icon_robe_auror.png",
+    "assets/ui/icons/icon_scroll_imbue.png",
+    "assets/ui/icons/icon_scroll_reweave.png",
     "assets/ui/icons/icon_stat_exp.png",
     "assets/ui/icons/icon_stat_health.png",
     "assets/ui/icons/icon_stat_level.png",
@@ -4358,6 +4360,8 @@
     "assets/ui/icons/icon_ring_apprentice.png": "7449dce259b4df502a6e2b09da16a2e0fb5681efd37675c84726f9d6a5a65f85",
     "assets/ui/icons/icon_robe_apprentice.png": "e9ac873f94b2e9a149a7849ed407b87a38b97495157c601fae0f7696a5605b82",
     "assets/ui/icons/icon_robe_auror.png": "a93239d0f6b2eb8dac0fb03d1274d678086ca3b986498464a1b1fdd7cfedd2a1",
+    "assets/ui/icons/icon_scroll_imbue.png": "a78c7c6eb910b8dd1c7619ca077a319e2a901ef718c5055a7dcd385f2e2ca36f",
+    "assets/ui/icons/icon_scroll_reweave.png": "36a342860596f39ac0aa7246b60e2221b8afaed426686745aa1ef9e7f15f537c",
     "assets/ui/icons/icon_stat_exp.png": "27aae24f0800d939cfa9b4f8d46efff4c55811f12eb61ec6d4c9f0081bcd2ccf",
     "assets/ui/icons/icon_stat_health.png": "7824dcf4ec634aec23f73d8e553af5ebe7004bd472af1676941016632a3ba369",
     "assets/ui/icons/icon_stat_level.png": "1e71e22e827c33f1bf2bf4bb5111338123d708a16d63f66000290ce60ec1e8a7",
