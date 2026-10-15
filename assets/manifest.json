@@ -4229,8 +4229,13 @@
     "assets/ui/icons/icon_basic_cast.png",
     "assets/ui/icons/icon_bombarda.png",
     "assets/ui/icons/icon_boots_apprentice.png",
+    "assets/ui/icons/icon_broom_ashwood.png",
+    "assets/ui/icons/icon_broom_emberwing.png",
     "assets/ui/icons/icon_broom_firebolt.png",
+    "assets/ui/icons/icon_broom_moonveil.png",
     "assets/ui/icons/icon_broom_nimbus2000.png",
+    "assets/ui/icons/icon_broom_runebound.png",
+    "assets/ui/icons/icon_broom_silverthorn.png",
     "assets/ui/icons/icon_cooldown.png",
     "assets/ui/icons/icon_currency_galleons.png",
     "assets/ui/icons/icon_expelliarmus.png",
@@ -4309,8 +4314,13 @@
     "assets/ui/icons/icon_basic_cast.png": "d7262091afbd5313df8eceabb6f558569ccaa6007a60668517dcfa574565003f",
     "assets/ui/icons/icon_bombarda.png": "1fb7d11ed213092b2890508b4d28d6ba1cf054fa9d1ce9dfabc234e1d8f81cb8",
     "assets/ui/icons/icon_boots_apprentice.png": "ff46db1ed225e65cc9f76ccea3effb38a0cd96167d9c25bc0ef04cc60b526695",
+    "assets/ui/icons/icon_broom_ashwood.png": "5de146993a9943da07171acc275516ee4bd65f4edcc7b5a7b197ff2d50bb97ee",
+    "assets/ui/icons/icon_broom_emberwing.png": "78e31d2feeee7fcd9674b1a1ffc77e5203dcc99075d462c18da5b9a9c420da9c",
     "assets/ui/icons/icon_broom_firebolt.png": "543ab02dd5d87263699c14107738dae5deb629efcb841ff57ff886a4139c2713",
+    "assets/ui/icons/icon_broom_moonveil.png": "c3cb3a5b42b46132ccbc1b011d316b164a72f07af1e2c68b49511f16eb5dee1d",
     "assets/ui/icons/icon_broom_nimbus2000.png": "a833ab74ac6f40a6ae1abd400de1a6cb5338680bc25aa66ada08af06ada66d0a",
+    "assets/ui/icons/icon_broom_runebound.png": "c8844da349b1fd97f5ccdc858e17c72de649e59e64d5e1aa1492862ff6ca2f59",
+    "assets/ui/icons/icon_broom_silverthorn.png": "352cc39cfb15f9e89139c9323cb764dad8bda6d554483cd716677219dd07d7f0",
     "assets/ui/icons/icon_cooldown.png": "f09e2d5075ca54a4d3b5d2e0c62d877ffa84151d66f7a8bd69d8eddc97204342",
     "assets/ui/icons/icon_currency_galleons.png": "fa9adee13d3307072ac19f58ac72cd4ca39b8b9fe20db33b68fa0c58dc940593",
     "assets/ui/icons/icon_expelliarmus.png": "130b50abd2bf2ecfec9bc08a0e3b915f3c43a166f6ef299156e56f0ff5ca39b2",
@@ -8731,6 +8741,201 @@
     "assets/audio/sound_library.json",
     "tools/downloads/vfx-check.log"
    ]
+  },
+  {
+   "id": "asset-broom_ashwood-glb",
+   "purpose": "tier 1 flight broom (items.json broom_ashwood `model`)",
+   "status": "integrated",
+   "author": "project (AI-assisted: openai/gpt-image-2.5 concept, meshy/v7.1 mesh)",
+   "source_url": "art/pipeline/ITEM_3D_PIPELINE.md",
+   "license": "Project-original (generated for this project)",
+   "license_url": "art/pipeline/ITEM_3D_PIPELINE.md",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/props/brooms/broom_ashwood.glb"
+   ],
+   "sha256": {
+    "assets/models/props/brooms/broom_ashwood.glb": "bce247d789fc4b1bd94f3d0e9f5b8cf54a0e24e43125e15619915578db1b25d4"
+   },
+   "scale_m": [
+    0.261,
+    0.348,
+    2.275
+   ],
+   "triangles": 5724,
+   "material_slots": 1,
+   "textures": {
+    "channels": [
+     "base_color",
+     "metallic_roughness",
+     "normal"
+    ],
+    "note": "embedded, 1024 px"
+   },
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "none (the broom never collides; the rider's capsule does)",
+   "lods": "Godot import-generated"
+  },
+  {
+   "id": "asset-broom_emberwing-glb",
+   "purpose": "tier 4 flight broom (items.json broom_emberwing `model`)",
+   "status": "integrated",
+   "author": "project (AI-assisted: openai/gpt-image-2.5 concept, meshy/v7.1 mesh)",
+   "source_url": "art/pipeline/ITEM_3D_PIPELINE.md",
+   "license": "Project-original (generated for this project)",
+   "license_url": "art/pipeline/ITEM_3D_PIPELINE.md",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/props/brooms/broom_emberwing.glb"
+   ],
+   "sha256": {
+    "assets/models/props/brooms/broom_emberwing.glb": "263a84be051fc05ce6ae0d6653046356d0bd147c9cb7f9c60edf7d64e31a4966"
+   },
+   "scale_m": [
+    0.178,
+    0.332,
+    2.275
+   ],
+   "triangles": 5484,
+   "material_slots": 1,
+   "textures": {
+    "channels": [
+     "base_color",
+     "metallic_roughness",
+     "normal"
+    ],
+    "note": "embedded, 1024 px"
+   },
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "none (the broom never collides; the rider's capsule does)",
+   "lods": "Godot import-generated"
+  },
+  {
+   "id": "asset-broom_moonveil-glb",
+   "purpose": "tier 5 flight broom (items.json broom_moonveil `model`)",
+   "status": "integrated",
+   "author": "project (AI-assisted: openai/gpt-image-2.5 concept, meshy/v7.1 mesh)",
+   "source_url": "art/pipeline/ITEM_3D_PIPELINE.md",
+   "license": "Project-original (generated for this project)",
+   "license_url": "art/pipeline/ITEM_3D_PIPELINE.md",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/props/brooms/broom_moonveil.glb"
+   ],
+   "sha256": {
+    "assets/models/props/brooms/broom_moonveil.glb": "25dc77bb9dbb6525f3bd40c3133688cb348505da7b2a88ba287735a7de222ce3"
+   },
+   "scale_m": [
+    0.389,
+    0.44,
+    2.275
+   ],
+   "triangles": 6190,
+   "material_slots": 1,
+   "textures": {
+    "channels": [
+     "base_color",
+     "metallic_roughness",
+     "normal"
+    ],
+    "note": "embedded, 1024 px"
+   },
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "none (the broom never collides; the rider's capsule does)",
+   "lods": "Godot import-generated"
+  },
+  {
+   "id": "asset-broom_runebound-glb",
+   "purpose": "tier 2 flight broom (items.json broom_runebound `model`)",
+   "status": "integrated",
+   "author": "project (AI-assisted: openai/gpt-image-2.5 concept, meshy/v7.1 mesh)",
+   "source_url": "art/pipeline/ITEM_3D_PIPELINE.md",
+   "license": "Project-original (generated for this project)",
+   "license_url": "art/pipeline/ITEM_3D_PIPELINE.md",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/props/brooms/broom_runebound.glb"
+   ],
+   "sha256": {
+    "assets/models/props/brooms/broom_runebound.glb": "359ad5a60cd5fa952ac17337269bc15c4b8f00e67c1d93bf88bd486e87dbf8b5"
+   },
+   "scale_m": [
+    0.285,
+    0.341,
+    2.275
+   ],
+   "triangles": 5730,
+   "material_slots": 1,
+   "textures": {
+    "channels": [
+     "base_color",
+     "metallic_roughness",
+     "normal"
+    ],
+    "note": "embedded, 1024 px"
+   },
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "none (the broom never collides; the rider's capsule does)",
+   "lods": "Godot import-generated"
+  },
+  {
+   "id": "asset-broom_silverthorn-glb",
+   "purpose": "tier 3 flight broom (items.json broom_silverthorn `model`)",
+   "status": "integrated",
+   "author": "project (AI-assisted: openai/gpt-image-2.5 concept, meshy/v7.1 mesh)",
+   "source_url": "art/pipeline/ITEM_3D_PIPELINE.md",
+   "license": "Project-original (generated for this project)",
+   "license_url": "art/pipeline/ITEM_3D_PIPELINE.md",
+   "license_file": "",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/models/props/brooms/broom_silverthorn.glb"
+   ],
+   "sha256": {
+    "assets/models/props/brooms/broom_silverthorn.glb": "356c7329b0ada557c321881c271948dd55fcb33576347cf2b29b076557a3c466"
+   },
+   "scale_m": [
+    0.151,
+    0.256,
+    2.275
+   ],
+   "triangles": 6112,
+   "material_slots": 1,
+   "textures": {
+    "channels": [
+     "base_color",
+     "metallic_roughness",
+     "normal"
+    ],
+    "note": "embedded, 1024 px"
+   },
+   "rig": {
+    "skinned": false,
+    "joints": 0,
+    "clips": []
+   },
+   "collision": "none (the broom never collides; the rider's capsule does)",
+   "lods": "Godot import-generated"
   }
  ],
  "rejected": [

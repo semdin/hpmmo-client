@@ -27,3 +27,15 @@ spell and potion icons. No third-party image was used as an input.
   objects generated on flat white, cut out by `tools/ui/cutout_icons.py`
   (border-connected white removed, soft edge alpha with the white un-mixed),
   trimmed square and resized to 128 px. They replace the previous minimap set.
+
+## 2026-10-16 additions (fal.ai) - broom tiers
+
+Tool: fal.ai `google/nano-banana-2.1/edit` (1K, 1:1). Input image: the project's
+own broom concept painting for that tier (generated the same day with
+`openai/gpt-image-2.5/sunburst`, kept in `art/brooms/<tier>/views/main.png`);
+no third-party image was used.
+
+* `icon_broom_{ashwood,runebound,silverthorn,emberwing,moonveil}.png` - the
+  tier's broom shown diagonally on flat white with its aura colour, cut out by
+  `tools/ui/cutout_icons.py` (`item_<id>.png` sources) and resized to 512 px to
+  match the earlier `icon_broom_*` icons. Sources: `art/brooms/icons_src/`.

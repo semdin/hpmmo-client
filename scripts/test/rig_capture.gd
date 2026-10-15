@@ -37,7 +37,7 @@ func _ready() -> void:
 	camera.fov = 42.0
 
 	# ---- standing: the wand in the hand
-	await _stage(player, Vector3(0, 0.15, 5), 0.0)
+	await _stage(player, TestGround.at(0, 0.15, 5), 0.0)
 	await get_tree().create_timer(0.6).timeout
 	var wrist: Vector3 = _bone(player, HeroBones.hand("R"))
 	print("CAPTURE idle wrist.R=%s" % wrist)
@@ -68,7 +68,7 @@ func _ready() -> void:
 	await get_tree().create_timer(0.8).timeout
 
 	# ---- mounted: the rider's grip on the broom
-	await _stage(player, Vector3(0, 0.15, 5), 0.0)
+	await _stage(player, TestGround.at(0, 0.15, 5), 0.0)
 	player._mount_lock = 0.0
 	player._cast_lock = 0.0
 	player._combat_until = 0.0
@@ -127,7 +127,7 @@ func _ready() -> void:
 	player.velocity = Vector3.ZERO
 	player._mount_lock = 0.0
 	player.toggle_broom_mount()
-	await _stage(player, Vector3(0, 0.15, 5), 0.0)
+	await _stage(player, TestGround.at(0, 0.15, 5), 0.0)
 	Input.action_press("move_forward")
 	await get_tree().create_timer(0.7).timeout
 	var foot: Vector3 = _bone(player, HeroBones.foot("L"))

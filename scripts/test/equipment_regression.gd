@@ -80,6 +80,53 @@ func _test_pure() -> void:
 	check(migrated.equipment.main_hand == {"id":"wand_hawthorn","tier":4},"legacy migration selects Hawthorn and transfers legacy refinement")
 	check(migrated.inventory.size() == 2 and migrated.inventory[1].tier == 2,"migration preserves spare wand tiers")
 	check(HPEquipment.migrate([],9).equipment.is_empty(),"migration never invents absent equipment")
+	_test_broom_catalog()
+
+## Tiered brooms: every `model` loads with the parts the rig binds, and a higher
+## tier never asks for less level or flies slower.
+func _test_broom_catalog() -> void:
+	var tiers := []
+	for id in HPEquipment.catalog():
+		var data := HPEquipment.item(id)
+		if not data.has("model"):
+			continue
+		var scene := load(String(data.model)) as PackedScene
+		check(scene != null, "%s model loads" % id)
+		if scene == null:
+			continue
+		var model := scene.instantiate()
+		for part in ["MountRoot", "SeatSocket", "GripSocket", "TailSocket", "Bristles"]:
+			check(model.find_child(part, true, false) != null, "%s model carries %s" % [id, part])
+		model.free()
+		tiers.append([int(data.get("item_tier", 0)), HPEquipment.required_level(id), float(data.get("mount_speed", 0.0))])
+	tiers.sort()
+	check(tiers.size() == 5 and tiers.map(func(t): return t[0]) == [1, 2, 3, 4, 5], "five broom tiers, one per tier")
+	for i in range(1, tiers.size()):
+		check(tiers[i][1] > tiers[i - 1][1] and tiers[i][2] > tiers[i - 1][2],
+			"broom tier %d needs more level and flies faster than tier %d" % [tiers[i][0], tiers[i - 1][0]])
+	check(HPEquipment.broom_model("broom_nimbus2000") == HPEquipment.DEFAULT_BROOM_MODEL, "brooms without a model keep the original broom")
+
+## The level gate is the authority's, and the drawn broom follows the equipped
+## item: the GLB parts are swapped, the rig re-binds to the new sockets and the
+## old parts leave the tree.
+func _test_broom_tiers() -> void:
+	var old_level: int = player.level
+	player.level = 1
+	check(request("equip","broom","broom_moonveil").reason == "level_too_low","a level 1 character cannot equip the level 50 broom")
+	check(player.equipment.broom.id == "broom_firebolt","a refused equip leaves the broom in place")
+	check(request("equip","broom","broom_ashwood").ok and player.mounted_speed == 15,"the tier 1 broom has no level gate")
+	var broom = player.broom
+	check(player._broom_model_path == HPEquipment.broom_model("broom_ashwood"),"equipping a tiered broom swaps the drawn model")
+	check(broom.seat_socket != null and broom.seat_socket.is_inside_tree() and player.broom_mesh.is_ancestor_of(broom.seat_socket),"the rig re-binds to the new model's seat")
+	check(broom.tail_socket != null and broom.tail_socket.is_inside_tree() and broom.trail != null and broom.trail.get("tail_socket") == broom.tail_socket,"the trail follows the new tail socket")
+	var roots: Array = player.broom_mesh.get_children().filter(func(n): return n.name.begins_with("BroomRoot"))
+	check(roots.size() == 1,"only the equipped broom's parts are drawn")
+	player.level = 50
+	check(request("equip","broom","broom_moonveil").ok and player.mounted_speed == 23,"level 50 equips the tier 5 broom")
+	check(player._broom_model_path == HPEquipment.broom_model("broom_moonveil") and player.broom.seat_socket.is_inside_tree(),"swapping between tiered brooms re-binds again")
+	check(request("equip","broom","broom_firebolt").ok and player._broom_model_path == HPEquipment.DEFAULT_BROOM_MODEL,"a broom without its own model restores the original broom")
+	check(player.broom_mesh.find_child("Bristles", true, false) != null and player.broom.bristles.is_inside_tree(),"the original broom's parts are back")
+	player.level = old_level
 
 func _test_authority() -> void:
 	player.inventory.clear()
@@ -116,6 +163,7 @@ func _test_authority() -> void:
 	check(request("equip","broom","broom_nimbus2000").reason == "mounted","broom changes require dismounting")
 	record.mounted = false
 	check(request("equip","broom","broom_firebolt").ok and player.mounted_speed == 22,"equipped broom controls mounted speed")
+	_test_broom_tiers()
 	request("unequip","broom")
 	check(SimAuthority.submit_mount(record.peer_id,true).reason == "no_broom","mounting requires an equipped broom")
 	check(SimAuthority.request_cast(record.peer_id,"basic_cast",Vector3.ZERO,1).reason == "no_wand","offensive spells require an equipped wand")

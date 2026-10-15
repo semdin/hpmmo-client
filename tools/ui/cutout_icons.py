@@ -11,7 +11,8 @@ Two kinds of source art come out of the image model (fal-ai/nano-banana-2.1):
   its visible bounds, padded square and resized.
 
 Usage: python tools/ui/cutout_icons.py <source_dir> [--out assets/ui/icons]
-Sources are named menu_<id>.png and mm_<id>.png.
+Sources are named menu_<id>.png, mm_<id>.png and item_<item id>.png (an
+inventory item on white, cut out like a marker and written as icon_<item id>.png).
 """
 
 import argparse
@@ -24,6 +25,7 @@ from scipy import ndimage
 
 MENU_SIZE = 256
 MARKER_SIZE = 128
+ITEM_SIZE = 512     # matches the original item icons (icon_broom_*.png)
 WHITE_HARD = 238   # min channel above this, connected to the border: background
 WHITE_SOFT = 200   # edge band: partially transparent between SOFT and HARD
 
@@ -71,6 +73,9 @@ def main() -> None:
         elif stem.startswith("mm_"):
             out = square_trim(cutout(img)).resize((MARKER_SIZE, MARKER_SIZE), Image.LANCZOS)
             name = "icon_minimap_" + stem[3:] + ".png"
+        elif stem.startswith("item_"):
+            out = square_trim(cutout(img)).resize((ITEM_SIZE, ITEM_SIZE), Image.LANCZOS)
+            name = "icon_" + stem[5:] + ".png"
         else:
             continue
         out.save(os.path.join(args.out, name))
