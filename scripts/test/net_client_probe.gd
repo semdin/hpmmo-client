@@ -1209,7 +1209,8 @@ func _sample_stair() -> void:
 	# catches up in one frame: the snapshot carrying the new tick can be
 	# dispatched before the staircase publish queued on another channel, so that
 	# one tick reads a stale state. Skip the catch-up frame; sample from the next.
-	var jumped := _stair_last_seen_tick >= 0 and tick - _stair_last_seen_tick > 3
+	# The very first tick seen counts as a catch-up too (nothing precedes it).
+	var jumped := _stair_last_seen_tick < 0 or tick - _stair_last_seen_tick > 3
 	_stair_last_seen_tick = tick
 	if jumped:
 		return
@@ -1637,7 +1638,14 @@ func _stand_tick() -> void:
 		_walk_started = true
 		_walk_start = _t
 		_walk_from = player.global_position if player != null and is_instance_valid(player) else _auth_pos()
-		SimNet.forced_intent = {"move": Vector2(0, -1), "yaw": 0.0, "jump": false, "descend": false}
+		# West, drifting slightly north (yaw 88 = toward layout (-60, 56)): from
+		# the vestibule (0, 58) through the Great Hall doors (z 52..60) and down
+		# the aisle between house tables 2 and 3 (z 53.7..58.3) - 40+ m of level
+		# floor, more than a 4 s walk covers. The other headings are short:
+		# north runs down the hall's centre into the dungeon stair opening
+		# (x -3..3, z 20..40 in castle_layout.json, a designed 10 m drop) and
+		# east climbs the dueling club platform (1.2 m) at x ~24.
+		SimNet.forced_intent = {"move": Vector2(0, -1), "yaw": 88.0, "jump": false, "descend": false}
 	if walk_seconds <= 0.0 or _t - _walk_start >= walk_seconds:
 		SimNet.forced_intent = {}
 		_finish_stand()
