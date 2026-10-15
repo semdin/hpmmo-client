@@ -86,6 +86,10 @@ var _ride_done := false
 var _staircase_reported := false
 var _ride_low := 0.0
 var _ride_high := 0.0
+## After the swing: 0 not started, 1 climbing to the top landing, 2 at the top,
+## 3 walking back down, 4 done.
+var _climb_state := 0
+var _climb_dock := 0
 var _state_at_logout := {}
 ## The courtyard spawn of the grounds catalog (where the journey casts and lands).
 var _courtyard := Vector3.ZERO
@@ -483,6 +487,9 @@ func _step_castle() -> void:
 	if _ride_aboard:
 		_ride_tick()
 		return
+	if _climb_state > 0 and _climb_state < 4:
+		_climb_tick()
+		return
 	if _t - _step_t > 200.0:
 		_fail("castle_route", "interior route timed out")
 		_goto("logout")
@@ -565,7 +572,11 @@ func _step_castle() -> void:
 		_fail("castle_exit", "return transfer timed out")
 		_goto("logout")
 
-## Ride the deck: board, wait for it to travel, step off at the far dock.
+## Ride the deck: board, wait for it to swing to the other dock.
+## The castle's flights SWING round the well between two docks at the same
+## storey (maps.json `staircases`): the swing itself changes no height. The
+## floor above is reached by climbing the flight once it has docked, which is
+## what `_climb_tick` does and what the step is judged on.
 func _ride_tick() -> void:
 	SimNet.forced_intent = {}
 	var y := _auth_pos().y
@@ -573,14 +584,57 @@ func _ride_tick() -> void:
 	_ride_high = maxf(_ride_high, y)
 	var state := String(staircase.get("state"))
 	if state == "docked" and int(staircase.get("dock_index")) > 0:
-		_pass("staircase", "rode the moving staircase %.1f m of vertical travel" % (_ride_high - _ride_low))
-		_record("staircase", {"low": _ride_low, "high": _ride_high, "dock": int(staircase.get("dock_index"))})
+		_record("staircase_swing", {"dock": int(staircase.get("dock_index")), "y": y})
 		_ride_aboard = false
+		_climb_dock = int(staircase.get("dock_index"))
+		_climb_state = 1
+		_step_t = _t
+		return
+
+## Climb the docked flight to its top landing (the floor above), then walk back
+## down to its foot while it is still docked here, for the walk out. A flight
+## that swings away mid-way carries the body; the walker waits until it docks
+## here again and carries on.
+func _climb_tick() -> void:
+	var top: Vector3 = staircase.global_transform * (staircase.call("dock_landing", _climb_dock, true) as Vector3)
+	var bottom: Vector3 = staircase.global_transform * (staircase.call("dock_landing", _climb_dock, false) as Vector3)
+	var docked_here: bool = String(staircase.get("state")) == "docked" and int(staircase.get("dock_index")) == _climb_dock
+	var y := _auth_pos().y
+	_ride_high = maxf(_ride_high, y)
+	if _t - _step_t > 90.0:
+		_fail("staircase", "did not reach the floor above / back down (state %d, y %.1f, top %.1f)" % [_climb_state, y, top.y])
+		_climb_state = 4
 		_ride_done = true
 		_step_t = _t
-		# The flight swung round the Grand Staircase well with the rider on it;
-		# step off its foot and walk back out to the vestibule exit.
 		return
+	match _climb_state:
+		1:
+			if _flat_distance(top) < 2.0 and absf(y - top.y) < 1.0:
+				var rise := y - _ride_low
+				if rise >= 8.0:
+					_pass("staircase", "rode the moving staircase to dock %d and climbed it to the floor above (+%.1f m)" % [_climb_dock, rise])
+				else:
+					_fail("staircase", "the top landing is only %.1f m above the boarding point" % rise)
+				_record("staircase", {"low": _ride_low, "high": _ride_high, "dock": _climb_dock, "top": top.y})
+				_climb_state = 2
+			elif docked_here:
+				_walk_toward(top)
+			else:
+				SimNet.forced_intent = {}
+		2:
+			SimNet.forced_intent = {}
+			if docked_here:
+				_climb_state = 3
+		3:
+			if _flat_distance(bottom) < 2.0 and absf(y - bottom.y) < 1.0:
+				SimNet.forced_intent = {}
+				_climb_state = 4
+				_ride_done = true
+				_step_t = _t
+			elif docked_here:
+				_walk_toward(bottom)
+			else:
+				SimNet.forced_intent = {}
 
 # ------------------------------------------------------------------ 8. logout
 
