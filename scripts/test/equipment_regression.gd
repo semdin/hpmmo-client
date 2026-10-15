@@ -258,6 +258,38 @@ func _test_broom_tiers() -> void:
 	check(player.broom_mesh.find_child("Bristles", true, false) != null and player.broom.bristles.is_inside_tree(),"the original broom's parts are back")
 	player.level = old_level
 
+## Cloaks: a chest item with a `cloak_texture` draws the shared skinned cloak on
+## the body's own skeleton (every skin bind resolves by name), switching cloaks
+## swaps only the fabric, and a chest item without one removes it.
+func _test_cloaks() -> void:
+	var old_level: int = player.level
+	player.level = 50
+	record.level = 50
+	for id in ["cloak_wool","cloak_moonveil","robe_apprentice"]:
+		HPEquipment.add(player.inventory,id,0,1)
+	var cloaks := 0
+	for id in HPEquipment.catalog():
+		if HPEquipment.item(id).has("cloak_texture"):
+			cloaks += 1
+			check(ResourceLoader.exists(HPEquipment.item(id).cloak_texture),"%s fabric exists" % id)
+	check(cloaks == 5,"five cloak items")
+	check(request("equip","chest","cloak_wool").ok,"a cloak is worn in the chest slot")
+	var sk: Skeleton3D = HeroAppearance._skeleton(player.visuals)
+	var cloak := sk.get_node_or_null("EquippedCloak") as MeshInstance3D
+	check(cloak != null and cloak.skin != null and cloak.get_node(cloak.skeleton) == sk,"the cloak is skinned to the body's skeleton")
+	if cloak != null and cloak.skin != null:
+		var unresolved := 0
+		for i in cloak.skin.get_bind_count():
+			if sk.find_bone(String(cloak.skin.get_bind_name(i))) < 0: unresolved += 1
+		check(cloak.skin.get_bind_count() > 0 and unresolved == 0,"every cloak skin bind names a body bone")
+	check(request("equip","chest","cloak_moonveil").ok,"a second cloak can replace the first")
+	cloak = sk.get_node_or_null("EquippedCloak") as MeshInstance3D
+	check(cloak != null and cloak.material_override.albedo_texture.resource_path == HPEquipment.item("cloak_moonveil").cloak_texture and sk.find_children("EquippedCloak","",false,false).size() == 1,"switching cloaks swaps the fabric, one cloak drawn")
+	check(request("equip","chest","robe_apprentice").ok,"a plain robe can be worn")
+	check(sk.get_node_or_null("EquippedCloak") == null,"a chest item without a cloak removes it")
+	player.level = old_level
+	record.level = old_level
+
 func _test_authority() -> void:
 	player.inventory.clear()
 	player.equipment = {}
@@ -296,6 +328,7 @@ func _test_authority() -> void:
 	record.mounted = false
 	check(request("equip","broom","broom_firebolt").ok and player.mounted_speed == 22,"equipped broom controls mounted speed")
 	_test_broom_tiers()
+	_test_cloaks()
 	request("unequip","broom")
 	check(SimAuthority.submit_mount(record.peer_id,true).reason == "no_broom","mounting requires an equipped broom")
 	check(SimAuthority.request_cast(record.peer_id,"basic_cast",Vector3.ZERO,1).reason == "no_wand","offensive spells require an equipped wand")

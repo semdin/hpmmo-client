@@ -47,3 +47,14 @@ Tool: fal.ai `google/nano-banana-2.1` (1K, 1:1), text prompt only (no input imag
 * `icon_scroll_{imbue,reweave}.png` - the Rune of Imbuing (green) and Rune of
   Reweaving (violet) scrolls on flat white, cut out by `tools/ui/cutout_icons.py`
   (`item_<id>.png` sources in `art/enchant/icons_src/`), 512 px.
+
+## 2026-10-16 additions (fal.ai) - cloak tiers
+
+Tool: fal.ai `google/nano-banana-2.1/edit` (1K, 1:1). Input image: the project's own
+cloak fabric texture for that tier (generated the same day with
+`openai/gpt-image-2.5/sunburst`, shipped as `assets/models/cloaks/cloak_<tier>.png`);
+no third-party image was used.
+
+* `icon_cloak_{wool,runed,thornveil,phoenix,moonveil}.png` - the cloak seen from the
+  back on flat white, cut out by `tools/ui/cutout_icons.py` (`item_<id>.png` sources
+  in `art/cloaks/icons_src/`), 512 px.
