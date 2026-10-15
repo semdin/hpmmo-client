@@ -68,7 +68,7 @@ func _test_pure() -> void:
 		bag = change.inventory
 		gear = change.equipment
 		check(totals(bag,gear) == ownership,"swap conserves each item and its tier")
-	check(gear.ring_left == gear.ring_right,"two identical rings occupy separate slots")
+	check(gear.ring_left.id == gear.ring_right.id and gear.ring_left.uid != gear.ring_right.uid,"two identical rings occupy separate slots as separate instances")
 	check(bag.any(func(e): return e.id == "wand_hawthorn" and e.tier == 4),"swapping returns the higher-tier wand unchanged")
 	var full: Array = []
 	for i in 40: full.append({"id":"fixture_%d" % i,"amount":1,"tier":0})
@@ -81,6 +81,36 @@ func _test_pure() -> void:
 	check(migrated.inventory.size() == 2 and migrated.inventory[1].tier == 2,"migration preserves spare wand tiers")
 	check(HPEquipment.migrate([],9).equipment.is_empty(),"migration never invents absent equipment")
 	_test_broom_catalog()
+	_test_instances()
+
+## Item instances: non-stackables are their own entries with a uid and
+## bonuses, equip/unequip move exactly that instance, and stored stacks from
+## before instances split into them once.
+func _test_instances() -> void:
+	var bag := []
+	HPEquipment.add(bag,"wand_hawthorn",0,2)
+	HPEquipment.add(bag,"potion_health",0,3)
+	HPEquipment.add(bag,"potion_health",0,2)
+	var wands: Array = bag.filter(func(e): return e.id == "wand_hawthorn")
+	check(bag.size() == 3 and wands.size() == 2 and bag.any(func(e): return e.id == "potion_health" and e.amount == 5),"wands are separate instances while potions stack")
+	check(wands[0].uid > 0 and wands[1].uid > 0 and wands[0].uid != wands[1].uid and wands.all(func(e): return e.amount == 1),"every instance has its own uid and an amount of one")
+	wands[1].bonuses = [{"stat":"spell_power","value":5}]
+	var target: int = wands[1].uid
+	var worn := HPEquipment.swap(bag,{},"main_hand","wand_hawthorn",0,target)
+	check(worn.ok and worn.equipment.main_hand.uid == target and worn.equipment.main_hand.bonuses == wands[1].bonuses,"equipping names the exact instance and keeps its bonuses")
+	check(worn.inventory.any(func(e): return e.id == "wand_hawthorn" and e.uid == wands[0].uid),"the other wand stays in the bag")
+	var back := HPEquipment.swap(worn.inventory,worn.equipment,"main_hand")
+	check(back.ok and back.inventory.any(func(e): return e.get("uid",0) == target and e.bonuses == wands[1].bonuses),"unequipping returns the same instance with its bonuses")
+	check(HPEquipment.swap(bag,{},"main_hand","wand_hawthorn",0,123456789).reason == "item_missing","an instance the bag does not hold cannot be equipped")
+	var legacy := [{"id":"wand_elder","amount":3,"tier":2},{"id":"potion_mana","amount":4,"tier":0}]
+	var gear := {"chest":{"id":"robe_apprentice","tier":0}}
+	check(HPEquipment.normalize(legacy,gear) and legacy.size() == 4 and legacy.filter(func(e): return e.id == "wand_elder" and e.tier == 2 and e.uid > 0).size() == 3,"a stored stack of wands splits into instances that keep their tier")
+	check(gear.chest.uid > 0 and gear.chest.bonuses == [],"worn gear saved before instances gets a uid")
+	var settled := legacy.duplicate(true)
+	check(not HPEquipment.normalize(legacy,gear) and legacy == settled,"normalizing twice changes nothing")
+	var rings := []
+	HPEquipment.add(rings,"ring_apprentice",0,HPEquipment.BAG_SLOTS + 1)
+	check(not HPEquipment.capacity_ok(rings),"each instance takes a bag slot")
 
 ## Tiered brooms: every `model` loads with the parts the rig binds, and a higher
 ## tier never asks for less level or flies slower.
@@ -135,7 +165,9 @@ func _test_authority() -> void:
 	player.base_max_mana = 300
 	player.current_hp = 200
 	player.current_mana = 100
-	for id in HPEquipment.catalog(): HPEquipment.add(player.inventory,id,0,3)
+	# Instances take a bag slot each: one of every item, a stack of each stackable.
+	for id in HPEquipment.catalog(): HPEquipment.add(player.inventory,id,0,3 if HPEquipment.stackable(id) else 1)
+	HPEquipment.add(player.inventory,"ring_apprentice",0,1)
 	HPEquipment.add(player.inventory,"wand_hawthorn",4,1)
 	player.galleons = 100000
 	SimAuthority.refresh_equipment(record)
@@ -296,6 +328,12 @@ func _test_gestures() -> void:
 	check(not player._basic_held and not player.mouse_orbit_active,"equipment UI input does not start world attack or camera orbit")
 	# Actual viewport dispatch must handle both phases of the double click.
 	var combat_tick: int = record.last_combat_tick
+	# The single pair of boots (one instance) is worn after the drag; put it back
+	# through the UI's own request path (its ids, not this harness's).
+	ui._request("unequip","feet")
+	for _i in 30:
+		if not ui._pending: break
+		await get_tree().process_frame
 	bag_slot = ui._bag_slots.filter(func(s):return s.item_id == "boots_apprentice")[0]
 	await _double_click(bag_slot)
 	check(player.equipment.has("feet") and not ui._pending, "viewport double click equips without a combat lock")
@@ -372,6 +410,11 @@ func _test_persistence() -> void:
 	player.restore_character(JSON.parse_string(JSON.stringify(sheet)))
 	sheet = bridge.character_payload(player,record)
 	check(sheet.equipment.values().all(func(entry): return typeof(entry.tier) == TYPE_INT), "JSON-loaded equipment is saved with integer tiers")
+	check(sheet.equipment.values().all(func(entry): return typeof(entry.uid) == TYPE_INT and entry.uid > 0 and entry.bonuses is Array),"worn items are saved with their integer uid and bonuses")
+	check(sheet.inventory.all(func(e): return HPEquipment.stackable(e.id) == not e.has("uid")),"the saved bag carries a uid for exactly the instances")
+	var reloaded_uids: Array = sheet.inventory.filter(func(e): return e.has("uid")).map(func(e): return e.uid)
+	player.restore_character(JSON.parse_string(JSON.stringify(sheet)))
+	check(player.inventory.filter(func(e): return e.has("uid")).map(func(e): return int(e.uid)) == reloaded_uids,"instance uids survive a JSON save and reload unchanged")
 	sheet.inventory.append({"id":"legacy_keepsake","amount":2,"tier":3})
 	player.restore_character(sheet)
 	check(player.inventory.any(func(e):return e.id == "legacy_keepsake" and e.amount == 2 and e.tier == 3),"loading preserves retired catalog entries and their tiers")

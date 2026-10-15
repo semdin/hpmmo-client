@@ -45,6 +45,7 @@ func _run() -> void:
 	if verify_only:
 		check(player.equipment.get("main_hand",{}).get("tier",-1) == 1,"refined equipped wand survives reconnect")
 		check(player.equipment.has("ring_left") and player.equipment.has("ring_right"),"both rings survive reconnect")
+		check(player.equipment.has("ring_left") and player.equipment.has("ring_right") and int(player.equipment.ring_left.get("uid",0)) > 0 and int(player.equipment.ring_left.get("uid",0)) != int(player.equipment.ring_right.get("uid",0)),"the two rings are separate instances with their own uids after reconnect")
 		check(not player.equipment.has("chest") and player.inventory.any(func(e):return e.id == "robe_apprentice" and e.amount == 1),"unequipped robe survives in bag exactly once")
 		check(player.galleons == 400,"authoritative refinement price survives reconnect")
 	else:
@@ -76,7 +77,7 @@ func _run() -> void:
 		answer = await send("refine","main_hand")
 		check(answer.ok and player.equipment.main_hand.tier == 1 and player.galleons == 400,"network refinement updates tier and currency from authority")
 		var revision: int = player.inventory_revision
-		SimNet.sim_equipment_request.rpc_id(1,int(answer.request_id),revision-1,"refine","main_hand","",0)
+		SimNet.sim_equipment_request.rpc_id(1,int(answer.request_id),revision-1,"refine","main_hand","",0,0)
 		await get_tree().create_timer(0.3).timeout
 		check(player.inventory_revision == revision and player.galleons == 400,"replayed reliable request does not charge twice")
 	check(player.inventory.any(func(e):return e.id == "wand_hawthorn" and e.tier == 4 and e.amount == 1),"spare higher-tier wand remains separate")
