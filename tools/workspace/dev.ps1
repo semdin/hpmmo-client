@@ -7,8 +7,8 @@ Commands:
   .\dev.ps1 ready [-Full]      THE pre-commit cycle, in order: sync the simulation package
                                (server -> client), regenerate the world file list, export
                                server\world (client -> server), import both projects and run
-                               `test`; -Full adds the maps / staircase / maintenance / journey
-                               simulations (~20 min). Refuses to overwrite hand edits made in
+                               `test`; -Full adds the maps / staircase / encounters / maintenance /
+                               journey simulations (~20 min). Refuses to overwrite hand edits made in
                                a generated copy. Ends with what each repo has to commit.
   .\dev.ps1 status             pinned revisions, contract-hash check, repo states
   .\dev.ps1 test               client check harness; server service compile + world boot smoke
@@ -161,10 +161,8 @@ function Invoke-ServerSmoke {
 }
 
 ## The long end-to-end simulations (each brings up its own servers and headless
-## clients). `ready -Full` runs them after `test`. encounters_sim is left out
-## until its dev spawns are moved off the old valley coordinates (it still
-## spawns probes at y = 0.6, under the Terrain3D grounds).
-$FullSims = @('maps_sim', 'staircase_sim', 'maintenance_sim', 'journey_e2e')
+## clients). `ready -Full` runs them after `test`.
+$FullSims = @('maps_sim', 'staircase_sim', 'encounters_sim', 'maintenance_sim', 'journey_e2e')
 
 function Write-Step([string]$Text) {
     Write-Host ''

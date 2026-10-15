@@ -1205,12 +1205,14 @@ func _sample_stair() -> void:
 	var tick := int(SimAuthority.sim_tick)
 	if not _stair_samples.is_empty() and int(_stair_samples[-1]["tick"]) == tick:
 		return
-	# A client that stalled (the grounds load hitches a fresh client for ~1 s)
-	# catches up in one frame: the snapshot carrying the new tick can be
-	# dispatched before the staircase publish queued on another channel, so that
-	# one tick reads a stale state. Skip the catch-up frame; sample from the next.
-	# The very first tick seen counts as a catch-up too (nothing precedes it).
-	var jumped := _stair_last_seen_tick < 0 or tick - _stair_last_seen_tick > 3
+	# A client that stalled (the grounds load hitches a fresh client, and five
+	# Godot processes share the machine) catches up in one frame: the snapshot
+	# carrying the new tick can be dispatched before the staircase publish
+	# queued on another channel, so that tick reads a stale state. At 20 Hz
+	# ticks and 60 Hz frames the tick moves at most 1 between frames; any larger
+	# step is a catch-up frame. Skip it; sample from the next. The very first
+	# tick seen counts as a catch-up too (nothing precedes it).
+	var jumped := _stair_last_seen_tick < 0 or tick - _stair_last_seen_tick > 1
 	_stair_last_seen_tick = tick
 	if jumped:
 		return
@@ -2137,7 +2139,9 @@ func _sample_encounter() -> void:
 			entry["start_tick"] = int(telegraph.get("start_tick", 0))
 			entry["release_tick"] = int(telegraph.get("release_tick", 0))
 			entry["kind"] = String(telegraph.get("kind", ""))
-			entry["mesh"] = warning != null
+			# Sticky: a sample in the frame the warning is torn down (release) must
+			# not erase that it was rendered.
+			entry["mesh"] = bool(entry.get("mesh", false)) or warning != null
 			if warning != null and warning is MeshInstance3D:
 				var mesh := (warning as MeshInstance3D).mesh
 				entry["radius"] = float(mesh.top_radius) if mesh is CylinderMesh else -1.0
@@ -2161,11 +2165,16 @@ func _sample_encounter() -> void:
 			var pos: Vector3 = record.get("pos", Vector3.ZERO)
 			# Drift is measured while the body is a corpse: a dead mob must not
 			# move. Once the pack respawns, the record stops accumulating.
-			# The first few samples cover the view catching up with the last
-			# replicated step; after that a corpse that moves is a bug.
+			# The baseline is the first SNAPSHOT that reports the body dead: the
+			# death event (reliable channel) can arrive well before it, while the
+			# record still holds the last pre-death position of a running mob, so
+			# the one correction to where it really fell is not corpse movement.
+			var snap_dead := (int(record.get("flags", 0)) & HPProtocol.FLAG_DEAD) != 0
 			corpse["settle"] = int(corpse.get("settle", 0)) + 1
-			if dead and int(corpse["settle"]) > 5 and not bool(corpse.get("revived", false)):
+			if dead and snap_dead and bool(corpse.get("confirmed", false)) and not bool(corpse.get("revived", false)):
 				corpse["drift"] = float(corpse["drift"]) + (pos - (corpse["last_pos"] as Vector3)).length()
+			if dead and snap_dead:
+				corpse["confirmed"] = true
 			elif not dead:
 				corpse["revived"] = true
 			corpse["last_pos"] = pos
@@ -2224,6 +2233,21 @@ func _finish_encounter() -> void:
 
 ## In-process creature checks. Drives the real authority and the real director;
 ## the Python suite asserts on the recorded facts.
+## Encounter-local test sites on the Terrain3D grounds. The old valley points
+## (y = 0.1 around the origin) are inside the castle plateau or the castle
+## exclusion on this map, so they are taken from the catalog or from open
+## ground instead: the Quidditch pitch is flat, outside every safe zone,
+## exclusion and pack region, with no trees or rocks on it.
+const ENC_OPEN := Vector2(330.0, -330.0)
+
+## A point on the grounds terrain at (x, z), `lift` metres up.
+func _ground_at(x: float, z: float, lift: float = 0.1) -> Vector3:
+	var h := GroundsTerrain.height_at(x, z)
+	return Vector3(x, (0.0 if is_nan(h) else h) + lift, z)
+
+func _courtyard_point() -> Vector3:
+	return HPMaps.spawn_point("grounds", "courtyard")
+
 func _run_encounter_local() -> void:
 	world = WORLD_SCENE.instantiate()
 	add_child(world)
@@ -2266,16 +2290,34 @@ func _run_encounter_local() -> void:
 	results["weighted_zones"] = drawn.keys()
 	# -- placement refusals --------------------------------------------------
 	var pack0: Dictionary = director.packs[0]
-	results["refusals"]["hub"] = director._placement_refusal(Vector3(0.0, 0.1, 0.0), pack0)
-	# A point inside a Great Hall wall: the formation member must not be placed
-	# inside solid geometry (the harness proves this wall blocks movement).
-	results["refusals"]["wall"] = director._placement_refusal(Vector3(18.0, 0.1, -57.0), pack0)
-	results["refusals"]["lake"] = director._placement_refusal(Vector3(-38.0, 0.1, 30.0), pack0)
-	results["refusals"]["portal"] = director._placement_refusal(Vector3(0.0, 0.1, -40.0), pack0)
-	player.global_position = Vector3(60.0, 0.1, 55.0)
+	results["refusals"]["hub"] = director._placement_refusal(_courtyard_point(), pack0)
+	# Solid geometry on otherwise legal ground: a block on the open pitch, wide
+	# enough to hold every formation member (they stand ~3 m round the anchor).
+	# (The castle walls are inside the castle exclusion on this map, which is
+	# refused first and for the more fundamental reason.)
+	var wall_at := _ground_at(ENC_OPEN.x + 15.0, ENC_OPEN.y - 15.0)
+	var wall := StaticBody3D.new()
+	wall.collision_layer = 1
+	var wall_shape := CollisionShape3D.new()
+	var wall_box := BoxShape3D.new()
+	wall_box.size = Vector3(14.0, 4.0, 14.0)
+	wall_shape.shape = wall_box
+	wall.add_child(wall_shape)
+	world.add_child(wall)
+	wall.global_position = wall_at + Vector3(0.0, 1.9, 0.0)
 	await get_tree().physics_frame
-	results["refusals"]["player"] = director._placement_refusal(Vector3(60.0, 0.1, 55.0), pack0)
-	player.global_position = Vector3(0.0, 0.5, 5.0)
+	await get_tree().physics_frame
+	results["refusals"]["wall"] = director._placement_refusal(wall_at, pack0)
+	wall.queue_free()
+	# The middle of the Black Lake (layout.json lake centre).
+	results["refusals"]["lake"] = director._placement_refusal(_ground_at(0.0, 330.0), pack0)
+	var landing: Array = (HPMaps.portal("castle_door").get("landing", {}) as Dictionary).get("center", [0.0, 0.0, 0.0])
+	results["refusals"]["portal"] = director._placement_refusal(Vector3(float(landing[0]), float(landing[1]), float(landing[2])), pack0)
+	var camp_at := _ground_at(60.0, 55.0)
+	player.global_position = camp_at + Vector3(0.0, 0.4, 0.0)
+	await get_tree().physics_frame
+	results["refusals"]["player"] = director._placement_refusal(camp_at, pack0)
+	player.global_position = _courtyard_point()
 	await get_tree().physics_frame
 	# -- respawn cycles: 3- and 5-member packs, several cycles each -----------
 	for target_index in [0, 2]:
@@ -2314,8 +2356,8 @@ func _run_encounter_local() -> void:
 			member.take_damage(1000000, "test", player)
 	await get_tree().physics_frame
 	var saved_area: Rect2 = camp_pack["area"]
-	camp_pack["area"] = Rect2(-2.0, -2.0, 4.0, 4.0)
-	player.global_position = Vector3(0.0, 0.1, 0.0)
+	camp_pack["area"] = Rect2(ENC_OPEN.x - 2.0, ENC_OPEN.y - 2.0, 4.0, 4.0)
+	player.global_position = _ground_at(ENC_OPEN.x, ENC_OPEN.y, 0.5)
 	await get_tree().physics_frame
 	camp_pack["timer"] = 0.01
 	await get_tree().create_timer(0.25).timeout
@@ -2326,7 +2368,7 @@ func _run_encounter_local() -> void:
 	results["camped"] = {"alive": alive, "deferred": bool(camp_pack.get("deferred", false)),
 		"timer": float(camp_pack.get("timer", -1.0))}
 	camp_pack["area"] = saved_area
-	player.global_position = Vector3(0.0, 0.5, 5.0)
+	player.global_position = _courtyard_point()
 	camp_pack["timer"] = 0.01
 	await get_tree().create_timer(0.3).timeout
 	# -- leash reset cancels the pending reward ------------------------------
@@ -2334,7 +2376,7 @@ func _run_encounter_local() -> void:
 	# mob must both be in a place where combat is legal.
 	var leash_pack: Dictionary = director.packs[1]
 	var leash_mob = leash_pack["members"][0]
-	var ground := Vector3(60.0, 0.1, 60.0)
+	var ground := _ground_at(ENC_OPEN.x - 15.0, ENC_OPEN.y - 15.0)
 	player.current_hp = player.max_hp
 	player.global_position = ground
 	for member in leash_pack["members"]:
@@ -2383,7 +2425,7 @@ func _run_encounter_local() -> void:
 		"log_before": log_before, "log_after": log_after, "chasing": chasing, "went_home": went_home,
 		"resets": resets, "rewards_before": rewards_before, "rewards_after": _rewards.size(),
 		"new_rewards": _rewards.slice(rewards_before)}
-	player.global_position = Vector3(0.0, 0.5, 5.0)
+	player.global_position = _courtyard_point()
 	await get_tree().physics_frame
 	# Positive control: the same kill WITH the player's contribution on the log
 	# does pay (proving the check above is not passing because rewards are off).
@@ -2399,16 +2441,17 @@ func _run_encounter_local() -> void:
 	results["leash"]["control_paid"] = _rewards.size() > rewards_control
 	# -- attack slots and separation ----------------------------------------
 	var slot_pack: Dictionary = director.packs[2]
-	player.global_position = Vector3(-68.0, 0.1, -40.0)
+	var slot_at := _ground_at(ENC_OPEN.x - 15.0, ENC_OPEN.y + 20.0)
+	player.global_position = slot_at + Vector3(0.0, 0.4, 0.0)
 	var slot_index := 0
 	for member in slot_pack["members"]:
 		if is_instance_valid(member):
 			member._respawn()
 			var i := slot_index
 			slot_index += 1
-			member.global_position = Vector3(-68.0, 0.1, -40.0) + Vector3(cos(TAU * float(i) / 5.0), 0.0, sin(TAU * float(i) / 5.0)) * 6.0
-			member.pack_anchor = Vector3(-68.0, 0.1, -40.0)
-			member.spawn_point = Vector3(-68.0, 0.1, -40.0)
+			member.global_position = slot_at + Vector3(cos(TAU * float(i) / 5.0), 0.0, sin(TAU * float(i) / 5.0)) * 6.0
+			member.pack_anchor = slot_at
+			member.spawn_point = slot_at
 			member.aggro_on(player)
 	var max_in_range := 0
 	var min_gap := 999.0
@@ -2434,7 +2477,7 @@ func _run_encounter_local() -> void:
 	# -- corpse + pool reset -------------------------------------------------
 	var corpse_pack: Dictionary = director.packs[0]
 	var victim = corpse_pack["members"][0]
-	player.global_position = Vector3(0.0, 0.5, 5.0)
+	player.global_position = _courtyard_point()
 	await get_tree().create_timer(0.2).timeout
 	var death_pos: Vector3 = victim.global_position
 	victim.take_damage(1000000, "test", player)

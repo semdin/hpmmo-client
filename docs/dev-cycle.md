@@ -38,8 +38,8 @@ and names the files. Move those edits to the source side, then run it again.
    - C++ service build and PostgreSQL integration
    - world import, multiplayer agreement and world boot
 
-   With `-Full` it also runs `maps_sim`, `staircase_sim`, `maintenance_sim` and
-   `journey_e2e`. `journey_e2e` needs PostgreSQL and the built service; a skip
+   With `-Full` it also runs `maps_sim`, `staircase_sim`, `encounters_sim`,
+   `maintenance_sim` and `journey_e2e`. `journey_e2e` needs PostgreSQL and the built service; a skip
    counts as a failure.
 5. **Commit summary**: what changed in each repository.
 
@@ -50,10 +50,8 @@ also changes `server/world/`. A new asset is committed with its `.import` and
 `.uid` side files. `workspace.lock.json` lives in the workspace folder, outside
 both repositories.
 
-## Not covered yet
+## Outside `ready`
 
-- `encounters_sim` still spawns its probes on the old valley coordinates (y = 0.6,
-  under the Terrain3D grounds) and is red, so `-Full` leaves it out.
 - Art pipelines that need Blender or fal (castle layout, terrain bake, icons)
   keep their own scripts: `art/castle/rebuild.sh`, `art/map/scripts/`. Run
   `ready` after them.
