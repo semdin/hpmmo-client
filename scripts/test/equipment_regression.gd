@@ -112,6 +112,30 @@ func _test_instances() -> void:
 	HPEquipment.add(rings,"ring_apprentice",0,HPEquipment.BAG_SLOTS + 1)
 	check(not HPEquipment.capacity_ok(rings),"each instance takes a bag slot")
 
+## One upgrade standard for wands, robes and brooms: the same refine request on
+## the slot, the same step table, and each kind's own bonus curve feeding the
+## derived stats; anything else refuses.
+func _test_upgrade_kinds() -> void:
+	var gold: int = player.galleons
+	player.galleons = 100000
+	HPEquipment.add(player.inventory,"mat_phoenix_ash",0,10)
+	record.last_combat_tick = SimAuthority.sim_tick - 5 * HPProtocol.SIM_HZ
+	check(request("equip","chest","robe_apprentice").ok,"a robe is worn for refinement")
+	var robe_uid: int = player.equipment.chest.uid
+	var hp_at_0: int = player.max_hp
+	check(request("refine","chest").reason == "refined" and player.equipment.chest.tier == 1 and player.equipment.chest.uid == robe_uid,"refining the chest raises that robe instance to +1")
+	var at_1 := HPEquipment.item_stats("robe_apprentice",1)
+	check(player.max_hp == hp_at_0 - 50 + int(at_1.bonus_hp) and player.derived_stats.defense >= float(at_1.bonus_defense),"a refined robe adds its curve's health and armour")
+	check(request("equip","broom","broom_ashwood").ok,"a broom is worn for refinement")
+	check(request("refine","broom").reason == "refined" and player.equipment.broom.tier == 1,"refining the broom slot raises the broom")
+	check(is_equal_approx(player.mounted_speed, float(HPEquipment.item_stats("broom_ashwood",1).mount_speed)) and player.mounted_speed > 15.0,"a refined broom flies faster")
+	request("equip","head","hat_apprentice")
+	check(request("refine","head").reason == "not_refinable","accessories are not refinable")
+	request("unequip","hands")
+	check(request("refine","hands").reason == "nothing_equipped","an empty slot cannot be refined")
+	check(HPEquipment.item_stats("robe_apprentice",9).bonus_hp > HPEquipment.item_stats("robe_apprentice",8).bonus_hp and HPEquipment.item_stats("broom_ashwood",9).mount_speed > HPEquipment.item_stats("broom_ashwood",8).mount_speed,"each +N is worth more than the one before")
+	player.galleons = gold
+
 ## Tiered brooms: every `model` loads with the parts the rig binds, and a higher
 ## tier never asks for less level or flies slower.
 func _test_broom_catalog() -> void:
@@ -243,6 +267,7 @@ func _test_authority() -> void:
 	player.galleons = 0
 	check(request("refine","main_hand").reason == "no_gold" and totals(player.inventory,player.equipment) == preserved,"unaffordable refinement preserves ownership")
 	player.galleons = before_failure_gold
+	_test_upgrade_kinds()
 	# Incoming attack defense and environmental damage use separate paths.
 	var mob: Node = get_tree().get_first_node_in_group("mobs")
 	player.global_position = Vector3(-70,0.2,20)
