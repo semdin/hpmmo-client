@@ -49,17 +49,48 @@ def rev(repo):
         return "unknown"
 
 
+## Source files Godot never rewrites on import: a hash change in one of these
+## inside server/world means somebody edited the generated copy by hand.
+HAND_EDITABLE = (".gd", ".tscn", ".tres", ".gdshader", ".json", ".cfg", ".txt", ".md")
+
+
+def hand_edits(world):
+    """Files of the last export whose content no longer matches WORLD_EXPORT.json."""
+    manifest_path = os.path.join(world, "WORLD_EXPORT.json")
+    if not os.path.isfile(manifest_path):
+        return []
+    with open(manifest_path, encoding="utf-8") as f:
+        recorded = json.load(f).get("files", {})
+    edited = []
+    for rel, digest in sorted(recorded.items()):
+        if not rel.endswith(HAND_EDITABLE):
+            continue
+        path = os.path.join(world, rel.replace("/", os.sep))
+        if os.path.isfile(path) and sha256(path) != digest:
+            edited.append(rel)
+    return edited
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--client", required=True)
     ap.add_argument("--server", required=True)
     ap.add_argument("--root", required=True)
+    ap.add_argument("--guard", action="store_true",
+                    help="refuse to export over hand edits made in server/world (dev.ps1 ready)")
     args = ap.parse_args()
 
     with open(FILE_LIST, encoding="utf-8") as f:
         wanted = [line.strip() for line in f if line.strip() and not line.startswith("#")]
 
     world = os.path.join(args.server, "world")
+    if args.guard:
+        edited = hand_edits(world)
+        if edited:
+            raise SystemExit(
+                "server/world has hand edits the export would overwrite (the world is a\n"
+                "generated copy - make these changes in client/ instead):\n  "
+                + "\n  ".join(edited))
     # Deterministic export: wipe previous contents (including Godot import
     # artifacts extracted next to models) so removed sources never linger.
     # Server-authored trees (the simulation package and the world-server entry)

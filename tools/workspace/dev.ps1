@@ -4,6 +4,12 @@ HPMMO workspace helper.
 Canonical source: client/tools/workspace/dev.ps1 - this root copy is generated.
 
 Commands:
+  .\dev.ps1 ready [-Full]      THE pre-commit cycle, in order: sync the simulation package
+                               (server -> client), regenerate the world file list, export
+                               server\world (client -> server), import both projects and run
+                               `test`; -Full adds the maps / staircase / maintenance / journey
+                               simulations (~20 min). Refuses to overwrite hand edits made in
+                               a generated copy. Ends with what each repo has to commit.
   .\dev.ps1 status             pinned revisions, contract-hash check, repo states
   .\dev.ps1 test               client check harness; server service compile + world boot smoke
   .\dev.ps1 build              server deployable package into server\dist (client export = the release pipeline)
@@ -14,10 +20,11 @@ Commands:
 #>
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('status', 'test', 'build', 'start', 'sync-world', 'sync-sim', 'verify-contracts')]
+    [ValidateSet('status', 'ready', 'test', 'build', 'start', 'sync-world', 'sync-sim', 'verify-contracts')]
     [string]$Command = 'status',
     [switch]$Client,
-    [switch]$Server
+    [switch]$Server,
+    [switch]$Full
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -153,7 +160,80 @@ function Invoke-ServerSmoke {
     }
 }
 
+## The long end-to-end simulations (each brings up its own servers and headless
+## clients). `ready -Full` runs them after `test`. encounters_sim is left out
+## until its dev spawns are moved off the old valley coordinates (it still
+## spawns probes at y = 0.6, under the Terrain3D grounds).
+$FullSims = @('maps_sim', 'staircase_sim', 'maintenance_sim', 'journey_e2e')
+
+function Write-Step([string]$Text) {
+    Write-Host ''
+    Write-Host "=== [ready] $Text ===" -ForegroundColor Cyan
+}
+
+function Invoke-Sims {
+    foreach ($name in $FullSims) {
+        $script = Join-Path $serverRepo "tests\$name.py"
+        if (-not (Test-Path $script)) { throw "missing $script" }
+        # Artifacts go to %TEMP%, never into the repo (journey_e2e defaults to
+        # server\tests\out\release, which then shows up as a change to commit).
+        $outDir = Join-Path $env:TEMP "hpmmo-ready\$name"
+        if (Test-Path $outDir) { Remove-Item -Recurse -Force $outDir }
+        New-Item -ItemType Directory -Force $outDir | Out-Null
+        Write-Host "[ready] $name (artifacts: $outDir)"
+        & $python -u $script --out-dir $outDir | Select-String -Pattern 'RESULT|FAIL|SKIP' | ForEach-Object { "  $_" }
+        # A skip (exit 2: no PostgreSQL / service build) is not a pass.
+        if ($LASTEXITCODE -ne 0) { throw "$name failed or could not run (exit $LASTEXITCODE)" }
+    }
+}
+
+## What each repo would commit now. New assets come with Godot's .import and
+## .uid side files; they belong in the same commit as the asset.
+function Show-CommitSummary {
+    foreach ($repo in @(@('client', $clientRepo), @('server', $serverRepo))) {
+        $lines = @(git -C $repo[1] status --short)
+        $branch = git -C $repo[1] branch --show-current
+        if ($lines.Count -eq 0) {
+            Write-Host ("  {0} ({1}): nothing to commit" -f $repo[0], $branch)
+            continue
+        }
+        Write-Host ("  {0} ({1}): {2} changed path(s)" -f $repo[0], $branch, $lines.Count)
+        $lines | ForEach-Object { "    $_" }
+    }
+}
+
 switch ($Command) {
+    'ready' {
+        # Keep the root copy current (this file is the canonical one in client).
+        $canonical = Join-Path $clientRepo 'tools\workspace\dev.ps1'
+        $rootCopy = Join-Path $root 'dev.ps1'
+        if ((Test-Path $canonical) -and ((Get-FileHash $canonical).Hash -ne (Get-FileHash $rootCopy).Hash)) {
+            Copy-Item $canonical $rootCopy -Force
+            Write-Host '[ready] refreshed the root dev.ps1 from client/tools/workspace/dev.ps1'
+        }
+        Write-Step '1/5 simulation package: server -> client'
+        & $python (Join-Path $clientRepo 'tools\workspace\sync_sim.py') --client $clientRepo --server $serverRepo --root $root --guard
+        if ($LASTEXITCODE -ne 0) { throw 'sync-sim refused or failed (see above)' }
+        Write-Step '2/5 world file list (new client assets/scripts the server needs)'
+        & $python (Join-Path $clientRepo 'tools\workspace\gen_world_files.py') --client $clientRepo
+        if ($LASTEXITCODE -ne 0) { throw 'world file list generation failed' }
+        Write-Step '3/5 world export: client -> server\world'
+        & $python (Join-Path $clientRepo 'tools\workspace\export_world.py') --client $clientRepo --server $serverRepo --root $root --guard
+        if ($LASTEXITCODE -ne 0) { throw 'world export refused or failed (see above)' }
+        Write-Step '4/5 import + tests (client harness, service, world boot, multiplayer)'
+        Invoke-ClientHarness
+        Invoke-ServerSmoke
+        if ($Full) {
+            Write-Step '4b/5 end-to-end simulations (-Full)'
+            Invoke-Sims
+        }
+        Write-Step '5/5 ready to commit'
+        Show-CommitSummary
+        if (-not $Full) {
+            Write-Host ''
+            Write-Host '  (quick cycle: run `dev.ps1 ready -Full` before a release or after gameplay/map changes)'
+        }
+    }
     'status' {
         $lock = Read-Lock
         Write-Host '=== HPMMO workspace ==='

@@ -66,6 +66,8 @@ def main():
     ap.add_argument("--root", required=True)
     ap.add_argument("--check", action="store_true",
                     help="verify the client copy matches the server package; write nothing")
+    ap.add_argument("--guard", action="store_true",
+                    help="refuse to sync over hand edits made in the client copy (dev.ps1 ready)")
     args = ap.parse_args()
 
     package_dir = os.path.join(args.server, PACKAGE_REL)
@@ -95,6 +97,27 @@ def main():
             raise SystemExit(1)
         print("simulation package in sync (%d files)" % len(source))
         return
+
+    if args.guard:
+        # The client copy is generated: a file that no longer matches the hash
+        # the last sync recorded was edited in the client by hand, and the mirror
+        # below would silently throw that work away.
+        manifest_path = os.path.join(client_dir, MANIFEST_NAME)
+        recorded = {}
+        if os.path.isfile(manifest_path):
+            with open(manifest_path, encoding="utf-8") as f:
+                recorded = json.load(f).get("files", {})
+        edited = []
+        for rel, digest in sorted(recorded.items()):
+            dst = os.path.join(client_dir, rel.replace("/", os.sep))
+            src = source.get(rel)
+            if os.path.isfile(dst) and sha256(dst) != digest and (src is None or sha256(src) != sha256(dst)):
+                edited.append(rel)
+        if edited:
+            raise SystemExit(
+                "client/addons/hpmmo_sim has hand edits the sync would overwrite (the\n"
+                "server copy owns the simulation package - make these changes in\n"
+                "server/world/addons/hpmmo_sim instead):\n  " + "\n  ".join(edited))
 
     # Deterministic mirror: wipe the client copy (nothing server-authored may
     # linger after a package file is renamed or deleted) and copy it again.
