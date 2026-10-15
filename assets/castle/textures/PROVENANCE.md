@@ -17,3 +17,7 @@ original designs (no film heraldry). Prompts are in the fal request history.
 3D props (`assets/castle/props/`): reference images in `art/castle/concepts/props/`
 (owl lectern 01a136e1-76fe-7751-9472-c60147edee3a, armour
 01a136e1-7701-7cd1-a046-5e16c1199862), meshes by `fal-ai/trellis-2` from them.
+| books.jpg | 01a1393b-481d-7a70-975e-955c39fb7fe0 | Library book-spine rows (tiles left to right) |
+| tapestry.jpg | 01a13940-8790-76b2-b000-10277ebdfc20 | Seventh-floor corridor tapestry (trolls' ballet lesson, original) |
+
+Owl prop (`assets/castle/props/owl.glb`): reference 01a13940-87ce-7e83-bb5a-971f8779db02, mesh by `fal-ai/trellis-2` (5k vertices).

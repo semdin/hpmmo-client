@@ -4,6 +4,7 @@ assets/castle/castle_blockout.glb
 assets/castle/castle_interior.glb
 assets/castle/castle_layout.json
 assets/castle/props/armour.glb
+assets/castle/props/owl.glb
 assets/castle/props/owl_lectern.glb
 assets/models/characters/barbarian_texture.png
 assets/models/characters/dark_wizard.glb
@@ -181,6 +182,7 @@ assets/models/props/wand.gltf
 assets/shaders/castle/candle_flame.gdshader
 assets/shaders/castle/enchanted_sky.gdshader
 assets/shaders/castle/floating_candle.gdshader
+assets/shaders/castle/lake_window.gdshader
 assets/shaders/lake_water.gdshader
 assets/shaders/spell_layer.gdshader
 assets/shaders/spell_layer_add.gdshader
