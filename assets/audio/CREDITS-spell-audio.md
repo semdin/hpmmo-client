@@ -1,8 +1,26 @@
 # Spell effects and music audio - provenance and credits
 
-**Everything in this folder is PROJECT-ORIGINAL synthesis.** No sample pack, no
-downloaded file, no third-party recording, and no image/audio generator is
-involved. There is nothing to attribute and nothing to license.
+## Spell sounds (`spells/`, every `spell_*` key) - generated, 2026-10-16
+
+The cast / travel / impact / sustain / end sounds of all seven spells (the basic
+chain's three cast steps and two impacts included) were **generated with
+ElevenLabs Sound Effects v2 through fal.ai** (`fal-ai/elevenlabs/sound-effects/v2`,
+44.1 kHz PCM output) from the prompts in `art/audio_fal/sfx_spec.json`; the raw
+takes are kept in `art/audio_fal/`. `client/tools/audio/import_fal_sfx.py` turns
+them into the shipped files: mono downmix for positional playback, leading-silence
+trim, loop crossfade for travel/sustain beds, and the same RMS targets as the rest
+of the library (one-shots -17 dBFS, beds -20 dBFS). Generated output; commercial
+use is permitted under the ElevenLabs / fal.ai terms of the generating account.
+No third-party recording or sample pack is involved.
+
+    python client/tools/audio/import_fal_sfx.py --art art/audio_fal --client client
+    python client/tools/audio/tune_imports.py --client client   # loop flags
+
+## Everything else - project-original synthesis
+
+Footsteps, robe, mount, creatures, UI, ambience beds and the music are
+PROJECT-ORIGINAL synthesis. No sample pack, no downloaded file, no third-party
+recording, and no image/audio generator is involved in them.
 
 ## What made these files
 

@@ -624,7 +624,7 @@ func _drive_forged() -> void:
 	if _own_hp_before < 0:
 		_own_hp_before = int(player.current_hp)
 		# 1. A damage claim: the server-side damage entry point is authority-only.
-		rpc_id(1, "sim_damage_event", _forged_mob_uid, 99999, 0, "test", SimAuthority.local_uid)
+		rpc_id(1, "sim_damage_event", _forged_mob_uid, 99999, 0, "test", SimAuthority.local_uid, 0)
 		_record("forged_damage_sent", {"mob": _forged_mob_uid})
 		# 2. A hostile cast the client cannot afford (ultimate costs 90 mana).
 		SimNet.submit_cast(player, "imperio", player.global_position + Vector3(0, 0, 30), 900)

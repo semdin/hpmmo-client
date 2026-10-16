@@ -53,6 +53,7 @@ func _ready() -> void:
 	check(player.level == 2 and hud.exp_bar.value == player.current_exp, "EXP rollover and level update HUD")
 	await _check_house_standing(player, hud)
 	await _check_server_quests(player)
+	await _check_skill_training(player, hud)
 	player.current_mana = player.max_mana
 	player.cast_spell("protego")
 	check(player.is_protego_active and hud.mana_bar.value == player.current_mana, "Skill mana payment updates HUD")
@@ -71,10 +72,17 @@ func _ready() -> void:
 	world.add_child(projectile)
 	projectile.global_position = dummy.global_position + Vector3.UP
 	projectile.setup(player, "basic_cast", Vector3.UP)
+	# Exact-damage checks run with critical hits switched off; the crit rules get
+	# their own checks right after.
+	var crit_rules: Dictionary = HPRules.combat().get("critical", {})
+	var base_crit := float(crit_rules.get("base_chance", 0.0))
+	crit_rules["base_chance"] = 0.0
 	hp_before = dummy.current_hp
 	projectile._handle_hit(dummy)
 	projectile._handle_hit(dummy)
 	check(dummy.current_hp == hp_before - 40, "Duplicate body/swept collisions deal damage only once")
+	await _check_crit_and_combo(player, dummy, crit_rules)
+	crit_rules["base_chance"] = base_crit
 	check(not Rules.can_damage(player, player), "Friendly fire is rejected")
 	check(not Rules.can_damage(player, world.get_node("NPCs/ProfessorFig")), "Peaceful NPCs cannot be attacked")
 	FX.play_impact(world, Vector3(0, 1, 0), "expelliarmus")
@@ -272,6 +280,86 @@ func _ready() -> void:
 
 ## House standing: quest reputation -> rank 1..7, shown on the HUD, persisted in
 ## the `quests` object, and able to gate a spell on the authority.
+## Critical hits are rolled by the authority and reach presentation as HIT_CRIT;
+## the basic chain advances 0-1-2 inside its window and resets after it.
+func _check_crit_and_combo(player: Node, dummy: Node, crit_rules: Dictionary) -> void:
+	var attacker := SimAuthority.record_for(player)
+	var victim := SimAuthority.record_for(dummy)
+	var seen: Array = []
+	var listener := func(uid: int, amount: int, _hp: int, _spell: String, _attacker: int, flags: int):
+		if uid == int(victim.get("uid", -1)):
+			seen.append([amount, flags])
+	SimAuthority.entity_hit.connect(listener)
+	victim["hp"] = int(victim.get("max_hp", 1000))
+	SimAuthority._apply_damage(victim, 40, "basic_cast", attacker)
+	var max_crit = crit_rules.get("max_chance", 100.0)
+	crit_rules["base_chance"] = 100.0
+	crit_rules["max_chance"] = 100.0
+	SimAuthority._apply_damage(victim, 40, "basic_cast", attacker, HPProtocol.HIT_FINISHER)
+	crit_rules["base_chance"] = 0.0
+	crit_rules["max_chance"] = max_crit
+	SimAuthority.entity_hit.disconnect(listener)
+	check(seen.size() == 2 and seen[0][1] & HPProtocol.HIT_CRIT == 0 and int(seen[0][0]) == 40,
+		"A hit with no crit chance is plain and carries no crit flag")
+	check(seen.size() == 2 and seen[1][1] & HPProtocol.HIT_CRIT != 0 and seen[1][1] & HPProtocol.HIT_FINISHER != 0 		and int(seen[1][0]) == int(round(40 * HPRules.crit_multiplier())), "A critical finisher deals crit damage and reports both flags")
+	check(is_equal_approx(HPRules.crit_chance(3.0, true), 3.0 + float(crit_rules.get("finisher_bonus", 0.0))),
+		"Enchanted crit chance and the finisher bonus add up")
+	attacker["combo_until_tick"] = 0
+	var steps: Array = []
+	for _i in 3:
+		steps.append(SimAuthority._advance_combo(attacker))
+	check(steps == [0, 1, 2], "The basic chain advances flick, backhand, finisher")
+	attacker["combo_until_tick"] = SimAuthority.sim_tick - 1
+	check(SimAuthority._advance_combo(attacker) == 0, "The chain restarts once its window has passed")
+	attacker["combo_until_tick"] = 0
+	attacker["combo_index"] = 0
+	await get_tree().process_frame
+
+## Skill training: one point per level gained, spent on the authority, level 10
+## is Master ("M" on the action bar), and the levels persist in `quests.skills`.
+func _check_skill_training(player: Node, hud: Node) -> void:
+	var record: Dictionary = SimAuthority.record_for(player)
+	var saved_level := int(record.get("level", 1))
+	record["skill_levels"] = {}
+	SimAuthority._push_stats(record)
+	check(HPRules.skill_points_available(2, {}) == 1 and HPRules.skill_points_available(1, {}) == 0
+		and HPRules.skill_points_available(5, {"stupefy": 3}) == 2, "One skill point per level gained, minus points spent")
+	check(HPRules.skill_level_label(9) == "9" and HPRules.skill_level_label(10) == "M", "Level 10 reads as Master")
+	check(HPRules.spell_damage("stupefy", 0, "", 1.0, 10) > HPRules.spell_damage("stupefy", 0, "", 1.0, 1)
+		and HPRules.cooldown_for("stupefy", "", 10) < HPRules.cooldown_for("stupefy", "", 1), "Trained skills hit harder and recover faster")
+	record["level"] = 2
+	SimAuthority._push_stats(record)
+	var first: Dictionary = SimNet.submit_skill_up(player, "stupefy")
+	check(bool(first.get("ok", false)) and HPRules.skill_level_of(record.skill_levels, "stupefy") == 2
+		and player.skill_level("stupefy") == 2 and int(player.skill_points) == 0, "A skill point raises the skill on the authority and the body")
+	var broke: Dictionary = SimNet.submit_skill_up(player, "incendio")
+	check(String(broke.get("reason", "")) == HPProtocol.REJECT_NO_SKILL_POINTS, "Training without a point is refused")
+	check(String(SimNet.submit_skill_up(player, "basic_cast").get("reason", "")) == HPProtocol.REJECT_SKILL_UNKNOWN, "The basic attack cannot be trained")
+	record["level"] = 20
+	record["skill_levels"] = {"stupefy": 9}
+	SimAuthority._push_stats(record)
+	var master: Dictionary = SimAuthority.skill_up_for_record(record, "stupefy")
+	var capped: Dictionary = SimAuthority.skill_up_for_record(record, "stupefy")
+	check(bool(master.get("ok", false)) and String(capped.get("reason", "")) == HPProtocol.REJECT_SKILL_MAX
+		and player.skill_level("stupefy") == 10, "A skill stops at Master")
+	await get_tree().process_frame
+	var slot: HudSlot = hud.action_bar.spell_slots[0]
+	check(slot.held_id == "stupefy" and slot.badge_text == "M" and hud.action_bar.spell_slots[1].badge_text == "1", "Action bar shows skill levels, M for Master")
+	hud.skill_window.open()
+	await get_tree().process_frame
+	var row: Dictionary = hud.skill_window._rows.get("stupefy", {})
+	check(hud.skill_window.is_open() and not row.is_empty() and (row.level as Label).text == "MASTER"
+		and (row.button as Button).disabled and not (hud.skill_window._rows.incendio.button as Button).disabled, "Skill window lists levels and offers the points")
+	check(hud.handle_escape() == "skills" and not hud.skill_window.is_open(), "Esc closes the skill window")
+	check(int((player.persisted_quests().get("skills", {}) as Dictionary).get("stupefy", 0)) == 10, "Skill levels save into the quests object")
+	player.restore_quest_state(player.persisted_quests())
+	SimAuthority._load_quest_state(record, player)
+	check(HPRules.skill_level_of(record.skill_levels, "stupefy") == 10, "Skill levels restore onto the authority record")
+	record["skill_levels"] = {}
+	player.skill_levels = {}
+	record["level"] = saved_level
+	SimAuthority._push_stats(record)
+
 func _check_house_standing(player: Node, hud: Node) -> void:
 	check(HPRules.max_house_rank() == 7 and HPRules.house_rank_for(0) == 1 and HPRules.house_rank_for(99) == 1 \
 		and HPRules.house_rank_for(100) == 2 and HPRules.house_rank_for(2400) == 7, "House rank table has seven ranks")

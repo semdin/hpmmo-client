@@ -28,6 +28,7 @@ func _ready() -> void:
 
 	await _capture_inventory()
 	await _capture_tooltip()
+	await _capture_skills()
 
 	world.queue_free()
 	await get_tree().process_frame
@@ -106,6 +107,20 @@ func _capture_tooltip() -> void:
 	ui._tooltip.offset_bottom += delta.y
 	await get_tree().create_timer(0.5).timeout
 	await _shot("tooltip")
+
+
+## The skill window (V) and the action-bar level badges, with a Master skill,
+## trained skills and points left to spend - staged through the authority.
+func _capture_skills() -> void:
+	world.inventory_ui.hide()
+	var player = world.local_player
+	var record: Dictionary = SimAuthority.record_for(player)
+	record["level"] = 22
+	record["skill_levels"] = {"stupefy": 10, "incendio": 6, "bombarda": 3, "protego": 2}
+	SimAuthority._push_stats(record)
+	world.hud.skill_window.open()
+	await get_tree().create_timer(0.6).timeout
+	await _shot("skills")
 
 
 func _shot(subject: String) -> void:

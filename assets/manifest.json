@@ -2,7 +2,7 @@
  "schema": 1,
  "generated": "2026-10-08",
  "project": "HPMMO",
- "notes": "Asset audit manifest. The audit tools are retired: their input (tools/downloads/asset-audit.json) was removed with the downloaded candidate packs, so this document is hand-maintained. Every local_paths / license_file entry names a file that exists. `status: missing` means the asset is planned and not yet produced; `rejected` holds packs that were evaluated and not adopted. Measured fields (scale_m, triangles, sha256) come from the retired tools and from re-measurement on disk. | the spell effects (2026-10-05): every missing VFX inventory item is now project-original art authored by tools/blender/spell_vfx.py (four coherent 64-frame flipbooks, ripple/rune/mark/lightning atlases, glow/noise/flow/distortion/streak/fracture textures) and tools/blender/spell_meshes.py (trail ribbon, shield shell, projectile core, shards); the whole sound library is original synthesis from tools/audio/synth_spell_sfx.py. The two Kenney stills remain as particle ingredients, not effects. No VFX or audio entry remains missing or placeholder.",
+ "notes": "Asset audit manifest. The audit tools are retired: their input (tools/downloads/asset-audit.json) was removed with the downloaded candidate packs, so this document is hand-maintained. Every local_paths / license_file entry names a file that exists. `status: missing` means the asset is planned and not yet produced; `rejected` holds packs that were evaluated and not adopted. Measured fields (scale_m, triangles, sha256) come from the retired tools and from re-measurement on disk. | the spell effects (2026-10-05): every missing VFX inventory item is now project-original art authored by tools/blender/spell_vfx.py (four coherent 64-frame flipbooks, ripple/rune/mark/lightning atlases, glow/noise/flow/distortion/streak/fracture textures) and tools/blender/spell_meshes.py (trail ribbon, shield shell, projectile core, shards); the whole sound library is original synthesis from tools/audio/synth_spell_sfx.py. The two Kenney stills remain as particle ingredients, not effects. No VFX or audio entry remains missing or placeholder. | spell effects regenerated (2026-10-16): the spell flipbooks and stills are generated (fal.ai Wan 3.0 text-to-video clips and Z-Image Turbo stills on black, packed by tools/vfx/build_spell_vfx.py; hex lattice, scorch and streak procedural) and the spell sounds are generated (ElevenLabs Sound Effects v2 via fal.ai, imported by tools/audio/import_fal_sfx.py). Noise fields, masks and meshes stay tools/blender/spell_vfx.py / spell_meshes.py; every other sound stays original synthesis.",
  "summary": {
   "candidate": 31,
   "integrated": 127,
@@ -5258,9 +5258,9 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "Two minor stat slips: (1) ceiling_tile measures 4x4x0.35 units, so the 'tile thickness 0.15' note holds for floors but not the ceiling; (2) provenance cannot be hash-pinned to a public mirror (archive deleted; the GitHub mirror is v1.0), though the in-archive 1.1 CC0 license and the live itch page are consistent. Neither affects licensing or file validity. Repo side verified exact: assets/models/environment holds exactly 44 KayKit models (all walls/banners/pillars/chest/torch — no stairs/floors/railings/furniture) and wall.gltf.glb measures 4x4x1.0."
+    "note": "Two minor stat slips: (1) ceiling_tile measures 4x4x0.35 units, so the 'tile thickness 0.15' note holds for floors but not the ceiling; (2) provenance cannot be hash-pinned to a public mirror (archive deleted; the GitHub mirror is v1.0), though the in-archive 1.1 CC0 license and the live itch page are consistent. Neither affects licensing or file validity. Repo side verified exact: assets/models/environment holds exactly 44 KayKit models (all walls/banners/pillars/chest/torch \u2014 no stairs/floors/railings/furniture) and wall.gltf.glb measures 4x4x1.0."
    },
-   "gaps": "No animations, no skins, no LODs, no collision meshes, no damage/wear variants (those are the paid EXTRA tier). IMPORTANT: this 1.1 release ships its own 1024x1024 atlas (dungeon_texture.png, sha256 ceb331d6…) that differs from the atlas the repo's existing KayKit files reference (assets/models/environment/wall_dungeon_texture.png, 15,794 B, sha256 f9ae1825…) — the new pieces must be imported with this 1.1 atlas (each .gltf references 'dungeon_texture.png' relatively, so keep it beside them), or the whole Dungeon family should be re-imported from 1.1 so everything shares one material; otherwise expect UV/colour mismatch. KayKit's module is 4 units (not metres), so the art-audit unit decision applies: at the repo's current root_scale=1.0 the standard stair rises 5.1 units, and a 1.75-1.90 m character needs the agreed global scale. Does NOT include: potted plants, a suit of armour, a real multi-arm chandelier, or benches. Each .gltf needs its same-named .bin buffer beside it."
+   "gaps": "No animations, no skins, no LODs, no collision meshes, no damage/wear variants (those are the paid EXTRA tier). IMPORTANT: this 1.1 release ships its own 1024x1024 atlas (dungeon_texture.png, sha256 ceb331d6\u2026) that differs from the atlas the repo's existing KayKit files reference (assets/models/environment/wall_dungeon_texture.png, 15,794 B, sha256 f9ae1825\u2026) \u2014 the new pieces must be imported with this 1.1 atlas (each .gltf references 'dungeon_texture.png' relatively, so keep it beside them), or the whole Dungeon family should be re-imported from 1.1 so everything shares one material; otherwise expect UV/colour mismatch. KayKit's module is 4 units (not metres), so the art-audit unit decision applies: at the repo's current root_scale=1.0 the standard stair rises 5.1 units, and a 1.75-1.90 m character needs the agreed global scale. Does NOT include: potted plants, a suit of armour, a real multi-arm chandelier, or benches. Each .gltf needs its same-named .bin buffer beside it."
   },
   {
    "id": "kaykit-furniture-bits-1.0",
@@ -5580,7 +5580,7 @@
     "adversarially_verified": true,
     "note": "Full-kit entry count ('406 entries') and the site's '75 assets' label can no longer be reconciled since the zip was deleted; not material to the kept files."
    },
-   "gaps": "Different art style from KayKit (flat-shaded stone with a single shared colormap, no gradient atlas) — the plan's 'avoid mixing styles' rule applies, so treat these as alternates, not mix-ins. Tiny module: the stair is 0.67 units tall, so it needs a scale decision, and the wall segments do not match the KayKit 4-unit grid. No animations/LODs/collision. Textures/colormap.png must stay in its subfolder or the GLBs lose their texture."
+   "gaps": "Different art style from KayKit (flat-shaded stone with a single shared colormap, no gradient atlas) \u2014 the plan's 'avoid mixing styles' rule applies, so treat these as alternates, not mix-ins. Tiny module: the stair is 0.67 units tall, so it needs a scale decision, and the wall segments do not match the KayKit 4-unit grid. No animations/LODs/collision. Textures/colormap.png must stay in its subfolder or the GLBs lose their texture."
   },
   {
    "id": "kenney-furniture-kit",
@@ -5648,7 +5648,7 @@
     "adversarially_verified": true,
     "note": "Scale claim is wrong: pottedPlant.glb renders ~0.54 units tall (raw accessor 0.536; root node scale 2x over a nested 0.5x plant node), not '0.12 units'. The 0.12 figure is the plant sub-mesh alone. plantSmall1-3 render ~0.14 units. Assets still valid; only the scale note needs fixing before the manifest uses it."
    },
-   "gaps": "Totally different look from KayKit: flat untextured colour, clean/modern rather than castle-carved, and the models are very small in raw units (pottedPlant is 0.12 units tall) so they must be scaled. No textures at all (0 images) means no shared atlas and no PBR — plan the material setup. No animations/LODs/collision. If plants must match the KayKit atlas look, use these only as a stand-in until a KayKit-style plant is authored."
+   "gaps": "Totally different look from KayKit: flat untextured colour, clean/modern rather than castle-carved, and the models are very small in raw units (pottedPlant is 0.12 units tall) so they must be scaled. No textures at all (0 images) means no shared atlas and no PBR \u2014 plan the material setup. No animations/LODs/collision. If plants must match the KayKit atlas look, use these only as a stand-in until a KayKit-style plant is authored."
   },
   {
    "id": "kenney-impact-sounds",
@@ -5952,7 +5952,7 @@
     "adversarially_verified": true,
     "note": "None."
    },
-   "gaps": "No ambience or loops; only short one-shots (no long tails for large spells); no magic-specific whoosh/zap/chime — spell cast must be assembled from these layers plus UI sounds."
+   "gaps": "No ambience or loops; only short one-shots (no long tails for large spells); no magic-specific whoosh/zap/chime \u2014 spell cast must be assembled from these layers plus UI sounds."
   },
   {
    "id": "kenney-rpg-audio",
@@ -6652,7 +6652,7 @@
     "adversarially_verified": true,
     "note": "CC-BY-3.0 is permissive with attribution. Corrected: the required credit is the original creator Jonathan Shaw (InspectorJ) per the source page; the local receipt was rewritten accordingly."
    },
-   "gaps": "License is CC-BY-3.0, NOT CC0 — shipping requires visible credit to AntumDeluge (recorded in LICENSE.txt); no license file ships from the site; loop seam not verified in a WAV editor; no other ambiences in this pack."
+   "gaps": "License is CC-BY-3.0, NOT CC0 \u2014 shipping requires visible credit to AntumDeluge (recorded in LICENSE.txt); no license file ships from the site; loop seam not verified in a WAV editor; no other ambiences in this pack."
   },
   {
    "id": "para-animated-particle-fx-1",
@@ -6921,7 +6921,7 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "One stat is wrong: the report says '54 nodes'; the GLB actually has 86 nodes (54 is KayKit's node count, likely copied across). Everything else in this candidate is accurate. Preview file named preview.jpg is really a PNG (magic 89 50 4E 47) — see category-level note."
+    "note": "One stat is wrong: the report says '54 nodes'; the GLB actually has 86 nodes (54 is KayKit's node count, likely copied across). Everything else in this candidate is accurate. Preview file named preview.jpg is really a PNG (magic 89 50 4E 47) \u2014 see category-level note."
    },
    "gaps": "No textures at all (11 flat materials; the original pack's texture atlas is not in the Poly Pizza conversion, though UVs and TEXCOORD_0 exist); no dedicated spellcast clip (melee/gun clips only); no LODs, no collision, no root motion; conversion duplicates the skin 5x (one per mesh) and 5 identical 62-joint skins must be merged before production use; textured original is Quaternius 'Ultimate Modular Men' whose Google Drive link is quota-blocked (manual); shoe/prop sockets not verified.",
    "acceptance": "tools/downloads/asset-review-neutral-hero-adventurer.png, tools/downloads/asset-review-final-hero-adventurer.png"
@@ -7052,7 +7052,7 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "The gaps field says '2 duplicated skins' — actually there are 4 identical 62-joint skins (Body, Head, Legs, Feet), i.e. the merge cost is double what was stated. Preview.jpg is really a PNG. Otherwise accurate."
+    "note": "The gaps field says '2 duplicated skins' \u2014 actually there are 4 identical 62-joint skins (Body, Head, Legs, Feet), i.e. the merge cost is double what was stated. Preview.jpg is really a PNG. Otherwise accurate."
    },
    "gaps": "Untextured (flat materials, UVs present); Sword mesh is a separate NON-skinned mesh (must be socketed to a hand bone manually); 2 duplicated skins; no spellcast clip; no LODs/collision/root motion; same Google-Drive-blocked textured original as the male Adventurer.",
    "acceptance": "tools/downloads/asset-review-neutral-hero-hooded.png, tools/downloads/asset-review-final-hero-hooded.png"
@@ -7319,7 +7319,7 @@
    "status": "candidate",
    "author": "Quaternius (quaternius.com)",
    "source_url": "https://quaternius.itch.io/universal-animation-library",
-   "license": "CC0 1.0 Universal (Public Domain Dedication) — license text shipped inside the archive",
+   "license": "CC0 1.0 Universal (Public Domain Dedication) \u2014 license text shipped inside the archive",
    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
    "license_file": "assets/candidates/character/quaternius-universal-animation-library/License.txt",
    "attribution_required": false,
@@ -7401,9 +7401,9 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "The itch page advertises '120+ animations' for the library, but the free Standard GLBs actually contain only 43 clips each — the researcher's 43 is what the downloaded artifact has, but a reader expecting the advertised 120+ from the free tier will be short (the rest sit in the paid Pro/Source tiers). No files are mislabeled; audio/other formats are not needed."
+    "note": "The itch page advertises '120+ animations' for the library, but the free Standard GLBs actually contain only 43 clips each \u2014 the researcher's 43 is what the downloaded artifact has, but a reader expecting the advertised 120+ from the free tier will be short (the rest sit in the paid Pro/Source tiers). No files are mislabeled; audio/other formats are not needed."
    },
-   "gaps": "Animation product, not a costumed hero: the included mesh is an untextured mannequin (2 flat materials, no skin/cloth textures, no robe); free Standard tier has 43 clips (the paid Pro tier, $9.99, has the larger set); 65-joint UE5-named rig differs from the 53-joint DEF- base mesh copy on Poly Pizza — pair it with its own mannequin or retarget deliberately; itch.io has no static URL (download needed a csrf + /download_url + /file/<id> session, reproduced in this run).",
+   "gaps": "Animation product, not a costumed hero: the included mesh is an untextured mannequin (2 flat materials, no skin/cloth textures, no robe); free Standard tier has 43 clips (the paid Pro tier, $9.99, has the larger set); 65-joint UE5-named rig differs from the 53-joint DEF- base mesh copy on Poly Pizza \u2014 pair it with its own mannequin or retarget deliberately; itch.io has no static URL (download needed a csrf + /download_url + /file/<id> session, reproduced in this run).",
    "acceptance": "tools/downloads/asset-review-neutral-hero-mannequin.png"
   },
   {
@@ -8045,191 +8045,6 @@
    }
   },
   {
-   "id": "vfx_flame_loop",
-   "purpose": "Loaning flame plume flipbook: Incendio sustain, Ultimate tail, torches",
-   "status": "integrated",
-   "author": "HPMMO project (original)",
-   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
-   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
-   "license_url": "assets/vfx/PROVENANCE.txt",
-   "license_file": "assets/vfx/PROVENANCE.txt",
-   "attribution_required": false,
-   "local_paths": [
-    "assets/vfx/atlases/flame_loop_8x8_2k.png",
-    "tools/blender/spell_vfx.py"
-   ],
-   "sha256": {
-    "assets/vfx/atlases/flame_loop_8x8_2k.png": "7e06c83fc09b08a217e55d53b19fd7ceb131f82b2f180eaf86fa8cde6d9e347e"
-   },
-   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
-   "frames": 64,
-   "loop": true,
-   "fps": 30,
-   "frame_order": "row-major, frame 0 at the top-left cell",
-   "cell_px": 256,
-   "sheet_px": [
-    2048,
-    2048
-   ],
-   "padding_px": 4,
-   "alpha": "straight (non-premultiplied); coverage in A, linear",
-   "colour_space": "sRGB (RGB), linear (A)",
-   "blend_default": "alpha",
-   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
-   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_flame_loop.png, and run_vfx_checks.ps1",
-   "evidence": [
-    "tools/downloads/vfx-atlas-flame_loop_8x8_2k.png"
-   ]
-  },
-  {
-   "id": "vfx_fire_burst",
-   "purpose": "Non-looping directional fire burst: Incendio cast/impact",
-   "status": "integrated",
-   "author": "HPMMO project (original)",
-   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
-   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
-   "license_url": "assets/vfx/PROVENANCE.txt",
-   "license_file": "assets/vfx/PROVENANCE.txt",
-   "attribution_required": false,
-   "local_paths": [
-    "assets/vfx/atlases/fire_burst_8x8_2k.png",
-    "tools/blender/spell_vfx.py"
-   ],
-   "sha256": {
-    "assets/vfx/atlases/fire_burst_8x8_2k.png": "1683349943b5bef49dd9b2a44ad722f17799b2162455bfe48c6391b043a5718e"
-   },
-   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
-   "frames": 64,
-   "loop": false,
-   "fps": 40,
-   "frame_order": "row-major, frame 0 at the top-left cell",
-   "cell_px": 256,
-   "sheet_px": [
-    2048,
-    2048
-   ],
-   "padding_px": 4,
-   "alpha": "straight (non-premultiplied); coverage in A, linear",
-   "colour_space": "sRGB (RGB), linear (A)",
-   "blend_default": "alpha",
-   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
-   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_fire_burst.png, and run_vfx_checks.ps1",
-   "evidence": [
-    "tools/downloads/vfx-atlas-fire_burst_8x8_2k.png"
-   ]
-  },
-  {
-   "id": "vfx_smoke_puff",
-   "purpose": "Evolving soft smoke: Incendio extinguish, Bombarda dust, Ultimate tail",
-   "status": "integrated",
-   "author": "HPMMO project (original)",
-   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
-   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
-   "license_url": "assets/vfx/PROVENANCE.txt",
-   "license_file": "assets/vfx/PROVENANCE.txt",
-   "attribution_required": false,
-   "local_paths": [
-    "assets/vfx/atlases/smoke_puff_8x8_2k.png",
-    "tools/blender/spell_vfx.py"
-   ],
-   "sha256": {
-    "assets/vfx/atlases/smoke_puff_8x8_2k.png": "0a9097a66eda74f9d0391f61b5e9ff340b144cf52fdc3e8f36857dba51a36d5c"
-   },
-   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
-   "frames": 64,
-   "loop": false,
-   "fps": 24,
-   "frame_order": "row-major, frame 0 at the top-left cell",
-   "cell_px": 256,
-   "sheet_px": [
-    2048,
-    2048
-   ],
-   "padding_px": 4,
-   "alpha": "straight (non-premultiplied); coverage in A, linear",
-   "colour_space": "sRGB (RGB), linear (A)",
-   "blend_default": "alpha",
-   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
-   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_smoke_puff.png, and run_vfx_checks.ps1",
-   "evidence": [
-    "tools/downloads/vfx-atlas-smoke_puff_8x8_2k.png"
-   ]
-  },
-  {
-   "id": "vfx_energy_impact",
-   "purpose": "Irregular magical impact: every projectile hit and the Ultimate strike",
-   "status": "integrated",
-   "author": "HPMMO project (original)",
-   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
-   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
-   "license_url": "assets/vfx/PROVENANCE.txt",
-   "license_file": "assets/vfx/PROVENANCE.txt",
-   "attribution_required": false,
-   "local_paths": [
-    "assets/vfx/atlases/energy_impact_8x8_2k.png",
-    "tools/blender/spell_vfx.py"
-   ],
-   "sha256": {
-    "assets/vfx/atlases/energy_impact_8x8_2k.png": "8dc9fce18b1e814ae9ecfcd34c993a34a95ff805c25cc91c2846376520a631d9"
-   },
-   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
-   "frames": 64,
-   "loop": false,
-   "fps": 40,
-   "frame_order": "row-major, frame 0 at the top-left cell",
-   "cell_px": 256,
-   "sheet_px": [
-    2048,
-    2048
-   ],
-   "padding_px": 4,
-   "alpha": "straight (non-premultiplied); coverage in A, linear",
-   "colour_space": "sRGB (RGB), linear (A)",
-   "blend_default": "additive",
-   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
-   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_energy_impact.png, and run_vfx_checks.ps1",
-   "evidence": [
-    "tools/downloads/vfx-atlas-energy_impact_8x8_2k.png"
-   ]
-  },
-  {
-   "id": "vfx_shield_ripple",
-   "purpose": "Local shield impact ripple with a fracture tail: Protego hit response",
-   "status": "integrated",
-   "author": "HPMMO project (original)",
-   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
-   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
-   "license_url": "assets/vfx/PROVENANCE.txt",
-   "license_file": "assets/vfx/PROVENANCE.txt",
-   "attribution_required": false,
-   "local_paths": [
-    "assets/vfx/atlases/shield_ripple_4x4_1k.png",
-    "tools/blender/spell_vfx.py"
-   ],
-   "sha256": {
-    "assets/vfx/atlases/shield_ripple_4x4_1k.png": "5033194fe869feaf512d5641e9ef288e853eacecbb2505d0b378427d1d17b54c"
-   },
-   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
-   "frames": 16,
-   "loop": false,
-   "fps": 24,
-   "frame_order": "row-major, frame 0 at the top-left cell",
-   "cell_px": 256,
-   "sheet_px": [
-    1024,
-    1024
-   ],
-   "padding_px": 4,
-   "alpha": "straight (non-premultiplied); coverage in A, linear",
-   "colour_space": "sRGB (RGB), linear (A)",
-   "blend_default": "additive",
-   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
-   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_shield_ripple.png, and run_vfx_checks.ps1",
-   "evidence": [
-    "tools/downloads/vfx-atlas-shield_ripple_4x4_1k.png"
-   ]
-  },
-  {
    "id": "vfx_soft_glow",
    "purpose": "Soft radial glow used by muzzle flashes, ember sprites and impact cores",
    "status": "integrated",
@@ -8383,43 +8198,6 @@
    "tiling": "tileable on both axes"
   },
   {
-   "id": "vfx_energy_streak",
-   "purpose": "Tapered streak mask for projectile trails, the Expelliarmus ribbon and the broom trail",
-   "status": "integrated",
-   "author": "HPMMO project (original)",
-   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
-   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
-   "license_url": "assets/vfx/PROVENANCE.txt",
-   "license_file": "assets/vfx/PROVENANCE.txt",
-   "attribution_required": false,
-   "local_paths": [
-    "assets/vfx/tex/energy_streak_1024x256.png",
-    "tools/blender/spell_vfx.py"
-   ],
-   "sha256": {
-    "assets/vfx/tex/energy_streak_1024x256.png": "5b9b62157d9461943eb379e17e50a01cae11aa6721d30444a6ec87fe8554ac90"
-   },
-   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
-   "frames": 1,
-   "loop": false,
-   "fps": 0,
-   "frame_order": "single frame",
-   "cell_px": 1024,
-   "sheet_px": [
-    1024,
-    256
-   ],
-   "padding_px": 0,
-   "alpha": "straight",
-   "colour_space": "sRGB (RGB), linear (A)",
-   "blend_default": "additive",
-   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
-   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_energy_streak.png, and run_vfx_checks.ps1",
-   "evidence": [
-    "tools/downloads/vfx-atlas-energy_streak_1024x256.png"
-   ]
-  },
-  {
    "id": "vfx_shield_fracture",
    "purpose": "Fracture mask drawn over the ward as it expires",
    "status": "integrated",
@@ -8528,43 +8306,6 @@
    "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_rune_masks.png, and run_vfx_checks.ps1",
    "evidence": [
     "tools/downloads/vfx-atlas-rune_masks_2x2_1k.png"
-   ]
-  },
-  {
-   "id": "vfx_lightning_branches",
-   "purpose": "Irregular branching energy masks for the Ultimate strike",
-   "status": "integrated",
-   "author": "HPMMO project (original)",
-   "source_url": "n/a - original work synthesised/authored by the project's own scripts",
-   "license": "Project-original; CC0-1.0 compatible (dedicated by the project)",
-   "license_url": "assets/vfx/PROVENANCE.txt",
-   "license_file": "assets/vfx/PROVENANCE.txt",
-   "attribution_required": false,
-   "local_paths": [
-    "assets/vfx/atlases/lightning_branches_2x2_1k.png",
-    "tools/blender/spell_vfx.py"
-   ],
-   "sha256": {
-    "assets/vfx/atlases/lightning_branches_2x2_1k.png": "03fb6c8a740a19b2647c220d8f99334c6568ba539033d16adbe07517d46ab0cd"
-   },
-   "generator": "tools/blender/spell_vfx.py (Blender 5.2.2, seeded 20261005)",
-   "frames": 4,
-   "loop": false,
-   "fps": 0,
-   "frame_order": "row-major, frame 0 at the top-left cell",
-   "cell_px": 512,
-   "sheet_px": [
-    1024,
-    1024
-   ],
-   "padding_px": 4,
-   "alpha": "straight (mask)",
-   "colour_space": "linear data (white mask)",
-   "blend_default": "additive",
-   "temporal_method": "simulated sequences: one continuous band-limited field in (x, y, t) sampled at consecutive frames; the looping atlas is periodic in t. Frames are ordered row-major and must be played in that order.",
-   "acceptance": "spell-effect metadata.json (frame count/order/FPS/loop/alpha/padding/colour space match the shipped file; every padding gutter asserted empty), tools/downloads/vfx-atlas-vfx_lightning_branches.png, and run_vfx_checks.ps1",
-   "evidence": [
-    "tools/downloads/vfx-atlas-lightning_branches_2x2_1k.png"
    ]
   },
   {
@@ -8960,6 +8701,504 @@
    },
    "collision": "none (the broom never collides; the rider's capsule does)",
    "lods": "Godot import-generated"
+  },
+  {
+   "id": "vfx_flame_loop",
+   "purpose": "Looping flame column (Incendio burn sustain)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/flame_loop_8x8_1k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/flame_loop_8x8_1k.png": "386e859919d2b9ae173939e711ef80f97692f3233e4d8e1a09d24c462fff56ce"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": true
+  },
+  {
+   "id": "vfx_fire_burst",
+   "purpose": "Rolling fire burst (Incendio cone, fire impacts)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/fire_burst_8x8_2k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/fire_burst_8x8_2k.png": "23d2d866f1ea0d0f161699d4238a157c9f2ca8233604b084877b2a727e96345f"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": false
+  },
+  {
+   "id": "vfx_smoke_puff",
+   "purpose": "White smoke puff, tinted at runtime (ends of fire and blasts)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/smoke_puff_8x8_1k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/smoke_puff_8x8_1k.png": "e081175893051f177a26c360f00b7c4ebde1fe7a692abceedbc1bba1374b53cd"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": false
+  },
+  {
+   "id": "vfx_energy_streak",
+   "purpose": "Tapered energy streak (bolt ribbons, broom trail)",
+   "status": "integrated",
+   "author": "project-original (procedural)",
+   "source_url": "",
+   "license": "project-original (CC0-equivalent)",
+   "license_url": "",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/energy_streak_1024x256.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/energy_streak_1024x256.png": "e32f0d93e55fd63347320f6280bdffbb8e5cb81e4a630f90dae20f4453367242"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 1,
+   "loop": false
+  },
+  {
+   "id": "vfx_explosion",
+   "purpose": "Fireball explosion with embers (Bombarda impact)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/explosion_8x8_2k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/explosion_8x8_2k.png": "ab8ac26ebc2c5e19852da42e4e0a7ebf4ecae786e102913955ffb3bc344e87d5"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": false
+  },
+  {
+   "id": "vfx_burst_gold",
+   "purpose": "Golden sparkle burst (basic attack impact)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/burst_gold_8x8_1k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/burst_gold_8x8_1k.png": "621b3da69d6db07a30db295f4ee02551570eafaaa250eb317eceba1e5d9e091f"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": false
+  },
+  {
+   "id": "vfx_burst_red",
+   "purpose": "Crimson electric burst (Stupefy impact)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/burst_red_8x8_1k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/burst_red_8x8_1k.png": "ece2ddb2274e13b9984470d6bdc6af4b8a1ad1c315e0eb56f5e464f35375ed0f"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": false
+  },
+  {
+   "id": "vfx_burst_crimson",
+   "purpose": "Magenta spiral vortex (Expelliarmus impact)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/burst_crimson_8x8_1k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/burst_crimson_8x8_1k.png": "2a2e03751e016c6c231eae137e888b24e13917b99edcf925eb720dc4b61e23e2"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": false
+  },
+  {
+   "id": "vfx_burst_green",
+   "purpose": "Emerald lightning explosion (Avada Arcana impact)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/burst_green_8x8_2k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/burst_green_8x8_2k.png": "3e3c3041bac0ee3a3c368f64944e6d13874879c10c99b144c778e54f6b9483f2"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": false
+  },
+  {
+   "id": "vfx_ripple_blue",
+   "purpose": "Blue force-field ripple ring (Protego cast and deflection)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/ripple_blue_8x8_1k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/ripple_blue_8x8_1k.png": "80effde53adf48bd79d1317e741bb8edd200abc4ec3e1615ca7b32a2907a3a00"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": false
+  },
+  {
+   "id": "vfx_shockwave",
+   "purpose": "Expanding ground shockwave ring, white, tinted and laid flat (blast impacts)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/shockwave_8x8_1k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/shockwave_8x8_1k.png": "eba34091600053bf8ae2c75f8f4ade534ba286726d624cb2f3998bc6985c3105"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": false
+  },
+  {
+   "id": "vfx_wand_flash",
+   "purpose": "Muzzle starburst at the wand tip, white, tinted per spell (cast flash)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/wand_flash_8x8_1k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/wand_flash_8x8_1k.png": "1130acef0f21067fcbfe6bd3e6817d8b2bc8eada2eefdd01567588a67ee7596a"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": false
+  },
+  {
+   "id": "vfx_spark_burst",
+   "purpose": "Radial spark spray, white, tinted per spell (impact detail)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/spark_burst_8x8_1k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/spark_burst_8x8_1k.png": "6c0f28bab1d7e8ac92dca7f8dc9cd13fc46df83dfca4c66f0a9789ae2dbdab79"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": false
+  },
+  {
+   "id": "vfx_energy_orb",
+   "purpose": "Crackling energy orb loop, white, tinted per spell (bolt cores)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/energy_orb_8x8_1k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/energy_orb_8x8_1k.png": "f00071973123dc0517ef4d90b5b19bad1780d5462360765b7f4840b368f2bbe6"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": true
+  },
+  {
+   "id": "vfx_fire_orb",
+   "purpose": "Churning fireball loop (Bombarda bolt core)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/atlases/fire_orb_8x8_1k.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/atlases/fire_orb_8x8_1k.png": "d5901e72f3ff66b9812e50de79ffca3be4dde6f552ffbb880cd7e61ff20bec2f"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 64,
+   "loop": true
+  },
+  {
+   "id": "vfx_rune_seal",
+   "purpose": "Rune seal, white, tinted (stun indicator, ground seals)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/fal-ai/z-image/turbo",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/rune_seal_512.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/rune_seal_512.png": "82417b8f6c188f7914548e7e9aa3d336dc3ae116677b2b14ae3e02bc303c86fb"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 1,
+   "loop": false
+  },
+  {
+   "id": "vfx_star_flare",
+   "purpose": "Four-point star sparkle (particle sprite)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/fal-ai/z-image/turbo",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/star_flare_256.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/star_flare_256.png": "40b5d340358c94bcba22fbae37e53c406a4cc83fa5736ad326e6244551b33345"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 1,
+   "loop": false
+  },
+  {
+   "id": "vfx_lightning_strands",
+   "purpose": "Branching lightning strands, white, tinted (Stupefy / Avada Arcana crackle)",
+   "status": "integrated",
+   "author": "generated for this project (fal.ai)",
+   "source_url": "https://fal.ai/models/fal-ai/z-image/turbo",
+   "license": "generated output, commercial use under the fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/lightning_strands_512.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/lightning_strands_512.png": "c0ac99937e2d09cae8d4189fac88a0b8f94d36094db65ee249490faae8a968c3"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 1,
+   "loop": false
+  },
+  {
+   "id": "vfx_hex_shield",
+   "purpose": "Tileable hex lattice in alpha (Protego shell)",
+   "status": "integrated",
+   "author": "project-original (procedural)",
+   "source_url": "",
+   "license": "project-original (CC0-equivalent)",
+   "license_url": "",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/hex_shield_512.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/hex_shield_512.png": "e55c19b93472e90c3a733e906bc562358c97125d8eaf4bfcafaddaaac75cbf5a"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 1,
+   "loop": false
+  },
+  {
+   "id": "vfx_scorch_decal",
+   "purpose": "Ground scorch decal (blast aftermath)",
+   "status": "integrated",
+   "author": "project-original (procedural)",
+   "source_url": "",
+   "license": "project-original (CC0-equivalent)",
+   "license_url": "",
+   "license_file": "assets/vfx/PROVENANCE.txt",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/vfx/tex/scorch_decal_512.png",
+    "tools/vfx/build_spell_vfx.py"
+   ],
+   "sha256": {
+    "assets/vfx/tex/scorch_decal_512.png": "4c988916b43a3134534836db75e9587210504d6a5ce557551157abe3440fcae8"
+   },
+   "generator": "tools/vfx/build_spell_vfx.py",
+   "frames": 1,
+   "loop": false
+  },
+  {
+   "id": "spell-sfx-generated",
+   "purpose": "Spell cast/travel/impact/sustain/end sounds (all spell_* sound_library keys)",
+   "status": "integrated",
+   "author": "generated for this project with ElevenLabs Sound Effects v2 via fal.ai",
+   "source_url": "https://fal.ai/models/fal-ai/elevenlabs/sound-effects/v2",
+   "license": "generated output, commercial use under the ElevenLabs / fal.ai terms of the generating account",
+   "license_url": "https://fal.ai/terms",
+   "license_file": "assets/audio/CREDITS-spell-audio.md",
+   "attribution_required": false,
+   "local_paths": [
+    "assets/audio/spells/basic_cast/cast.wav",
+    "assets/audio/spells/basic_cast/cast_02.wav",
+    "assets/audio/spells/basic_cast/cast_03.wav",
+    "assets/audio/spells/basic_cast/end.wav",
+    "assets/audio/spells/basic_cast/impact.wav",
+    "assets/audio/spells/basic_cast/impact_02.wav",
+    "assets/audio/spells/basic_cast/travel.wav",
+    "assets/audio/spells/bombarda/cast.wav",
+    "assets/audio/spells/bombarda/end.wav",
+    "assets/audio/spells/bombarda/impact.wav",
+    "assets/audio/spells/bombarda/travel.wav",
+    "assets/audio/spells/expelliarmus/cast.wav",
+    "assets/audio/spells/expelliarmus/end.wav",
+    "assets/audio/spells/expelliarmus/impact.wav",
+    "assets/audio/spells/expelliarmus/travel.wav",
+    "assets/audio/spells/incendio/cast.wav",
+    "assets/audio/spells/incendio/end.wav",
+    "assets/audio/spells/incendio/impact.wav",
+    "assets/audio/spells/incendio/sustain.wav",
+    "assets/audio/spells/protego/cast.wav",
+    "assets/audio/spells/protego/end.wav",
+    "assets/audio/spells/protego/impact.wav",
+    "assets/audio/spells/protego/sustain.wav",
+    "assets/audio/spells/stupefy/cast.wav",
+    "assets/audio/spells/stupefy/end.wav",
+    "assets/audio/spells/stupefy/impact.wav",
+    "assets/audio/spells/stupefy/travel.wav",
+    "assets/audio/spells/ultimate/cast.wav",
+    "assets/audio/spells/ultimate/end.wav",
+    "assets/audio/spells/ultimate/impact.wav",
+    "assets/audio/spells/ultimate/travel.wav",
+    "tools/audio/import_fal_sfx.py"
+   ],
+   "sha256": {
+    "assets/audio/spells/basic_cast/cast.wav": "5a7f316a05fd02ef85098306ff1766f6ae747f289196e53e583df8ae222271c2",
+    "assets/audio/spells/basic_cast/cast_02.wav": "5db39b92f4fb7d9fd50db527a63364491014db82f09cc919b88c2011ad867ec1",
+    "assets/audio/spells/basic_cast/cast_03.wav": "9f6d5bd3acd3ca13df18181cb89798ebc3474e72c8af2ea236a7aff4a911bcde",
+    "assets/audio/spells/basic_cast/end.wav": "1b8990d91b7453f3ab55cc88c386e07fa9df377ce965c85b875beab089bd9d0a",
+    "assets/audio/spells/basic_cast/impact.wav": "c4f5c5cb749f5cb580b188096d46be30814ed3ca690dc9e323f0ee302f7805c7",
+    "assets/audio/spells/basic_cast/impact_02.wav": "d72104ad287c43c6b25a9988821c22f844f7b574ccae5ed3a2a546256130b0fa",
+    "assets/audio/spells/basic_cast/travel.wav": "44e1ec83887a7fe405eee04378cc7656890100f7d7e4b44da7c369694dfaf841",
+    "assets/audio/spells/bombarda/cast.wav": "e359af4270448dacd2913b1627f1457dbe65d5b421a65aab07270a00238870b2",
+    "assets/audio/spells/bombarda/end.wav": "b4f6f0ec38a890c2048aad648dfa38b4c29a73e58cd6f6840c62ccb8d96024fb",
+    "assets/audio/spells/bombarda/impact.wav": "f03ef737a9cffb165fa4492e1ac39f3348c67e9c9a2741eb67fccf9254bdf5d7",
+    "assets/audio/spells/bombarda/travel.wav": "3b6d226524232e6a852aa245490a6fc5937c89c607a72992a137c82cdc47c91d",
+    "assets/audio/spells/expelliarmus/cast.wav": "d6d72e8fa8270032eba2bae88d3dc63806552f7ae57daa050803d183b1bb57ac",
+    "assets/audio/spells/expelliarmus/end.wav": "f7953d6f1e072228a7212b12c9aeeb3e259120d5bbc6bc2e077121237933a381",
+    "assets/audio/spells/expelliarmus/impact.wav": "d4c5f9bb9bfd2d0d3f36b93a30cb79ef96034636618ce64ad9a9e114c0cbb19c",
+    "assets/audio/spells/expelliarmus/travel.wav": "0f6755d60c6bde8fc7894ac7a7c522220ba269472b7d7cbabaaa5bdaa61707ca",
+    "assets/audio/spells/incendio/cast.wav": "601cedaf8d6bd28a8a9e9668800b5f270a90e157ce75a0f1912845ab50868a3c",
+    "assets/audio/spells/incendio/end.wav": "70707747f79a360d95378dee80d7785d69fc1f98775ae92e86f7202d211fc0de",
+    "assets/audio/spells/incendio/impact.wav": "d7485d19e97e06e0f81bd22a5f720ba7d4e691fb58b875f665d9b690bf721499",
+    "assets/audio/spells/incendio/sustain.wav": "c928b785f4556588b400d30e94b92048bc7a4222fb3ca5ce31f14a15f540d1f5",
+    "assets/audio/spells/protego/cast.wav": "6b3fd018aaa2827e8b890869b73f74288f5508f2a22e676d10ae091b2fbb79f0",
+    "assets/audio/spells/protego/end.wav": "a24f03d037c8a0b914e99e64baef139794983323a051b8cb69f33e61d68b5a83",
+    "assets/audio/spells/protego/impact.wav": "0f41a2a866e86199568d31d9df77321f895a4e05602ba6cb5d00f8839f4d60ee",
+    "assets/audio/spells/protego/sustain.wav": "0f0295ec1585108446e21e01e0ca0fa739386ac14f5f6ad3fdd078af8507dee7",
+    "assets/audio/spells/stupefy/cast.wav": "5cc977d5c9d4e6c918ed2fa9327f0996d4414e84fda1b181db582f12d9d4ff4e",
+    "assets/audio/spells/stupefy/end.wav": "799712a6725e20b07584b3b47c2cc4463c195426782a2c756e7758425363adce",
+    "assets/audio/spells/stupefy/impact.wav": "04ab5dafb800281738674bb894c0c29c1e5eea12c64fda910c64127ff2312765",
+    "assets/audio/spells/stupefy/travel.wav": "a35452073919b2d9d75d9a78733ca834d2c0a7670318a19a38ade42f5a28329f",
+    "assets/audio/spells/ultimate/cast.wav": "09ead3c9a1d21b1921cc03fc0a219959f5c17d9949620eaaa72f8d54dd8d9513",
+    "assets/audio/spells/ultimate/end.wav": "34405df24e799051478ada435c76b515ca0113377e076fe005aecb6018014491",
+    "assets/audio/spells/ultimate/impact.wav": "a5eca4e8bedbb2603d1bcd51d33ae909456a5d4a739f24b2af427c28f0cbea89",
+    "assets/audio/spells/ultimate/travel.wav": "ec65f833580ea3e70bce9837776e5eacad45bfb94096c130875273b0cacd5991"
+   }
   }
  ],
  "rejected": [
@@ -8970,12 +9209,12 @@
   },
   {
    "id": "kenney-mini-characters",
-   "reason": "0.67 m blocky characters, 7 bones — fails the art direction",
+   "reason": "0.67 m blocky characters, 7 bones \u2014 fails the art direction",
    "source": "kenney.nl"
   },
   {
    "id": "quaternius-animated-base-character",
-   "reason": "Poly Pizza copy lists CC-BY 3.0 while the pack page says CC0 — license discrepancy; UAL (CC0) covers the same mannequin",
+   "reason": "Poly Pizza copy lists CC-BY 3.0 while the pack page says CC0 \u2014 license discrepancy; UAL (CC0) covers the same mannequin",
    "source": "poly.pizza"
   },
   {

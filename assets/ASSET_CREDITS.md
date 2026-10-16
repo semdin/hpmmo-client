@@ -103,3 +103,16 @@ Castle and village textures in `assets/textures/pbr/` (2k, Poly Haven, CC0 1.0):
 *medieval_wood*, *wooden_planks*, *white_rough_plaster*, *mossy_stone_wall*,
 *cobblestone_floor_04*. The castle, village and site buildings themselves are
 project-original geometry (`scripts/world/grounds/`).
+
+# Captured spell motion (2026-10-16)
+
+- `animations/hero/cast_*.glb` (each `Cast_<Move>` + `Cast_<Move>_Upper`): motion
+  **generated for this project with fal.ai Hunyuan Motion** (`fal-ai/hunyuan-motion`,
+  text-to-motion, SMPL-H FBX), trimmed and retargeted onto the hero rig by
+  `tools/blender/retarget_clip.py`. Three seeds per move; the chosen takes:
+  Stupefy `stupefy_b` (frames 17-48), Expelliarmus `stupefy_a` (5-44), Incendio
+  `incendio_a` (10-30), Bombarda `bombarda_b` (7-40), Protego `protego_a` (1-48),
+  Avada Arcana `ultimate2_b` (12-50), basic chain `combo0_b` (8-30), `combo1_b`
+  (6-28), `combo2_b` (6-34, spine x0.5 in the upper clip). Source FBX files, prompts
+  and the per-clip retarget reports (release frame, reach/lift/side curves) live in
+  `art/hero/motion_fal/`.

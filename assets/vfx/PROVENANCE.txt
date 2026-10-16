@@ -1,8 +1,27 @@
-spell effects source art - PROJECT-ORIGINAL.
-Authored by client/tools/blender/spell_vfx.py running inside Blender 5.2.2
-headless (deterministic seeded numpy fields; re-running the script reproduces
-these files byte-for-byte on the same Blender/numpy build).
-No third-party image was used and no image generator was involved.
-License: project-original (CC0-equivalent dedication by the project).
-flame_01.png / spark_01.png beside this file are the Kenney Particle Pack
-ingredients (CC0, Kenney-License.txt) and are used as particle sprites only.
+spell effects source art - provenance (updated 2026-10-16)
+
+GENERATED (spell flipbooks and stills):
+  atlases/fire_burst, flame_loop, smoke_puff, explosion, burst_gold, burst_red,
+  burst_crimson, burst_green, ripple_blue, shockwave, wand_flash, spark_burst,
+  energy_orb, fire_orb (8x8 flipbooks) were generated with fal.ai Wan 3.0
+  text-to-video (alibaba/wan-3.0/text-to-video) on a pure black background;
+  tex/rune_seal, star_flare, lightning_strands were generated with fal.ai
+  Z-Image Turbo (fal-ai/z-image/turbo). Prompts and the raw clips/stills are in
+  art/vfx/ (README.md, source/). client/tools/vfx/build_spell_vfx.py keys the
+  black background to alpha, packs the frames (4 px zero gutter, straight alpha,
+  row-major) and registers them in metadata.json. Generated output; commercial
+  use is permitted under the fal.ai terms of the generating account. No
+  third-party image or effect pack was used as an input.
+
+PROJECT-ORIGINAL (procedural):
+  tex/hex_shield, scorch_decal, energy_streak - client/tools/vfx/procedural_textures.py
+  (seeded, deterministic).
+  tex/soft_glow, noise_flow, noise_erosion, distortion, shield_fracture and
+  atlases/ground_marks, rune_masks - authored by client/tools/blender/spell_vfx.py
+  running inside Blender 5.2.2 headless (deterministic seeded numpy fields).
+  meshes/ - client/tools/blender/spell_meshes.py.
+  License: project-original (CC0-equivalent dedication by the project).
+
+INGREDIENTS:
+  flame_01.png / spark_01.png beside this file are the Kenney Particle Pack
+  ingredients (CC0, Kenney-License.txt) and are used as particle sprites only.

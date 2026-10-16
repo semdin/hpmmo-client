@@ -135,6 +135,8 @@ func _check_inventory() -> void:
 		var text := FileAccess.get_file_as_string(provenance_path)
 		check(text.contains("PROJECT-ORIGINAL") and text.contains("spell_vfx.py"),
 			"VFX provenance names the script that authored the art")
+		check(text.contains("GENERATED") and text.contains("build_spell_vfx.py") and text.contains("fal.ai"),
+			"VFX provenance names the generator and the packer of the spell flipbooks")
 
 
 ## The published atlas metadata must describe the file that actually ships:
@@ -152,7 +154,14 @@ func _check_atlas_metadata() -> void:
 		check(texture != null, "%s loads as a texture" % id)
 		if texture == null:
 			continue
-		var image := texture.get_image()
+		# Read the shipped PNG itself: the import is VRAM-compressed (block
+		# formats cannot be sampled per pixel), and the PNG is what the packer
+		# wrote and what every mip level is built from.
+		var image := Image.load_from_file(ProjectSettings.globalize_path(path))
+		if image == null:
+			image = texture.get_image()
+			if image.is_compressed():
+				image.decompress()
 		var sheet: Array = entry.get("sheet_px", [0, 0])
 		check(image.get_width() == int(sheet[0]) and image.get_height() == int(sheet[1]),
 			"%s is %dx%d as published" % [id, image.get_width(), image.get_height()])
@@ -569,13 +578,13 @@ func _check_effect_behaviour() -> void:
 	# stun indicator is the case that shows it: a halo 1.9 m over the head.
 	var mark = SkillFX.spawn_stage(world, "stupefy", "sustain", probe.global_position + Vector3.UP * 1.9,
 		Vector3.UP, null, {"follow_target": probe})
-	var rune := _layer_node(mark, "vfx_rune_masks")
-	check(rune != null, "The stun indicator builds its rune mask")
+	var rune := _layer_node(mark, "vfx_rune_seal")
+	check(rune != null, "The stun indicator builds its rune seal")
 	if rune != null:
 		var rune_mat := rune.mesh.surface_get_material(0) as ShaderMaterial
 		await get_tree().create_timer(0.35).timeout
-		check(int(round(float(rune_mat.get_shader_parameter("frame")))) == 1,
-			"The stun rune holds its authored cell (no slide to another picture)")
+		check(int(round(float(rune_mat.get_shader_parameter("frame")))) == 0,
+			"The stun rune holds its single picture (no slide through a sheet)")
 		check(absf(rune.global_position.y - probe.global_position.y - 1.9) < 0.01,
 			"The stun halo is still 1.9 m over its target (%.2f m)" % (rune.global_position.y - probe.global_position.y))
 		probe.global_position += Vector3(3.0, 0.0, 0.0)
@@ -647,7 +656,7 @@ func _check_wand_bolts() -> void:
 	var original := QualityPreset.current()
 	for preset in ["low", "high"]:
 		QualityPreset.forced(preset)
-		for spell in ["basic_cast", "stupefy"]:
+		for spell in ["basic_cast", "stupefy", "bombarda", "expelliarmus", "ultimate"]:
 			var projectile = preload("res://scenes/spells/spell_projectile.tscn").instantiate()
 			world.add_child(projectile)
 			projectile.global_position = Vector3(17, 80, -23)
@@ -655,13 +664,20 @@ func _check_wand_bolts() -> void:
 			projectile.setup(null, spell, Vector3.RIGHT)
 			projectile.set_physics_process(false)
 			check(not projectile.mesh.visible, "%s/%s has no solid carrier" % [spell, preset])
+			var tail: Node3D = projectile.travel_effect
 			var ribbon: MeshInstance3D = null
 			var motes: GPUParticles3D = null
-			for child in projectile.travel_effect.get_children():
+			for child in tail.get_children():
 				if child is MeshInstance3D and child.mesh is ImmediateMesh:
 					ribbon = child
 				if child is GPUParticles3D:
 					motes = child
+			# The bolt's heart is a looping generated orb flipbook.
+			var core := _layer_node(tail, "vfx_fire_orb" if spell == "bombarda" else "vfx_energy_orb")
+			check(core != null, "%s/%s builds its looping orb core" % [spell, preset])
+			var first_frame := -1.0
+			if core != null:
+				first_frame = float((core.mesh.surface_get_material(0) as ShaderMaterial).get_shader_parameter("frame"))
 			for step in range(5):
 				projectile.global_position += Vector3.RIGHT * 0.4
 				await get_tree().process_frame
@@ -671,29 +687,28 @@ func _check_wand_bolts() -> void:
 				var vertices: PackedVector3Array = ribbon.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 				check(not vertices.is_empty() and vertices[0].distance_to(projectile.global_position) < 1.0,
 					"%s/%s trail reaches its actual projectile" % [spell, preset])
+			if core != null:
+				check(core.global_position.distance_to(projectile.global_position) < 0.6,
+					"%s/%s orb rides its projectile" % [spell, preset])
 			if preset == "high":
 				check(motes != null and not motes.one_shot, "%s motes emit throughout flight" % spell)
 			else:
+				check(motes == null, "%s/low drops the optional motes" % spell)
 				check(not projectile.light.visible, "%s low quality disables carrier light" % spell)
-			if spell == "stupefy":
-				var tail: Node3D = projectile.travel_effect
-				var energy := tail.get_node_or_null("StupefyEnergy")
-				check(energy != null and energy.get_node("HelicalFilaments").mesh.get_surface_count() > 0,
-					"Stupefy/%s builds its moving 3D filaments" % preset)
-				# Reflection changes the next frame's axis without losing the history.
-				projectile.direction = Vector3.UP
+			# A reflected bolt changes axis without losing its heart or its wake.
+			projectile.direction = Vector3.UP
+			for step in range(3):
+				projectile.global_position += Vector3.UP * 0.4
 				await get_tree().process_frame
-				await get_tree().process_frame
-				check(energy != null and energy.direction.is_equal_approx(Vector3.UP),
-					"Stupefy/%s filaments follow a reflected vertical aim" % preset)
-				projectile._handle_hit(null)
-				await get_tree().process_frame
-				check(is_instance_valid(tail) and tail.get_parent() == world and not energy.get_node("TurbulentHeart").visible,
-					"Stupefy/%s leaves only a fading tail after collision" % preset)
-				await get_tree().create_timer(0.32).timeout
-				check(not is_instance_valid(tail), "Stupefy/%s retires its tail without orphan nodes" % preset)
-			else:
-				projectile.queue_free()
+			if core != null:
+				check(core.global_position.distance_to(projectile.global_position) < 0.6,
+					"%s/%s orb follows a reflected vertical aim" % [spell, preset])
+			projectile._handle_hit(null)
+			await get_tree().process_frame
+			check(is_instance_valid(tail) and tail.get_parent() == world and (core == null or not core.visible),
+				"%s/%s leaves only a fading wake after collision" % [spell, preset])
+			await get_tree().create_timer(0.32).timeout
+			check(not is_instance_valid(tail), "%s/%s retires its wake without orphan nodes" % [spell, preset])
 			await get_tree().process_frame
 	QualityPreset.forced(original)
 
@@ -702,44 +717,48 @@ func _check_spell_signatures() -> void:
 	var original := QualityPreset.current()
 	for preset in ["low", "high"]:
 		QualityPreset.forced(preset)
-		for spell in ["bombarda", "expelliarmus", "ultimate"]:
-			var projectile = preload("res://scenes/spells/spell_projectile.tscn").instantiate()
-			world.add_child(projectile)
-			projectile.global_position = Vector3(17, 80, -23)
-			projectile.visual_only = true
-			projectile.setup(null, spell, Vector3.RIGHT)
-			projectile.set_physics_process(false)
-			var tail: Node3D = projectile.travel_effect
-			var signature = tail.get_node("SpellSignature")
-			check(not projectile.mesh.visible, "%s/%s has no solid carrier" % [spell, preset])
-			for step in range(5):
-				projectile.global_position += Vector3.RIGHT * 0.5
-				await get_tree().process_frame
-			var geometry: MeshInstance3D = signature.get_node("SignatureGeometry")
-			var vertices: PackedVector3Array = geometry.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
-			check(vertices.size() > 20 and geometry.global_transform.is_equal_approx(Transform3D.IDENTITY),
-				"%s/%s draws its signature in world space" % [spell, preset])
-			projectile.direction = Vector3.UP
-			await get_tree().process_frame
-			await get_tree().process_frame
-			check(signature.direction.is_equal_approx(Vector3.UP), "%s/%s supports reflected aim" % [spell, preset])
-			projectile._handle_hit(null)
-			await get_tree().process_frame
-			check(is_instance_valid(tail) and tail.get_parent() == world and not signature.get_node("SignatureCore").visible,
-				"%s/%s preserves only the fading trail after impact" % [spell, preset])
-			await get_tree().create_timer(0.32).timeout
-			check(not is_instance_valid(tail), "%s/%s frees the retired trail" % [spell, preset])
+		# Every impact shows its own generated burst, never a shared ring.
+		var bursts := {"basic_cast": "vfx_burst_gold", "stupefy": "vfx_burst_red", "incendio": "vfx_fire_burst",
+			"bombarda": "vfx_explosion", "expelliarmus": "vfx_burst_crimson", "ultimate": "vfx_burst_green",
+			"protego": "vfx_ripple_blue"}
+		for spell in bursts:
+			var impact := SkillFX.spawn_stage(world, spell, "impact", Vector3(17, 80, -23), Vector3.RIGHT,
+				null, {"target_position": Vector3(17, 80, -23)})
+			var burst := _layer_node(impact, String(bursts[spell]))
+			check(burst != null, "%s/%s impact plays its own burst (%s)" % [spell, preset, bursts[spell]])
+			if burst != null:
+				var mat := burst.mesh.surface_get_material(0) as ShaderMaterial
+				var start := float(mat.get_shader_parameter("frame"))
+				await get_tree().create_timer(0.12).timeout
+				check(float(mat.get_shader_parameter("frame")) > start, "%s/%s burst walks its flipbook" % [spell, preset])
+			impact.queue_free()
+		# A blast's ground ring is laid flat and sized to the gameplay radius.
 		for spell in ["bombarda", "ultimate"]:
 			var impact := SkillFX.spawn_stage(world, spell, "impact", Vector3(17, 80, -23), Vector3.RIGHT)
-			check(is_equal_approx(impact.get_node("SpellSignature").radius, float(GameData.SPELLS[spell]["radius"])),
-				"%s/%s blast uses the gameplay radius" % [spell, preset])
+			var ring := _layer_node(impact, "vfx_shockwave")
+			var radius := float(GameData.SPELLS[spell]["radius"])
+			var quad_size := 0.0
+			if ring != null:
+				quad_size = (ring.mesh as QuadMesh).size.x * ring.scale.x
+			check(ring != null and absf(quad_size - radius * 2.0) < 0.05,
+				"%s/%s shockwave covers the gameplay radius (%.1f m across, radius %.1f)" % [spell, preset, quad_size, radius])
 			impact.queue_free()
+		# Incendio's cone: fire bursts marching down the aim, never outside the
+		# gameplay angle, fewer of them at low quality.
 		var cone := SkillFX.spawn_stage(world, "incendio", "cast", Vector3(17, 80, -23), Vector3.RIGHT)
-		var fire = cone.get_node("SpellSignature")
+		var flames: Array = []
+		var fire_tex: Texture2D = load(VFX.asset_path("vfx_fire_burst"))
+		for child in cone.get_children():
+			if child is MeshInstance3D and (child.mesh.surface_get_material(0) as ShaderMaterial) != null \
+					and (child.mesh.surface_get_material(0) as ShaderMaterial).get_shader_parameter("atlas") == fire_tex:
+				flames.append(child)
 		var bounded := true
-		for axis in fire._cone_directions:
-			bounded = bounded and Vector3.RIGHT.angle_to(axis) <= deg_to_rad(float(GameData.SPELLS.incendio.cone_angle) * 0.5) + 0.001
-		check(bounded and fire._flames.size() == (6 if preset == "low" else 10), "Incendio/%s keeps its cone silhouette within the gameplay angle" % preset)
+		for flame in flames:
+			var offset: Vector3 = flame.global_position - Vector3(17, 80, -23)
+			bounded = bounded and offset.length() > 0.5 \
+				and Vector3.RIGHT.angle_to(offset) <= deg_to_rad(float(GameData.SPELLS.incendio.cone_angle) * 0.5) + 0.001
+		check(bounded and flames.size() >= 2 and flames.size() <= (3 if preset == "low" else 6),
+			"Incendio/%s keeps its cone of %d bursts within the gameplay angle" % [preset, flames.size()])
 		cone.queue_free()
 		await get_tree().process_frame
 	QualityPreset.forced(original)
@@ -1040,7 +1059,7 @@ func _check_no_missing_resources() -> void:
 	for shader_path in ["res://assets/shaders/spell_layer.gdshader",
 			"res://assets/shaders/spell_layer_add.gdshader",
 			"res://assets/shaders/spell_ribbon.gdshader", "res://assets/shaders/wand_energy.gdshader",
-			"res://assets/shaders/stupefy_plasma.gdshader", "res://assets/shaders/stupefy_filament.gdshader", "res://assets/shaders/spell_signature.gdshader", "res://assets/shaders/ward_surface.gdshader"]:
+			"res://assets/shaders/ward_surface.gdshader"]:
 		if not ResourceLoader.exists(shader_path):
 			missing.append(shader_path)
 	check(missing.is_empty(), "Every resource the effects reference resolves (%d missing)" % missing.size())
@@ -1049,11 +1068,11 @@ func _check_no_missing_resources() -> void:
 	for shader_path in ["res://assets/shaders/spell_layer.gdshader",
 			"res://assets/shaders/spell_layer_add.gdshader",
 			"res://assets/shaders/spell_ribbon.gdshader", "res://assets/shaders/wand_energy.gdshader",
-			"res://assets/shaders/stupefy_plasma.gdshader", "res://assets/shaders/stupefy_filament.gdshader", "res://assets/shaders/spell_signature.gdshader", "res://assets/shaders/ward_surface.gdshader"]:
+			"res://assets/shaders/ward_surface.gdshader"]:
 		var shader: Shader = load(shader_path)
 		if shader != null and shader.get_shader_uniform_list().size() > 0:
 			compiled += 1
-	check(compiled == 8, "All eight effect shaders compile with their uniforms (%d/8)" % compiled)
+	check(compiled == 5, "All five effect shaders compile with their uniforms (%d/5)" % compiled)
 	for key in sound_library.get("sounds", {}):
 		var path := "res://" + String((sound_library["sounds"][key] as Dictionary).get("path", ""))
 		if not ResourceLoader.exists(path):

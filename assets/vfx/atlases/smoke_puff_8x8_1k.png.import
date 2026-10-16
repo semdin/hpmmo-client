@@ -2,20 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://mxl47r2mw4hn"
-path="res://.godot/imported/energy_impact_8x8_2k.png-811558d5eb222fea7ac0c49a267e3bcc.ctex"
+uid="uid://bveklqos0wid0"
+path.s3tc="res://.godot/imported/smoke_puff_8x8_1k.png-ca309e3f5ca88359839f397418239529.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://assets/vfx/atlases/energy_impact_8x8_2k.png"
-dest_files=["res://.godot/imported/energy_impact_8x8_2k.png-811558d5eb222fea7ac0c49a267e3bcc.ctex"]
+source_file="res://assets/vfx/atlases/smoke_puff_8x8_1k.png"
+dest_files=["res://.godot/imported/smoke_puff_8x8_1k.png-ca309e3f5ca88359839f397418239529.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -37,4 +38,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

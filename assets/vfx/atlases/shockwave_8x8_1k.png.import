@@ -2,20 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dv0xr60gjamde"
-path="res://.godot/imported/flame_loop_8x8_2k.png-65ce37fe6f5d428ab118d8fcdd53fdee.ctex"
+uid="uid://s538s1inpmvv"
+path.s3tc="res://.godot/imported/shockwave_8x8_1k.png-94a6d50cbbf13426f18f42122b4cce2c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://assets/vfx/atlases/flame_loop_8x8_2k.png"
-dest_files=["res://.godot/imported/flame_loop_8x8_2k.png-65ce37fe6f5d428ab118d8fcdd53fdee.ctex"]
+source_file="res://assets/vfx/atlases/shockwave_8x8_1k.png"
+dest_files=["res://.godot/imported/shockwave_8x8_1k.png-94a6d50cbbf13426f18f42122b4cce2c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -37,4 +38,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1
