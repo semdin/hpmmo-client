@@ -118,6 +118,7 @@ func _ready() -> void:
 				near_dormant += 1
 	check(cam != null and far_seen > 50 and far_awake == 0 and near_dormant == 0,
 		"Far creatures stop drawing and posing, near ones stay awake (%d far, %d awake far, %d asleep near)" % [far_seen, far_awake, near_dormant])
+	await _check_m1_systems(player, director, hud)
 	for pack in director.packs:
 		for member in pack.members:
 			check(member.spawn_point.distance_to(member.global_position) < 8, "Spawn anchor is assigned before mob ready")
@@ -392,6 +393,111 @@ func _check_mob_system(director: Node, overlay: Node) -> void:
 			if member.species != String(pack_data.get("mob", "")) or record.get("resist", {}) != member.resist 					or int(SimAuthority.mob_info_of(record).get("level", 0)) != int(pack_data.get("level", -1)):
 				wrong += 1
 	check(wrong == 0, "Spawned pack members (%d) carry species, resistances and level into the authority record" % configured)
+
+## M1 rest: world boss announcements, creature abilities (slam, boulder,
+## kiss + despair, cold aura), Expecto Patronum and the creature voices.
+func _check_m1_systems(player: Node, director: Node, hud: Node) -> void:
+	# --- world boss announcements
+	var boss_pack: Dictionary = {}
+	for pack in director.packs:
+		if String(pack.get("boss_key", "")) == "grak":
+			boss_pack = pack
+	var data: Dictionary = director._world_boss_data(boss_pack) if not boss_pack.is_empty() else {}
+	var heard: Array = []
+	var listener := func(kind: String, d: Dictionary): heard.append([kind, d])
+	SimAuthority.world_event.connect(listener)
+	if not boss_pack.is_empty():
+		boss_pack["timer"] = 30.0
+		boss_pack["announced_soon"] = false
+		director._process(0.01)
+		boss_pack["timer"] = -1.0
+	SimAuthority.world_event.disconnect(listener)
+	check(director._is_world_boss(boss_pack) and String(data.get("name", "")).begins_with("Grak")
+		and String(data.get("region", "")) == "Stone Circle Summit"
+		and heard.size() == 1 and String(heard[0][0]) == "boss_soon" and int(heard[0][1].get("seconds", 0)) == 30,
+		"A world boss is announced realm-wide a minute before it returns %s" % str(heard))
+	var shown: String = hud.show_world_event("boss_slain", {"name": "Grak", "region": "Stone Circle Summit", "killer": "Tester"})
+	check(shown.contains("Grak") and shown.contains("Tester")
+		and hud.world_event_text("boss_spawned", {"name": "Grak", "region": "Stone Circle Summit", "level": 38}).contains("Lv 38"),
+		"The HUD words world boss events (soon / appeared / slain by)")
+
+	# --- creature abilities
+	var troll = null
+	var dementor = null
+	for pack in director.packs:
+		if pack.get("boss", false):
+			continue
+		for member in pack.members:
+			if member.species == "troll_mountain" and troll == null:
+				troll = member
+			if member.species == "dementor" and dementor == null:
+				dementor = member
+	check(troll != null and dementor != null, "A mountain troll and a dementor are on the map")
+	if troll == null or dementor == null:
+		return
+	troll._attack_count = 0
+	var plans: Array = [troll._choose_plan(), troll._choose_plan(), troll._choose_plan()]
+	check(not bool(plans[0].get("telegraph", false)) and String(plans[2].get("id", "")) == "slam" and bool(plans[2].get("telegraph", false)),
+		"Every third troll attack is a telegraphed ground slam")
+	troll._ability_ready_tick.clear()
+	var thrown: Dictionary = troll._ranged_ability(15.0)
+	check(String(thrown.get("id", "")) == "boulder" and bool(thrown.get("at_target", false))
+		and troll._ranged_ability(15.0).is_empty() and troll._ranged_ability(3.0).is_empty(),
+		"A mountain troll throws a boulder at a target out of reach, then waits out its cooldown")
+
+	# --- despair and the cold aura (players are never stunned; regeneration stops)
+	var record: Dictionary = SimAuthority.record_for(player)
+	var stage := _g(250, -150)
+	player.global_position = stage
+	dementor.global_position = stage + Vector3(2.5, 0, 0)
+	dementor.target_player = player
+	player.current_hp = player.max_hp
+	player.is_protego_active = false
+	record["hp"] = player.max_hp
+	record["despair_until_tick"] = 0
+	record["ward_until_tick"] = 0
+	var hp_before := int(record.get("hp", 0))
+	SimAuthority._tick_creature_auras()
+	var chilled: bool = int(record.get("despair_until_tick", 0)) > SimAuthority.sim_tick and int(record.get("hp", 0)) < hp_before
+	player.current_hp = player.max_hp - 100
+	record["hp"] = player.current_hp
+	SimAuthority._tick_regeneration()
+	var held: bool = int(record.get("hp", 0)) <= int(player.max_hp) - 100
+	check(chilled and held, "A fighting dementor's aura chills nearby players and despair stops their regeneration")
+	dementor.target_player = null
+	dementor.global_position = dementor.spawn_point
+	record["despair_until_tick"] = 0
+	var kiss: Dictionary = (dementor.abilities[0] as Dictionary)
+	check(String(kiss.get("id", "")) == "kiss" and bool(kiss.get("at_target", false)) and float(kiss.get("despair_s", 0.0)) > 0.0
+		and float(kiss.get("drain", 0.0)) > 0.0, "The dementor's kiss is a dodgeable, draining, despairing strike")
+
+	# --- Expecto Patronum
+	check(HPRules.damage_after_resistances(100, "patronum", false, HPRules.mob_resist("dementor")) == 300
+		and HPRules.damage_after_resistances(100, "patronum", false, HPRules.mob_resist("troll_forest")) == 50
+		and HPRules.spell_required_level("patronum") == 40 and HPRules.spell_banishes("patronum", "dementor"),
+		"Patronum: triple damage to dementors, half to others, level 40, banishes dementors")
+	var saved_level := int(player.level)
+	player.level = 10
+	var refused: Dictionary = SimAuthority.cast_for_record(record, "patronum", stage + Vector3(0, 0, -5), 9001)
+	player.level = saved_level
+	check(String(refused.get("reason", refused.get("reject", ""))) == HPProtocol.REJECT_LEVEL or str(refused).contains(HPProtocol.REJECT_LEVEL),
+		"The authority refuses Patronum below level 40 %s" % str(refused))
+	dementor._begin_attack(kiss.duplicate(true).merged({"telegraph": true}))
+	var winding: bool = dementor.attack_phase == dementor.AttackPhase.ANTICIPATION
+	SimAuthority._apply_status_on_hit(SimAuthority.record_for(dementor), "patronum", record)
+	check(winding and dementor.attack_phase == dementor.AttackPhase.NONE
+		and not SimAuthority.record_for(dementor).has("telegraph"), "A Patronum hit breaks a dementor's kiss mid-windup")
+	check(HudActionBar.SPELLS.any(func(spec): return spec[0] == "patronum" and spec[1] == "5")
+		and InputMap.has_action("spell_5") and UITheme.spell_icon("patronum") != null,
+		"Patronum sits on the action bar under 5 with its icon")
+
+	# --- voices
+	var voices_ok := true
+	for key in ["troll_alert", "troll_attack", "troll_death", "troll_move_1", "dementor_alert", "dementor_attack",
+			"dementor_death", "dementor_move_1", "spell_patronum_cast", "spell_patronum_impact"]:
+		voices_ok = voices_ok and AudioManager.has_sound(key)
+	check(voices_ok and troll._voice_family() == "troll" and dementor._voice_family() == "dementor",
+		"Trolls and dementors speak with their own voices")
 
 ## House standing: quest reputation -> rank 1..7, shown on the HUD, persisted in
 ## the `quests` object, and able to gate a spell on the authority.

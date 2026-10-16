@@ -134,7 +134,13 @@ Tümü mevcut **anticipation → release → recovery** + "release tick'i sunucu
 > **Grak** (Taş Çember, Sv 38) ve **Azkaban Gardiyanı** (Warden's Barrow, Sv 50) world boss olarak doğuyor
 > (10-15 dk respawn, trol/ruh emici saldırı desenleri). Minimapte av bölgeleri seviye renginde halka.
 > Uzak yaratıklar (>120 m) çizilmiyor/animasyonsuz (iGPU). Harita: `art/creatures/m1_hunting_map.png`.
-> **Kalanlar:** world boss duyurusu, yeni yetenek türleri (yere vurma, kaya
+> **M1 tamam (2026-10-16):** world boss duyurusu (1 dk kala / doğdu / kesildi, tüm diyara), trol yere vurma
+> (her 3. saldırı) + kaya fırlatma (7-22 m, hedefe kilitli, 9 sn), ruh emici Öpücük (kaçılabilir, can emer,
+> 6 sn Umutsuzluk) + soğuk aura (savaşta, 6 m), **Expecto Patronum** (5 tuşu, Sv 40, ruh emicilere ×3,
+> Öpücüğü keser), trol/ruh emici/Patronum sesleri (ElevenLabs). Oyuncular sersemletilmez kuralı korundu:
+> ruh emicinin tutuşu "Umutsuzluk" (can yenilenmesi durur).
+> **Ertelenen:** gece/gündüz farkı, ruh emici pelerin shader'ı + sis partikülü.
+> **Eski kalanlar listesi:** yeni yetenek türleri (yere vurma, kaya
 > fırlatma, Öpücük, aura), Expecto Patronum, gece/gündüz, trol/ruh emici sesleri (şimdilik inferi sesleri),
 > ruh emici pelerin shader'ı + sis partikülü.
 

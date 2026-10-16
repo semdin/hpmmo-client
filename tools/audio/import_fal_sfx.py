@@ -1,4 +1,4 @@
-"""Import generated spell SFX (fal.ai ElevenLabs Sound Effects v2) into the game.
+"""Import generated spell and creature SFX (fal.ai ElevenLabs Sound Effects v2) into the game.
 
 Source WAVs live in art/audio_fal/<sound_library key>.wav with their prompts in
 art/audio_fal/sfx_spec.json. For each key this writes the file the sound
@@ -107,13 +107,13 @@ def main():
         entry["source"] = "fal.ai %s (ElevenLabs Sound Effects v2); art/audio_fal/%s.wav" % (spec["model"], key)
         done.append(key)
     library["generated"] = "2026-10-16"
-    library["provenance"] = ("spell effects (spell_*): generated with ElevenLabs Sound Effects v2 via fal.ai "
+    library["provenance"] = ("spell effects (spell_*) and creature cues (troll_*, dementor_*): generated with ElevenLabs Sound Effects v2 via fal.ai "
         "(fal-ai/elevenlabs/sound-effects/v2), prompts in art/audio_fal/sfx_spec.json, imported by "
         "client/tools/audio/import_fal_sfx.py. Everything else: project-original synthesis "
         "(client/tools/audio/synth_spell_sfx.py, deterministic seeded DSP); the music beds are original "
         "synthesised arrangements of public-domain classical works (Grieg, Pachelbel, Bach, Beethoven, Satie - "
         "all d. 1925 or earlier).")
-    library["license"] = ("spell_* files: generated output, commercial use permitted under the ElevenLabs / fal.ai "
+    library["license"] = ("spell_*, troll_* and dementor_* files: generated output, commercial use permitted under the ElevenLabs / fal.ai "
         "terms of the generating account; everything else project-original (CC0-equivalent dedication by the project)")
     with open(lib_path, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(library, fh, indent=1, ensure_ascii=False)

@@ -5,7 +5,7 @@
  "notes": "Asset audit manifest. The audit tools are retired: their input (tools/downloads/asset-audit.json) was removed with the downloaded candidate packs, so this document is hand-maintained. Every local_paths / license_file entry names a file that exists. `status: missing` means the asset is planned and not yet produced; `rejected` holds packs that were evaluated and not adopted. Measured fields (scale_m, triangles, sha256) come from the retired tools and from re-measurement on disk. | the spell effects (2026-10-05): every missing VFX inventory item is now project-original art authored by tools/blender/spell_vfx.py (four coherent 64-frame flipbooks, ripple/rune/mark/lightning atlases, glow/noise/flow/distortion/streak/fracture textures) and tools/blender/spell_meshes.py (trail ribbon, shield shell, projectile core, shards); the whole sound library is original synthesis from tools/audio/synth_spell_sfx.py. The two Kenney stills remain as particle ingredients, not effects. No VFX or audio entry remains missing or placeholder. | spell effects regenerated (2026-10-16): the spell flipbooks and stills are generated (fal.ai Wan 3.0 text-to-video clips and Z-Image Turbo stills on black, packed by tools/vfx/build_spell_vfx.py; hex lattice, scorch and streak procedural) and the spell sounds are generated (ElevenLabs Sound Effects v2 via fal.ai, imported by tools/audio/import_fal_sfx.py). Noise fields, masks and meshes stay tools/blender/spell_vfx.py / spell_meshes.py; every other sound stays original synthesis.",
  "summary": {
   "candidate": 31,
-  "integrated": 127,
+  "integrated": 141,
   "placeholder": 3,
   "missing": 8
  },
@@ -4270,6 +4270,7 @@
     "assets/ui/icons/icon_minimap_player.png",
     "assets/ui/icons/icon_minimap_zoom_in.png",
     "assets/ui/icons/icon_minimap_zoom_out.png",
+    "assets/ui/icons/icon_patronum.png",
     "assets/ui/icons/icon_pendant_apprentice.png",
     "assets/ui/icons/icon_potion_health.png",
     "assets/ui/icons/icon_potion_mana.png",
@@ -4286,6 +4287,7 @@
     "assets/ui/icons/icon_stat_mana.png",
     "assets/ui/icons/icon_status_burn.png",
     "assets/ui/icons/icon_status_dead.png",
+    "assets/ui/icons/icon_status_despair.png",
     "assets/ui/icons/icon_status_enraged.png",
     "assets/ui/icons/icon_status_mounted.png",
     "assets/ui/icons/icon_status_stun.png",
@@ -4367,6 +4369,7 @@
     "assets/ui/icons/icon_minimap_player.png": "331405232a70fb4a1c994d57a962a236c7af633b28b858ce20754b97afbbe00e",
     "assets/ui/icons/icon_minimap_zoom_in.png": "83c7b896b4b784c29439a9cd35b61e99e2037f9b7967ad5b88ff8e70cfd2a50f",
     "assets/ui/icons/icon_minimap_zoom_out.png": "96ba7feff5d8ef4f4b2c2f4eb34beaa58d48b4d3e531c6a56ee610a795f9b819",
+    "assets/ui/icons/icon_patronum.png": "36df32bb3a30d3d29895ca1baf88fd32e750eb9dd266dd71923ca6ccbeb56efd",
     "assets/ui/icons/icon_pendant_apprentice.png": "cf06d055ad3a14c894f439fddf8dc5782b8209ebbf58bc263d94b40547728ed0",
     "assets/ui/icons/icon_potion_health.png": "27709f9533a640b34868555aa557b4cdc1334ce87bc5224381748e89da25b889",
     "assets/ui/icons/icon_potion_mana.png": "0d2964a8802d560e063decaedbd6dca28b09deb3af8da77d08b5141fbcb45cee",
@@ -4383,6 +4386,7 @@
     "assets/ui/icons/icon_stat_mana.png": "6e4e4b4ae43ffa20ec487b0e35d722fdfbc0c7ebdef950d094b6582b245b723c",
     "assets/ui/icons/icon_status_burn.png": "a7adf45cfa22fbc7645a8b52d4837a8ac7d0e2b671052cdc25db887e77333158",
     "assets/ui/icons/icon_status_dead.png": "630b5ec4f8c5175a886bc50f6152664b52622ce4d575a204fbf5bed9b2819d61",
+    "assets/ui/icons/icon_status_despair.png": "cd37dffca365fe0683d8723ec1672c737b8ff7509866a2c39f22a1b83e5c8aa3",
     "assets/ui/icons/icon_status_enraged.png": "c28d13fd98ad39a286a7e0a08697407955de10b95d486b0c831879cc6663c213",
     "assets/ui/icons/icon_status_mounted.png": "a50fe6ab6ead25255a26c3b5d3c96164798b31644fb3c8e8deec82c74ee862f7",
     "assets/ui/icons/icon_status_stun.png": "dbcf719b8f3435babbe0ac44224fd2187777d3b9b0ded7ff3618acc97cc4a156",
@@ -5258,9 +5262,9 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "Two minor stat slips: (1) ceiling_tile measures 4x4x0.35 units, so the 'tile thickness 0.15' note holds for floors but not the ceiling; (2) provenance cannot be hash-pinned to a public mirror (archive deleted; the GitHub mirror is v1.0), though the in-archive 1.1 CC0 license and the live itch page are consistent. Neither affects licensing or file validity. Repo side verified exact: assets/models/environment holds exactly 44 KayKit models (all walls/banners/pillars/chest/torch \u2014 no stairs/floors/railings/furniture) and wall.gltf.glb measures 4x4x1.0."
+    "note": "Two minor stat slips: (1) ceiling_tile measures 4x4x0.35 units, so the 'tile thickness 0.15' note holds for floors but not the ceiling; (2) provenance cannot be hash-pinned to a public mirror (archive deleted; the GitHub mirror is v1.0), though the in-archive 1.1 CC0 license and the live itch page are consistent. Neither affects licensing or file validity. Repo side verified exact: assets/models/environment holds exactly 44 KayKit models (all walls/banners/pillars/chest/torch — no stairs/floors/railings/furniture) and wall.gltf.glb measures 4x4x1.0."
    },
-   "gaps": "No animations, no skins, no LODs, no collision meshes, no damage/wear variants (those are the paid EXTRA tier). IMPORTANT: this 1.1 release ships its own 1024x1024 atlas (dungeon_texture.png, sha256 ceb331d6\u2026) that differs from the atlas the repo's existing KayKit files reference (assets/models/environment/wall_dungeon_texture.png, 15,794 B, sha256 f9ae1825\u2026) \u2014 the new pieces must be imported with this 1.1 atlas (each .gltf references 'dungeon_texture.png' relatively, so keep it beside them), or the whole Dungeon family should be re-imported from 1.1 so everything shares one material; otherwise expect UV/colour mismatch. KayKit's module is 4 units (not metres), so the art-audit unit decision applies: at the repo's current root_scale=1.0 the standard stair rises 5.1 units, and a 1.75-1.90 m character needs the agreed global scale. Does NOT include: potted plants, a suit of armour, a real multi-arm chandelier, or benches. Each .gltf needs its same-named .bin buffer beside it."
+   "gaps": "No animations, no skins, no LODs, no collision meshes, no damage/wear variants (those are the paid EXTRA tier). IMPORTANT: this 1.1 release ships its own 1024x1024 atlas (dungeon_texture.png, sha256 ceb331d6…) that differs from the atlas the repo's existing KayKit files reference (assets/models/environment/wall_dungeon_texture.png, 15,794 B, sha256 f9ae1825…) — the new pieces must be imported with this 1.1 atlas (each .gltf references 'dungeon_texture.png' relatively, so keep it beside them), or the whole Dungeon family should be re-imported from 1.1 so everything shares one material; otherwise expect UV/colour mismatch. KayKit's module is 4 units (not metres), so the art-audit unit decision applies: at the repo's current root_scale=1.0 the standard stair rises 5.1 units, and a 1.75-1.90 m character needs the agreed global scale. Does NOT include: potted plants, a suit of armour, a real multi-arm chandelier, or benches. Each .gltf needs its same-named .bin buffer beside it."
   },
   {
    "id": "kaykit-furniture-bits-1.0",
@@ -5580,7 +5584,7 @@
     "adversarially_verified": true,
     "note": "Full-kit entry count ('406 entries') and the site's '75 assets' label can no longer be reconciled since the zip was deleted; not material to the kept files."
    },
-   "gaps": "Different art style from KayKit (flat-shaded stone with a single shared colormap, no gradient atlas) \u2014 the plan's 'avoid mixing styles' rule applies, so treat these as alternates, not mix-ins. Tiny module: the stair is 0.67 units tall, so it needs a scale decision, and the wall segments do not match the KayKit 4-unit grid. No animations/LODs/collision. Textures/colormap.png must stay in its subfolder or the GLBs lose their texture."
+   "gaps": "Different art style from KayKit (flat-shaded stone with a single shared colormap, no gradient atlas) — the plan's 'avoid mixing styles' rule applies, so treat these as alternates, not mix-ins. Tiny module: the stair is 0.67 units tall, so it needs a scale decision, and the wall segments do not match the KayKit 4-unit grid. No animations/LODs/collision. Textures/colormap.png must stay in its subfolder or the GLBs lose their texture."
   },
   {
    "id": "kenney-furniture-kit",
@@ -5648,7 +5652,7 @@
     "adversarially_verified": true,
     "note": "Scale claim is wrong: pottedPlant.glb renders ~0.54 units tall (raw accessor 0.536; root node scale 2x over a nested 0.5x plant node), not '0.12 units'. The 0.12 figure is the plant sub-mesh alone. plantSmall1-3 render ~0.14 units. Assets still valid; only the scale note needs fixing before the manifest uses it."
    },
-   "gaps": "Totally different look from KayKit: flat untextured colour, clean/modern rather than castle-carved, and the models are very small in raw units (pottedPlant is 0.12 units tall) so they must be scaled. No textures at all (0 images) means no shared atlas and no PBR \u2014 plan the material setup. No animations/LODs/collision. If plants must match the KayKit atlas look, use these only as a stand-in until a KayKit-style plant is authored."
+   "gaps": "Totally different look from KayKit: flat untextured colour, clean/modern rather than castle-carved, and the models are very small in raw units (pottedPlant is 0.12 units tall) so they must be scaled. No textures at all (0 images) means no shared atlas and no PBR — plan the material setup. No animations/LODs/collision. If plants must match the KayKit atlas look, use these only as a stand-in until a KayKit-style plant is authored."
   },
   {
    "id": "kenney-impact-sounds",
@@ -5952,7 +5956,7 @@
     "adversarially_verified": true,
     "note": "None."
    },
-   "gaps": "No ambience or loops; only short one-shots (no long tails for large spells); no magic-specific whoosh/zap/chime \u2014 spell cast must be assembled from these layers plus UI sounds."
+   "gaps": "No ambience or loops; only short one-shots (no long tails for large spells); no magic-specific whoosh/zap/chime — spell cast must be assembled from these layers plus UI sounds."
   },
   {
    "id": "kenney-rpg-audio",
@@ -6652,7 +6656,7 @@
     "adversarially_verified": true,
     "note": "CC-BY-3.0 is permissive with attribution. Corrected: the required credit is the original creator Jonathan Shaw (InspectorJ) per the source page; the local receipt was rewritten accordingly."
    },
-   "gaps": "License is CC-BY-3.0, NOT CC0 \u2014 shipping requires visible credit to AntumDeluge (recorded in LICENSE.txt); no license file ships from the site; loop seam not verified in a WAV editor; no other ambiences in this pack."
+   "gaps": "License is CC-BY-3.0, NOT CC0 — shipping requires visible credit to AntumDeluge (recorded in LICENSE.txt); no license file ships from the site; loop seam not verified in a WAV editor; no other ambiences in this pack."
   },
   {
    "id": "para-animated-particle-fx-1",
@@ -6921,7 +6925,7 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "One stat is wrong: the report says '54 nodes'; the GLB actually has 86 nodes (54 is KayKit's node count, likely copied across). Everything else in this candidate is accurate. Preview file named preview.jpg is really a PNG (magic 89 50 4E 47) \u2014 see category-level note."
+    "note": "One stat is wrong: the report says '54 nodes'; the GLB actually has 86 nodes (54 is KayKit's node count, likely copied across). Everything else in this candidate is accurate. Preview file named preview.jpg is really a PNG (magic 89 50 4E 47) — see category-level note."
    },
    "gaps": "No textures at all (11 flat materials; the original pack's texture atlas is not in the Poly Pizza conversion, though UVs and TEXCOORD_0 exist); no dedicated spellcast clip (melee/gun clips only); no LODs, no collision, no root motion; conversion duplicates the skin 5x (one per mesh) and 5 identical 62-joint skins must be merged before production use; textured original is Quaternius 'Ultimate Modular Men' whose Google Drive link is quota-blocked (manual); shoe/prop sockets not verified.",
    "acceptance": "tools/downloads/asset-review-neutral-hero-adventurer.png, tools/downloads/asset-review-final-hero-adventurer.png"
@@ -7052,7 +7056,7 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "The gaps field says '2 duplicated skins' \u2014 actually there are 4 identical 62-joint skins (Body, Head, Legs, Feet), i.e. the merge cost is double what was stated. Preview.jpg is really a PNG. Otherwise accurate."
+    "note": "The gaps field says '2 duplicated skins' — actually there are 4 identical 62-joint skins (Body, Head, Legs, Feet), i.e. the merge cost is double what was stated. Preview.jpg is really a PNG. Otherwise accurate."
    },
    "gaps": "Untextured (flat materials, UVs present); Sword mesh is a separate NON-skinned mesh (must be socketed to a hand bone manually); 2 duplicated skins; no spellcast clip; no LODs/collision/root motion; same Google-Drive-blocked textured original as the male Adventurer.",
    "acceptance": "tools/downloads/asset-review-neutral-hero-hooded.png, tools/downloads/asset-review-final-hero-hooded.png"
@@ -7319,7 +7323,7 @@
    "status": "candidate",
    "author": "Quaternius (quaternius.com)",
    "source_url": "https://quaternius.itch.io/universal-animation-library",
-   "license": "CC0 1.0 Universal (Public Domain Dedication) \u2014 license text shipped inside the archive",
+   "license": "CC0 1.0 Universal (Public Domain Dedication) — license text shipped inside the archive",
    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
    "license_file": "assets/candidates/character/quaternius-universal-animation-library/License.txt",
    "attribution_required": false,
@@ -7401,9 +7405,9 @@
    "verification": {
     "download_verified": true,
     "adversarially_verified": true,
-    "note": "The itch page advertises '120+ animations' for the library, but the free Standard GLBs actually contain only 43 clips each \u2014 the researcher's 43 is what the downloaded artifact has, but a reader expecting the advertised 120+ from the free tier will be short (the rest sit in the paid Pro/Source tiers). No files are mislabeled; audio/other formats are not needed."
+    "note": "The itch page advertises '120+ animations' for the library, but the free Standard GLBs actually contain only 43 clips each — the researcher's 43 is what the downloaded artifact has, but a reader expecting the advertised 120+ from the free tier will be short (the rest sit in the paid Pro/Source tiers). No files are mislabeled; audio/other formats are not needed."
    },
-   "gaps": "Animation product, not a costumed hero: the included mesh is an untextured mannequin (2 flat materials, no skin/cloth textures, no robe); free Standard tier has 43 clips (the paid Pro tier, $9.99, has the larger set); 65-joint UE5-named rig differs from the 53-joint DEF- base mesh copy on Poly Pizza \u2014 pair it with its own mannequin or retarget deliberately; itch.io has no static URL (download needed a csrf + /download_url + /file/<id> session, reproduced in this run).",
+   "gaps": "Animation product, not a costumed hero: the included mesh is an untextured mannequin (2 flat materials, no skin/cloth textures, no robe); free Standard tier has 43 clips (the paid Pro tier, $9.99, has the larger set); 65-joint UE5-named rig differs from the 53-joint DEF- base mesh copy on Poly Pizza — pair it with its own mannequin or retarget deliberately; itch.io has no static URL (download needed a csrf + /download_url + /file/<id> session, reproduced in this run).",
    "acceptance": "tools/downloads/asset-review-neutral-hero-mannequin.png"
   },
   {
@@ -9209,12 +9213,12 @@
   },
   {
    "id": "kenney-mini-characters",
-   "reason": "0.67 m blocky characters, 7 bones \u2014 fails the art direction",
+   "reason": "0.67 m blocky characters, 7 bones — fails the art direction",
    "source": "kenney.nl"
   },
   {
    "id": "quaternius-animated-base-character",
-   "reason": "Poly Pizza copy lists CC-BY 3.0 while the pack page says CC0 \u2014 license discrepancy; UAL (CC0) covers the same mannequin",
+   "reason": "Poly Pizza copy lists CC-BY 3.0 while the pack page says CC0 — license discrepancy; UAL (CC0) covers the same mannequin",
    "source": "poly.pizza"
   },
   {
