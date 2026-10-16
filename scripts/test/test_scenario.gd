@@ -119,6 +119,8 @@ func _ready() -> void:
 	check(cam != null and far_seen > 50 and far_awake == 0 and near_dormant == 0,
 		"Far creatures stop drawing and posing, near ones stay awake (%d far, %d awake far, %d asleep near)" % [far_seen, far_awake, near_dormant])
 	await _check_m1_systems(player, director, hud)
+	_check_party_book(hud)
+	await _check_dungeon_run(player)
 	for pack in director.packs:
 		for member in pack.members:
 			check(member.spawn_point.distance_to(member.global_position) < 8, "Spawn anchor is assigned before mob ready")
@@ -498,6 +500,127 @@ func _check_m1_systems(player: Node, director: Node, hud: Node) -> void:
 		voices_ok = voices_ok and AudioManager.has_sound(key)
 	check(voices_ok and troll._voice_family() == "troll" and dementor._voice_family() == "dementor",
 		"Trolls and dementors speak with their own voices")
+
+## Party bookkeeping (pure): invitations, founding by acceptance, size cap,
+## leader hand-over on departure, kick/promote rights and the experience bonus.
+func _check_party_book(hud: Node) -> void:
+	var book = preload("res://addons/hpmmo_sim/party.gd").new()
+	var ok := book.invite(1, 2, 0) == "" and not book.accept(2, 10).is_empty()
+	var p: Dictionary = book.party_of(1)
+	ok = ok and int(p.get("leader", 0)) == 1 and (p["members"] as Array) == [1, 2]
+	ok = ok and book.invite(2, 3, 20) == "not_leader" and book.invite(1, 1, 20) == "self"
+	for uid in [3, 4, 5]:
+		book.invite(1, uid, 20)
+		book.accept(uid, 21)
+	ok = ok and book.invite(1, 6, 22) == "party_full" and book.members_of(5).size() == 5
+	ok = ok and book.invite(1, 7, 30) == "party_full"
+	book.invite(9, 8, 0)
+	ok = ok and book.accept(8, book.INVITE_TTL_TICKS + 5).is_empty()
+	var rest: Array = book.leave(1)
+	ok = ok and rest.size() == 4 and int(book.party_of(2).get("leader", 0)) == 2
+	ok = ok and book.kick(3, 4) == "not_leader" and book.kick(2, 4) == "" and book.members_of(2).size() == 3
+	ok = ok and book.promote(2, 3) == "" and int(book.party_of(2).get("leader", 0)) == 3
+	book.leave(2)
+	var last: Array = book.leave(3)
+	ok = ok and last == [5] and book.party_of(5).is_empty()
+	ok = ok and is_equal_approx(book.share_bonus(1), 1.0) and is_equal_approx(book.share_bonus(3), 1.2) and is_equal_approx(book.share_bonus(9), 1.4)
+	check(ok, "Party book: invite/accept founds a party, cap of five, invitations expire, leader hand-over, kick/promote rights, bonus")
+	var record := SimAuthority.player_record(SimNet.local_peer_id)
+	var unknown: Dictionary = SimAuthority.party_command(record, "/frobnicate")
+	var alone: Dictionary = SimAuthority.party_command(record, "/p hello")
+	var nobody: Dictionary = SimAuthority.party_command(record, "/invite NoSuchWizard")
+	check(not bool(unknown.get("handled", true)) and String(alone.get("reply", "")).contains("not in a party")
+		and String(nobody.get("reply", "")).contains("NoSuchWizard") and hud.party_frames != null,
+		"Party commands answer through chat and the HUD carries party frames")
+
+## M2: an instanced dungeon end to end in this (offline) process - entry rules,
+## the private copy, the scripted run (wave -> gate -> boss -> chest), copy
+## ownership by party, the exit and the empty copy's teardown.
+func _wait_map(prefix: String, seconds: float = 8.0) -> String:
+	var waited := 0.0
+	var record := SimAuthority.player_record(SimNet.local_peer_id)
+	while waited < seconds:
+		var map_id := String(record.get("map_id", ""))
+		if map_id.begins_with(prefix) and not world.get_node("MapController").busy:
+			return map_id
+		await get_tree().create_timer(0.1).timeout
+		waited += 0.1
+	return String(record.get("map_id", ""))
+
+func _check_dungeon_run(player: Node) -> void:
+	var record := SimAuthority.player_record(SimNet.local_peer_id)
+	var entry := HPMaps.portal("trial_entry")
+	var c: Array = entry.get("trigger", {}).get("center", [0, 0, 0])
+	var door := Vector3(float(c[0]), float(c[1]), float(c[2]))
+	var saved_level := int(player.level)
+	player.level = 1
+	player.global_position = door
+	var low: Dictionary = SimNet.request_transfer(player, "trial_entry", "dng_trial")
+	check(not bool(low.get("ok", true)) and String(low.get("reason", "")) == HPProtocol.REJECT_LEVEL,
+		"A dungeon refuses characters below its entry level %s" % str(low))
+	player.level = maxi(saved_level, 12)
+	player.global_position = door
+	var asked: Dictionary = SimNet.request_transfer(player, "trial_entry", "dng_trial")
+	var map_id: String = await _wait_map("dng_trial#")
+	var origin := HPMaps.instance_origin(map_id)
+	check(bool(asked.get("ok", false)) and HPMaps.instance_slot(map_id) >= 1 and HPMaps.base_map(map_id) == "dng_trial"
+		and player.global_position.distance_to(HPMaps.spawn_point(map_id, "entry")) < 3.0 and origin.x >= 3000.0,
+		"The party leader's entry opens a private copy at its own offset (%s at x=%.0f)" % [map_id, origin.x])
+	var dd: Node = world.get_node("DungeonDirector")
+	await get_tree().create_timer(0.4).timeout
+	var run: Dictionary = dd.run_state(map_id)
+	var wave: Array = (run.get("spawned", {}) as Dictionary).get("wave", [])
+	var on_copy := wave.filter(func(m): return is_instance_valid(m) and String(SimAuthority.record_for(m).get("map_id", "")) == map_id)
+	var scene: Node = null
+	for node in get_tree().get_nodes_in_group("dungeon_instance"):
+		if String(node.get_meta("map_id", "")) == map_id:
+			scene = node
+	check(wave.size() == 3 and on_copy.size() == 3 and scene != null and not scene.gate_open("gate_a"),
+		"Entering starts the run: the first wave stands in this copy and the gate is shut")
+	# Copy ownership: a stranger gets another copy, a party mate this one.
+	var stranger := {"uid": 987654, "kind": HPProtocol.Kind.PLAYER}
+	var other: String = SimAuthority._resolve_instance(stranger, "dng_trial")
+	var me := int(record["uid"])
+	SimAuthority.party.invite(me, 987654, SimAuthority.sim_tick)
+	SimAuthority.party.accept(987654, SimAuthority.sim_tick)
+	var mate_copy: String = SimAuthority._resolve_instance(stranger, "dng_trial")
+	SimAuthority.party.leave(987654)
+	SimAuthority.close_instance(other)
+	check(other != map_id and other.begins_with("dng_trial#") and mate_copy == map_id,
+		"A stranger gets their own copy; a party mate joins the leader's (%s / %s)" % [other, mate_copy])
+	for mob in wave:
+		if is_instance_valid(mob):
+			mob.take_damage(1000000, "test", player)
+	await get_tree().create_timer(0.8).timeout
+	check(scene.gate_open("gate_a") and String(dd.run_state(map_id).get("message", "")).contains("gate"),
+		"Clearing the wave opens the gate (server collision and the copy's scene agree)")
+	player.global_position = origin + Vector3(0, 1000.5, -56)
+	await get_tree().create_timer(0.8).timeout
+	var bosses: Array = (dd.run_state(map_id).get("spawned", {}) as Dictionary).get("boss", [])
+	var boss = bosses[0] if not bosses.is_empty() else null
+	check(boss != null and boss.is_boss and String(boss.mob_name) == "The Trial Warden" and not scene.gate_open("gate_a"),
+		"Stepping into the arena raises the Trial Warden and shuts the gate behind")
+	if boss != null:
+		boss.take_damage(1000000, "test", player)
+	await get_tree().create_timer(0.8).timeout
+	var loot := 0
+	for uid in SimAuthority.entities.keys():
+		var r: Dictionary = SimAuthority.entities[uid]
+		if int(r.get("kind", 0)) == HPProtocol.Kind.LOOT and String(r.get("map_id", "")) == map_id:
+			loot += 1
+	check(bool(dd.run_state(map_id).get("complete", false)) and loot >= 3 and scene.gate_open("gate_a"),
+		"The boss's fall completes the run and drops the trial chest (%d loot)" % loot)
+	var exit := HPMaps.portal("trial_exit")
+	var e: Array = exit.get("trigger", {}).get("center", [0, 0, 0])
+	player.global_position = origin + Vector3(float(e[0]), float(e[1]), float(e[2]))
+	var leave: Dictionary = SimNet.request_transfer(player, "trial_exit", "grounds")
+	var back: String = await _wait_map("grounds")
+	check(bool(leave.get("ok", false)) and back == "grounds" and player.global_position.distance_to(HPMaps.spawn_point("grounds", "trial_return")) < 3.0,
+		"The exit portal returns the party to the grounds")
+	SimAuthority.close_instance(map_id)
+	check(dd.run_state(map_id).is_empty() and not is_instance_valid(boss) or (is_instance_valid(boss) and boss.is_queued_for_deletion()),
+		"Closing the empty copy ends its run and frees its creatures")
+	player.level = saved_level
 
 ## House standing: quest reputation -> rank 1..7, shown on the HUD, persisted in
 ## the `quests` object, and able to gate a spell on the authority.

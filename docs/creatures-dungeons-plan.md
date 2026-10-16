@@ -192,6 +192,16 @@ Patronus konusu → **Kararlar #3**.
 
 ## Faz M2 — Parti + Instance + Zindan Altyapısı (zindanlar için şart)
 
+> **Durum (2026-10-16): altyapı çalışıyor, commit edilmedi.** Parti (`party.gd`: 5 kişi, davet/kabul/ret/ayrıl/at/lider,
+> davet 60 sn'de düşer, 40 m exp paylaşımı + kişi başı %10 bonus, en fazla %40; `/invite /accept /decline /leave /kick /promote`,
+> `/p` parti sohbeti, HUD parti çerçeveleri + davet penceresi). Instance: harita kimliği `dng_trial#k`, kopya k → x + 3000·k,
+> sınır 8, boş kopya 5 dk sonra kapanır; parti üyesi liderin kopyasına, yabancı yeni kopyaya; seviye kontrolü
+> `level_too_low`. Script motoru `dungeon_director.gd` + `dungeons.json` (tetikleyiciler `enter`/`cleared:`/`area:`,
+> eylemler spawn/open/close/message/chest/complete); kapı durumu sunucu çarpışması ile istemci sahnesinde aynı.
+> Deneme zindanı **Sınav Salonu** (`dng_trial`, giriş arazide [18, 93]): dalga → kapı → arena bossu (Sınav Gardiyanı) → sandık → çıkış.
+> **Henüz yok:** günlük giriş hakkı (3/gün), kişisel loot, wipe/checkpoint, hazır-kontrol penceresi, sıra kuyruğu,
+> parti ölçekleme (`scale_by_party`), instance için çok istemcili ağ testi. D1'de Kabarık zindanıyla birlikte gelir.
+
 ### M2.1 Parti sistemi (protokol v14)
 
 - En fazla **5 kişi**; davet / kabul / ayrıl / at / lider devri. Komutlar: sağ tık oyuncu → "Partiye davet", `/party`.

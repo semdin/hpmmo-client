@@ -429,6 +429,7 @@ scenes/ui/inventory_ui.tscn
 scenes/ui/ollivander_ui.tscn
 scenes/world/castle/staircase.tscn
 scenes/world/castle_interior.tscn
+scenes/world/dungeons/dng_trial.tscn
 scenes/world/game_world.tscn
 scenes/world/grounds_terrain.tscn
 scripts/assets/material_kit.gd
@@ -481,6 +482,7 @@ scripts/ui/hud_chat.gd
 scripts/ui/hud_game_menu.gd
 scripts/ui/hud_kit.gd
 scripts/ui/hud_notices.gd
+scripts/ui/hud_party.gd
 scripts/ui/hud_quest_scroll.gd
 scripts/ui/hud_skill_window.gd
 scripts/ui/hud_slot.gd
@@ -514,6 +516,8 @@ scripts/world/castle/castle_blockout.gd
 scripts/world/castle/castle_decor.gd
 scripts/world/castle/magical_staircase.gd
 scripts/world/castle_interior.gd
+scripts/world/dungeon_director.gd
+scripts/world/dungeons/dungeon_trial.gd
 scripts/world/encounter_director.gd
 scripts/world/game_world.gd
 scripts/world/grounds/arch_kit.gd

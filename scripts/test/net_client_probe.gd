@@ -10,7 +10,7 @@ extends Node
 ##
 ## Usage:
 ##   godot --headless --path client res://scenes/test/net_client_probe.tscn -- \
-##     --mode=agree|forged|protection|maintenance|transfer --port=7777 --name=Alice \
+##     --mode=agree|forged|protection|maintenance|transfer|party --port=7777 --name=Alice \
 ##     --out=<file> [--seconds=25] [--admin-port=8082] [--scenario=observer]
 ##
 ## The `maintenance` mode (Maintenance surface) joins, records every SimAuthority
@@ -360,6 +360,9 @@ func _physics_process(delta: float) -> void:
 	if mode == "quest":
 		_quest_tick()
 		return
+	if mode == "party":
+		_party_tick()
+		return
 	_update_target()
 	if mode == "agree":
 		if _pack_wiped() and _target_respawn_tick < 0:
@@ -376,6 +379,71 @@ func _physics_process(delta: float) -> void:
 	_sample_position()
 	if _t >= duration:
 		_finish_forged()
+
+# ------------------------------------------------------------------ party
+
+## `--mode=party`: "Lead" invites "Mate" by chat command; Mate accepts from the
+## invitation event. Lead then fights the contested pack while Mate only walks
+## along (never casts): Mate's experience can only come from party sharing.
+var _party_states: Array = []
+var _party_invites: Array = []
+var _party_invite_sent := false
+var _party_hooked := false
+
+func _party_tick() -> void:
+	if not _party_hooked:
+		_party_hooked = true
+		SimAuthority.party_state.connect(func(uid: int, state: Dictionary):
+			if uid == SimAuthority.local_uid:
+				_party_states.append(state)
+				_record("party_state", {"size": (state.get("members", []) as Array).size(), "leader": int(state.get("leader", 0))}))
+		SimAuthority.party_invited.connect(func(uid: int, from_name: String):
+			if uid == SimAuthority.local_uid:
+				_party_invites.append(from_name)
+				_record("party_invite", {"from": from_name})
+				NetworkManager.send_chat("/accept"))
+	if probe_name == "Lead" and not _party_invite_sent and _t > 3.0:
+		_party_invite_sent = true
+		NetworkManager.send_chat("/invite Mate")
+	_update_target()
+	_drive_to_target()
+	if probe_name == "Lead" and _party_size() >= 2:
+		_attack_target()
+	if _t >= duration:
+		_finish_party()
+
+func _party_size() -> int:
+	if _party_states.is_empty():
+		return 0
+	return (_party_states[-1].get("members", []) as Array).size()
+
+func _finish_party() -> void:
+	_done = true
+	var granted := 0
+	for reward in _rewards:
+		granted += int(reward.get("exp", 0))
+	for _frame in range(120):
+		if player == null or int(player.current_exp) >= _exp_start + granted:
+			break
+		await get_tree().physics_frame
+	var max_size := 0
+	var leader := 0
+	for state in _party_states:
+		max_size = maxi(max_size, (state.get("members", []) as Array).size())
+		leader = int(state.get("leader", leader))
+	_record("final", {
+		"uid": SimAuthority.local_uid,
+		"party_max_size": max_size,
+		"party_leader": leader,
+		"invites": _party_invites,
+		"casts_sent": _casts_sent,
+		"casts_accepted": _casts_accepted,
+		"exp_start": _exp_start,
+		"exp_end": int(player.current_exp) if player != null else _exp_now,
+		"rewards": _rewards,
+		"target_death_tick": _target_death_tick,
+	})
+	_finish(0)
 
 ## Where the pack under test stood when it was chosen: retreating means walking
 ## away from it, so a wiped pack is free to respawn.
