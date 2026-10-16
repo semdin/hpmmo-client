@@ -127,6 +127,17 @@ Tümü mevcut **anticipation → release → recovery** + "release tick'i sunucu
 
 ## Faz M1 — Yeni yaratıklar: Troller ve Ruh Emiciler
 
+> **Durum (2026-10-16): yaratıklar oyunda (açık dünya mobu olarak), commit edilmedi.** Orman Trolü (Troll Hollow,
+> Sv 14-20), Dağ Trolü (Highland Moor, Sv 30-36), Ruh Emici (Misty Shore, Sv 40-46, agresif); Azkaban Gardiyanı
+> modeli ruh emici sahnesinin boss gövdesi olarak hazır. Hat: `art/pipeline/CREATURE_PIPELINE.md`.
+> **Harita doldu (2026-10-16):** 31 bölge (av bölgesi 29 + 2 world boss), 49 aktif pack, ~163 yaratık, Sv 1-52;
+> **Grak** (Taş Çember, Sv 38) ve **Azkaban Gardiyanı** (Warden's Barrow, Sv 50) world boss olarak doğuyor
+> (10-15 dk respawn, trol/ruh emici saldırı desenleri). Minimapte av bölgeleri seviye renginde halka.
+> Uzak yaratıklar (>120 m) çizilmiyor/animasyonsuz (iGPU). Harita: `art/creatures/m1_hunting_map.png`.
+> **Kalanlar:** world boss duyurusu, yeni yetenek türleri (yere vurma, kaya
+> fırlatma, Öpücük, aura), Expecto Patronum, gece/gündüz, trol/ruh emici sesleri (şimdilik inferi sesleri),
+> ruh emici pelerin shader'ı + sis partikülü.
+
 ### Troller (`family: troll`)
 
 Tek humanoid rig, 3 varyant (Meshy retexture + ölçek):

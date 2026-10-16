@@ -169,6 +169,10 @@ assets/models/monsters/boss_matriarch.glb
 assets/models/monsters/boss_matriarch_matriarch_albedo.png
 assets/models/monsters/boss_matriarch_matriarch_normal.png
 assets/models/monsters/boss_matriarch_matriarch_rough.png
+assets/models/monsters/dementor.glb
+assets/models/monsters/dementor_warden.glb
+assets/models/monsters/troll_forest.glb
+assets/models/monsters/troll_mountain.glb
 assets/models/props/broom_flight.glb
 assets/models/props/broom_flight_broom_leather_basecolor.png
 assets/models/props/broom_flight_broom_straw_basecolor.png
@@ -400,7 +404,10 @@ project.godot
 scenes/entities/loot/loot_drop.tscn
 scenes/entities/mobs/mob_acromantula.tscn
 scenes/entities/mobs/mob_darksnatcher.tscn
+scenes/entities/mobs/mob_dementor.tscn
 scenes/entities/mobs/mob_inferi.tscn
+scenes/entities/mobs/mob_troll_forest.tscn
+scenes/entities/mobs/mob_troll_mountain.tscn
 scenes/entities/monolith/dark_monolith.tscn
 scenes/entities/player/player.tscn
 scenes/server/dedicated_server.tscn

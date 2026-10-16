@@ -89,9 +89,36 @@ func _ready() -> void:
 	FX.play_impact(world, Vector3(0, 1, 0), "expelliarmus")
 	check(absf(Rules.safe_up(Vector3.UP).dot(Vector3.UP)) < 0.01, "Vertical spell effect uses a non-collinear up vector")
 	await get_tree().create_timer(0.4).timeout
-	check(director.packs.size() == 7, "Seven encounter groups created")
+	var authored_active := 0
+	for region in HPRules.regions():
+		authored_active += HPRules.active_encounters_for(String(region.get("id", ""))).size()
+	check(director.packs.size() == authored_active and authored_active >= 45,
+		"Every active encounter is created (%d of %d)" % [director.packs.size(), authored_active])
+	var unspawned: Array = []
 	for pack in director.packs:
-		check(pack.members.size() == pack.count, "Encounter has its configured 3/5 pack or boss composition")
+		if pack.members.size() != pack.count:
+			unspawned.append("%s(%s)" % [pack.get("encounter_id", "?"), "deferred" if pack.get("deferred", false) else "?"])
+	check(unspawned.is_empty(), "Every encounter found valid ground and spawned its full pack %s" % str(unspawned))
+	# Presentation LOD: far bodies neither draw nor pose; near ones do.
+	await get_tree().create_timer(0.8).timeout
+	var cam := get_viewport().get_camera_3d()
+	var far_awake := 0
+	var near_dormant := 0
+	var far_seen := 0
+	for pack in director.packs:
+		for member in pack.members:
+			if cam == null or not is_instance_valid(member):
+				continue
+			var dist: float = cam.global_position.distance_to(member.global_position)
+			if dist > member.VISUAL_RANGE + 5.0:
+				far_seen += 1
+				if member.visuals.visible or (member.anim_player and member.anim_player.active):
+					far_awake += 1
+			elif dist < member.VISUAL_RANGE - 5.0 and not member.visuals.visible:
+				near_dormant += 1
+	check(cam != null and far_seen > 50 and far_awake == 0 and near_dormant == 0,
+		"Far creatures stop drawing and posing, near ones stay awake (%d far, %d awake far, %d asleep near)" % [far_seen, far_awake, near_dormant])
+	for pack in director.packs:
 		for member in pack.members:
 			check(member.spawn_point.distance_to(member.global_position) < 8, "Spawn anchor is assigned before mob ready")
 	# Ordinary mobs are reactive; protected volumes gate damage.
@@ -285,9 +312,33 @@ func _check_mob_system(director: Node, overlay: Node) -> void:
 	var report: Dictionary = HPRules.validate_encounters()
 	check(report["ok"], "Encounter data validates against the creature catalog and region bands %s" % str(report["problems"]))
 	var scenes_ok := true
-	for species in ["inferi", "acromantula", "darksnatcher"]:
+	for species in HPRules.mob_ids():
 		scenes_ok = scenes_ok and ResourceLoader.exists(HPRules.mob_scene_path(species))
-	check(scenes_ok, "Every catalog species resolves to a mob scene")
+	check(scenes_ok and HPRules.mob_ids().size() >= 6, "Every catalog species resolves to a mob scene (%d species)" % HPRules.mob_ids().size())
+	# M1 creatures: each body carries the clips its animation set plays, the
+	# attack windup clip is time-stretched onto the authored phase, and the
+	# replication variant round-trips.
+	var clip_problems: Array = []
+	for species in ["troll_forest", "troll_mountain", "dementor"]:
+		var body = load(HPRules.mob_scene_path(species)).instantiate()
+		add_child(body)
+		var anim: AnimationPlayer = body.anim_player
+		if anim == null:
+			clip_problems.append("%s: no AnimationPlayer" % species)
+		else:
+			for slot in ["idle", "walk", "anticipation", "attack", "hit", "death"]:
+				if not anim.has_animation(body._clip_for(slot)) or body._clip_for(slot) == "Idle" and slot != "idle":
+					clip_problems.append("%s: slot %s -> %s missing" % [species, slot, body._clip_for(slot)])
+			var stretch: float = body._phase_speed("anticipation", body._clip_for("anticipation"))
+			if not (stretch > 0.4 and stretch < 3.0):
+				clip_problems.append("%s: anticipation stretch %.2f" % [species, stretch])
+		if HPProtocol.mob_scene(HPProtocol.mob_variant(body.scene_file_path)) != body.scene_file_path:
+			clip_problems.append("%s: replication variant does not round-trip" % species)
+		body.queue_free()
+	check(clip_problems.is_empty(), "Trolls and dementors carry their animation sets and replicate %s" % str(clip_problems))
+	var encounter_ids: Array = director.packs.map(func(p): return String(p.get("encounter_id", "")))
+	check(encounter_ids.has("enc_troll_hollow_forest_trolls") and encounter_ids.has("enc_highland_moor_mountain_trolls")
+		and encounter_ids.has("enc_misty_shore_dementors"), "The troll and dementor encounters are active in the director")
 	check(HPRules.damage_after_resistances(100, "incendio", false, HPRules.mob_resist("inferi")) == 200
 		and HPRules.damage_after_resistances(100, "incendio", true) == 200
 		and HPRules.damage_after_resistances(100, "basic_cast", false, HPRules.mob_resist("darksnatcher")) == 85
