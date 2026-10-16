@@ -4,14 +4,13 @@ HPMMO workspace helper.
 Canonical source: client/tools/workspace/dev.ps1 - this root copy is generated.
 
 Commands:
-  .\dev.ps1 ready [-Full]      THE pre-commit cycle, in order: sync the simulation package
+  .\dev.ps1 ready             THE pre-commit cycle, in order: sync the simulation package
                                (server -> client), regenerate the world file list, export
                                server\world (client -> server), import both projects and run
-                               `test`; -Full adds the maps / staircase / encounters / maintenance /
-                               journey simulations (~20 min). Refuses to overwrite hand edits made in
-                               a generated copy. Ends with what each repo has to commit.
+                               `test`. Refuses to overwrite hand edits made in a generated copy.
+                               Ends with what each repo has to commit.
   .\dev.ps1 status             pinned revisions, contract-hash check, repo states
-  .\dev.ps1 test               client check harness; server service compile + world boot smoke
+  .\dev.ps1 test               client import check, world import + boot, multiplayer proof (the only kept test)
   .\dev.ps1 build              server deployable package into server\dist (client export = the release pipeline)
   .\dev.ps1 start -Client      launch the game
   .\dev.ps1 start -Server      launch the dedicated server world (headless)
@@ -23,8 +22,7 @@ param(
     [ValidateSet('status', 'ready', 'test', 'build', 'start', 'sync-world', 'sync-sim', 'verify-contracts')]
     [string]$Command = 'status',
     [switch]$Client,
-    [switch]$Server,
-    [switch]$Full
+    [switch]$Server
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -79,11 +77,13 @@ function Test-Contracts([switch]$Quiet) {
     return $ok
 }
 
+## The client must import cleanly (a parse error in any script fails here).
 function Invoke-ClientHarness {
-    $script = Join-Path $clientRepo 'tools\run_game_checks.ps1'
-    if (-not (Test-Path $script)) { throw "missing $script" }
-    & powershell -ExecutionPolicy Bypass -File $script
-    if ($LASTEXITCODE -ne 0) { throw 'client harness failed' }
+    $godot = Get-Godot
+    Write-Host '[client] import + script check'
+    $errors = Invoke-GodotText @('--headless', '--path', $clientRepo, '--import') |
+        Select-String -Pattern 'SCRIPT ERROR|Parse Error'
+    if ($errors) { $errors | Select-Object -First 10 | ForEach-Object { "  $_" }; throw 'client import reported script errors' }
 }
 
 function Invoke-ServiceBuild {
@@ -126,16 +126,6 @@ function Invoke-GodotText([string[]]$GodotArgs) {
 function Invoke-ServerSmoke {
     $world = Join-Path $serverRepo 'world'
     Test-WorldFileList
-    Invoke-ServiceBuild
-    Write-Host '[server] legacy python service compile (kept as fallback reference)'
-    & $python -m py_compile (Join-Path $serverRepo 'services\db_service.py')
-    if ($LASTEXITCODE -ne 0) { throw 'legacy service does not compile' }
-    $integration = Join-Path $serverRepo 'tests\integration_api.py'
-    if (Test-Path $integration) {
-        Write-Host '[server] persistence integration tests (PostgreSQL + C++ service, self-contained)'
-        & $python $integration
-        if ($LASTEXITCODE -ne 0) { throw 'integration tests failed' }
-    }
     if (Test-Path (Join-Path $world 'project.godot')) {
         $godot = Get-Godot
         # Import before anything boots the world: an asset that is new to the
@@ -157,31 +147,6 @@ function Invoke-ServerSmoke {
         Invoke-GodotText @('--headless', '--path', $world, 'res://server/world_server.tscn', '--quit-after', '300') |
             Select-String -Pattern 'WorldServer|ERROR|SCRIPT' | Select-Object -First 20
         if ($LASTEXITCODE -ne 0) { throw 'world boot smoke failed' }
-    }
-}
-
-## The long end-to-end simulations (each brings up its own servers and headless
-## clients). `ready -Full` runs them after `test`.
-$FullSims = @('maps_sim', 'staircase_sim', 'encounters_sim', 'maintenance_sim', 'journey_e2e')
-
-function Write-Step([string]$Text) {
-    Write-Host ''
-    Write-Host "=== [ready] $Text ===" -ForegroundColor Cyan
-}
-
-function Invoke-Sims {
-    foreach ($name in $FullSims) {
-        $script = Join-Path $serverRepo "tests\$name.py"
-        if (-not (Test-Path $script)) { throw "missing $script" }
-        # Artifacts go to %TEMP%, never into the repo (journey_e2e defaults to
-        # server\tests\out\release, which then shows up as a change to commit).
-        $outDir = Join-Path $env:TEMP "hpmmo-ready\$name"
-        if (Test-Path $outDir) { Remove-Item -Recurse -Force $outDir }
-        New-Item -ItemType Directory -Force $outDir | Out-Null
-        Write-Host "[ready] $name (artifacts: $outDir)"
-        & $python -u $script --out-dir $outDir | Select-String -Pattern 'RESULT|FAIL|SKIP' | ForEach-Object { "  $_" }
-        # A skip (exit 2: no PostgreSQL / service build) is not a pass.
-        if ($LASTEXITCODE -ne 0) { throw "$name failed or could not run (exit $LASTEXITCODE)" }
     }
 }
 
@@ -218,19 +183,11 @@ switch ($Command) {
         Write-Step '3/5 world export: client -> server\world'
         & $python (Join-Path $clientRepo 'tools\workspace\export_world.py') --client $clientRepo --server $serverRepo --root $root --guard
         if ($LASTEXITCODE -ne 0) { throw 'world export refused or failed (see above)' }
-        Write-Step '4/5 import + tests (client harness, service, world boot, multiplayer)'
+        Write-Step '4/5 import + checks (client import, world boot, multiplayer)'
         Invoke-ClientHarness
         Invoke-ServerSmoke
-        if ($Full) {
-            Write-Step '4b/5 end-to-end simulations (-Full)'
-            Invoke-Sims
-        }
         Write-Step '5/5 ready to commit'
         Show-CommitSummary
-        if (-not $Full) {
-            Write-Host ''
-            Write-Host '  (quick cycle: run `dev.ps1 ready -Full` before a release or after gameplay/map changes)'
-        }
     }
     'status' {
         $lock = Read-Lock

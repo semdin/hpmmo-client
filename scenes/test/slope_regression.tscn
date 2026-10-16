@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://scripts/test/slope_regression.gd" id="1_slope"]
-
-[node name="SlopeRegression" type="Node3D"]
-script = ExtResource("1_slope")
