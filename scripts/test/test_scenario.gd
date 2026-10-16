@@ -689,6 +689,18 @@ func _check_forbidden_corridor(player: Node) -> void:
 	for node in get_tree().get_nodes_in_group("dungeon_instance"):
 		if String(node.get_meta("map_id", "")) == map_id:
 			scene = node
+	var pushes: Array = []
+	var on_push := func(uid: int, force: Vector3) -> void: pushes.append([uid, force])
+	SimAuthority.player_pushed.connect(on_push)
+	if not pixies.is_empty():
+		var lift_plan: Dictionary = {}
+		for a in pixies[0].abilities:
+			if String(a.get("id", "")) == "lift":
+				lift_plan = a
+		player.velocity.y = 0.0
+		pixies[0]._apply_riders(lift_plan, [{"uid": int(record["uid"]), "amount": 1}])
+		check(not lift_plan.is_empty() and player.velocity.y >= 7.0 and pushes.size() == 1 and pushes[0][0] == int(record["uid"]),
+			"A pixie's lift tosses the player up (the authority's body and the owner's prediction get the same shove)")
 	_fc_kill(corridor, player)
 	await get_tree().create_timer(0.6).timeout
 	check(scene != null and scene.gate_open("gate_a"), "Clearing the corridor opens the gallery")
@@ -741,6 +753,11 @@ func _check_forbidden_corridor(player: Node) -> void:
 	check(scene.gate_open("gate_c"), "The Snare's death opens the stair to Fluffy")
 	await _fc_goto(player, origin, Vector3(0, 1200.5, -146))
 	_fc_kill(_fc_spawned(dd, map_id, "stairs"), player)
+	pushes.clear()
+	await _fc_goto(player, origin, Vector3(0, 1200.5, -150), 7.6)
+	check(not pushes.is_empty() and (pushes[0][1] as Vector3).z > 5.0 and String(dd.run_state(map_id).get("message", "")).contains("breath"),
+		"Fluffy's breath rolls down the stair and shoves the party back (%d)" % pushes.size())
+	SimAuthority.player_pushed.disconnect(on_push)
 
 	# --- Fluffy: three heads, the harp, the trapdoor
 	await _fc_goto(player, origin, Vector3(0, 1200.5, -170), 0.8)
@@ -763,13 +780,35 @@ func _check_forbidden_corridor(player: Node) -> void:
 		await get_tree().create_timer(0.5).timeout
 		check(fluffy.phase >= 2 and (SimAuthority.record_for(fluffy).get("parts_down", []) as Array).has(heads[0].part_key),
 			"A head faints (it droops for everyone) and Fluffy turns furious")
-		_fc_kill([heads[1], heads[2]], player)
+		# A wipe: nobody left past the hall's line, Fluffy loses its target.
+		await _fc_goto(player, origin, Vector3(0, 1200.5, -150), 0.1)
+		fluffy.move_speed = fluffy._base_speed   # it walks home from wherever the fight left it
+		fluffy._break_fight("test wipe")
+		var waited := 0.0
+		while fluffy.state != fluffy.State.IDLE and waited < 12.0:
+			await get_tree().create_timer(0.25).timeout
+			waited += 0.25
+		await get_tree().create_timer(0.4).timeout
+		fluffy.move_speed = 0.0
+		var frec := SimAuthority.record_for(fluffy)
+		check(fluffy.living_parts().size() == 3 and (frec.get("parts_down", []) as Array).is_empty() and bool(frec.get("immune", false))
+			and fluffy.phase == 1 and int(heads[0].current_hp) == int(heads[0].max_hp) and scene.gate_open("gate_c"),
+			"After a wipe Fluffy resets (every head back, immune again) and the way back opens")
+		await _fc_goto(player, origin, Vector3(0, 1200.5, -172), 0.6)
+		check(not scene.gate_open("gate_c"), "Crossing into the hall again seals the door behind the party")
+		_fc_kill([heads[0], heads[1], heads[2]], player)
 		await get_tree().create_timer(1.0).timeout
 	var loot := 0
+	var personal := true
 	for uid in SimAuthority.entities.keys():
 		var r: Dictionary = SimAuthority.entities[uid]
 		if int(r.get("kind", 0)) == HPProtocol.Kind.LOOT and String(r.get("map_id", "")) == map_id:
 			loot += 1
+			personal = personal and int(r.get("owner_uid", 0)) == int(record["uid"]) 				and SimAuthority.loot_visible_to(r, record) and not SimAuthority.loot_visible_to(r, {"uid": 987654})
+	check(loot > 0 and personal, "Dungeon loot is personal: every drop is the player's own, invisible to anyone else")
+	var title_node = player.get("_nameplate_title")
+	check(player.titles.has("fc_explorer") and title_node != null and String(title_node.text).contains("Forbidden Corridor Explorer"),
+		"The first clear earns the title \"Forbidden Corridor Explorer\" (shown above the name)")
 	check(fluffy != null and fluffy.state == fluffy.State.DEAD and bool(dd.run_state(map_id).get("complete", false))
 		and scene.gate_open("gate_d") and loot >= 4,
 		"The last head brings Fluffy down: the trapdoor opens and the chest waits (%d loot)" % loot)

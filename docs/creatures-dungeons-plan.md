@@ -271,8 +271,13 @@ Haritalar şu an **y-bandı** ile ayrılıyor. Zindanlar da yeni y-bantları al�
 > Parça-boss altyapısı: `multipart_boss.gd` / `boss_part.gd` / `part_droop.gd` (SkeletonModifier3D, istemcide sarkma/solma),
 > authority `set_mob_immune` / `set_mob_vulnerable` / `set_mob_hp` / `mark_part_down` / `force_kill`, `_creature_damage_mods`.
 > Ses: 24 yeni yaratık sesi (hound/pixie/armour/snare, ElevenLabs). Test: `_check_forbidden_corridor` (19 kontrol).
-> **Henüz yok:** kişisel loot, wipe/checkpoint (boss eve dönünce gövde iyileşir ama kafalar/sarmaşıklar iyileşmez), Arp Merdiveni
-> rüzgâr itmesi, pixie havaya kaldırma, "Yasak Koridor Kâşifi" unvanı, gerçek Gotik mekân sanatı (şimdilik greybox + aksesuar).
+> **Eksikler kapatıldı (2026-10-17, protokol v15):** kişisel loot (zindanda her drop ve sandık her oyuncuya ayrı
+> rulo, sadece sahibi görür/alır), wipe (boss eve dönünce kafalar/sarmaşıklar dolu canla geri gelir, gövde yeniden bağışık;
+> kapalı kapı arkasında yaşayan kimse kalmayınca kapılar açılır, çizgiyi tekrar geçince kapanır), Arp Merdiveni rüzgârı
+> (`hazards`: 7 sn'de bir merdivendeki herkesi geri iter), pixie havaya kaldırma (`lift` yeteneği; `sim_push` ile sahibin
+> tahmini de aynı itmeyi alır), "Forbidden Corridor Explorer" unvanı (ilk temizlemede, `quests.titles`, ismin üstünde).
+> Bulunan hata: parça gövdenin kapsülü içindeydi, gövde kendi kafalarından itilip kayıyordu (çarpışma istisnası eklendi).
+> Hâlâ yok: başka oyuncuların unvanını görmek (uzak oyuncu kimliği replike edilmiyor), gerçek Gotik mekân sanatı.
 
 ### Giriş — kalede, 3. kat
 
