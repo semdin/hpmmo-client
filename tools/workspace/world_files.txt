@@ -189,6 +189,16 @@ assets/models/props/spellbook_open.bin
 assets/models/props/spellbook_open.gltf
 assets/models/props/wand.bin
 assets/models/props/wand.gltf
+assets/models/props/wands/wand_ashwood.glb
+assets/models/props/wands/wand_ashwood_wand_ashwood_paint.png
+assets/models/props/wands/wand_emberwing.glb
+assets/models/props/wands/wand_emberwing_wand_emberwing_paint.png
+assets/models/props/wands/wand_moonveil.glb
+assets/models/props/wands/wand_moonveil_wand_moonveil_paint.png
+assets/models/props/wands/wand_runebound.glb
+assets/models/props/wands/wand_runebound_wand_runebound_paint.png
+assets/models/props/wands/wand_silverthorn.glb
+assets/models/props/wands/wand_silverthorn_wand_silverthorn_paint.png
 assets/shaders/castle/candle_flame.gdshader
 assets/shaders/castle/enchanted_sky.gdshader
 assets/shaders/castle/floating_candle.gdshader

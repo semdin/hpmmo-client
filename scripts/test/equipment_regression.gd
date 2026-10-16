@@ -218,7 +218,7 @@ func _test_broom_catalog() -> void:
 	var tiers := []
 	for id in HPEquipment.catalog():
 		var data := HPEquipment.item(id)
-		if not data.has("model"):
+		if not data.has("model") or data.get("type", "") != "mount":
 			continue
 		var scene := load(String(data.model)) as PackedScene
 		check(scene != null, "%s model loads" % id)
@@ -287,6 +287,50 @@ func _test_cloaks() -> void:
 	check(cloak != null and cloak.material_override.albedo_texture.resource_path == HPEquipment.item("cloak_moonveil").cloak_texture and sk.find_children("EquippedCloak","",false,false).size() == 1,"switching cloaks swaps the fabric, one cloak drawn")
 	check(request("equip","chest","robe_apprentice").ok,"a plain robe can be worn")
 	check(sk.get_node_or_null("EquippedCloak") == null,"a chest item without a cloak removes it")
+	# Leave the shared bag as found: the UI gesture tests click visible bag slots.
+	HPEquipment.take(player.inventory,"cloak_wool",0,1)
+	HPEquipment.take(player.inventory,"cloak_moonveil",0,1)
+	player.level = old_level
+	record.level = old_level
+
+## Tiered wands: each `model` loads, equipping one draws it in the hand, and the
+## spell tip stays at WAND_TIP_LOCAL so casts leave the same point.
+func _test_wand_models() -> void:
+	var old_level: int = player.level
+	player.level = 50
+	record.level = 50
+	var tiers := []
+	for id in HPEquipment.catalog():
+		var data := HPEquipment.item(id)
+		if data.get("type", "") == "weapon" and data.has("model"):
+			check(load(String(data.model)) is PackedScene,"%s model loads" % id)
+			tiers.append([int(data.get("item_tier", 0)), float(data.get("base_multiplier", 1.0)), id])
+	tiers.sort()
+	check(tiers.size() == 5,"five tiered wands")
+	for i in range(1, tiers.size()):
+		check(tiers[i][1] > tiers[i - 1][1],"wand tier %d hits harder than tier %d" % [tiers[i][0], tiers[i - 1][0]])
+	var original: Dictionary = player.equipment.get("main_hand", {}).duplicate(true)
+	for t in tiers:
+		# Instances take a slot each: keep the shared test bag from filling up by
+		# taking back the wand each swap returns.
+		var returned: Dictionary = player.equipment.get("main_hand", {})
+		HPEquipment.add(player.inventory,t[2],0,1)
+		var answer := request("equip","main_hand",t[2])
+		check(answer.ok,"%s can be equipped (%s)" % [t[2], answer.get("reason","")])
+		if answer.ok and not returned.is_empty() and returned.get("uid", 0) != original.get("uid", -1):
+			HPEquipment.take_instance(player.inventory, int(returned.uid))
+		var tip: Node3D = HeroAppearance.wand_tip(player.visuals)
+		var holder: Node = player.visuals.find_child("EquippedWand",true,false)
+		check(tip != null and holder != null and holder.get_child_count() > 0 and (holder.get_child(0) as Node3D).scene_file_path == String(HPEquipment.item(t[2]).model),"%s is the wand drawn in the hand" % t[2])
+		if tip:
+			check(tip.position.is_equal_approx(HeroAppearance.WAND_TIP_LOCAL),"%s keeps the spell tip at WAND_TIP_LOCAL" % t[2])
+	# Leave the slot as the shared test found it (empty or the original wand) and
+	# take the last tiered wand back out of the bag.
+	if original.is_empty():
+		request("unequip","main_hand")
+	else:
+		request("equip","main_hand",String(original.id),int(original.get("tier",0)))
+	HPEquipment.take(player.inventory,"wand_moonveil",0,1)
 	player.level = old_level
 	record.level = old_level
 
@@ -329,6 +373,7 @@ func _test_authority() -> void:
 	check(request("equip","broom","broom_firebolt").ok and player.mounted_speed == 22,"equipped broom controls mounted speed")
 	_test_broom_tiers()
 	_test_cloaks()
+	_test_wand_models()
 	request("unequip","broom")
 	check(SimAuthority.submit_mount(record.peer_id,true).reason == "no_broom","mounting requires an equipped broom")
 	check(SimAuthority.request_cast(record.peer_id,"basic_cast",Vector3.ZERO,1).reason == "no_wand","offensive spells require an equipped wand")

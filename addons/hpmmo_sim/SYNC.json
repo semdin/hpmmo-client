@@ -1,7 +1,7 @@
 {
  "generated": "2026-10-16",
  "source_repository": "hpmmo-server",
- "source_revision": "fce7378ce15be507be8756af6efe8c13088b128a",
+ "source_revision": "bbb9cb85ca33447e79c98a7bac6b86593cd19856",
  "note": "Generated from server/world/addons/hpmmo_sim by dev.ps1 sync-sim. Never edit these files in the client repository.",
  "files": {
   "admin.gd": "8605e27d706abc3eeafd3a7cce41de451734ff9d56652998b973fb4eacb7257c",
@@ -9,7 +9,7 @@
   "authority.gd": "998c49b294ec35801f38210097aef5b84bf927842f4df2e27ccae673eb80eb23",
   "authority.gd.uid": "7a0e9dcb17566e2f6c5c2fa8067b1a57a8a7cd14c568c6dab087475a8628bb0e",
   "data/combat.json": "3887fdefe701c4b443290c8435ac6e82a337b1b27ee6a81652b12e8540939527",
-  "data/items.json": "069ee65ca1cd4183afec0560ab60198f1ff7e6732763aad52e88ac6f5a0ba880",
+  "data/items.json": "2b529e97b921485e1eb2d8aa3f8a5593e23a3e78bb1e54fccffc635f945102c4",
   "data/loot_tables.json": "d98079294fdc1f302dd0d244f9e3752f72dc65245e163e92fe18af8cf72f8790",
   "data/maps.json": "e380c4afda8af72bc6a88d0a1e70a61df47cb36a9cc49871186a15acd0222bc8",
   "data/quests.json": "b1c2574756fc5c7b2b430bb79da96db9af4720bfb8ec61558f8844d4a9d8b644",

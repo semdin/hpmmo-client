@@ -58,3 +58,14 @@ no third-party image was used.
 * `icon_cloak_{wool,runed,thornveil,phoenix,moonveil}.png` - the cloak seen from the
   back on flat white, cut out by `tools/ui/cutout_icons.py` (`item_<id>.png` sources
   in `art/cloaks/icons_src/`), 512 px.
+
+## 2026-10-16 additions (fal.ai) - wand tiers
+
+Tool: fal.ai `google/nano-banana-2.1/edit` (1K, 1:1). Input image: the project's own
+wand concept for that tier (generated the same day with `openai/gpt-image-2.5/sunburst`,
+kept in `art/wands/concepts/`); no third-party image was used.
+
+* `icon_wand_{ashwood,runebound,silverthorn,emberwing,moonveil}.png` - the wand shown
+  diagonally on flat white, cut out by `tools/ui/cutout_icons.py` (`item_<id>.png`
+  sources in `art/wands/icons_src/`), 512 px. The in-game wand meshes themselves are
+  procedural (`art/wands/scripts/build_wands.py`).
