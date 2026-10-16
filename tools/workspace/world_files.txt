@@ -161,6 +161,8 @@ assets/models/monsters/acromantula.glb
 assets/models/monsters/acromantula_acromantula_albedo.png
 assets/models/monsters/acromantula_acromantula_normal.png
 assets/models/monsters/acromantula_acromantula_rough.png
+assets/models/monsters/armour_commander.glb
+assets/models/monsters/armour_guard.glb
 assets/models/monsters/boss_commander.glb
 assets/models/monsters/boss_commander_commander_albedo.png
 assets/models/monsters/boss_commander_commander_normal.png
@@ -169,8 +171,11 @@ assets/models/monsters/boss_matriarch.glb
 assets/models/monsters/boss_matriarch_matriarch_albedo.png
 assets/models/monsters/boss_matriarch_matriarch_normal.png
 assets/models/monsters/boss_matriarch_matriarch_rough.png
+assets/models/monsters/cornish_pixie.glb
 assets/models/monsters/dementor.glb
 assets/models/monsters/dementor_warden.glb
+assets/models/monsters/devils_snare.glb
+assets/models/monsters/fluffy.glb
 assets/models/monsters/troll_forest.glb
 assets/models/monsters/troll_mountain.glb
 assets/models/props/broom_flight.glb
@@ -403,9 +408,16 @@ data/json/quests.json
 project.godot
 scenes/entities/loot/loot_drop.tscn
 scenes/entities/mobs/mob_acromantula.tscn
+scenes/entities/mobs/mob_armour_commander.tscn
+scenes/entities/mobs/mob_armour_guard.tscn
+scenes/entities/mobs/mob_cornish_pixie.tscn
 scenes/entities/mobs/mob_darksnatcher.tscn
 scenes/entities/mobs/mob_dementor.tscn
+scenes/entities/mobs/mob_devils_snare.tscn
+scenes/entities/mobs/mob_fluffy.tscn
+scenes/entities/mobs/mob_fluffy_head.tscn
 scenes/entities/mobs/mob_inferi.tscn
+scenes/entities/mobs/mob_snare_vine.tscn
 scenes/entities/mobs/mob_troll_forest.tscn
 scenes/entities/mobs/mob_troll_mountain.tscn
 scenes/entities/monolith/dark_monolith.tscn
@@ -429,6 +441,7 @@ scenes/ui/inventory_ui.tscn
 scenes/ui/ollivander_ui.tscn
 scenes/world/castle/staircase.tscn
 scenes/world/castle_interior.tscn
+scenes/world/dungeons/dng_forbidden_corridor.tscn
 scenes/world/dungeons/dng_trial.tscn
 scenes/world/game_world.tscn
 scenes/world/grounds_terrain.tscn
@@ -447,7 +460,12 @@ scripts/entities/hero_animation.gd
 scripts/entities/hero_appearance.gd
 scripts/entities/hero_bones.gd
 scripts/entities/loot/loot_drop.gd
+scripts/entities/mobs/boss_part.gd
+scripts/entities/mobs/fluffy_boss.gd
 scripts/entities/mobs/mob_base.gd
+scripts/entities/mobs/multipart_boss.gd
+scripts/entities/mobs/part_droop.gd
+scripts/entities/mobs/snare_boss.gd
 scripts/entities/monolith/dark_monolith.gd
 scripts/entities/player.gd
 scripts/entities/rig_follower.gd
@@ -517,6 +535,8 @@ scripts/world/castle/castle_decor.gd
 scripts/world/castle/magical_staircase.gd
 scripts/world/castle_interior.gd
 scripts/world/dungeon_director.gd
+scripts/world/dungeons/dungeon_forbidden_corridor.gd
+scripts/world/dungeons/dungeon_greybox.gd
 scripts/world/dungeons/dungeon_trial.gd
 scripts/world/encounter_director.gd
 scripts/world/game_world.gd

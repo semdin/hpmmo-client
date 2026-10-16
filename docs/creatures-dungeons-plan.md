@@ -260,6 +260,20 @@ Haritalar şu an **y-bandı** ile ayrılıyor. Zindanlar da yeni y-bantları al�
 
 ## Faz D1 — Zindan: **Yasak Koridor** (Kabarık)
 
+> **Durum (2026-10-16): D1 oynanabilir, commit edilmedi.** Giriş: kale L3 doğu koridoru güney duvarındaki kilitli kapı
+> (`fc_entry`, kapı + "out of bounds" tabelası), Sv 30+, günde 3 giriş (`quests.dungeons`, aynı koşuya geri dönmek ücretsiz).
+> Harita `dng_forbidden_corridor` (kod-greybox, `dungeon_forbidden_corridor.gd`; ortak taban `dungeon_greybox.gd`):
+> koridor (6 pixie + 2 zırh) → Zırh Galerisi (Komutan: önden %80 kalkan `front_guard`, %70 ve %40'ta duvardan 2'şer zırh `hp_below`)
+> → Şeytan Kapanı mahzeni (3 sarmaşık = ayrı hedef, ateşe ×2; gövde sarmaşıklar bitene kadar bağışık) → merdiven pixie sürüsü
+> → Kabarık salonu (3 kafa = ayrı hedef, gövde bağışık ve kafaların toplam HP'sini gösterir; arp: kaidenin 2.6 m yakınında 6 sn
+> hasar almadan durmak → 10 sn uyku (faz 3'te 5), uyurken kafalar +%50 hasar, 45 sn bekleme; bir kafa bayılınca faz 2: Kükreme +
+> Atılma; %25 altı faz 3; 8 dk'da öfke) → kapak açılır, ödül odası sandığı (`dungeon_corridor`) + çıkış.
+> Parça-boss altyapısı: `multipart_boss.gd` / `boss_part.gd` / `part_droop.gd` (SkeletonModifier3D, istemcide sarkma/solma),
+> authority `set_mob_immune` / `set_mob_vulnerable` / `set_mob_hp` / `mark_part_down` / `force_kill`, `_creature_damage_mods`.
+> Ses: 24 yeni yaratık sesi (hound/pixie/armour/snare, ElevenLabs). Test: `_check_forbidden_corridor` (19 kontrol).
+> **Henüz yok:** kişisel loot, wipe/checkpoint (boss eve dönünce gövde iyileşir ama kafalar/sarmaşıklar iyileşmez), Arp Merdiveni
+> rüzgâr itmesi, pixie havaya kaldırma, "Yasak Koridor Kâşifi" unvanı, gerçek Gotik mekân sanatı (şimdilik greybox + aksesuar).
+
 ### Giriş — kalede, 3. kat
 
 - `art/castle/layout.json`: **L3 Doğu Koridoru** (`east_corridor_L3`, x 26-86, z -12…-4) — 3. katta koridor dışında oda yok, güney tarafı (z -42…-15) boş. Filmdeki gibi: koridorun **sağ (güney) duvarında kilitli bir kapı**.

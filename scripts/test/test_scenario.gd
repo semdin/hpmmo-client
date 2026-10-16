@@ -121,6 +121,7 @@ func _ready() -> void:
 	await _check_m1_systems(player, director, hud)
 	_check_party_book(hud)
 	await _check_dungeon_run(player)
+	await _check_forbidden_corridor(player)
 	for pack in director.packs:
 		for member in pack.members:
 			check(member.spawn_point.distance_to(member.global_position) < 8, "Spawn anchor is assigned before mob ready")
@@ -500,6 +501,17 @@ func _check_m1_systems(player: Node, director: Node, hud: Node) -> void:
 		voices_ok = voices_ok and AudioManager.has_sound(key)
 	check(voices_ok and troll._voice_family() == "troll" and dementor._voice_family() == "dementor",
 		"Trolls and dementors speak with their own voices")
+	var d1_voices := true
+	for family in ["hound", "pixie", "armour", "snare"]:
+		for kind in ["move_1", "move_2", "move_3", "alert", "attack", "death"]:
+			d1_voices = d1_voices and AudioManager.has_sound("%s_%s" % [family, kind])
+	for scene_path in ["res://scenes/entities/mobs/mob_fluffy.tscn", "res://scenes/entities/mobs/mob_cornish_pixie.tscn",
+			"res://scenes/entities/mobs/mob_armour_guard.tscn", "res://scenes/entities/mobs/mob_devils_snare.tscn"]:
+		var state := (load(scene_path) as PackedScene).get_state()
+		for i in state.get_node_property_count(0):
+			if state.get_node_property_name(0, i) == "voice_set":
+				d1_voices = d1_voices and troll.VOICE_SETS.has(String(state.get_node_property_value(0, i)))
+	check(d1_voices, "Fluffy, pixies, armours and the Snare have their own voices")
 
 ## Party bookkeeping (pure): invitations, founding by acceptance, size cap,
 ## leader hand-over on departure, kick/promote rights and the experience bonus.
@@ -621,6 +633,159 @@ func _check_dungeon_run(player: Node) -> void:
 	check(dd.run_state(map_id).is_empty() and not is_instance_valid(boss) or (is_instance_valid(boss) and boss.is_queued_for_deletion()),
 		"Closing the empty copy ends its run and frees its creatures")
 	player.level = saved_level
+
+## D1: the Forbidden Corridor end to end in this (offline) process - entry
+## level and daily limit, the pixie corridor, the shield-bearing commander and
+## its wall adds, the Snare's vines (fire) guarding an immune heart, Fluffy's
+## three heads behind an immune body, the harp's lullaby, the chest and the
+## way out to the castle.
+func _fc_kill(list: Array, player: Node) -> void:
+	for mob in list:
+		if is_instance_valid(mob) and mob.state != mob.State.DEAD:
+			SimAuthority.apply_damage(mob, 1000000, "incendio", player)
+
+func _fc_spawned(dd: Node, map_id: String, step: String) -> Array:
+	return ((dd.run_state(map_id).get("spawned", {}) as Dictionary).get(step, []) as Array)
+
+func _fc_goto(player: Node, origin: Vector3, local: Vector3, wait: float = 0.6) -> void:
+	player.global_position = origin + local
+	await get_tree().create_timer(wait).timeout
+
+func _check_forbidden_corridor(player: Node) -> void:
+	var record := SimAuthority.player_record(SimNet.local_peer_id)
+	var saved_level := int(player.level)
+	var day := Time.get_date_string_from_system(true)
+	# The castle door (L3 east corridor). The test stands at the portal without
+	# walking the castle: the authority checks only the body's position.
+	var entry := HPMaps.portal("fc_entry")
+	var c: Array = entry.get("trigger", {}).get("center", [0, 0, 0])
+	var door := Vector3(float(c[0]), float(c[1]), float(c[2]))
+	record["map_id"] = "castle_interior"
+	player.level = 20
+	player.global_position = door
+	var low: Dictionary = SimNet.request_transfer(player, "fc_entry", "dng_forbidden_corridor")
+	check(String(low.get("reason", "")) == HPProtocol.REJECT_LEVEL, "The Forbidden Corridor refuses characters below level 30 %s" % str(low))
+	player.level = 36
+	for i in range(3):
+		player.record_dungeon_entry("forbidden_corridor", day)
+	var spent: Dictionary = SimNet.request_transfer(player, "fc_entry", "dng_forbidden_corridor")
+	check(String(spent.get("reason", "")) == HPProtocol.REJECT_DAILY_LIMIT and SimAuthority.instances.get("dng_forbidden_corridor", {}).is_empty(),
+		"Three runs a day: a fourth entry is refused and leaves no copy behind %s" % str(spent))
+	player._quest_state.erase("dungeons")
+	record["map_id"] = "castle_interior"
+	player.global_position = door
+	var asked: Dictionary = SimNet.request_transfer(player, "fc_entry", "dng_forbidden_corridor")
+	var map_id: String = await _wait_map("dng_forbidden_corridor#", 12.0)
+	var origin := HPMaps.instance_origin(map_id)
+	check(bool(asked.get("ok", false)) and map_id.begins_with("dng_forbidden_corridor#")
+		and player.dungeon_entries_on("forbidden_corridor", day) == 1,
+		"The locked third-floor door opens a copy of the Forbidden Corridor and counts one entry (%s)" % map_id)
+	var dd: Node = world.get_node("DungeonDirector")
+	await get_tree().create_timer(0.5).timeout
+	var corridor := _fc_spawned(dd, map_id, "corridor")
+	var pixies := corridor.filter(func(m): return is_instance_valid(m) and m.species == "cornish_pixie")
+	check(corridor.size() == 8 and pixies.size() == 6, "Pixies and two enchanted armours hold the corridor (%d)" % corridor.size())
+	var scene: Node = null
+	for node in get_tree().get_nodes_in_group("dungeon_instance"):
+		if String(node.get_meta("map_id", "")) == map_id:
+			scene = node
+	_fc_kill(corridor, player)
+	await get_tree().create_timer(0.6).timeout
+	check(scene != null and scene.gate_open("gate_a"), "Clearing the corridor opens the gallery")
+
+	# --- the Cursed Armour Commander: shield in front, adds from the walls
+	await _fc_goto(player, origin, Vector3(0, 1200.5, -66))
+	var cmd_list := _fc_spawned(dd, map_id, "commander")
+	var cmd = cmd_list[0] if not cmd_list.is_empty() else null
+	check(cmd != null and cmd.is_boss and not scene.gate_open("gate_a"), "The Commander rises in the gallery and the door shuts")
+	if cmd != null:
+		cmd.attack_timer = 999.0
+		cmd.visuals.rotation.y = 0.0   # facing the entrance (+z)
+		player.global_position = origin + Vector3(0, 1200.5, -80)
+		var front := SimAuthority.apply_damage(cmd, 1000, "basic_cast", player)
+		player.global_position = origin + Vector3(0, 1200.5, -92)
+		cmd.visuals.rotation.y = 0.0
+		var back := SimAuthority.apply_damage(cmd, 1000, "basic_cast", player)
+		check(front > 0 and back > 0 and float(front) <= float(back) * 0.45,
+			"Its shield blocks most of a blow from the front (%d) but not from behind (%d)" % [front, back])
+		# No attacker: no crit roll and no shield, so the share is exact.
+		SimAuthority.apply_damage(cmd, int(cmd.current_hp - cmd.max_hp * 0.6), "basic_cast", null)
+		await get_tree().create_timer(0.6).timeout
+		check(_fc_spawned(dd, map_id, "wall_70").size() == 2 and _fc_spawned(dd, map_id, "wall_40").is_empty(),
+			"Below 70% two armours step down from the walls (none yet for 40%)")
+		_fc_kill([cmd], player)
+		_fc_kill(_fc_spawned(dd, map_id, "wall_70"), player)
+	await get_tree().create_timer(0.8).timeout
+	check(scene.gate_open("gate_b"), "The Commander's fall opens the way to the cellar")
+
+	# --- Devil's Snare: vines first (fire), then the heart
+	await _fc_goto(player, origin, Vector3(0, 1200.5, -110), 0.8)
+	var snare_list := _fc_spawned(dd, map_id, "snare")
+	var snare = snare_list[0] if not snare_list.is_empty() else null
+	var vines: Array = snare.living_parts() if snare != null else []
+	check(snare != null and vines.size() == 3 and SimAuthority.apply_damage(snare, 1000, "basic_cast", player) == 0,
+		"The Snare grows three vines and its heart is immune behind them")
+	if vines.size() == 3:
+		snare.attack_timer = 999.0
+		var plain := SimAuthority.apply_damage(vines[0], 100, "basic_cast", player)
+		var fire := SimAuthority.apply_damage(vines[0], 100, "incendio", player)
+		check(fire >= plain * 1.9, "Incendio burns a vine far faster than plain magic (%d vs %d)" % [fire, plain])
+		_fc_kill(vines, player)
+		await get_tree().create_timer(0.5).timeout
+		var srec := SimAuthority.record_for(snare)
+		check((srec.get("parts_down", []) as Array).size() == 3 and not bool(srec.get("immune", true))
+			and SimAuthority.apply_damage(snare, 500, "basic_cast", player) > 0,
+			"With every vine burned the heart is exposed (the vines wither on every client)")
+		_fc_kill([snare], player)
+	await get_tree().create_timer(0.8).timeout
+	check(scene.gate_open("gate_c"), "The Snare's death opens the stair to Fluffy")
+	await _fc_goto(player, origin, Vector3(0, 1200.5, -146))
+	_fc_kill(_fc_spawned(dd, map_id, "stairs"), player)
+
+	# --- Fluffy: three heads, the harp, the trapdoor
+	await _fc_goto(player, origin, Vector3(0, 1200.5, -170), 0.8)
+	var fl := _fc_spawned(dd, map_id, "fluffy")
+	var fluffy = fl[0] if not fl.is_empty() else null
+	var heads: Array = fluffy.living_parts() if fluffy != null else []
+	check(fluffy != null and heads.size() == 3 and SimAuthority.apply_damage(fluffy, 1000, "basic_cast", player) == 0
+		and int(SimAuthority.record_for(fluffy).get("max_hp", 0)) == 12000 and not scene.gate_open("gate_c"),
+		"Fluffy wakes with three heads; its body is immune and shows their summed health")
+	if heads.size() == 3:
+		fluffy.attack_timer = 999.0
+		fluffy.attack_cooldown = 999.0
+		fluffy.move_speed = 0.0
+		await _fc_goto(player, origin, Vector3(16.2, 1200.5, -172), 7.0)
+		check(fluffy.state == fluffy.State.STUNNED and String(dd.run_state(map_id).get("message", "")).contains("sleep"),
+			"Standing at the harp for six seconds plays it: Fluffy falls asleep")
+		var lulled := SimAuthority.apply_damage(heads[0], 1000, "basic_cast", player)
+		check(lulled >= 1400, "A sleeping head takes extra damage (%d from 1000)" % lulled)
+		_fc_kill([heads[0]], player)
+		await get_tree().create_timer(0.5).timeout
+		check(fluffy.phase >= 2 and (SimAuthority.record_for(fluffy).get("parts_down", []) as Array).has(heads[0].part_key),
+			"A head faints (it droops for everyone) and Fluffy turns furious")
+		_fc_kill([heads[1], heads[2]], player)
+		await get_tree().create_timer(1.0).timeout
+	var loot := 0
+	for uid in SimAuthority.entities.keys():
+		var r: Dictionary = SimAuthority.entities[uid]
+		if int(r.get("kind", 0)) == HPProtocol.Kind.LOOT and String(r.get("map_id", "")) == map_id:
+			loot += 1
+	check(fluffy != null and fluffy.state == fluffy.State.DEAD and bool(dd.run_state(map_id).get("complete", false))
+		and scene.gate_open("gate_d") and loot >= 4,
+		"The last head brings Fluffy down: the trapdoor opens and the chest waits (%d loot)" % loot)
+	await _fc_goto(player, origin, Vector3(0, 1200.5, -230), 0.2)
+	var leave: Dictionary = SimNet.request_transfer(player, "fc_reward_exit", "castle_interior")
+	var back_map: String = await _wait_map("castle_interior", 15.0)
+	check(bool(leave.get("ok", false)) and back_map == "castle_interior"
+		and player.global_position.distance_to(HPMaps.spawn_point("castle_interior", "fc_return")) < 3.0,
+		"The way out returns the party to the third-floor corridor")
+	SimAuthority.close_instance(map_id)
+	player.level = saved_level
+	# Back to the grounds for the rest of the regression.
+	var vc: Array = HPMaps.portal("vestibule_exit").get("trigger", {}).get("center", [0, 201.6, 62.8])
+	player.global_position = Vector3(float(vc[0]), float(vc[1]), float(vc[2]))
+	SimNet.request_transfer(player, "vestibule_exit", "grounds")
+	await _wait_map("grounds", 15.0)
 
 ## House standing: quest reputation -> rank 1..7, shown on the HUD, persisted in
 ## the `quests` object, and able to gate a spell on the authority.
