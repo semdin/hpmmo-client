@@ -31,6 +31,7 @@ func _ready() -> void:
 	var player = world.local_player
 	var hud = world.hud
 	var director = world.get_node("EncounterDirector")
+	_check_mob_system(director, world.overlay)
 	check(player.inventory.size() == 1 and player.inventory[0].amount == 2, "JSON inventory converts safely, malformed entries ignored")
 	check(player.level == 3 and player.max_exp == 450, "Saved level restores its EXP threshold")
 	check(hud.hp_bar.value == player.current_hp and hud.mana_bar.value == player.current_mana and hud.exp_bar.value == 75, "HUD binds after restoring a DB character")
@@ -277,6 +278,69 @@ func _ready() -> void:
 	await get_tree().process_frame
 	print("REGRESSION RESULT: %d checks, %d failures" % [checks, failures.size()])
 	get_tree().quit(0 if failures.is_empty() else 1)
+
+## Mob system v2 (M0): creature catalog, resistances, elite rolls, per-species
+## loot, the level-gap rule and the hunting-region bands the HUD names.
+func _check_mob_system(director: Node, overlay: Node) -> void:
+	var report: Dictionary = HPRules.validate_encounters()
+	check(report["ok"], "Encounter data validates against the creature catalog and region bands %s" % str(report["problems"]))
+	var scenes_ok := true
+	for species in ["inferi", "acromantula", "darksnatcher"]:
+		scenes_ok = scenes_ok and ResourceLoader.exists(HPRules.mob_scene_path(species))
+	check(scenes_ok, "Every catalog species resolves to a mob scene")
+	check(HPRules.damage_after_resistances(100, "incendio", false, HPRules.mob_resist("inferi")) == 200
+		and HPRules.damage_after_resistances(100, "incendio", true) == 200
+		and HPRules.damage_after_resistances(100, "basic_cast", false, HPRules.mob_resist("darksnatcher")) == 85
+		and HPRules.damage_after_resistances(100, "bombarda", false, HPRules.mob_resist("inferi")) == 100,
+		"Resistances scale damage per spell element (fire x2 on inferi, arcane -15% on snatchers)")
+	check(is_equal_approx(HPRules.level_gap_exp(10, 10), 1.0) and is_equal_approx(HPRules.level_gap_exp(30, 3), 0.05)
+		and is_equal_approx(HPRules.level_gap_exp(5, 15), 1.2) and HPRules.level_gap_drop(20, 8) < 1.0,
+		"Level gap: same level pays in full, far-lower mobs pay almost nothing, tougher ones pay extra")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var count_galleons := func(drops: Array) -> int:
+		return drops.filter(func(d): return d["id"] == "galleons").size()
+	check(count_galleons.call(HPRules.mob_loot(false, rng)) == 1
+		and count_galleons.call(HPRules.mob_loot(false, rng, "dark_wizard")) == 2
+		and count_galleons.call(HPRules.mob_loot(false, rng, "dark_wizard", true)) == 3,
+		"Loot stacks the base table, the species table and the elite table")
+	var forest: Dictionary = HPRules.region_by_id("forest_w")
+	var inside := Vector3(float(forest["center"][0]), 0.0, float(forest["center"][1]))
+	check(String(HPRules.hunting_region_at(inside).get("id", "")) == "forest_w"
+		and HPRules.hunting_region_at(Vector3(0, 0, 65)).is_empty()
+		and HPRules.region_level_band("forest_w") == [6, 12],
+		"Hunting regions are strict and carry their level band (the courtyard is not one)")
+	check(overlay.band_color(10, 6, 12) != overlay.band_color(2, 6, 12) and overlay.band_color(30, 6, 12) != overlay.band_color(10, 6, 12),
+		"The zone banner colours a level band against the player's level")
+	# Elite: force the roll and configure a fresh body the way the director does.
+	var elite_rules: Dictionary = HPRules.elite_rules()
+	var chance := float(elite_rules.get("chance", 0.0))
+	elite_rules["chance"] = 1.0
+	var pack := {"mob": "acromantula", "level": 8, "boss": false}
+	var elite_mob = load(HPRules.mob_scene_path("acromantula")).instantiate()
+	director._configure_member(elite_mob, pack, true)
+	var normal_mob = load(HPRules.mob_scene_path("acromantula")).instantiate()
+	elite_rules["chance"] = 0.0
+	director._configure_member(normal_mob, pack, true)
+	elite_rules["chance"] = chance
+	check(elite_mob.is_elite and not normal_mob.is_elite and elite_mob.mob_name.begins_with("Elite ")
+		and absi(elite_mob.max_hp - normal_mob.max_hp * 3) <= 3,
+		"An elite roll triples health and prefixes the name")
+	check(elite_mob.species == "acromantula" and elite_mob.loot_table == "spider" and float(elite_mob.resist.get("fire", 0.0)) < 0.0,
+		"A configured mob carries its catalog species, loot table and resistances")
+	elite_mob.free()
+	normal_mob.free()
+	var configured := 0
+	var wrong := 0
+	for pack_data in director.packs:
+		for member in pack_data.members:
+			if not is_instance_valid(member):
+				continue
+			configured += 1
+			var record: Dictionary = SimAuthority.record_for(member)
+			if member.species != String(pack_data.get("mob", "")) or record.get("resist", {}) != member.resist 					or int(SimAuthority.mob_info_of(record).get("level", 0)) != int(pack_data.get("level", -1)):
+				wrong += 1
+	check(wrong == 0, "Spawned pack members (%d) carry species, resistances and level into the authority record" % configured)
 
 ## House standing: quest reputation -> rank 1..7, shown on the HUD, persisted in
 ## the `quests` object, and able to gate a spell on the authority.

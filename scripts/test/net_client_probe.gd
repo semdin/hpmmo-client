@@ -604,7 +604,10 @@ func _mob_summary() -> Array:
 		if int(record.get("kind", 0)) != HPProtocol.Kind.MOB:
 			continue
 		out.append({"uid": int(uid), "hp": int(record.get("hp", -1)), "pack": int(record.get("pack_id", 0)),
-			"zone": String(record.get("zone_id", ""))})
+			"zone": String(record.get("zone_id", "")),
+			# v14 sim_mob_info: what the client was told to print on the label.
+			"name": String(record.get("name", "")), "level": int(record.get("level", 0)),
+			"elite": bool(record.get("is_elite", false))})
 	out.sort_custom(func(a, b): return int(a["uid"]) < int(b["uid"]))
 	return out
 
