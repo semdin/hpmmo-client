@@ -6,6 +6,14 @@ extends Node
 ## --interior builds the castle interior in place (its L0 floor is y 200).
 
 @onready var world = $GameWorld
+## Frame hitches since the last shot (frames over 100 ms, the longest frame).
+var _hitches := 0
+var _worst := 0.0
+
+func _process(delta: float) -> void:
+	if delta > 0.1:
+		_hitches += 1
+	_worst = maxf(_worst, delta)
 
 func _ready() -> void:
 	var views_path := ""
@@ -80,7 +88,9 @@ func _ready() -> void:
 		await get_tree().create_timer(float(v[3]) if v.size() > 3 else 0.8).timeout
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_jpg(out_dir.path_join("%s.jpg" % v[0]), 0.88)
-		print("SHOT %s" % v[0])
+		print("SHOT %s  hitches>100ms=%d worst=%.0fms" % [v[0], _hitches, _worst * 1000.0])
+		_hitches = 0
+		_worst = 0.0
 		var g := WaypointGuide.find(get_tree())
 		if g != null and g.has_target():
 			print("  guide: map=%s route=%d prints=%d air=%d player=%s" % [g.current_map(), g.route().size(),
