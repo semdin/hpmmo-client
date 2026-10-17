@@ -29,6 +29,7 @@ func _ready() -> void:
 	await _capture_inventory()
 	await _capture_tooltip()
 	await _capture_skills()
+	await _capture_chest()
 
 	world.queue_free()
 	await get_tree().process_frame
@@ -49,6 +50,7 @@ func _stock_inventory(player) -> void:
 	player.inventory.clear()
 	for spec in [
 		["wand_hawthorn", 1, 3],
+		["wand_runebound", 1, 0, [{"stat": "spell_power", "value": 6, "grade": 2}, {"stat": "crit_chance", "value": 2, "grade": 1}]],
 		["wand_elder", 1, 6],
 		["robe_apprentice", 1, 0],
 		["broom_nimbus2000", 1, 0],
@@ -62,7 +64,10 @@ func _stock_inventory(player) -> void:
 		var id: String = spec[0]
 		if not GameData.ITEMS.has(id):
 			continue
-		player.inventory.append({"id": id, "amount": int(spec[1]), "tier": int(spec[2])})
+		if HPEquipment.stackable(id):
+			player.inventory.append({"id": id, "amount": int(spec[1]), "tier": int(spec[2])})
+		else:
+			player.inventory.append(HPEquipment.instance(id, int(spec[2]), spec[3] if spec.size() > 3 else []))
 	player.galleons = 22874
 	player.emit_stats()
 	player.inventory_changed.emit()
@@ -73,6 +78,19 @@ func _capture_inventory() -> void:
 	world.inventory_ui.open_for_player(player)
 	await get_tree().create_timer(0.8).timeout
 	await _shot("inventory")
+	# The merchant beside it, pricing an enchanted wand.
+	ui_merchant_offer(player)
+	await get_tree().create_timer(0.5).timeout
+	await _shot("merchant")
+
+
+func ui_merchant_offer(player) -> void:
+	var ui = world.inventory_ui
+	ui._set_merchant_open(true)
+	for entry in player.inventory:
+		if not (entry.get("bonuses", []) as Array).is_empty():
+			ui._offer(entry)
+			return
 
 
 func _capture_tooltip() -> void:
@@ -121,6 +139,27 @@ func _capture_skills() -> void:
 	world.hud.skill_window.open()
 	await get_tree().create_timer(0.6).timeout
 	await _shot("skills")
+
+
+## Two loot chests beside the player (plain gold glow, enchanted violet) and
+## the chest window opened on the enchanted one - staged through the authority.
+func _capture_chest() -> void:
+	world.hud.skill_window.close()
+	var player = world.local_player
+	var at: Vector3 = player.global_position + Vector3(0, 0, -3.0)
+	SimAuthority._spawn_chest([{"id": "galleons", "amount": 64}, {"id": "potion_health", "amount": 1}], at + Vector3(-1.6, 0, 0))
+	SimAuthority._spawn_chest([{"id": "galleons", "amount": 88}, {"id": "mat_phoenix_ash", "amount": 2},
+		{"id": "wand_runebound", "amount": 1, "bonuses": [{"stat": "spell_power", "value": 6, "grade": 2}, {"stat": "crit_chance", "value": 2, "grade": 1}]}],
+		at + Vector3(1.6, 0, 0))
+	await get_tree().create_timer(0.6).timeout
+	var rare: Node3D = null
+	for node in get_tree().get_nodes_in_group("loot"):
+		if node.get("item_id") == "chest_rare":
+			rare = node
+	if rare != null:
+		world.loot_window.open_chest(rare)
+	await get_tree().create_timer(0.6).timeout
+	await _shot("chest")
 
 
 func _shot(subject: String) -> void:

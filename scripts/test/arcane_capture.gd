@@ -39,10 +39,6 @@ func _ready() -> void:
 			check(canvas.encloses(ui._window.get_global_rect()),key+" inventory window fits canvas")
 			for slot in ui._doll_slots:
 				check(canvas.encloses(slot.get_global_rect()),key+" gear slot "+slot.equipment_slot+" fits")
-			if ui._compact:
-				ui._tabs.current_tab = 1
-				await _settle()
-				await _shot(key+"-bag")
 			ui._on_slot_entered(ui._bag_slots[0])
 			await _settle()
 			check(canvas.encloses(ui._tooltip.get_global_rect()),key+" tooltip fits canvas")

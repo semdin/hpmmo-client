@@ -520,6 +520,7 @@ scripts/ui/hud_world_map.gd
 scripts/ui/inventory_arcane.gd
 scripts/ui/inventory_ui.gd
 scripts/ui/item_tooltip.gd
+scripts/ui/loot_window.gd
 scripts/ui/main_menu.gd
 scripts/ui/maintenance_ui.gd
 scripts/ui/map_marker.gd
