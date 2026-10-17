@@ -207,6 +207,8 @@ func _ready() -> void:
 		_setup_maintenance()
 	if mode == "transfer":
 		_setup_transfer()
+	if mode == "party":
+		_setup_party()
 	if mode == "encounter":
 		_setup_encounter()
 	SimAuthority.entity_health.connect(_on_health)
@@ -390,20 +392,21 @@ func _physics_process(delta: float) -> void:
 var _party_states: Array = []
 var _party_invites: Array = []
 var _party_invite_sent := false
-var _party_hooked := false
+
+## Hooked before the join: an invitation can arrive in the same network poll
+## as the join result, ahead of the first post-join physics frame.
+func _setup_party() -> void:
+	SimAuthority.party_state.connect(func(uid: int, state: Dictionary):
+		if uid == SimAuthority.local_uid:
+			_party_states.append(state)
+			_record("party_state", {"size": (state.get("members", []) as Array).size(), "leader": int(state.get("leader", 0))}))
+	SimAuthority.party_invited.connect(func(uid: int, from_name: String):
+		if uid == SimAuthority.local_uid:
+			_party_invites.append(from_name)
+			_record("party_invite", {"from": from_name})
+			NetworkManager.send_chat("/accept"))
 
 func _party_tick() -> void:
-	if not _party_hooked:
-		_party_hooked = true
-		SimAuthority.party_state.connect(func(uid: int, state: Dictionary):
-			if uid == SimAuthority.local_uid:
-				_party_states.append(state)
-				_record("party_state", {"size": (state.get("members", []) as Array).size(), "leader": int(state.get("leader", 0))}))
-		SimAuthority.party_invited.connect(func(uid: int, from_name: String):
-			if uid == SimAuthority.local_uid:
-				_party_invites.append(from_name)
-				_record("party_invite", {"from": from_name})
-				NetworkManager.send_chat("/accept"))
 	if probe_name == "Lead" and not _party_invite_sent and _t > 3.0:
 		_party_invite_sent = true
 		NetworkManager.send_chat("/invite Mate")
