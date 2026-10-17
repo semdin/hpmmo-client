@@ -61,6 +61,7 @@ var _target_death_tick := -1
 var _target_initial_hp := -1
 var _target_respawn_tick := -1
 var _exp_start := -1
+var _level_start := -1
 var _exp_now := -1
 ## Every distinct exp this client was told about, in order: evidence for the
 ## reward arithmetic below, and the only way to see a stat push that arrived too
@@ -296,6 +297,7 @@ func _on_joined(ok: bool, reason: String, _character: Dictionary) -> void:
 		_finish(1)
 		return
 	_exp_start = int(player.current_exp) if player != null else -1
+	_level_start = int(player.level) if player != null else -1
 	_last_pos = player.global_position if player != null else Vector3.ZERO
 	_origin_pos = _last_pos
 	if ok and mode == "staircase":
@@ -440,6 +442,8 @@ func _finish_party() -> void:
 		"casts_accepted": _casts_accepted,
 		"exp_start": _exp_start,
 		"exp_end": int(player.current_exp) if player != null else _exp_now,
+		"level_start": _level_start,
+		"level_end": int(player.level) if player != null else _level_start,
 		"rewards": _rewards,
 		"target_death_tick": _target_death_tick,
 	})
@@ -519,15 +523,30 @@ func _set_target(uid: int) -> void:
 
 func _choose_pack() -> int:
 	var packs: Dictionary = {}
+	var boss_packs: Dictionary = {}
+	for uid in SimAuthority.entities.keys():
+		var r: Dictionary = SimAuthority.entities[uid]
+		if int(r.get("kind", 0)) == HPProtocol.Kind.MOB and (int(r.get("flags", 0)) & HPProtocol.FLAG_BOSS) != 0:
+			boss_packs[int(r.get("pack_id", 0))] = true
 	for uid in SimAuthority.entities.keys():
 		var record: Dictionary = SimAuthority.entities[uid]
 		if int(record.get("kind", 0)) != HPProtocol.Kind.MOB:
 			continue
+		if boss_packs.has(int(record.get("pack_id", 0))):
+			continue
 		var pack_id := int(record.get("pack_id", 0))
 		if pack_id == 0:
 			continue
+		# An ordinary pack whose position has arrived: a boss is not a quick kill,
+		# and a record without a sample would read as the origin ("nearest").
+		if (int(record.get("flags", 0)) & HPProtocol.FLAG_BOSS) != 0:
+			continue
+		var node = record.get("node")
+		var pos = (node as Node3D).global_position if node != null and is_instance_valid(node) else record.get("pos")
+		if not (pos is Vector3):
+			continue
 		if not packs.has(pack_id) or int(uid) < int(packs[pack_id]["uid"]):
-			packs[pack_id] = {"uid": int(uid), "pos": record.get("pos", Vector3.ZERO)}
+			packs[pack_id] = {"uid": int(uid), "pos": pos}
 	var best := 0
 	var best_distance := 1e9
 	for pack_id in packs.keys():
@@ -651,6 +670,8 @@ func _finish_agree() -> void:
 		"casts_rejected": _casts_rejected,
 		"exp_start": _exp_start,
 		"exp_end": int(player.current_exp) if player != null else _exp_now,
+		"level_start": _level_start,
+		"level_end": int(player.level) if player != null else _level_start,
 		"exp_seen": _exp_seen,
 		"rewards": _rewards,
 		"visible_mobs": _mob_summary(),
