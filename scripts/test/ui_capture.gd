@@ -30,6 +30,7 @@ func _ready() -> void:
 	await _capture_tooltip()
 	await _capture_skills()
 	await _capture_chest()
+	await _capture_windows()
 
 	world.queue_free()
 	await get_tree().process_frame
@@ -160,6 +161,51 @@ func _capture_chest() -> void:
 		world.loot_window.open_chest(rare)
 	await get_tree().create_timer(0.6).timeout
 	await _shot("chest")
+
+
+## The HUD windows (B bestiary, M map), Ollivander and an NPC dialogue.
+func _capture_windows() -> void:
+	world.loot_window.close()
+	world.inventory_ui.hide()
+	world.hud.bestiary.open()
+	await get_tree().create_timer(0.6).timeout
+	await _shot("bestiary")
+	world.hud.bestiary.close()
+	world.hud.world_map.open()
+	await get_tree().create_timer(0.6).timeout
+	await _shot("map")
+	world.hud.world_map.close()
+	world.ollivander_ui.open_for_player(world.local_player)
+	for entry in world.local_player.inventory:
+		if not (entry.get("bonuses", []) as Array).is_empty():
+			world.ollivander_ui.set_target(int(entry.get("uid", 0)))
+	await get_tree().create_timer(0.6).timeout
+	await _shot("ollivander")
+	world.ollivander_ui.hide()
+	world.inventory_ui.hide()
+	var fig: Node = null
+	for npc in get_tree().get_nodes_in_group("npcs"):
+		if String(npc.get("npc_name")) == "Professor Fig":
+			fig = npc
+	if fig != null:
+		world.overlay.show_dialogue(fig.npc_name, fig.talk(world.local_player))
+		await get_tree().create_timer(0.6).timeout
+		await _shot("dialogue")
+		world.overlay._dialog_panel.hide()
+	# The target ring under the nearest targetable thing, moved in front of us.
+	var player = world.local_player
+	var best: Node3D = null
+	for node in get_tree().get_nodes_in_group("targetable"):
+		if node is Node3D and node != player and (best == null or node.global_position.distance_to(player.global_position) < best.global_position.distance_to(player.global_position)):
+			best = node
+	if best != null:
+		player.global_position = best.global_position + Vector3(0, 0, 6)
+		player.camera_rot_y = 0
+		player.set_target(best)
+		await get_tree().create_timer(0.8).timeout
+		var ring = world.get_node_or_null("TargetRing")
+		print("DIAG ring target=%s at=%s ring_visible=%s ring_pos=%s scale=%s" % [best.name, best.global_position, ring.visible if ring else "none", ring.global_position if ring else Vector3.ZERO, ring.scale if ring else Vector3.ZERO])
+		await _shot("target-ring")
 
 
 func _shot(subject: String) -> void:

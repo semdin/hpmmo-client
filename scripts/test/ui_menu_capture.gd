@@ -20,6 +20,16 @@ func _ready() -> void:
 	menu.call("_set_status", "Sunucu şu an bakımda. Lütfen biraz sonra tekrar dene.", "warn")
 	await get_tree().create_timer(0.3).timeout
 	await _shot("menu-maintenance")
+	# The character screen and its create card (run with --resolution 1280x800
+	# to see a 16:10 laptop).
+	menu.queue_free()
+	var select: Node = load("res://scenes/main/character_select.tscn").instantiate()
+	add_child(select)
+	await get_tree().create_timer(1.0).timeout
+	await _shot("charselect")
+	select.call("_on_new_char_pressed")
+	await get_tree().create_timer(0.4).timeout
+	await _shot("charselect-create")
 	get_tree().quit()
 
 func _shot(subject: String) -> void:

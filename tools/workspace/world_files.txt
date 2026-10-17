@@ -222,6 +222,7 @@ assets/shaders/spell_layer_add.gdshader
 assets/shaders/spell_ribbon.gdshader
 assets/shaders/stair_threshold.gdshader
 assets/shaders/stair_ward.gdshader
+assets/shaders/target_ring.gdshader
 assets/shaders/triplanar_pbr.gdshader
 assets/shaders/wand_energy.gdshader
 assets/shaders/ward_surface.gdshader
@@ -564,6 +565,7 @@ scripts/world/map_controller.gd
 scripts/world/npc.gd
 scripts/world/quality_preset.gd
 scripts/world/safe_zone.gd
+scripts/world/target_ring.gd
 scripts/world/training_dummy.gd
 scripts/world/waypoint_guide.gd
 scripts/world/waypoint_router.gd
