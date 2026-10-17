@@ -495,6 +495,7 @@ scripts/ui/gauge_flow.gd
 scripts/ui/hit_feedback.gd
 scripts/ui/hud.gd
 scripts/ui/hud_action_bar.gd
+scripts/ui/hud_bestiary.gd
 scripts/ui/hud_buff_bar.gd
 scripts/ui/hud_chat.gd
 scripts/ui/hud_game_menu.gd

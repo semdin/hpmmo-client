@@ -18,9 +18,9 @@ const CAST := [
 ]
 const SHOTS := [
 	[Vector3(0, F + 2.2, -8), Vector3(0, F + 1.4, -26)],
-	[Vector3(4, F + 3.0, -62), Vector3(0, F + 1.8, -86)],
+	[Vector3(12, F + 3.0, -166), Vector3(18, F + 1.2, -172)],
 	[Vector3(5, F + 2.5, -106), Vector3(0, F + 2.2, -128)],
-	[Vector3(14, F + 5.0, -164), Vector3(0, F + 3.6, -194)],
+	[Vector3(15, F + 4.0, -180), Vector3(2, F + 0.5, -204)],
 ]
 
 func _ready() -> void:
