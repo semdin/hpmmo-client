@@ -475,6 +475,7 @@ scripts/entities/mobs/part_droop.gd
 scripts/entities/mobs/snare_boss.gd
 scripts/entities/monolith/dark_monolith.gd
 scripts/entities/player.gd
+scripts/entities/prediction_history.gd
 scripts/entities/rig_follower.gd
 scripts/entities/rig_ik.gd
 scripts/entities/wand_grip_modifier.gd
