@@ -31,6 +31,11 @@ $serverRepo = Join-Path $root 'server'
 $lockPath = Join-Path $root 'workspace.lock.json'
 $python = 'python'
 
+function Write-Step([string]$Text) {
+    Write-Host ''
+    Write-Host "[ready] $Text" -ForegroundColor Cyan
+}
+
 function Get-Godot {
     if ($env:HPMMO_GODOT) { return $env:HPMMO_GODOT }
     $cmd = Get-Command godot -ErrorAction SilentlyContinue

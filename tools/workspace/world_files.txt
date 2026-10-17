@@ -212,14 +212,21 @@ assets/shaders/castle/candle_flame.gdshader
 assets/shaders/castle/enchanted_sky.gdshader
 assets/shaders/castle/floating_candle.gdshader
 assets/shaders/castle/lake_window.gdshader
+assets/shaders/castle/window_lit.gdshader
+assets/shaders/castle/window_view.gdshader
+assets/shaders/footprint.gdshader
 assets/shaders/lake_water.gdshader
+assets/shaders/safe_ward.gdshader
 assets/shaders/spell_layer.gdshader
 assets/shaders/spell_layer_add.gdshader
 assets/shaders/spell_ribbon.gdshader
+assets/shaders/stair_threshold.gdshader
+assets/shaders/stair_ward.gdshader
 assets/shaders/triplanar_pbr.gdshader
 assets/shaders/wand_energy.gdshader
 assets/shaders/ward_surface.gdshader
 assets/shaders/water_pbr.gdshader
+assets/shaders/waypoint_beacon.gdshader
 assets/terrain/grounds/data/terrain3d-01-01.res
 assets/terrain/grounds/data/terrain3d-01_00.res
 assets/terrain/grounds/data/terrain3d_00-01.res
@@ -544,6 +551,7 @@ scripts/world/game_world.gd
 scripts/world/grounds/arch_kit.gd
 scripts/world/grounds/castle_exterior.gd
 scripts/world/grounds/grounds_builder.gd
+scripts/world/grounds/grounds_courtyard.gd
 scripts/world/grounds/grounds_horizon.gd
 scripts/world/grounds/grounds_lake.gd
 scripts/world/grounds/grounds_layout.gd
@@ -555,3 +563,5 @@ scripts/world/npc.gd
 scripts/world/quality_preset.gd
 scripts/world/safe_zone.gd
 scripts/world/training_dummy.gd
+scripts/world/waypoint_guide.gd
+scripts/world/waypoint_router.gd

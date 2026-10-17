@@ -38,6 +38,8 @@ const SHOTS := [
 	["staff_table", Vector3(-86, 2.4, 50), Vector3(-101, 2.0, 57)],
 	["banners", Vector3(-30, 3.0, 56), Vector3(-66, 15, 50)],
 	["owl_lectern", Vector3(-90.5, 2.6, 58.5), Vector3(-96.2, 1.8, 56)],
+	["corridor_portraits", Vector3(53, 21.7, -5), Vector3(47, 23.2, -12)],
+	["dungeon_portraits", Vector3(-38, -8.3, -8), Vector3(-60, -8.0, -4)],
 	["armour_and_portraits", Vector3(-11, 2.0, 57), Vector3(-17.5, 3.5, 47)],
 	["compass_rose", Vector3(0, 7.0, 62.5), Vector3(0, 0, 54)],
 	["tower_portraits", Vector3(0, 21.7, -20), Vector3(-5.5, 23.5, -29)],
@@ -277,7 +279,13 @@ func _render_shots(out_dir: String) -> void:
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	for i in 3:
 		await get_tree().process_frame
+	var only := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--only="):
+			only = a.trim_prefix("--only=")
 	for s in SHOTS:
+		if only != "" and not (",%s," % only).contains(",%s," % s[0]):
+			continue
 		_cam.look_at_from_position(s[1] + Vector3(0, MAP_Y, 0), s[2] + Vector3(0, MAP_Y, 0))
 		for i in 3:
 			await get_tree().process_frame
