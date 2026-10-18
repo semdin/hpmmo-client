@@ -501,6 +501,7 @@ scripts/entities/wand_grip_modifier.gd
 scripts/fx/level_up_fx.gd
 scripts/server/db_manager.gd
 scripts/server/dedicated_server.gd
+scripts/server/test_character.gd
 scripts/spells/bombarda_blast.gd
 scripts/spells/boss_warning.gd
 scripts/spells/broom_trail.gd
