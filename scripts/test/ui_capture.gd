@@ -29,6 +29,8 @@ func _ready() -> void:
 	await _capture_inventory()
 	await _capture_tooltip()
 	await _capture_tooltip("robe_apprentice", "tooltip-cloak")
+	await _capture_tooltip("focus_emberwing", "tooltip-focus-t4")
+	await _capture_tooltip("ring_moonveil", "tooltip-ring-t5")
 	await _capture_skills()
 	await _capture_chest()
 	await _capture_windows()
@@ -62,7 +64,7 @@ func _stock_inventory(player) -> void:
 		["mat_dragon_heartstring", 4, 0],
 		["mat_thestral_hair", 2, 0],
 		["mat_elder_core", 1, 0],
-	]:
+	] + _tier_accessories():
 		var id: String = spec[0]
 		if not GameData.ITEMS.has(id):
 			continue
@@ -73,6 +75,16 @@ func _stock_inventory(player) -> void:
 	player.galleons = 22874
 	player.emit_stats()
 	player.inventory_changed.emit()
+
+
+## Every T2-T5 accessory (hat/gloves/boots/focus/pendant/ring x runebound..moonveil),
+## so the bag shot shows their icons.
+func _tier_accessories() -> Array:
+	var out: Array = []
+	for kind in ["hat", "gloves", "boots", "focus", "pendant", "ring"]:
+		for tier in ["runebound", "silverthorn", "emberwing", "moonveil"]:
+			out.append([kind + "_" + tier, 1, 0])
+	return out
 
 
 func _capture_inventory() -> void:

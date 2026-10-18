@@ -78,3 +78,16 @@ Tool: fal.ai `fal-ai/nano-banana-2.1` (1K, 1:1), text prompt only (no input imag
   (silver spectral stag), resized to 512 px.
 * `icon_status_despair.png` - "Despair" debuff (dementor kiss / aura), generated on flat
   white and cut out by `tools/ui/cutout_icons.py` (item_ mode, 512 px).
+
+## 2026-10-18 additions (fal.ai) - accessory tiers T2-T5
+
+Tool: fal.ai `fal-ai/nano-banana-2.1` (1K, 1:1), text prompt only (no input image):
+"Square MMORPG inventory item icon of <object>. <tier look>. The object is isolated on
+a pure flat white background, ... Style: rich hand-painted fantasy game icon like World
+of Warcraft item icons ...".
+
+* `icon_{hat,gloves,boots,focus,pendant,ring}_{runebound,silverthorn,emberwing,moonveil}.png`
+  (24 icons) - generated on flat white and cut out by `tools/ui/cutout_icons.py`
+  (`item_<id>.png` sources in `art/accessories/icons_src/`), 512 px. Tier looks follow
+  the wand/cloak tiers: brass runes, silver thorns + emeralds, crimson-gold phoenix,
+  moonlit mithril + star crystal.
