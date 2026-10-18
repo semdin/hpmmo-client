@@ -698,6 +698,62 @@
    "source": "procedural",
    "method": "client/tools/vfx/procedural_textures.py (seeded)",
    "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. One-shot: ends on an empty frame."
+  },
+  {
+   "id": "vfx_levelup_pillar",
+   "file": "atlases/levelup_pillar_8x8_1k.png",
+   "path": "atlases/levelup_pillar_8x8_1k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 128,
+   "frames": 64,
+   "fps": 23,
+   "loop": false,
+   "colour": true,
+   "blend": "add",
+   "blend_default": "add",
+   "purpose": "Golden light pillar erupting from the feet (level-up)",
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "cell_px": 128,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "generator": "client/tools/vfx/build_spell_vfx.py",
+   "source": "fal.ai alibaba/wan-3.0/text-to-video -> art/vfx/source/levelup_pillar.mp4",
+   "method": "generated video, packed",
+   "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. One-shot: ends on an empty frame."
+  },
+  {
+   "id": "vfx_levelup_spiral",
+   "file": "atlases/levelup_spiral_8x8_1k.png",
+   "path": "atlases/levelup_spiral_8x8_1k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 128,
+   "frames": 64,
+   "fps": 22,
+   "loop": false,
+   "colour": true,
+   "blend": "add",
+   "blend_default": "add",
+   "purpose": "Golden sparkle helix rising around the body (level-up)",
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "cell_px": 128,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "generator": "client/tools/vfx/build_spell_vfx.py",
+   "source": "fal.ai alibaba/wan-3.0/text-to-video -> art/vfx/source/levelup_spiral.mp4",
+   "method": "generated video, packed",
+   "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. One-shot: ends on an empty frame."
   }
  ]
 }

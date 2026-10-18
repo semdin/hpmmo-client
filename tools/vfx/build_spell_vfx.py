@@ -55,6 +55,10 @@ ATLASES = [
      "Crackling energy orb loop, white, tinted per spell (bolt cores)"),
     ("vfx_fire_orb", "fire_orb.mp4", "atlases/fire_orb_8x8_1k.png", {"cell": 128, "loop": True, "start": 0, "end": 40}, "add",
      "Churning fireball loop (Bombarda bolt core)"),
+    ("vfx_levelup_pillar", "levelup_pillar.mp4", "atlases/levelup_pillar_8x8_1k.png", {"cell": 128, "inner": 0.97}, "add",
+     "Golden light pillar erupting from the feet (level-up)"),
+    ("vfx_levelup_spiral", "levelup_spiral.mp4", "atlases/levelup_spiral_8x8_1k.png", {"cell": 128, "inner": 0.9}, "add",
+     "Golden sparkle helix rising around the body (level-up)"),
 ]
 
 STILLS = [

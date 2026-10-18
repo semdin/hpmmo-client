@@ -2644,8 +2644,9 @@ func _retreat_from_pack() -> void:
 
 ## Quest mode: the client spawns beside Professor Fig (HPMMO_DEV_SPAWN) and can
 ## only ASK to talk. It asks Hagrid (across the map: must be refused), then Fig
-## (in range: the server completes the quest and pays), then Fig again (nothing
-## more may be paid). Progress is read from what the server sent back.
+## (in range: the server finishes the quest - it waits to be claimed), claims
+## it (the server pays), then talks to Fig again (nothing more may be paid).
+## Progress is read from what the server sent back.
 var _quest_started := false
 var _quest_step := 0
 var _quest_at := 0.0
@@ -2655,13 +2656,13 @@ var _quest_completed: Array = []
 
 func _quest_snapshot() -> Dictionary:
 	return {
-		"quest_active": int(player.quest_active),
-		"quest_progress": int(player.quest_progress),
+		"quest_active": player.quest_done.size(),
+		"quest_ready": player.quest_ready.duplicate(),
 		"house_rep": int(player.house_rep),
 		"galleons": int(player.galleons),
 		"exp": int(player.current_exp),
 		"level": int(player.level),
-		"view_index": int(QuestManager.active_index),
+		"view_index": QuestManager.done_count(),
 	}
 
 func _quest_tick() -> void:
@@ -2683,6 +2684,9 @@ func _quest_tick() -> void:
 			SimNet.submit_talk(player, "Professor Fig")
 		2:
 			_record("after_near_talk", _quest_snapshot())
+			SimNet.submit_quest_claim(player, "q001")
+		3:
+			_record("after_claim", _quest_snapshot())
 			SimNet.submit_talk(player, "Professor Fig")
 		_:
 			_done = true
