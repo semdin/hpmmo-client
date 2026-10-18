@@ -91,3 +91,13 @@ of Warcraft item icons ...".
   (`item_<id>.png` sources in `art/accessories/icons_src/`), 512 px. Tier looks follow
   the wand/cloak tiers: brass runes, silver thorns + emeralds, crimson-gold phoenix,
   moonlit mithril + star crystal.
+
+## 2026-10-18 additions (fal.ai) - HUD menu buttons
+
+Tool: fal.ai `google/nano-banana-2.1` (1K, 1:1), the same full-bleed menu-icon text
+template as the 2026-10-13 menu set, text prompt only (no input image).
+
+* `icon_menu_{skills,bestiary,character,quests}.png` - full-bleed square paintings for
+  the bottom-right menu cells (wand + spellbook, monster book with claw marks, hooded
+  wizard before a gold crest, sealed quest scroll), resized to 256 px by
+  `tools/ui/cutout_icons.py` (`menu_<id>.png` sources in `art/ui_menu_icons_2026-10-18/src/`).
