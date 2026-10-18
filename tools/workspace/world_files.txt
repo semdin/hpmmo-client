@@ -43,6 +43,10 @@ assets/models/environment/chest_gold.glb
 assets/models/environment/chest_gold_dungeon_texture.png
 assets/models/environment/column.gltf.glb
 assets/models/environment/column_dungeon_texture.png
+assets/models/environment/loot_chest.glb
+assets/models/environment/loot_chest_chest_albedo.png
+assets/models/environment/loot_chest_chest_mr.png
+assets/models/environment/loot_chest_chest_normal.png
 assets/models/environment/pillar.gltf.glb
 assets/models/environment/pillar_decorated.gltf.glb
 assets/models/environment/pillar_decorated_dungeon_texture.png
@@ -216,6 +220,9 @@ assets/shaders/castle/window_lit.gdshader
 assets/shaders/castle/window_view.gdshader
 assets/shaders/footprint.gdshader
 assets/shaders/lake_water.gdshader
+assets/shaders/loot/chest_beam.gdshader
+assets/shaders/loot/chest_pool.gdshader
+assets/shaders/loot/chest_rim.gdshader
 assets/shaders/safe_ward.gdshader
 assets/shaders/spell_layer.gdshader
 assets/shaders/spell_layer_add.gdshader
