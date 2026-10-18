@@ -132,6 +132,8 @@ def main():
     drift = []
     checked = 0
     for key, entry in sorted(manifest.get("sounds", {}).items()):
+        if not str(entry["path"]).endswith(".wav"):
+            continue  # MP3 music: AudioManager sets its loop flag at load time
         path = import_path(parsed.client, str(entry["path"]))
         if not os.path.exists(path):
             drift.append("%s: no .import file yet (run the Godot import pass)" % key)

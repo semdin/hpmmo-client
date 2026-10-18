@@ -42,6 +42,19 @@ The earlier PNG kit (Kenney *Fantasy UI Borders*, Kenney *UI Pack* and the
 procedural shapes) was removed in the same pass: nothing in the project loads
 those files any more, and their licence copies went with them.
 
+# Audio pass 2 (2026-10-19)
+
+Every synthesised sound and the classical beds were replaced with generated
+audio from fal.ai: ambience beds and one-shots, footsteps, interface, broom,
+door and the remaining creature cues with **ElevenLabs Sound Effects v2**, and
+a 13-track soundtrack plus three stingers with **ElevenLabs Music v2.5**
+(instrumental). Prompts: `tools/audio/audio_spec.json`; importer
+`tools/audio/import_audio_spec.py`. Spell / basic-attack / creature cues from
+2026-10-16 are unchanged. Generated output; commercial use permitted under the
+ElevenLabs / fal.ai terms of the generating account. Full provenance:
+`assets/audio/CREDITS-spell-audio.md`. The section below describes the retired
+synthesised set.
+
 # Audio pass (2026-10-10)
 
 The whole sound set was regenerated from `tools/audio/synth_spell_sfx.py`
