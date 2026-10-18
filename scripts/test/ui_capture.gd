@@ -28,6 +28,7 @@ func _ready() -> void:
 
 	await _capture_inventory()
 	await _capture_tooltip()
+	await _capture_tooltip("robe_apprentice", "tooltip-cloak")
 	await _capture_skills()
 	await _capture_chest()
 	await _capture_windows()
@@ -94,11 +95,11 @@ func ui_merchant_offer(player) -> void:
 			return
 
 
-func _capture_tooltip() -> void:
+func _capture_tooltip(item_id := "wand_elder", subject := "tooltip") -> void:
 	var ui = world.inventory_ui
 	var slot: UISlot = null
 	for candidate in ui._bag_slots:
-		if candidate.item_id == "wand_elder":
+		if candidate.item_id == item_id:
 			slot = candidate
 			break
 	if slot == null:
@@ -115,6 +116,8 @@ func _capture_tooltip() -> void:
 	ui.set_process(false)
 	ui._tooltip.set_process(false)
 	var at: Vector2 = slot.global_position + Vector2(slot.size.x + 14, -30)
+	if at.x + ui._tooltip.size.x > get_viewport().get_visible_rect().size.x:
+		at.x = slot.global_position.x - ui._tooltip.size.x - 14   # the bag sits at the right edge
 	print("DIAG tooltip rect=%s size=%s z=%d visible=%s parent=%s sb=%s" % [
 		ui._tooltip.global_position, ui._tooltip.size, ui._tooltip.z_index,
 		ui._tooltip.visible, ui._tooltip.get_parent().name,
@@ -125,7 +128,7 @@ func _capture_tooltip() -> void:
 	ui._tooltip.offset_top += delta.y
 	ui._tooltip.offset_bottom += delta.y
 	await get_tree().create_timer(0.5).timeout
-	await _shot("tooltip")
+	await _shot(subject)
 
 
 ## The skill window (V) and the action-bar level badges, with a Master skill,
