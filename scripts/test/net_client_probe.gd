@@ -373,6 +373,10 @@ func _physics_process(delta: float) -> void:
 			# Retreat: a pack is not allowed to respawn on top of players, so the
 			# spot has to be vacated before the respawn can be observed.
 			_retreat()
+		elif _target_respawn_tick >= 0:
+			# Death and respawn are both on record: hold still. Fighting the
+			# fresh pack would retarget and wipe what was observed.
+			SimNet.forced_intent = {}
 		else:
 			_drive_to_target()
 			_attack_target()
@@ -463,6 +467,8 @@ const ENGAGE_RANGE := 22.0
 ## pack whose lowest-uid member is closest, then that pack's lowest-uid member.
 ## A whole pack is replicated together, so both clients compute the same answer.
 func _update_target() -> void:
+	if mode == "agree" and _target_respawn_tick >= 0:
+		return   # the observation is complete; keep the target it was made on
 	if _pack_id == 0:
 		var pack := _choose_pack()
 		if pack == 0:

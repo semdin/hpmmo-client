@@ -126,6 +126,8 @@ func _capture_maintenance() -> void:
 
 func _capture_onboarding() -> void:
 	var hud = world.hud
+	if hud.onboarding == null:
+		return   # the guide is retired; the quest chain is the onboarding
 	var player = world.local_player
 	# Back outside, in the courtyard, at the second step of the route.
 	world.map_controller._start_transfer("grounds", "courtyard", 0)
