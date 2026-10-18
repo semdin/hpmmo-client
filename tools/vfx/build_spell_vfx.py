@@ -59,6 +59,10 @@ ATLASES = [
      "Golden light pillar erupting from the feet (level-up)"),
     ("vfx_levelup_spiral", "levelup_spiral.mp4", "atlases/levelup_spiral_8x8_1k.png", {"cell": 128, "inner": 0.9}, "add",
      "Golden sparkle helix rising around the body (level-up)"),
+    ("vfx_broom_mist", "broom_mist.mp4", "atlases/broom_mist_8x8_1k.png", {"cell": 128, "mono": True, "gain": 1.1, "inner": 0.6}, "alpha",
+     "Curling silvery air wisps, white, tinted at runtime (broom wake)"),
+    ("vfx_broom_motes", "broom_motes.mp4", "atlases/broom_motes_8x8_1k.png", {"cell": 128, "inner": 0.8, "gain": 1.4}, "add",
+     "Drifting cloud of glittering pale-gold dust motes (broom wake)"),
 ]
 
 STILLS = [

@@ -754,6 +754,62 @@
    "source": "fal.ai alibaba/wan-3.0/text-to-video -> art/vfx/source/levelup_spiral.mp4",
    "method": "generated video, packed",
    "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. One-shot: ends on an empty frame."
+  },
+  {
+   "id": "vfx_broom_mist",
+   "file": "atlases/broom_mist_8x8_1k.png",
+   "path": "atlases/broom_mist_8x8_1k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 128,
+   "frames": 64,
+   "fps": 22,
+   "loop": false,
+   "colour": true,
+   "blend": "alpha",
+   "blend_default": "alpha",
+   "purpose": "Curling silvery air wisps, white, tinted at runtime (broom wake)",
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "cell_px": 128,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "generator": "client/tools/vfx/build_spell_vfx.py",
+   "source": "fal.ai alibaba/wan-3.0/text-to-video -> art/vfx/source/broom_mist.mp4",
+   "method": "generated video, packed",
+   "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. White colour: tinted per spell at runtime. One-shot: ends on an empty frame."
+  },
+  {
+   "id": "vfx_broom_motes",
+   "file": "atlases/broom_motes_8x8_1k.png",
+   "path": "atlases/broom_motes_8x8_1k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 128,
+   "frames": 64,
+   "fps": 22,
+   "loop": false,
+   "colour": true,
+   "blend": "add",
+   "blend_default": "add",
+   "purpose": "Drifting cloud of glittering pale-gold dust motes (broom wake)",
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "cell_px": 128,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "generator": "client/tools/vfx/build_spell_vfx.py",
+   "source": "fal.ai alibaba/wan-3.0/text-to-video -> art/vfx/source/broom_motes.mp4",
+   "method": "generated video, packed",
+   "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. One-shot: ends on an empty frame."
   }
  ]
 }

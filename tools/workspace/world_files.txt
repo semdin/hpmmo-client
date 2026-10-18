@@ -154,6 +154,10 @@ assets/models/gothic_kit/trim_band_4.glb
 assets/models/gothic_kit/wall_module_4x6.glb
 assets/models/gothic_kit/wall_module_4x6_damaged.glb
 assets/models/gothic_kit/window_lancet_2x4.glb
+assets/models/monolith/dark_monolith.glb
+assets/models/monolith/dark_monolith_texture_pbr_20250901.jpg
+assets/models/monolith/dark_monolith_texture_pbr_20250901_metallic-texture_pbr_20250901_roughness.jpg
+assets/models/monolith/dark_monolith_texture_pbr_20250901_normal.jpg
 assets/models/monsters/Atlas_Monsters.png
 assets/models/monsters/Demon.gltf
 assets/models/monsters/Demon_Atlas_Monsters.png
@@ -176,6 +180,7 @@ assets/models/monsters/boss_matriarch_matriarch_albedo.png
 assets/models/monsters/boss_matriarch_matriarch_normal.png
 assets/models/monsters/boss_matriarch_matriarch_rough.png
 assets/models/monsters/cornish_pixie.glb
+assets/models/monsters/darksnatcher.glb
 assets/models/monsters/dementor.glb
 assets/models/monsters/dementor_warden.glb
 assets/models/monsters/devils_snare.glb
@@ -218,6 +223,7 @@ assets/shaders/castle/floating_candle.gdshader
 assets/shaders/castle/lake_window.gdshader
 assets/shaders/castle/window_lit.gdshader
 assets/shaders/castle/window_view.gdshader
+assets/shaders/cloak.gdshader
 assets/shaders/footprint.gdshader
 assets/shaders/lake_water.gdshader
 assets/shaders/loot/chest_beam.gdshader
@@ -385,6 +391,8 @@ assets/textures/pbr/wooden_planks/wooden_planks_ao_2k.jpg
 assets/textures/pbr/wooden_planks/wooden_planks_diff_2k.jpg
 assets/textures/pbr/wooden_planks/wooden_planks_nor_gl_2k.jpg
 assets/textures/pbr/wooden_planks/wooden_planks_rough_2k.jpg
+assets/vfx/atlases/broom_mist_8x8_1k.png
+assets/vfx/atlases/broom_motes_8x8_1k.png
 assets/vfx/atlases/burst_crimson_8x8_1k.png
 assets/vfx/atlases/burst_gold_8x8_1k.png
 assets/vfx/atlases/burst_green_8x8_2k.png
@@ -473,6 +481,7 @@ scripts/autoload/network_manager.gd
 scripts/entities/broom_flight.gd
 scripts/entities/broom_grip_modifier.gd
 scripts/entities/cast_layer_modifier.gd
+scripts/entities/cloak_deformer.gd
 scripts/entities/hero_animation.gd
 scripts/entities/hero_appearance.gd
 scripts/entities/hero_bones.gd
