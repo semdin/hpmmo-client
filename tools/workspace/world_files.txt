@@ -542,6 +542,7 @@ scripts/ui/hud_bestiary.gd
 scripts/ui/hud_buff_bar.gd
 scripts/ui/hud_character_window.gd
 scripts/ui/hud_chat.gd
+scripts/ui/hud_floo.gd
 scripts/ui/hud_game_menu.gd
 scripts/ui/hud_kit.gd
 scripts/ui/hud_notices.gd
@@ -608,5 +609,6 @@ scripts/world/quality_preset.gd
 scripts/world/safe_zone.gd
 scripts/world/target_ring.gd
 scripts/world/training_dummy.gd
+scripts/world/travel_nodes.gd
 scripts/world/waypoint_guide.gd
 scripts/world/waypoint_router.gd

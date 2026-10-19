@@ -20,7 +20,14 @@
 > `scenes/entities/monolith/spider_stone.tscn`. Protokol **v19**: mob variant 14/15 (Zehirdiş/Muhafız — S2'de eksikti,
 > uzak istemciler inferi görürdü) ve 16 = Mühür Taşı (monolith kaydı `variant` taşır). 5 taş (kat 1: 2, kat 2: 3),
 > Sv 30, 9000 can, 3 dk respawn, loot `monolith_spider`. Yeni eşyalar: `mat_spider_silk`, `mat_acromantula_venom`,
-> `queen_seal` (taştan %8, örümceklerden %0.15; S6 Kraliçe Odası anahtarı). İkonlar sunburst ile. Görüntüler: `tools/capture/world_shots.tscn -- --map=spider_caverns`. Kararlar bölümündeki varsayılanlarla ilerlenecek;
+> `queen_seal` (taştan %8, örümceklerden %0.15; S6 Kraliçe Odası anahtarı). İkonlar sunburst ile.
+> **S4 (2026-10-19, protokol v20):** `addons/hpmmo_sim/data/travel.json` (5 şömine: Avlu, Hogsmeade, Hagrid, Büyük Salon,
+> Kara Ağ Kampı; `floo` kuralları), `HPMaps.travel*`, authority `request_travel` (öğrenme + yolculuk; aynı harita da
+> transfer akışından, `floo:<id>` spawn), transfer rezervasyonu ortak `_grant_transfer`. `floo_known` quests jsonb'de,
+> stats payload'da. Uçuç Tozu (`floo_powder`, `buy_price` 2.500 — equipment `buy` işlemi, pencereden), taş %25 / örümcek %2.
+> İstemci: `TravelNodes` (şömineler, ocak ateşi, yeşil alev `burst` + `floo_whoosh` sesi), `HudFloo` penceresi,
+> map_controller F istemi / kalkış-varış alevi. Doğrulama `tools/capture/floo_probe.tscn` (4 yolculuk + ret + satın alma).
+> Not: kalkış alevini yalnızca yolcu görüyor (diğer oyunculara yayın yok). Görüntüler: `tools/capture/world_shots.tscn -- --map=spider_caverns`. Kararlar bölümündeki varsayılanlarla ilerlenecek;
 > her fazın sonunda oyunda gösterilip onay alınır. Konsept görselleri 3D'ye geçmeden önce onaya sunulur.
 
 ## Hedef

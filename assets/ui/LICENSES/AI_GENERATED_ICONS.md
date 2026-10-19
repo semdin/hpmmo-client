@@ -106,3 +106,5 @@ template as the 2026-10-13 menu set, text prompt only (no input image).
   Blackweb Caverns materials) - `openai/gpt-image-2.5/sunburst/text-to-image` 1024 px with the
   standard full-bleed item-icon template (obsidian spider seal in silk; venom vial with a fang;
   spool of pearly silk), resized to 512 px. Sources in `art/spider_caverns/icons/`.
+* `icon_floo_powder.png` (2026-10-19, Floo Network) - same sunburst full-bleed template (brass pot of
+  glittering green powder puffing into green flames), 512 px. Source `art/spider_caverns/icons/`.
