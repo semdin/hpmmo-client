@@ -1,0 +1,42 @@
+# One-off (2026-10-19): releases are chunk-only since 1.0.64, so the full
+# client zips in older releases are dead weight (64 files, ~48 GB). This
+# deletes ONLY assets named hpmmo-client-<version>-<platform>.zip; chunks,
+# content indexes, manifests, signatures and launchers stay (newer releases
+# reference old chunks). Start it from the Actions tab; delete this file after.
+name: cleanup-release-zips
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only list what would be deleted'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Delete the full client zips from every release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          gh api --paginate "repos/${{ github.repository }}/releases?per_page=100" \
+            --jq '.[] | .tag_name as $t | .assets[] | [$t, (.id|tostring), .name, (.size|tostring)] | @tsv' \
+            > assets.tsv
+          awk -F'\t' '$3 ~ /^hpmmo-client-[0-9]+(\.[0-9]+)+-(windows-x86_64|linux-x86_64|macos)\.zip$/' assets.tsv > zips.tsv
+          echo "assets: $(wc -l < assets.tsv), zips to delete: $(wc -l < zips.tsv), keeping: $(( $(wc -l < assets.tsv) - $(wc -l < zips.tsv) ))"
+          awk -F'\t' '{s+=$4} END {printf "zip bytes: %.1f GB\n", s/1e9}' zips.tsv
+          while IFS=$'\t' read -r tag id name size; do
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "would delete $tag/$name"
+            else
+              gh api -X DELETE "repos/${{ github.repository }}/releases/assets/$id"
+              echo "deleted $tag/$name"
+            fi
+          done < zips.tsv
