@@ -40,7 +40,57 @@ func _ready() -> void:
 	print("CAVERN mobs %s floating=%d" % [counts, floating])
 	for species in ["acromantula_venomfang", "acromantula_broodguard"]:
 		await _stand_by(player, species)
+	await _break_stone(player)
 	get_tree().quit()
+
+## Break the nearest Webbound Seal Stone with authoritative damage and report
+## its waves and what dropped.
+func _break_stone(player: Node3D) -> void:
+	var stone: Node3D = null
+	for m in get_tree().get_nodes_in_group("monoliths"):
+		if String(m.get("monolith_type")) == "spider":
+			stone = m
+			break
+	if stone == null:
+		print("CAVERN stone: none")
+		return
+	player.global_position = stone.global_position + Vector3(5, 1, 0)
+	var rec: Dictionary = SimAuthority.record_for(player)
+	rec["hp"] = 900000
+	rec["max_hp"] = 900000
+	var stone_rec: Dictionary = SimAuthority.record_for(stone)
+	print("CAVERN stone %s lv=%s hp=%s variant=%s loot=%s" % [stone.call("display_name"), stone_rec.get("level"),
+		stone_rec.get("max_hp"), stone_rec.get("variant"), stone_rec.get("loot_table")])
+	var before := get_tree().get_nodes_in_group("mobs").size()
+	var loot_before := 0
+	for uid in SimAuthority.entities:
+		if int(SimAuthority.entities[uid].get("kind", 0)) == HPProtocol.Kind.LOOT:
+			loot_before += 1
+	if _out != "":
+		for layer in world.find_children("*", "CanvasLayer", true, false):
+			(layer as CanvasLayer).visible = false
+		var cam := Camera3D.new()
+		world.add_child(cam)
+		cam.global_position = stone.global_position + Vector3(7, 3.5, 7)
+		cam.look_at(stone.global_position + Vector3.UP * 1.6)
+		cam.current = true
+		await get_tree().create_timer(0.5).timeout
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_jpg(_out.path_join("probe_spider_stone.jpg"), 0.85)
+		cam.queue_free()
+	for i in 12:
+		SimAuthority.apply_damage(stone, 800, "basic_cast", player)
+		await get_tree().create_timer(0.3).timeout
+	var drops: Array = []
+	for uid in SimAuthority.entities:
+		var r: Dictionary = SimAuthority.entities[uid]
+		if int(r.get("kind", 0)) == HPProtocol.Kind.LOOT:
+			for slot in r.get("slots", r.get("items", [])):
+				drops.append(slot)
+	print("CAVERN stone broken=%s wave_mobs=%d loot_entities=%d drops=%s" % [stone.get("is_destroyed"),
+		get_tree().get_nodes_in_group("mobs").size() - before,
+		SimAuthority.entities.values().filter(func(r): return int(r.get("kind", 0)) == HPProtocol.Kind.LOOT).size() - loot_before,
+		str(drops).left(600)])
 
 func _stand_by(player: Node3D, species: String) -> void:
 	var target: Node3D = null

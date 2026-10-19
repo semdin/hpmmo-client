@@ -458,6 +458,7 @@ scenes/entities/mobs/mob_snare_vine.tscn
 scenes/entities/mobs/mob_troll_forest.tscn
 scenes/entities/mobs/mob_troll_mountain.tscn
 scenes/entities/monolith/dark_monolith.tscn
+scenes/entities/monolith/spider_stone.tscn
 scenes/entities/player/player.tscn
 scenes/server/dedicated_server.tscn
 scenes/spells/bombarda_explosion.tscn

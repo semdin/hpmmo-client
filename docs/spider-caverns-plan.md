@@ -14,7 +14,13 @@
 > `poison` (yanma saatinde zehir, `apply_poison`) ve `web_s` (yayan %50 hız, `apply_web`, player.gd `WEBBED_FACTOR`,
 > stats payload `webbed_until_tick`). Mağara spawn'ları `art/spider_caverns/scripts/cavern_spawns.py` (43 paket / 191 yaratık,
 > agresif, `respawn_s` 12-18, `clear_radius` 5, paket `y` = zemin), bölgeler `caverns_f1/f2` (`map`), loot `cavern_spider`.
-> Doğrulama: `tools/capture/cavern_probe.tscn` (zemine oturma, zehir/ağ tetiklenmesi). Görüntüler: `tools/capture/world_shots.tscn -- --map=spider_caverns`. Kararlar bölümündeki varsayılanlarla ilerlenecek;
+> Doğrulama: `tools/capture/cavern_probe.tscn` (zemine oturma, zehir/ağ tetiklenmesi).
+> **S3 (2026-10-19):** `spawn_tables.monolith_types` (dark = eski monolith_config, spider), `monoliths[].type`;
+> `dark_monolith.gd` türden okur (isim/seviye/can/exp/dalga/loot/respawn, `_ground_y` mağarada ışın), sahne
+> `scenes/entities/monolith/spider_stone.tscn`. Protokol **v19**: mob variant 14/15 (Zehirdiş/Muhafız — S2'de eksikti,
+> uzak istemciler inferi görürdü) ve 16 = Mühür Taşı (monolith kaydı `variant` taşır). 5 taş (kat 1: 2, kat 2: 3),
+> Sv 30, 9000 can, 3 dk respawn, loot `monolith_spider`. Yeni eşyalar: `mat_spider_silk`, `mat_acromantula_venom`,
+> `queen_seal` (taştan %8, örümceklerden %0.15; S6 Kraliçe Odası anahtarı). İkonlar sunburst ile. Görüntüler: `tools/capture/world_shots.tscn -- --map=spider_caverns`. Kararlar bölümündeki varsayılanlarla ilerlenecek;
 > her fazın sonunda oyunda gösterilip onay alınır. Konsept görselleri 3D'ye geçmeden önce onaya sunulur.
 
 ## Hedef

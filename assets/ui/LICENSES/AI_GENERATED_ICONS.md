@@ -101,3 +101,8 @@ template as the 2026-10-13 menu set, text prompt only (no input image).
   the bottom-right menu cells (wand + spellbook, monster book with claw marks, hooded
   wizard before a gold crest, sealed quest scroll), resized to 256 px by
   `tools/ui/cutout_icons.py` (`menu_<id>.png` sources in `art/ui_menu_icons_2026-10-18/src/`).
+
+* `icon_queen_seal.png`, `icon_mat_acromantula_venom.png`, `icon_mat_spider_silk.png` (2026-10-19,
+  Blackweb Caverns materials) - `openai/gpt-image-2.5/sunburst/text-to-image` 1024 px with the
+  standard full-bleed item-icon template (obsidian spider seal in silk; venom vial with a fang;
+  spool of pearly silk), resized to 512 px. Sources in `art/spider_caverns/icons/`.
