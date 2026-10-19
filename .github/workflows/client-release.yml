@@ -321,6 +321,7 @@ jobs:
           python3 tools/release/gen_manifest.py --verify \
             --manifest "$RUNNER_TEMP/live.json" --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
           curl -fsSL "$base/manifest-linux-x86_64.json" -o "$RUNNER_TEMP/live-linux.json"
+          curl -fsSL "$base/manifest-linux-x86_64.json.sig" -o "$RUNNER_TEMP/live-linux.json.sig"
           python3 tools/release/gen_manifest.py --verify \
             --manifest "$RUNNER_TEMP/live-linux.json" --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
           {
