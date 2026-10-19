@@ -21,7 +21,7 @@ lengths never stretch however different the proportions are.
 
 Run:
   blender --background --python retarget_clip.py -- <clip.fbx> <out.glb> <ClipName>
-          [--hand Right|Left] [--trim START END] [--release FRAME] [--spine-scale K] [--render <dir>]
+          [--hand Right|Left] [--trim START END] [--hips-ref FRAME] [--release FRAME] [--spine-scale K] [--render <dir>]
 
 Writes <out>.json: frame range, length, release frame/fraction (the frame the
 wand hand is furthest in front of the chest) and the per-frame reach.
@@ -35,6 +35,7 @@ if len(argv) < 3:
 FBX, OUT, CLIP = os.path.abspath(argv[0]), os.path.abspath(argv[1]), argv[2]
 HAND = "Right"
 TRIM = None
+HIPS_REF = None
 RENDER = None
 RELEASE = None
 SPINE_SCALE = 1.0
@@ -44,6 +45,8 @@ while i < len(argv):
         HAND = argv[i + 1].capitalize(); i += 2
     elif argv[i] == "--trim":
         TRIM = (int(argv[i + 1]), int(argv[i + 2])); i += 3
+    elif argv[i] == "--hips-ref":
+        HIPS_REF = int(argv[i + 1]); i += 2
     elif argv[i] == "--spine-scale":
         SPINE_SCALE = float(argv[i + 1]); i += 2
     elif argv[i] == "--release":
@@ -180,7 +183,10 @@ for b in hero.data.bones:
 
 # ---------------------------------------------------------------- bake
 src.animation_data.action = action
-scene.frame_set(f0)
+# The standing reference for the hips' height: the first baked frame, or
+# `--hips-ref` (a loop trimmed out of a kneel starts low, so its height must be
+# measured from the standing frame before the trim).
+scene.frame_set(HIPS_REF if HIPS_REF is not None else f0)
 root_start = head_world(src, src_root, True)
 clip = bpy.data.actions.new(CLIP)
 clip.use_fake_user = True
