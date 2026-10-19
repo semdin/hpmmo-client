@@ -87,7 +87,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          lfs: true
           clean: false
 
       - name: Reset the workspace (keep only the import cache)
@@ -96,6 +95,9 @@ jobs:
           # Untracked leftovers of an earlier run must not leak into this one
           # (a stale chunks-*.bin in dist/ would be published).
           git clean -ffdx -e .godot -e export_presets.cfg
+          # LFS comes from our own server (lfs.agsilvery.com -> Cloudflare R2,
+          # see .lfsconfig; the runner user holds its credentials).
+          git lfs pull
           # A pointer file left in the tree would export as a broken asset.
           if git lfs ls-files | grep -q ' - '; then
             echo "::error::some LFS objects were not downloaded"; git lfs ls-files | grep ' - ' | head; exit 1
