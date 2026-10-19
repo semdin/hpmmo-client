@@ -6,6 +6,8 @@ assets/castle/castle_layout.json
 assets/castle/props/armour.glb
 assets/castle/props/owl.glb
 assets/castle/props/owl_lectern.glb
+assets/maps/spider_caverns/cavern_height.res
+assets/maps/spider_caverns/cavern_layout.json
 assets/models/characters/barbarian_texture.png
 assets/models/characters/dark_wizard.glb
 assets/models/characters/dark_wizard_rogue_texture.png
@@ -158,6 +160,10 @@ assets/models/monolith/dark_monolith.glb
 assets/models/monolith/dark_monolith_texture_pbr_20250901.jpg
 assets/models/monolith/dark_monolith_texture_pbr_20250901_metallic-texture_pbr_20250901_roughness.jpg
 assets/models/monolith/dark_monolith_texture_pbr_20250901_normal.jpg
+assets/models/monolith/spider_stone.glb
+assets/models/monolith/spider_stone_chest_albedo.png
+assets/models/monolith/spider_stone_chest_mr.png
+assets/models/monolith/spider_stone_chest_normal.png
 assets/models/monsters/Atlas_Monsters.png
 assets/models/monsters/Demon.gltf
 assets/models/monsters/Demon_Atlas_Monsters.png
@@ -223,7 +229,9 @@ assets/shaders/castle/floating_candle.gdshader
 assets/shaders/castle/lake_window.gdshader
 assets/shaders/castle/window_lit.gdshader
 assets/shaders/castle/window_view.gdshader
+assets/shaders/cavern_ground.gdshader
 assets/shaders/cloak.gdshader
+assets/shaders/cobweb.gdshader
 assets/shaders/footprint.gdshader
 assets/shaders/lake_water.gdshader
 assets/shaders/loot/chest_beam.gdshader
@@ -466,6 +474,7 @@ scenes/ui/inventory_ui.tscn
 scenes/ui/ollivander_ui.tscn
 scenes/world/castle/staircase.tscn
 scenes/world/castle_interior.tscn
+scenes/world/caverns/spider_caverns.tscn
 scenes/world/dungeons/dng_forbidden_corridor.tscn
 scenes/world/dungeons/dng_trial.tscn
 scenes/world/game_world.tscn
@@ -569,6 +578,9 @@ scripts/world/castle/castle_blockout.gd
 scripts/world/castle/castle_decor.gd
 scripts/world/castle/magical_staircase.gd
 scripts/world/castle_interior.gd
+scripts/world/caverns/cavern_atmosphere.gd
+scripts/world/caverns/cavern_colliders.gd
+scripts/world/caverns/spider_caverns.gd
 scripts/world/dungeon_director.gd
 scripts/world/dungeons/dungeon_forbidden_corridor.gd
 scripts/world/dungeons/dungeon_greybox.gd

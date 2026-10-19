@@ -1,7 +1,7 @@
 {
  "generated": "2026-10-19",
  "source_repository": "hpmmo-server",
- "source_revision": "cdc4d82d65890f23c13c3b61c15d70e44bbb6e8e",
+ "source_revision": "3243937c7055e8dfd830d20f88b77c3760a7aca2",
  "note": "Generated from server/world/addons/hpmmo_sim by dev.ps1 sync-sim. Never edit these files in the client repository.",
  "files": {
   "admin.gd": "8605e27d706abc3eeafd3a7cce41de451734ff9d56652998b973fb4eacb7257c",
@@ -12,10 +12,10 @@
   "data/dungeons.json": "16b4426dbcb7f5a90d7a96e48e75bdc154180772615e65179a0f6f460be171f5",
   "data/items.json": "d1ef534b069bf8187c6d78a692444a97c07a6a0edad0547c0271114cbc307771",
   "data/loot_tables.json": "9cf2483ff5c28a87e8a31ca2a895c615f022e4df36b688f3944cde3858dc5293",
-  "data/maps.json": "e0eca2960719b067c4e5d2a2dc988601eebe1d808070aecf0f37dc7aeec45652",
+  "data/maps.json": "5533e0bf7fe170a49e8ce35fb34af3f8b78bb8cebfa75bf70a86beeed8d0d5f5",
   "data/mobs.json": "f6dcf47944d91357eb6808855bcc84c5c9fb20c1838c7de45744770cbc3f5077",
   "data/quests.json": "02a7ef5c1fd07ed3774f3c70882194121fa75af62452f084629bde44dde0c451",
-  "data/safe_zones.json": "40f4aecf8a0e8f663810e448ebfa75f9cfc3092686fa3b7fee6b3c0d941b276a",
+  "data/safe_zones.json": "0ac7eaefed63b5e47bd944aeba13055f338a61ad476975ade0289e0a52455095",
   "data/spawn_tables.json": "f36996a2cd1d05fe3480a64bf099f65c1c77a5334198b8e40a6c7d218acb0981",
   "data/spells.json": "a5381b46462993ed98351bf35011680252192b3e61504b536ba7723ca492c774",
   "equipment.gd": "e69dd41959abeec150cfb64463587cdff7448bb47e758b67c6a8c34efbbb61a9",

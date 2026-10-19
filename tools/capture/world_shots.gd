@@ -4,6 +4,7 @@ extends Node
 ##   godot --path . tools/capture/world_shots.tscn -- --views=<views.json> --out=<dir> [--interior] [--quality=low]
 ## views.json: [["name", [x, y, z], [tx, ty, tz]], ...] in world coordinates.
 ## --interior builds the castle interior in place (its L0 floor is y 200).
+## --map=<id> loads a scene map (e.g. spider_caverns) through the map controller.
 
 @onready var world = $GameWorld
 ## Frame hitches since the last shot (frames over 100 ms, the longest frame).
@@ -19,6 +20,7 @@ func _ready() -> void:
 	var views_path := ""
 	var out_dir := "user://world_shots"
 	var interior := false
+	var scene_map := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--views="):
 			views_path = arg.trim_prefix("--views=")
@@ -26,6 +28,8 @@ func _ready() -> void:
 			out_dir = arg.trim_prefix("--out=")
 		elif arg == "--interior":
 			interior = true
+		elif arg.begins_with("--map="):
+			scene_map = arg.trim_prefix("--map=")
 	var views: Array = JSON.parse_string(FileAccess.get_file_as_string(views_path))
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	await get_tree().create_timer(1.5).timeout
@@ -51,6 +55,12 @@ func _ready() -> void:
 		for light in world.find_children("*", "DirectionalLight3D", true, false):
 			if (light as DirectionalLight3D).light_energy > 0.5 and not rig.is_ancestor_of(light):
 				light.visible = false
+		await get_tree().create_timer(1.0).timeout
+	if scene_map != "":
+		var mc = world.get_node_or_null("MapController")
+		await mc.call("_unload_map", "grounds")
+		await mc.call("_load_map", scene_map)
+		mc.set("current_map", scene_map)
 		await get_tree().create_timer(1.0).timeout
 	for v in views:
 		var p: Array = v[1]
