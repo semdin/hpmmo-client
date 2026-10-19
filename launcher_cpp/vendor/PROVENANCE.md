@@ -34,3 +34,17 @@ Windows CNG API (`bcrypt.dll`, `BCRYPT_SHA256_ALGORITHM`). ZIP container
 parsing and DEFLATE decompression are implemented in-tree
 (`src/zip.cpp`, `src/inflate.cpp`); Ed25519 is the only vendored third-party
 code.
+
+## stb (Linux/macOS launcher UI, 2026-10-19)
+
+| file | bytes | sha256 |
+| --- | --- | --- |
+| vendor/stb/stb_image.h | 283010 | 594c2fe35d49488b4382dbfaec8f98366defca819d916ac95becf3e75f4200b3 |
+| vendor/stb/stb_image_write.h | 71221 | cbd5f0ad7a9cf4468affb36354a1d2338034f2c12473cf1a8e32053cb6914a05 |
+| vendor/stb/stb_truetype.h | 199192 | ecd30b05e0dd4fea3a13c26810dd9e1992dc379049482c393d5a19e6b5090aab |
+
+Source:
+- nothings/stb, commit `a7d4c2175630e1ea5b6f8dd00ab96fed0b97b96d` (fetched 2026-10-19 from
+  https://github.com/nothings/stb) - public domain / MIT dual license (the
+  license text is at the end of each header). Used only by the SDL launcher UI:
+  JPEG decode of the background, TrueType rasterisation, PNG screenshots.

@@ -7,20 +7,81 @@
 #include "common.h"
 #include "sha256.h"
 
+// The API is called through function pointers (see CurlApi), so curl.h's
+// type-checking macros around curl_easy_setopt/getinfo must stay off.
+#define CURL_DISABLE_TYPECHECK
 #include <curl/curl.h>
 #include <unistd.h>
+#ifdef __linux__
+#include <dlfcn.h>
+#endif
 
 #include <cstdio>
-#include <mutex>
+#include <type_traits>
 #include <vector>
 
 namespace hpmmo {
 
 namespace {
 
-void GlobalInit() {
-    static std::once_flag once;
-    std::call_once(once, []() { curl_global_init(CURL_GLOBAL_DEFAULT); });
+// libcurl is loaded at run time on Linux: the launcher must start on any
+// distribution, and every desktop ships libcurl.so.4 (or Debian/Ubuntu's
+// libcurl-gnutls.so.4) configured for the system's own CA store. Linking it
+// would pin the build host's soname and its ~30 dependencies. macOS always has
+// /usr/lib/libcurl.4.dylib, so it links normally.
+struct CurlApi {
+    CURLcode (*global_init)(long) = nullptr;
+    CURL* (*easy_init)() = nullptr;
+    CURLcode (*easy_setopt)(CURL*, CURLoption, ...) = nullptr;
+    CURLcode (*easy_perform)(CURL*) = nullptr;
+    CURLcode (*easy_getinfo)(CURL*, CURLINFO, ...) = nullptr;
+    void (*easy_cleanup)(CURL*) = nullptr;
+    const char* (*easy_strerror)(CURLcode) = nullptr;
+    bool ok = false;
+    std::string error;
+};
+
+CurlApi LoadCurl() {
+    CurlApi api;
+#ifdef __linux__
+    void* lib = nullptr;
+    for (const char* name : {"libcurl.so.4", "libcurl-gnutls.so.4", "libcurl.so"}) {
+        lib = dlopen(name, RTLD_NOW | RTLD_LOCAL);
+        if (lib) break;
+    }
+    if (!lib) {
+        api.error = "libcurl is not installed (install the curl / libcurl4 package)";
+        return api;
+    }
+    auto sym = [&](auto& fn, const char* name) {
+        fn = reinterpret_cast<std::remove_reference_t<decltype(fn)>>(dlsym(lib, name));
+        if (!fn && api.error.empty()) api.error = std::string("libcurl lacks ") + name;
+    };
+    sym(api.global_init, "curl_global_init");
+    sym(api.easy_init, "curl_easy_init");
+    sym(api.easy_setopt, "curl_easy_setopt");
+    sym(api.easy_perform, "curl_easy_perform");
+    sym(api.easy_getinfo, "curl_easy_getinfo");
+    sym(api.easy_cleanup, "curl_easy_cleanup");
+    sym(api.easy_strerror, "curl_easy_strerror");
+    api.ok = api.error.empty();
+#else
+    api.global_init = curl_global_init;
+    api.easy_init = curl_easy_init;
+    api.easy_setopt = curl_easy_setopt;
+    api.easy_perform = curl_easy_perform;
+    api.easy_getinfo = curl_easy_getinfo;
+    api.easy_cleanup = curl_easy_cleanup;
+    api.easy_strerror = curl_easy_strerror;
+    api.ok = true;
+#endif
+    if (api.ok) api.global_init(CURL_GLOBAL_DEFAULT);
+    return api;
+}
+
+const CurlApi& Curl() {
+    static CurlApi api = LoadCurl();   // thread-safe initialisation
+    return api;
 }
 
 std::string Base64Encode(const unsigned char* data, size_t len) {
@@ -58,7 +119,7 @@ bool AcceptStatus(Transfer& t) {
     if (t.statusChecked) return t.statusOk;
     t.statusChecked = true;
     long status = 0;
-    curl_easy_getinfo(t.curl, CURLINFO_RESPONSE_CODE, &status);
+    Curl().easy_getinfo(t.curl, CURLINFO_RESPONSE_CODE, &status);
     t.statusOk = (status == 200 || status == 206) && !(t.opts->closedRange && status != 206);
     if (t.statusOk && t.file) {
         bool resumed = t.opts->resumeFrom > 0 && status == 206;
@@ -107,7 +168,12 @@ int OnProgress(void* user, curl_off_t dltotal, curl_off_t, curl_off_t, curl_off_
 HttpOutcome RunRequest(const HttpRequestOptions& opts, const std::wstring* destFile, std::string* bodyOut,
                        bool requirePin) {
     HttpOutcome out;
-    GlobalInit();
+    const CurlApi& api = Curl();
+    if (!api.ok) {
+        out.errorKind = "network";
+        out.error = api.error;
+        return out;
+    }
     std::string url = WideToUtf8(opts.url);
     bool secure = url.rfind("https://", 0) == 0;
     bool plain = url.rfind("http://", 0) == 0;
@@ -133,7 +199,7 @@ HttpOutcome RunRequest(const HttpRequestOptions& opts, const std::wstring* destF
         return out;
     }
 
-    CURL* curl = curl_easy_init();
+    CURL* curl = api.easy_init();
     if (!curl) {
         out.errorKind = "network";
         out.error = "curl_easy_init failed";
@@ -147,7 +213,7 @@ HttpOutcome RunRequest(const HttpRequestOptions& opts, const std::wstring* destF
         // "ab" keeps a partial file for a resume; AcceptStatus truncates on 200.
         t.file = OpenFileW(*destFile, L"ab");
         if (!t.file) {
-            curl_easy_cleanup(curl);
+            api.easy_cleanup(curl);
             out.errorKind = "network";
             out.error = "cannot open destination file";
             return out;
@@ -155,30 +221,30 @@ HttpOutcome RunRequest(const HttpRequestOptions& opts, const std::wstring* destF
     }
 
     char errbuf[CURL_ERROR_SIZE] = {0};
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "HPMMO-Launcher/3");
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
+    api.easy_setopt(curl, CURLOPT_URL, url.c_str());
+    api.easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
+    api.easy_setopt(curl, CURLOPT_USERAGENT, "HPMMO-Launcher/3");
+    api.easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    api.easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
     // Redirects may not downgrade an HTTPS request to HTTP.
 #if LIBCURL_VERSION_NUM >= 0x075500
-    curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, secure ? "https" : "http,https");
-    curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, secure ? "https" : "http,https");
+    api.easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, secure ? "https" : "http,https");
+    api.easy_setopt(curl, CURLOPT_PROTOCOLS_STR, secure ? "https" : "http,https");
 #else
-    curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, secure ? CURLPROTO_HTTPS : (CURLPROTO_HTTP | CURLPROTO_HTTPS));
-    curl_easy_setopt(curl, CURLOPT_PROTOCOLS, secure ? CURLPROTO_HTTPS : (CURLPROTO_HTTP | CURLPROTO_HTTPS));
+    api.easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, secure ? CURLPROTO_HTTPS : (CURLPROTO_HTTP | CURLPROTO_HTTPS));
+    api.easy_setopt(curl, CURLOPT_PROTOCOLS, secure ? CURLPROTO_HTTPS : (CURLPROTO_HTTP | CURLPROTO_HTTPS));
 #endif
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 10000L);
+    api.easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 10000L);
     // Equivalent of the WinHTTP receive timeout: abort when the transfer stalls.
-    curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
-    curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, (long)((opts.receiveTimeoutMs + 999) / 1000));
-    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OnData);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &t);
-    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, OnProgress);
-    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &t);
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "identity");
+    api.easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
+    api.easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, (long)((opts.receiveTimeoutMs + 999) / 1000));
+    api.easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+    api.easy_setopt(curl, CURLOPT_WRITEFUNCTION, OnData);
+    api.easy_setopt(curl, CURLOPT_WRITEDATA, &t);
+    api.easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, OnProgress);
+    api.easy_setopt(curl, CURLOPT_XFERINFODATA, &t);
+    api.easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    api.easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "identity");
 
     std::string range;
     if (opts.closedRange) {
@@ -186,35 +252,35 @@ HttpOutcome RunRequest(const HttpRequestOptions& opts, const std::wstring* destF
     } else if (opts.resumeFrom > 0) {
         range = std::to_string(opts.resumeFrom) + "-";
     }
-    if (!range.empty()) curl_easy_setopt(curl, CURLOPT_RANGE, range.c_str());
+    if (!range.empty()) api.easy_setopt(curl, CURLOPT_RANGE, range.c_str());
 
     // Pinning: the SPKI pin is the authentication decision, so chain/name
     // validation is replaced by an exact public-key match (as on Windows).
     std::string pinOpt;
     if (checkPin) {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        api.easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        api.easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
         std::vector<unsigned char> pinBytes;
         if (!opts.pinnedSpkiHex.empty() && HexToBytes(WideToUtf8(ToLower(opts.pinnedSpkiHex)), pinBytes) &&
             pinBytes.size() == 32) {
             pinOpt = "sha256//" + Base64Encode(pinBytes.data(), pinBytes.size());
-            curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY, pinOpt.c_str());
+            api.easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY, pinOpt.c_str());
         } else if (requirePin) {
             if (t.file) fclose(t.file);
-            curl_easy_cleanup(curl);
+            api.easy_cleanup(curl);
             out.errorKind = "config";
             out.error = "pinned certificate is not a sha256 hex value";
             return out;
         }
     }
 
-    CURLcode rc = curl_easy_perform(curl);
+    CURLcode rc = api.easy_perform(curl);
     long status = 0;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
+    api.easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
     out.status = (int)status;
     curl_off_t contentLength = -1;
-    curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &contentLength);
-    curl_easy_cleanup(curl);
+    api.easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &contentLength);
+    api.easy_cleanup(curl);
     if (t.file) {
         fflush(t.file);
         fsync(fileno(t.file));
@@ -245,7 +311,7 @@ HttpOutcome RunRequest(const HttpRequestOptions& opts, const std::wstring* destF
         bool tls = rc == CURLE_SSL_CONNECT_ERROR || rc == CURLE_PEER_FAILED_VERIFICATION ||
                    rc == CURLE_SSL_CACERT_BADFILE || rc == CURLE_SSL_CERTPROBLEM;
         out.errorKind = tls ? "tls" : "network";
-        out.error = std::string("request failed (") + (errbuf[0] ? errbuf : curl_easy_strerror(rc)) + ")";
+        out.error = std::string("request failed (") + (errbuf[0] ? errbuf : api.easy_strerror(rc)) + ")";
         return out;
     }
     if (checkPin && requirePin) {
@@ -272,7 +338,7 @@ HttpOutcome RunRequest(const HttpRequestOptions& opts, const std::wstring* destF
         out.errorKind = "network";
         out.error = rc == CURLE_PARTIAL_FILE ? "response was truncated"
                                              : std::string("download interrupted (") +
-                                                   (errbuf[0] ? errbuf : curl_easy_strerror(rc)) + ")";
+                                                   (errbuf[0] ? errbuf : api.easy_strerror(rc)) + ")";
         return out;
     }
     out.resumed = opts.resumeFrom > 0 && status == 206;

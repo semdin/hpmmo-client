@@ -147,6 +147,17 @@ jobs:
           mkdir -p dist
           cp launcher_cpp/build-mingw/HPMMO_Launcher.exe dist/HPMMO_Launcher.exe
 
+      - name: Build the Linux launcher (AppImage)
+        # Built in the pinned Ubuntu 22.04 image (launcher_cpp/packaging/linux)
+        # through the host's root wrapper, so it runs on glibc >= 2.34 distros.
+        run: |
+          set -eu
+          out="$RUNNER_TEMP/linux-launcher"
+          rm -rf "$out"
+          sudo /opt/hpmmo-ci/build_linux_launcher.sh "$PWD/launcher_cpp" "${{ steps.v.outputs.launcher }}" "$out"
+          cp "$out/HPMMO_Launcher-x86_64.AppImage" dist/HPMMO_Launcher-x86_64.AppImage
+          ls -la dist/HPMMO_Launcher-x86_64.AppImage
+
       - name: Check the pinned Godot engine and export templates
         id: godot
         run: |
@@ -259,9 +270,11 @@ jobs:
             --release-notes-file "$RUNNER_TEMP/release_notes.txt" \
             --content-index dist/content.json \
             --out dist --key "$key"
-          # Linux manifest (no launcher self-update payload until the Linux launcher ships).
+          # Linux manifest (with the AppImage as the launcher self-update payload).
           python3 tools/release/gen_manifest.py \
             --artifact "dist/hpmmo-client-${{ steps.v.outputs.client }}-linux-x86_64.zip" \
+            --launcher-artifact dist/HPMMO_Launcher-x86_64.AppImage \
+            --launcher-version "${{ steps.v.outputs.launcher }}" \
             --channel release \
             --client-version "${{ steps.v.outputs.client }}" \
             --min-launcher-version "$MIN_LAUNCHER_VERSION" \
@@ -301,6 +314,7 @@ jobs:
             dist/HPMMO_Launcher.exe dist/content.json "${chunks[@]}" \
             dist/manifest.json dist/manifest.json.sig dist/manifest.json.keyid dist/SHA256SUMS \
             "dist/hpmmo-client-${{ steps.v.outputs.client }}-linux-x86_64.zip" dist/content-linux-x86_64.json \
+            dist/HPMMO_Launcher-x86_64.AppImage \
             dist/manifest-linux-x86_64.json dist/manifest-linux-x86_64.json.sig \
             dist/manifest-linux-x86_64.json.keyid dist/SHA256SUMS-linux-x86_64 \
             --repo "${{ github.repository }}" \
@@ -328,4 +342,5 @@ jobs:
             echo "### HPMMO ${{ steps.v.outputs.tag }}"
             echo "- client \`${{ steps.v.outputs.client }}\`, launcher \`${{ steps.v.outputs.launcher }}\`"
             echo "- installer link: $base/HPMMO_Launcher.exe"
+            echo "- Linux launcher: $base/HPMMO_Launcher-x86_64.AppImage"
           } >> "$GITHUB_STEP_SUMMARY"

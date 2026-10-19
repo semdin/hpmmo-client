@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=HPMMO Launcher
+Comment=HPMMO - Büyücülük Diyarı
+Exec=HPMMO_Launcher
+Icon=hpmmo-launcher
+Categories=Game;
+Terminal=false

@@ -31,6 +31,7 @@
 
 #include "http.h"
 #include "json.h"
+#include "launcher_app.h"
 #include "updater.h"
 
 using namespace Gdiplus;
@@ -44,6 +45,15 @@ using namespace Gdiplus;
 #define WM_APP_EXIT (WM_APP + 2)      // worker -> UI: self-update handed off, quit
 
 namespace {
+
+using hpmmo::app::Phase;
+using hpmmo::app::Snapshot;
+using hpmmo::app::TakeSnapshot;
+using hpmmo::app::PlayLabel;
+using hpmmo::app::PlayEnabled;
+using hpmmo::app::CurrentPhase;
+using hpmmo::app::StartWorker;
+using hpmmo::app::StartStatusPoll;
 
 // ------------------------------------------------------------------ palette
 // The GDI+ mirror of the game theme (client/assets/ui/hpmmo.tres).
@@ -77,32 +87,7 @@ constexpr UINT kStatusPollMs = 30000;
 constexpr UINT kRecheckMs = 10 * 60 * 1000;   // look for a new release while idle
 
 // ------------------------------------------------------------------ state
-enum class Phase {
-    Checking,       // reading the manifest
-    Downloading,    // fetching the client package (progress known)
-    Installing,     // verifying / extracting / activating
-    SelfUpdating,   // a newer launcher is being installed; we exit
-    Ready,          // installed and current: PLAY
-    ReadyStale,     // installed, but the update check or the update failed
-    Failed,         // nothing installed and the update failed: RETRY
-    GameRunning,    // the game is open
-};
-
 enum class Hit { None, Play, Close, Minimize, Repair };
-
-std::mutex g_Mutex;
-Phase g_Phase = Phase::Checking;
-std::wstring g_Title = L"Güncellemeler kontrol ediliyor";
-std::wstring g_Detail;
-std::wstring g_Notes;          // release notes of the newest release
-std::string g_InstalledVersion;
-std::string g_ReleaseVersion;
-std::wstring g_ServerState = L"UNKNOWN";  // ONLINE | MAINTENANCE | OFFLINE | UNKNOWN
-std::atomic<uint64_t> g_Done{0};
-std::atomic<uint64_t> g_Total{0};
-std::atomic<bool> g_WorkerBusy{false};
-std::atomic<bool> g_StatusBusy{false};
-std::atomic<bool> g_Cancel{false};
 
 HWND g_Wnd = NULL;
 float g_Scale = 1.0f;
@@ -119,7 +104,6 @@ Bitmap* g_Background = nullptr;
 Bitmap* g_BackgroundScaled = nullptr;   // cover-scaled to the client size
 int g_ScaledW = 0, g_ScaledH = 0;
 
-hpmmo::AppConfig g_Cfg;
 
 int S(float v) { return (int)std::lround(v * g_Scale); }
 float SF(float v) { return v * g_Scale; }
@@ -289,33 +273,6 @@ void EnsureScaledBackground(int cw, int ch) {
     g_ScaledH = ch;
 }
 
-struct Snapshot {
-    Phase phase;
-    std::wstring title, detail, notes, server;
-    std::string installed, release;
-};
-
-Snapshot TakeSnapshot() {
-    std::lock_guard<std::mutex> lock(g_Mutex);
-    return Snapshot{g_Phase, g_Title, g_Detail, g_Notes, g_ServerState, g_InstalledVersion, g_ReleaseVersion};
-}
-
-std::wstring PlayLabel(Phase p) {
-    switch (p) {
-        case Phase::Ready:
-        case Phase::ReadyStale: return L"OYNA";
-        case Phase::Failed: return L"TEKRAR DENE";
-        case Phase::GameRunning: return L"OYUN AÇIK";
-        case Phase::Downloading:
-        case Phase::Installing:
-        case Phase::SelfUpdating: return L"GÜNCELLENİYOR";
-        default: return L"KONTROL…";
-    }
-}
-
-bool PlayEnabled(Phase p) {
-    return p == Phase::Ready || p == Phase::ReadyStale || p == Phase::Failed;
-}
 
 void Paint(HDC hdc, int cw, int ch) {
     Bitmap frame(cw, ch, PixelFormat32bppPARGB);
@@ -485,7 +442,7 @@ void Paint(HDC hdc, int cw, int ch) {
         bool show = true;
         switch (s.phase) {
             case Phase::Downloading: {
-                uint64_t t = g_Total.load(), d = g_Done.load();
+                uint64_t t = hpmmo::app::ProgressTotal(), d = hpmmo::app::ProgressDone();
                 frac = t ? std::min(1.0f, (float)d / (float)t) : -1.0f;
                 break;
             }
@@ -595,265 +552,8 @@ void Repaint() {
     if (g_Wnd) InvalidateRect(g_Wnd, NULL, FALSE);
 }
 
-void PostRefresh() {
-    if (g_Wnd) PostMessageW(g_Wnd, WM_APP_REFRESH, 0, 0);
-}
-
-void SetState(Phase p, const std::wstring& title, const std::wstring& detail) {
-    {
-        std::lock_guard<std::mutex> lock(g_Mutex);
-        g_Phase = p;
-        g_Title = title;
-        g_Detail = detail;
-    }
-    PostRefresh();
-}
-
-Phase CurrentPhase() {
-    std::lock_guard<std::mutex> lock(g_Mutex);
-    return g_Phase;
-}
-
-// ------------------------------------------------------------------ workers
-// "24.2 MB": one decimal, integer arithmetic only (no printf dialect issues).
-std::wstring BytesText(uint64_t v) {
-    const wchar_t* unit = L"KB";
-    uint64_t div = 1024;
-    if (v >= (1ull << 30)) {
-        unit = L"GB";
-        div = 1ull << 30;
-    } else if (v >= (1ull << 20)) {
-        unit = L"MB";
-        div = 1ull << 20;
-    }
-    uint64_t tenths = (v * 10 + div / 2) / div;
-    return std::to_wstring(tenths / 10) + L"." + std::to_wstring(tenths % 10) + L" " + unit;
-}
-
-std::wstring FriendlyError(const std::string& raw, int code) {
-    switch (code) {
-        case hpmmo::kExitNetwork: return L"Güncelleme sunucusuna ulaşılamadı. İnternet bağlantını kontrol et.";
-        case hpmmo::kExitSignature: return L"Güncelleme doğrulanamadı (imza/sertifika hatası).";
-        case hpmmo::kExitDiskSpace: return L"Diskte yeterli boş alan yok.";
-        case hpmmo::kExitGameRunning: return L"Oyun açıkken güncelleme yapılamaz. Önce oyunu kapat.";
-        case hpmmo::kExitIntegrity: return L"İndirilen dosya bozuk görünüyor; tekrar denenecek.";
-        case hpmmo::kExitDownload: return L"İndirme tamamlanamadı. Bağlantını kontrol edip tekrar dene.";
-        case hpmmo::kExitProtocol: return L"Bu sürüm sunucuyla uyumsuz; yeni bir güncelleme bekleniyor.";
-        case hpmmo::kExitSelfUpdateFailed: return L"Launcher kendini güncelleyemedi.";
-        case hpmmo::kExitConfig: return L"Launcher yapılandırması hatalı.";
-        default: break;
-    }
-    if (raw.empty()) return L"Bilinmeyen bir hata oluştu.";
-    return hpmmo::Utf8ToWide(raw);
-}
-
-bool InstalledGamePresent() {
-    hpmmo::UpdaterPaths paths = hpmmo::ResolvePathsForGui(g_Cfg);
-    return !paths.gameExe.empty() && hpmmo::FileExists(paths.gameExe);
-}
-
-void ApplySummary(const hpmmo::CheckSummary& s) {
-    std::lock_guard<std::mutex> lock(g_Mutex);
-    g_InstalledVersion = s.installedVersion;
-    g_ReleaseVersion = s.releaseVersion;
-    g_Notes = hpmmo::Utf8ToWide(s.releaseNotes);
-    // The server pill belongs to StatusWorker (it understands services that
-    // predate /api/status); the check may only add "under maintenance".
-    if (s.maintenance) g_ServerState = L"MAINTENANCE";
-}
-
-std::wstring ReadyDetail() {
-    std::lock_guard<std::mutex> lock(g_Mutex);
-    std::wstring d = L"Sürüm " + hpmmo::Utf8ToWide(g_InstalledVersion);
-    if (g_ServerState == L"MAINTENANCE") d += L"  ·  Sunucu şu an bakımda; bakım bitince giriş yapabilirsin.";
-    else if (g_ServerState == L"OFFLINE") d += L"  ·  Oyun sunucusuna şu an ulaşılamıyor.";
-    else d += L"  ·  Her şey hazır.";
-    return d;
-}
-
-// Check -> (self-update | download + install) -> ready. Runs on its own thread.
-void UpdateWorker(bool repair) {
-    g_Cancel = false;
-    hpmmo::CliOptions cli;
-    auto status = [](const std::wstring&) {};
-    auto progress = [](uint64_t done, uint64_t total) {
-        g_Done = done;
-        g_Total = total;
-        Phase p = CurrentPhase();
-        if (p == Phase::Downloading || p == Phase::SelfUpdating) {
-            int pct = total ? (int)((done * 100) / total) : 0;
-            std::wstring d = L"%" + std::to_wstring(pct) + L"  ·  " + BytesText(done) + L" / " + BytesText(total);
-            std::lock_guard<std::mutex> lock(g_Mutex);
-            g_Detail = d;
-        }
-        PostRefresh();
-    };
-
-    if (repair) {
-        g_Done = 0;
-        g_Total = 0;
-        SetState(Phase::Installing, L"Oyun dosyaları onarılıyor", L"Dosyalar doğrulanıyor ve eksikler indiriliyor…");
-        hpmmo::CommandResult r = hpmmo::DoRepair(cli, g_Cfg, &g_Cancel, status);
-        if (r.code != hpmmo::kExitOk) {
-            hpmmo::LogMsg("[Launcher] repair failed: " + r.json);
-        }
-    }
-
-    SetState(Phase::Checking, L"Güncellemeler kontrol ediliyor", L"Yeni sürüm olup olmadığına bakılıyor…");
-    hpmmo::CheckSummary s = hpmmo::DoCheck(cli, g_Cfg, &g_Cancel, status);
-    if (!s.ok) {
-        hpmmo::LogMsg("[Launcher] update check failed: " + s.error);
-        if (InstalledGamePresent()) {
-            SetState(Phase::ReadyStale, L"Güncelleme kontrol edilemedi",
-                     FriendlyError(s.error, s.errorCode) + L" Mevcut sürümle oynayabilirsin.");
-        } else {
-            SetState(Phase::Failed, L"Oyun indirilemedi", FriendlyError(s.error, s.errorCode));
-        }
-        g_WorkerBusy = false;
-        PostRefresh();
-        return;
-    }
-    ApplySummary(s);
-
-    if (s.gameRunning) {
-        SetState(Phase::GameRunning, L"Oyun şu an açık", L"Güncelleme, oyun kapandıktan sonra yapılacak.");
-        g_WorkerBusy = false;
-        PostRefresh();
-        return;
-    }
-
-    if (s.selfUpdateRequired || s.updateRequired || s.updateAvailable) {
-        g_Done = 0;
-        g_Total = 0;
-        if (s.selfUpdateRequired) {
-            SetState(Phase::SelfUpdating, L"Launcher güncelleniyor", L"Yeni launcher indiriliyor…");
-        } else {
-            std::wstring what = s.installedVersion.empty() ? L"Oyun indiriliyor" : L"Güncelleme indiriliyor";
-            SetState(Phase::Downloading, what + L"  ·  v" + hpmmo::Utf8ToWide(s.releaseVersion), L"Başlıyor…");
-        }
-        std::atomic<bool> installingShown{false};
-        auto status2 = [&](const std::wstring& text) {
-            if (!installingShown && text.find(L"Verifying") != std::wstring::npos) {
-                installingShown = true;
-                SetState(Phase::Installing, L"Güncelleme kuruluyor", L"Dosyalar doğrulanıyor ve yerleştiriliyor…");
-            }
-        };
-        hpmmo::CommandResult r = hpmmo::DoUpdate(cli, g_Cfg, &g_Cancel, status2, progress);
-        if (r.code == hpmmo::kExitSelfUpdateDone) {
-            SetState(Phase::SelfUpdating, L"Launcher güncellendi", L"Yeniden başlatılıyor…");
-            PostMessageW(g_Wnd, WM_APP_EXIT, 0, 0);
-            return;
-        }
-        if (r.code != hpmmo::kExitOk) {
-            hpmmo::LogMsg("[Launcher] update failed: " + r.json);
-            std::string message;
-            hpmmo::JsonValue root;
-            std::string perr;
-            if (hpmmo::JsonValue::Parse(r.json, root, perr) && root.isObject()) message = root.str("message");
-            if (InstalledGamePresent() && r.code != hpmmo::kExitProtocol) {
-                SetState(Phase::ReadyStale, L"Güncelleme tamamlanamadı",
-                         FriendlyError(message, r.code) + L" Mevcut sürümle oynayabilirsin.");
-            } else {
-                SetState(Phase::Failed, L"Güncelleme başarısız", FriendlyError(message, r.code));
-            }
-            g_WorkerBusy = false;
-            PostRefresh();
-            return;
-        }
-        // Refresh what is installed now.
-        hpmmo::CheckSummary after = hpmmo::DoCheck(cli, g_Cfg, &g_Cancel, status);
-        if (after.ok) ApplySummary(after);
-    }
-
-    SetState(Phase::Ready, L"Oyun hazır", ReadyDetail());
-    g_WorkerBusy = false;
-    PostRefresh();
-}
-
-void StartWorker(bool repair = false) {
-    bool expected = false;
-    if (!g_WorkerBusy.compare_exchange_strong(expected, true)) return;
-    std::thread(UpdateWorker, repair).detach();
-}
-
-// Server status only (cheap, plain HTTP): keeps the pill honest while idle.
-void StatusWorker() {
-    hpmmo::HttpRequestOptions opts;
-    opts.url = hpmmo::StatusUrl(hpmmo::CliOptions{}, g_Cfg);
-    opts.allowPlainHttp = true;
-    opts.systemTrust = true;
-    opts.maxBodyBytes = 64 * 1024;
-    opts.receiveTimeoutMs = 8000;
-    std::string body;
-    hpmmo::HttpOutcome out = hpmmo::HttpGetToString(opts, body);
-    std::wstring state = L"OFFLINE";
-    if (out.ok) {
-        hpmmo::JsonValue root;
-        std::string err;
-        if (hpmmo::JsonValue::Parse(body, root, err) && root.isObject()) {
-            state = root.boolean("maintenance", false) ? L"MAINTENANCE" : L"ONLINE";
-        }
-    } else if (out.status == 404) {
-        state = L"ONLINE";   // a service that predates /api/status
-    } else if (out.status == 503) {
-        state = L"MAINTENANCE";
-    }
-    {
-        std::lock_guard<std::mutex> lock(g_Mutex);
-        g_ServerState = state;
-        if (g_Phase == Phase::Ready) g_Detail.clear();
-    }
-    if (CurrentPhase() == Phase::Ready) {
-        std::wstring d = ReadyDetail();
-        std::lock_guard<std::mutex> lock(g_Mutex);
-        g_Detail = d;
-    }
-    g_StatusBusy = false;
-    PostRefresh();
-}
-
-void StartStatusPoll() {
-    if (hpmmo::StatusUrl(hpmmo::CliOptions{}, g_Cfg).empty()) return;
-    bool expected = false;
-    if (!g_StatusBusy.compare_exchange_strong(expected, true)) return;
-    std::thread(StatusWorker).detach();
-}
 
 // ------------------------------------------------------------------ actions
-void OnPlay() {
-    Phase p = CurrentPhase();
-    if (p == Phase::Failed) {
-        StartWorker();
-        return;
-    }
-    if (p != Phase::Ready && p != Phase::ReadyStale) return;
-    hpmmo::UpdaterPaths paths = hpmmo::ResolvePathsForGui(g_Cfg);
-    std::string version;
-    {
-        std::lock_guard<std::mutex> lock(g_Mutex);
-        version = g_InstalledVersion;
-    }
-    if (!hpmmo::LaunchGameClient(paths, g_Cfg, version)) {
-        SetState(Phase::Failed, L"Oyun başlatılamadı", L"Oyun dosyaları eksik olabilir. \"Dosyaları onar\" ile düzeltebilirsin.");
-        return;
-    }
-    SetState(Phase::GameRunning, L"Oyun açık", L"İyi oyunlar! Launcher arka planda bekliyor.");
-    SetTimer(g_Wnd, kTimerGame, 2500, NULL);
-    ShowWindow(g_Wnd, SW_MINIMIZE);
-}
-
-void OnGameTimer() {
-    if (CurrentPhase() != Phase::GameRunning) {
-        KillTimer(g_Wnd, kTimerGame);
-        return;
-    }
-    hpmmo::UpdaterPaths paths = hpmmo::ResolvePathsForGui(g_Cfg);
-    if (!hpmmo::IsGameRunningNow(paths, g_Cfg, nullptr)) {
-        KillTimer(g_Wnd, kTimerGame);
-        // The game closed: look for an update that may have landed meanwhile.
-        StartWorker();
-    }
-}
 
 Hit HitTest(int x, int y) {
     Layout L = CurrentLayout();
@@ -869,13 +569,14 @@ void Activate(Hit h) {
         case Hit::Close: PostMessageW(g_Wnd, WM_CLOSE, 0, 0); break;
         case Hit::Minimize: ShowWindow(g_Wnd, SW_MINIMIZE); break;
         case Hit::Play:
-            if (PlayEnabled(CurrentPhase())) OnPlay();
+            if (PlayEnabled(CurrentPhase()) && hpmmo::app::OnPlay()) {
+                SetTimer(g_Wnd, kTimerGame, 2500, NULL);
+                ShowWindow(g_Wnd, SW_MINIMIZE);
+            }
             break;
-        case Hit::Repair: {
-            Phase p = CurrentPhase();
-            if (p == Phase::Ready || p == Phase::ReadyStale || p == Phase::Failed) StartWorker(true);
+        case Hit::Repair:
+            hpmmo::app::RequestRepair();
             break;
-        }
         default: break;
     }
 }
@@ -897,10 +598,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             } else if (wParam == kTimerStatus) {
                 StartStatusPoll();
             } else if (wParam == kTimerGame) {
-                OnGameTimer();
+                if (!hpmmo::app::PollGame()) KillTimer(hWnd, kTimerGame);
             } else if (wParam == kTimerRecheck) {
-                Phase p = CurrentPhase();
-                if (p == Phase::Ready || p == Phase::ReadyStale) StartWorker();
+                hpmmo::app::OnRecheckTimer();
             }
             return 0;
         case WM_APP_REFRESH:
@@ -979,7 +679,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 int answer = MessageBoxW(hWnd, L"Güncelleme sürüyor. Şimdi kapatırsan indirme bir sonraki açılışta kaldığı yerden devam eder.\n\nKapatılsın mı?",
                                          L"HPMMO Launcher", MB_YESNO | MB_ICONQUESTION);
                 if (answer != IDYES) return 0;
-                g_Cancel = true;
+                hpmmo::app::Cancel();
             }
             DestroyWindow(hWnd);
             return 0;
@@ -1108,7 +808,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     LoadAssets();
 
     hpmmo::LoadConfig();
-    g_Cfg = hpmmo::Config();
+    hpmmo::app::Hooks hooks;
+    hooks.refresh = [] {
+        if (g_Wnd) PostMessageW(g_Wnd, WM_APP_REFRESH, 0, 0);
+    };
+    hooks.exitForSelfUpdate = [] { PostMessageW(g_Wnd, WM_APP_EXIT, 0, 0); };
+    hpmmo::app::Init(hpmmo::Config(), hooks);
 
     WNDCLASSEXW wcex = {sizeof(wcex)};
     wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DROPSHADOW;
@@ -1145,7 +850,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
         DispatchMessageW(&msg);
     }
 
-    g_Cancel = true;
+    hpmmo::app::Cancel();
     FreeAssets();
     GdiplusShutdown(g_GdiToken);
     WSACleanup();

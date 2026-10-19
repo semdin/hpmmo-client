@@ -12,3 +12,6 @@
 *.dll filter=lfs diff=lfs merge=lfs -text
 *.so filter=lfs diff=lfs merge=lfs -text
 assets/terrain/**/*.res filter=lfs diff=lfs merge=lfs -text
+*.sh text eol=lf
+launcher_cpp/packaging/linux/Dockerfile text eol=lf
+launcher_cpp/packaging/linux/*.desktop text eol=lf

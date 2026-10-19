@@ -168,8 +168,11 @@ def make_manifest(args: argparse.Namespace) -> dict:
     if args.launcher_artifact:
         if not os.path.isfile(args.launcher_artifact):
             rc.fail("launcher artifact %s does not exist" % args.launcher_artifact, 2)
-        if not args.launcher_artifact.lower().endswith(".exe"):
-            rc.fail("the launcher artifact must be a raw .exe (self-update swaps the executable)", 2)
+        # Self-update swaps one raw executable: an .exe on Windows, the AppImage on Linux.
+        wanted = {"windows-x86_64": ".exe", "linux-x86_64": ".appimage"}.get(args.platform)
+        if not wanted or not args.launcher_artifact.lower().endswith(wanted):
+            rc.fail("the %s launcher artifact must be a raw %s (self-update swaps the executable)"
+                    % (args.platform, wanted or "executable"), 2)
         artifacts.append({
             "kind": "launcher",
             "from_version": None,
@@ -510,7 +513,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--base-url", default="https://185.118.141.74:8443/releases")
     parser.add_argument("--release-notes", default="")
     parser.add_argument("--release-notes-file", default="")
-    parser.add_argument("--launcher-artifact", default="", help="the launcher .exe for self-update (optional)")
+    parser.add_argument("--launcher-artifact", default="", help="the launcher executable for self-update: .exe / .AppImage (optional)")
     parser.add_argument("--launcher-version", default="", help="version of --launcher-artifact")
     parser.add_argument("--content-index", default="", help="content.json from chunk_release.py (optional)")
     parser.add_argument("--published-at", default="", help="pin published_at for a reproducible manifest")
