@@ -11,6 +11,14 @@
 #include <map>
 #include <thread>
 
+#ifndef _WIN32
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <unistd.h>
+extern char** environ;
+#endif
+
 extern "C" {
 #include "ed25519.h"
 }
@@ -34,6 +42,84 @@ std::string ToLowerAscii(const std::string& s) {
 
 std::string ToLowerString(const std::string& s) { return ToLowerAscii(s); }
 
+#ifndef _WIN32
+// Starts exe detached from the launcher (double fork + setsid, so it is not
+// our child and survives the launcher exiting). The environment is the current
+// one minus every variable named in `drop`, plus `add` ("NAME=value"). A
+// failed exec is reported back through a close-on-exec pipe.
+bool SpawnDetached(const std::wstring& exe, const std::vector<std::wstring>& args,
+                   const std::vector<std::string>& drop, const std::vector<std::wstring>& add,
+                   const std::wstring& workDir, std::string& err) {
+    // Everything the children touch is prepared before fork().
+    std::vector<std::string> argStore;
+    argStore.push_back(WideToUtf8(exe));
+    for (const auto& a : args) argStore.push_back(WideToUtf8(a));
+    std::vector<std::string> envStore;
+    for (char** e = environ; e && *e; e++) {
+        std::string entry = *e;
+        std::string name = entry.substr(0, entry.find('='));
+        if (std::find(drop.begin(), drop.end(), name) != drop.end()) continue;
+        envStore.push_back(entry);
+    }
+    for (const auto& a : add) envStore.push_back(WideToUtf8(a));
+    std::vector<char*> argv, envp;
+    for (auto& a : argStore) argv.push_back(&a[0]);
+    argv.push_back(nullptr);
+    for (auto& e : envStore) envp.push_back(&e[0]);
+    envp.push_back(nullptr);
+    std::string dir = WideToUtf8(workDir);
+
+    int fds[2];
+    if (pipe(fds) != 0) {  // (pipe2 is Linux-only)
+        err = "pipe failed (" + std::to_string(errno) + ")";
+        return false;
+    }
+    fcntl(fds[0], F_SETFD, FD_CLOEXEC);
+    fcntl(fds[1], F_SETFD, FD_CLOEXEC);
+    pid_t mid = fork();
+    if (mid < 0) {
+        close(fds[0]);
+        close(fds[1]);
+        err = "fork failed (" + std::to_string(errno) + ")";
+        return false;
+    }
+    if (mid == 0) {
+        setsid();
+        pid_t child = fork();
+        if (child != 0) _exit(child < 0 ? 1 : 0);
+        close(fds[0]);
+        if (!dir.empty() && chdir(dir.c_str()) != 0) {
+            int e = errno;
+            (void)!write(fds[1], &e, sizeof(e));
+            _exit(127);
+        }
+        execve(argv[0], argv.data(), envp.data());
+        int e = errno;
+        (void)!write(fds[1], &e, sizeof(e));
+        _exit(127);
+    }
+    close(fds[1]);
+    int status = 0;
+    while (waitpid(mid, &status, 0) < 0 && errno == EINTR) {
+    }
+    int childErr = 0;
+    ssize_t got;
+    do {
+        got = read(fds[0], &childErr, sizeof(childErr));
+    } while (got < 0 && errno == EINTR);
+    close(fds[0]);
+    if (got == (ssize_t)sizeof(childErr)) {
+        err = "cannot start " + argStore[0] + " (" + std::to_string(childErr) + ")";
+        return false;
+    }
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+        err = "fork failed";
+        return false;
+    }
+    return true;
+}
+#endif
+
 std::wstring ResolveInstallRoot(const CliOptions& cli, const AppConfig& cfg) {
     if (!cli.installRoot.empty()) return NormalizePath(cli.installRoot);
     if (!cfg.installRoot.empty()) return NormalizePath(cfg.installRoot);
@@ -45,9 +131,8 @@ std::wstring ResolveInstallRoot(const CliOptions& cli, const AppConfig& cfg) {
         DirExists(JoinPath(exeDir, L"versions"))) {
         return NormalizePath(exeDir);
     }
-    wchar_t local[MAX_PATH] = {0};
-    DWORD n = GetEnvironmentVariableW(L"LOCALAPPDATA", local, MAX_PATH);
-    if (n > 0 && n < MAX_PATH) return NormalizePath(JoinPath(local, L"HPMMO"));
+    std::wstring dataRoot = UserDataRoot();
+    if (!dataRoot.empty()) return NormalizePath(JoinPath(dataRoot, L"HPMMO"));
     return NormalizePath(exeDir);
 }
 
@@ -127,7 +212,13 @@ UpdaterContext MakeContext(const CliOptions& cli, AppConfig cfg) {
     InstalledState cur;
     cur.present = false;
     if (LoadCurrentImpl(ctx, cur) && cur.present) {
+#ifdef _WIN32
         const wchar_t* candidates[] = {L"HPMMO.exe", L"HPMMO_Game.exe", L"game.exe", L"godot.exe"};
+#elif defined(__APPLE__)
+        const wchar_t* candidates[] = {L"HPMMO.app/Contents/MacOS/HPMMO"};
+#else
+        const wchar_t* candidates[] = {L"HPMMO.x86_64", L"HPMMO.arm64", L"HPMMO"};
+#endif
         if (!cfg.gameExeName.empty()) {
             std::wstring p = JoinPath(cur.dir, cfg.gameExeName);
             if (FileExists(p)) ctx.paths.gameExe = p;
@@ -314,8 +405,18 @@ bool FetchManifest(UpdaterContext& ctx, ReleaseManifest& m, std::string& message
         code = kExitConfig;
         return false;
     }
-    if (!m.platform.empty() && ToLowerAscii(m.platform).find("win") == std::string::npos) {
-        message = "release platform '" + m.platform + "' is not Windows";
+#ifdef _WIN32
+    const char* hostOs = "win";
+    const char* hostOsName = "Windows";
+#elif defined(__APPLE__)
+    const char* hostOs = "macos";
+    const char* hostOsName = "macOS";
+#else
+    const char* hostOs = "linux";
+    const char* hostOsName = "Linux";
+#endif
+    if (!m.platform.empty() && ToLowerAscii(m.platform).find(hostOs) == std::string::npos) {
+        message = "release platform '" + m.platform + "' is not " + hostOsName;
         code = kExitProtocol;
         return false;
     }
@@ -439,7 +540,7 @@ bool VerifyInstallFiles(const std::wstring& versionDir, const JsonValue& record,
         }
         std::wstring wide = Utf8ToWide(norm);
         for (auto& c : wide)
-            if (c == L'/') c = L'\\';
+            if (c == L'/') c = kPathSep;
         std::wstring full = JoinPath(versionDir, wide);
         out.checked++;
         if (!FileExists(full)) {
@@ -592,7 +693,7 @@ bool DownloadArtifact(UpdaterContext& ctx, const Artifact& art, std::wstring& fi
         }
         if (have == art.size) {
             if (Sha256FileHex(partPath) == art.sha256) {
-                if (!MoveFileExW(partPath.c_str(), finalPath.c_str(), MOVEFILE_REPLACE_EXISTING)) {
+                if (!MoveReplace(partPath, finalPath)) {
                     message = "cannot finalize the downloaded package";
                     code = kExitIntegrity;
                     return false;
@@ -640,7 +741,7 @@ bool DownloadArtifact(UpdaterContext& ctx, const Artifact& art, std::wstring& fi
                 code = kExitIntegrity;
                 return false;
             }
-            if (!MoveFileExW(partPath.c_str(), finalPath.c_str(), MOVEFILE_REPLACE_EXISTING)) {
+            if (!MoveReplace(partPath, finalPath)) {
                 message = "cannot finalize the downloaded package";
                 code = kExitIntegrity;
                 return false;
@@ -777,9 +878,9 @@ bool ActivateFromStaged(UpdaterContext& ctx, const std::string& version,
         }
         if (DirExists(finalDir)) {
             RemoveDirRecursive(stagedDir);
-        } else if (!MoveFileExW(stagedDir.c_str(), finalDir.c_str(), 0)) {
+        } else if (!MoveNoReplace(stagedDir, finalDir)) {
             message = "cannot move the staged install into place (error " +
-                      std::to_string(GetLastError()) + ")";
+                      std::to_string(LastErrorCode()) + ")";
             code = kExitIntegrity;
             return false;
         }
@@ -954,6 +1055,7 @@ bool PerformSelfUpdate(UpdaterContext& ctx, const ReleaseManifest& m, std::strin
         return false;
     }
     std::wstring target = GetExePath();
+#ifdef _WIN32
     std::wstring cmd = L"\"" + newExe + L"\" --self-update-swap " +
                        std::to_wstring(GetCurrentProcessId()) + L" \"" + target + L"\"";
     // The GUI launcher comes back by itself once the new executable is in place.
@@ -970,6 +1072,19 @@ bool PerformSelfUpdate(UpdaterContext& ctx, const ReleaseManifest& m, std::strin
     }
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
+#else
+    // The downloaded launcher (an AppImage on Linux) is the helper: it waits
+    // for us to exit and renames itself over `target`.
+    MakeExecutable(newExe);
+    std::vector<std::wstring> args = {L"--self-update-swap", std::to_wstring(CurrentProcessId()), target};
+    if (ctx.interactive) args.push_back(L"--relaunch");
+    std::string spawnErr;
+    if (!SpawnDetached(newExe, args, {}, {}, L"", spawnErr)) {
+        message = "cannot start the launcher update helper (" + spawnErr + ")";
+        code = kExitSelfUpdateFailed;
+        return false;
+    }
+#endif
     message = "launcher self-update to " + m.clientVersion + " handed off to the update helper";
     code = kExitSelfUpdateDone;
     LogMsg("[Updater] " + message);
@@ -980,12 +1095,12 @@ bool PerformSelfUpdate(UpdaterContext& ctx, const ReleaseManifest& m, std::strin
 
 bool CopyFileAtomic(const std::wstring& src, const std::wstring& dst, std::string& err) {
     std::wstring tmp = dst + L".new";
-    if (!CopyFileW(src.c_str(), tmp.c_str(), FALSE)) {
-        err = "copy failed (" + std::to_string(GetLastError()) + ")";
+    if (!CopyFilePlain(src, tmp)) {
+        err = "copy failed (" + std::to_string(LastErrorCode()) + ")";
         return false;
     }
-    if (!MoveFileExW(tmp.c_str(), dst.c_str(), MOVEFILE_REPLACE_EXISTING)) {
-        err = "replace failed (" + std::to_string(GetLastError()) + ")";
+    if (!MoveReplace(tmp, dst)) {
+        err = "replace failed (" + std::to_string(LastErrorCode()) + ")";
         DeleteFileQuiet(tmp);
         return false;
     }
@@ -1113,8 +1228,8 @@ CommandResult CheckImpl(UpdaterContext& ctx, CheckSummary* summary) {
 
 // HPMMO_FULL_PACKAGE=1 skips the delta path (diagnostics, tests).
 bool FullPackageForced() {
-    wchar_t v[8] = {0};
-    return GetEnvironmentVariableW(L"HPMMO_FULL_PACKAGE", v, 8) > 0 && v[0] == L'1';
+    std::wstring v = GetEnvW(L"HPMMO_FULL_PACKAGE");
+    return !v.empty() && v[0] == L'1';
 }
 
 // Chunked (delta) staging: builds <versions>/<ver>.tmp from the chunks the
@@ -1576,7 +1691,7 @@ CommandResult RepairImpl(UpdaterContext& ctx) {
             std::string rel = f.str("path");
             std::wstring wide = Utf8ToWide(rel);
             for (auto& c : wide)
-                if (c == L'/') c = L'\\';
+                if (c == L'/') c = kPathSep;
             std::wstring full = JoinPath(repairDir, wide);
             if (!FileExists(full) || Sha256FileHex(full) != ToLowerString(f.str("sha256"))) {
                 RemoveDirRecursive(repairDir);
@@ -1597,10 +1712,10 @@ CommandResult RepairImpl(UpdaterContext& ctx) {
         if (!needed) continue;
         std::wstring wide = Utf8ToWide(rel);
         for (auto& c : wide)
-            if (c == L'/') c = L'\\';
+            if (c == L'/') c = kPathSep;
         std::wstring src = JoinPath(repairDir, wide);
         std::wstring dst = JoinPath(inst.dir, wide);
-        size_t slash = dst.find_last_of(L'\\');
+        size_t slash = dst.find_last_of(kPathSep);
         if (slash != std::wstring::npos && slash > 2) CreateDirs(dst.substr(0, slash));
         if (!CopyFileAtomic(src, dst, err)) {
             failed.push_back(rel + ": " + err);
@@ -1648,19 +1763,12 @@ void CleanStaging(UpdaterContext& ctx) {
             }
         }
     }
-    WIN32_FIND_DATAW fd;
-    HANDLE h = FindFirstFileW(JoinPath(ctx.paths.versionsDir, L"*").c_str(), &fd);
-    if (h != INVALID_HANDLE_VALUE) {
-        do {
-            if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) continue;
-            std::wstring name = fd.cFileName;
-            if (name == L"." || name == L"..") continue;
-            if (name.size() > 4 && (EqualsCI(name.substr(name.size() - 4), L".tmp") ||
-                                    EqualsCI(name.substr(name.size() - 7), L".repair"))) {
-                RemoveDirRecursive(JoinPath(ctx.paths.versionsDir, name));
-            }
-        } while (FindNextFileW(h, &fd));
-        FindClose(h);
+    for (const auto& name : ListSubdirs(ctx.paths.versionsDir)) {
+        // (size checks first: a 5-6 character directory name used to throw in substr)
+        if ((name.size() > 4 && EqualsCI(name.substr(name.size() - 4), L".tmp")) ||
+            (name.size() > 7 && EqualsCI(name.substr(name.size() - 7), L".repair"))) {
+            RemoveDirRecursive(JoinPath(ctx.paths.versionsDir, name));
+        }
     }
 }
 
@@ -1774,6 +1882,7 @@ bool IsGameRunningNow(const UpdaterPaths& paths, const AppConfig& cfg,
     return IsGameRunningNowImpl(paths, cfg, matches);
 }
 
+#ifdef _WIN32
 bool LaunchInstalledGame(const UpdaterPaths& paths, const AppConfig& cfg, bool solo,
                          const std::wstring& username, const std::wstring& ticket) {
     if (paths.gameExe.empty() || !FileExists(paths.gameExe)) return false;
@@ -1827,12 +1936,38 @@ bool LaunchInstalledGame(const UpdaterPaths& paths, const AppConfig& cfg, bool s
     }
     return false;
 }
+#else  // !_WIN32
+
+bool LaunchInstalledGame(const UpdaterPaths& paths, const AppConfig& cfg, bool solo,
+                         const std::wstring& username, const std::wstring& ticket) {
+    if (paths.gameExe.empty() || !FileExists(paths.gameExe)) return false;
+    MakeExecutable(paths.gameExe);
+    std::vector<std::wstring> args;
+    std::vector<std::wstring> add;
+    std::vector<std::string> drop;
+    if (solo) {
+        args.push_back(L"--solo");
+    } else {
+        args = {L"--user", username, L"--ip", cfg.serverIp, L"--port", std::to_wstring(cfg.serverPort),
+                L"--autologin"};
+        drop = {"HPMMO_TICKET", "HPMMO_API_URL", "HPMMO_USER_DIR"};
+        add = {L"HPMMO_API_URL=http://" + cfg.serverIp + L":" + std::to_wstring(cfg.apiPort),
+               L"HPMMO_USER_DIR=" + paths.userDir, L"HPMMO_TICKET=" + ticket};
+    }
+    std::string err;
+    if (SpawnDetached(paths.gameExe, args, drop, add, L"", err)) return true;
+    LogMsg("[Launcher] " + err);
+    return false;
+}
+
+#endif  // _WIN32
 
 UpdaterPaths ResolvePathsForGui(AppConfig cfg) {
     CliOptions cli;
     return MakeContext(cli, cfg).paths;
 }
 
+#ifdef _WIN32
 bool LaunchGameClient(const UpdaterPaths& paths, const AppConfig& cfg, const std::string& clientVersion) {
     if (paths.gameExe.empty() || !FileExists(paths.gameExe)) return false;
     // No scene argument: export templates refuse path overrides, and the main
@@ -1922,6 +2057,62 @@ int RunSelfUpdateSwap(const std::string& pidStr, const std::wstring& target,
     }
     return kExitOk;
 }
+#else  // !_WIN32
+
+bool LaunchGameClient(const UpdaterPaths& paths, const AppConfig& cfg, const std::string& clientVersion) {
+    if (paths.gameExe.empty() || !FileExists(paths.gameExe)) return false;
+    // Zip/delta installs do not carry the exec bit reliably.
+    MakeExecutable(paths.gameExe);
+    std::vector<std::string> drop = {"HPMMO_TICKET", "HPMMO_API_URL", "HPMMO_USER_DIR", "HPMMO_CLIENT_VERSION"};
+    std::vector<std::wstring> add = {
+        L"HPMMO_API_URL=http://" + cfg.serverIp + L":" + std::to_wstring(cfg.apiPort),
+        L"HPMMO_USER_DIR=" + paths.userDir};
+    if (!clientVersion.empty()) add.push_back(L"HPMMO_CLIENT_VERSION=" + Utf8ToWide(clientVersion));
+    std::wstring workDir = paths.gameExe.substr(0, paths.gameExe.find_last_of(L'/'));
+    std::string err;
+    if (!SpawnDetached(paths.gameExe, {}, drop, add, workDir, err)) {
+        LogMsg("[Launcher] cannot start the game (" + err + ")");
+        return false;
+    }
+    LogMsg("[Launcher] game started: " + WideToUtf8(paths.gameExe));
+    return true;
+}
+
+int RunSelfUpdateSwap(const std::string& pidStr, const std::wstring& target,
+                      const std::wstring& newExe, bool relaunch) {
+    uint32_t pid = 0;
+    try {
+        pid = (uint32_t)std::stoul(pidStr);
+    } catch (...) {
+        pid = 0;
+    }
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(120);
+    if (pid != 0) {
+        while (IsProcessRunning(pid) && std::chrono::steady_clock::now() < deadline) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        }
+    }
+    if (NormalizePath(newExe) != NormalizePath(target)) {
+        // POSIX can rename over a running executable, so no retry loop is needed.
+        std::wstring tmp = target + L".swapnew";
+        DeleteFileQuiet(tmp);
+        if (!CopyFilePlain(newExe, tmp) || !MakeExecutable(tmp) || !MoveReplace(tmp, target, true)) {
+            DeleteFileQuiet(tmp);
+            LogMsg("[Updater] self-update swap failed (" + std::to_string(LastErrorCode()) + ")");
+            return kExitSelfUpdateFailed;
+        }
+    }
+    LogMsg("[Updater] launcher self-update applied to " + WideToUtf8(target));
+    if (relaunch) {
+        std::string err;
+        // The new AppImage would otherwise inherit $APPIMAGE pointing at newExe.
+        if (!SpawnDetached(target, {L"--post-self-update"}, {"APPIMAGE", "APPDIR", "ARGV0", "OWD"}, {}, L"", err))
+            LogMsg("[Updater] relaunch failed: " + err);
+    }
+    return kExitOk;
+}
+
+#endif  // _WIN32
 
 int RunPrintCertPin(const std::wstring& url) {
     std::string pin;

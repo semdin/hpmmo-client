@@ -5,8 +5,6 @@
 #include "json.h"
 #include "sha256.h"
 
-#include <windows.h>
-
 #include <algorithm>
 #include <cstdio>
 #include <map>
@@ -42,15 +40,15 @@ bool SafeRelPath(const std::string& p) {
 
 std::wstring NativePath(const std::wstring& root, const std::string& rel) {
     std::wstring w = Utf8ToWide(rel);
-    std::replace(w.begin(), w.end(), L'/', L'\\');
+    std::replace(w.begin(), w.end(), L'/', kPathSep);
     return JoinPath(root, w);
 }
 
 bool ReadAt(const std::wstring& path, uint64_t offset, uint64_t len, std::string& out) {
     out.clear();
-    FILE* f = _wfopen(path.c_str(), L"rb");
+    FILE* f = OpenFileW(path, L"rb");
     if (!f) return false;
-    bool ok = _fseeki64(f, (long long)offset, SEEK_SET) == 0;
+    bool ok = SeekFile64(f, offset);
     if (ok) {
         out.resize((size_t)len);
         ok = len == 0 || fread(&out[0], 1, (size_t)len, f) == len;
@@ -284,8 +282,8 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
         }
         stats.requests++;
         stats.downloadBytes += body.size();
-        FILE* bin = _wfopen(storeBin.c_str(), L"ab");
-        FILE* idx = _wfopen(storeIdx.c_str(), L"ab");
+        FILE* bin = OpenFileW(storeBin, L"ab");
+        FILE* idx = OpenFileW(storeIdx, L"ab");
         if (!bin || !idx) {
             if (bin) fclose(bin);
             if (idx) fclose(idx);
@@ -310,8 +308,12 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
                 err = "a downloaded chunk failed verification (" + c->sha256.substr(0, 12) + ")";
                 return false;
             }
+#ifdef _WIN32
             _fseeki64(bin, 0, SEEK_END);
-            uint64_t off = (uint64_t)_ftelli64(bin);
+#else
+            fseeko(bin, 0, SEEK_END);
+#endif
+            uint64_t off = TellFile64(bin);
             fwrite(plain.data(), 1, plain.size(), bin);
             fprintf(idx, "%s %llu %llu\n", c->sha256.c_str(), (unsigned long long)off, (unsigned long long)plain.size());
             stored.emplace(c->sha256, Ref{storeBin, off, (uint64_t)plain.size()});
@@ -328,16 +330,16 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
     for (const auto& f : index.files) {
         if (stop()) return cancelled = true, false;
         std::wstring dest = NativePath(stagedDir, f.path);
-        size_t slash = dest.find_last_of(L'\\');
+        size_t slash = dest.find_last_of(kPathSep);
         if (slash != std::wstring::npos) CreateDirs(dest.substr(0, slash));
         if (wholeOk.count(f.sha256)) {
-            if (!CopyFileW(wholeSource[f.sha256].c_str(), dest.c_str(), FALSE)) {
+            if (!CopyFilePlain(wholeSource[f.sha256], dest)) {
                 err = "cannot copy " + f.path + " from the installed version";
                 return false;
             }
             stats.reusedBytes += f.size;
         } else {
-            FILE* out = _wfopen(dest.c_str(), L"wb");
+            FILE* out = OpenFileW(dest, L"wb");
             if (!out) {
                 err = "cannot create " + f.path;
                 return false;

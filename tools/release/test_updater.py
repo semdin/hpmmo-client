@@ -45,8 +45,18 @@ from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID
 
 HERE = Path(__file__).resolve().parent
 CLIENT = HERE.parent.parent
-DEFAULT_LAUNCHER = CLIENT / "launcher_cpp" / "build" / "HPMMO_UpdaterCLI.exe"
-DEFAULT_GUI_LAUNCHER = CLIENT / "launcher_cpp" / "build" / "HPMMO_Launcher.exe"
+IS_WINDOWS = os.name == "nt"
+EXE = ".exe" if IS_WINDOWS else ""
+DEFAULT_LAUNCHER = CLIENT / "launcher_cpp" / "build" / ("HPMMO_UpdaterCLI" + EXE)
+DEFAULT_GUI_LAUNCHER = CLIENT / "launcher_cpp" / "build" / ("HPMMO_Launcher" + EXE)
+# The fake releases target the platform the launcher under test runs on (the
+# launcher refuses a release built for another platform).
+if IS_WINDOWS:
+    HOST_PLATFORM, GAME_EXE = "windows-x86_64", "HPMMO.exe"
+elif sys.platform == "darwin":
+    HOST_PLATFORM, GAME_EXE = "macos-universal", "HPMMO.app/Contents/MacOS/HPMMO"
+else:
+    HOST_PLATFORM, GAME_EXE = "linux-x86_64", "HPMMO.x86_64"
 
 CHECKS: list[tuple[str, bool, str]] = []
 
@@ -280,7 +290,7 @@ class Release:
         server_version: str = "0.9.0",
         release_notes: str = "Test release",
         content_version: str = "1",
-        platform: str = "windows-x86_64",
+        platform: str = HOST_PLATFORM,
         artifacts: list[dict] | None = None,
         launcher_version: str | None = None,
         content_index: dict | None = None,
@@ -379,7 +389,7 @@ def test_install_and_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25
     release = Release(rel, signer)
 
     pkg_110 = build_package({
-        "HPMMO.exe": b"GAME-1.1.0",
+        GAME_EXE: b"GAME-1.1.0",
         "data/level.pck": b"level-1.1.0" * 200,
     })
     release.add_package("game-1.1.0.zip", pkg_110)
@@ -396,7 +406,7 @@ def test_install_and_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25
     check("update/older: activated 1.1.0", bool(js and js.get("installed_version") == "1.1.0"), log)
     leftovers = [p.name for p in (root / "staging").glob("*") if p.is_file()] if (root / "staging").is_dir() else []
     check("update/older: the downloaded package is removed after activation", not leftovers, str(leftovers))
-    active = root / "versions" / "1.1.0" / "HPMMO.exe"
+    active = root / "versions" / "1.1.0" / GAME_EXE
     check("update/older: game files installed", active.is_file() and
           active.read_bytes() == b"GAME-1.1.0", f"missing {active}")
     current = json.loads((root / "current.json").read_text()) if (root / "current.json").is_file() else {}
@@ -408,7 +418,7 @@ def test_install_and_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25
     # Now publish 1.2.0 and update from the older version.
     release2 = Release(rel, signer)
     pkg_120 = build_package({
-        "HPMMO.exe": b"GAME-1.2.0",
+        GAME_EXE: b"GAME-1.2.0",
         "data/level.pck": b"level-1.2.0" * 200,
         "data/new.txt": b"brand new",
     })
@@ -426,7 +436,7 @@ def test_install_and_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25
     check("update/upgrade: previous kept", current.get("previous") == "1.1.0", str(current))
     check("update/upgrade: old version still on disk", (root / "versions" / "1.1.0").is_dir())
     check("update/upgrade: new files correct",
-          (root / "versions" / "1.2.0" / "HPMMO.exe").read_bytes() == b"GAME-1.2.0")
+          (root / "versions" / "1.2.0" / GAME_EXE).read_bytes() == b"GAME-1.2.0")
 
     rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--verify"])
     check("verify: healthy after update", rc == 0 and bool(js and js.get("healthy")), log)
@@ -447,7 +457,7 @@ def test_resume(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateKe
     server.httpd.release_root = rel
     release = Release(rel, signer)
     blob = os.urandom(6 * 1024 * 1024)
-    pkg = build_package({"HPMMO.exe": b"GAME-1.2.0", "data/blob.bin": blob})
+    pkg = build_package({GAME_EXE: b"GAME-1.2.0", "data/blob.bin": blob})
     art = release.add_package("game-1.2.0.zip", pkg)
     release.write_manifest("1.2.0")
     release.write_status("ONLINE")
@@ -478,7 +488,7 @@ def test_tampered(t: Path, server: ReleaseServer, signer: ed25519.Ed25519Private
     rel.mkdir()
     server.httpd.release_root = rel
     release = Release(rel, signer)
-    pkg = build_package({"HPMMO.exe": b"GAME-1.2.0"})
+    pkg = build_package({GAME_EXE: b"GAME-1.2.0"})
     release.add_package("game-1.2.0.zip", pkg)
     release.write_manifest("1.2.0")
     release.write_status("ONLINE")
@@ -513,7 +523,7 @@ def test_disk_space(t: Path, server: ReleaseServer, signer: ed25519.Ed25519Priva
     rel.mkdir()
     server.httpd.release_root = rel
     release = Release(rel, signer)
-    release.add_package("game-1.2.0.zip", build_package({"HPMMO.exe": b"G" * (4 << 20)}))
+    release.add_package("game-1.2.0.zip", build_package({GAME_EXE: b"G" * (4 << 20)}))
     release.write_manifest("1.2.0")
     release.write_status("ONLINE")
 
@@ -534,20 +544,20 @@ def test_repair(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateKe
     server.httpd.release_root = rel
     release = Release(rel, signer)
     release.add_package("game-1.2.0.zip",
-                        build_package({"HPMMO.exe": b"GAME-1.2.0", "data/level.pck": b"level-data"}))
+                        build_package({GAME_EXE: b"GAME-1.2.0", "data/level.pck": b"level-data"}))
     release.write_manifest("1.2.0")
     release.write_status("ONLINE")
     rc, _, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
     check("repair: baseline install", rc == 0, log)
 
     (root / "versions" / "1.2.0" / "data" / "level.pck").unlink()
-    exe = root / "versions" / "1.2.0" / "HPMMO.exe"
+    exe = root / "versions" / "1.2.0" / GAME_EXE
     exe.write_bytes(b"GAME-1.2.0-CORRUPTED")
 
     rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--verify"])
     check("repair: verify detects damage", rc == 20 and js.get("healthy") is False, log)
     check("repair: missing file listed", bool(js and "data/level.pck" in js.get("missing", [])), str(js))
-    check("repair: corrupt file listed", bool(js and "HPMMO.exe" in js.get("corrupt", [])), str(js))
+    check("repair: corrupt file listed", bool(js and GAME_EXE in js.get("corrupt", [])), str(js))
 
     rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--repair"])
     check("repair: exit 0", rc == 0, log)
@@ -555,7 +565,7 @@ def test_repair(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateKe
     check("repair: file restored",
           (root / "versions" / "1.2.0" / "data" / "level.pck").read_bytes() == b"level-data")
     check("repair: exe hash restored",
-          (root / "versions" / "1.2.0" / "HPMMO.exe").read_bytes() == b"GAME-1.2.0")
+          (root / "versions" / "1.2.0" / GAME_EXE).read_bytes() == b"GAME-1.2.0")
 
     rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--verify"])
     check("repair: verify healthy afterwards", rc == 0 and js.get("healthy") is True, log)
@@ -568,7 +578,7 @@ def test_settings_preserved(t: Path, server: ReleaseServer, signer: ed25519.Ed25
     rel.mkdir()
     server.httpd.release_root = rel
     release = Release(rel, signer)
-    release.add_package("game-1.1.0.zip", build_package({"HPMMO.exe": b"GAME-1.1.0"}))
+    release.add_package("game-1.1.0.zip", build_package({GAME_EXE: b"GAME-1.1.0"}))
     release.write_manifest("1.1.0")
     release.write_status("ONLINE")
     rc, _, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
@@ -586,7 +596,7 @@ def test_settings_preserved(t: Path, server: ReleaseServer, signer: ed25519.Ed25
     before = {str(p): (p.stat().st_mtime_ns, sha256_file(p)) for p in (settings, keybinds, shot)}
 
     release2 = Release(rel, signer)
-    release2.add_package("game-1.2.0.zip", build_package({"HPMMO.exe": b"GAME-1.2.0"}))
+    release2.add_package("game-1.2.0.zip", build_package({GAME_EXE: b"GAME-1.2.0"}))
     release2.write_manifest("1.2.0")
     release2.write_status("ONLINE")
     rc, _, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
@@ -607,14 +617,14 @@ def test_activation_recovery(t: Path, server: ReleaseServer, signer: ed25519.Ed2
     rel.mkdir()
     server.httpd.release_root = rel
     release = Release(rel, signer)
-    release.add_package("game-1.1.0.zip", build_package({"HPMMO.exe": b"GAME-1.1.0"}))
+    release.add_package("game-1.1.0.zip", build_package({GAME_EXE: b"GAME-1.1.0"}))
     release.write_manifest("1.1.0")
     release.write_status("ONLINE")
     rc, _, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
     check("recovery: baseline install", rc == 0, log)
 
     release2 = Release(rel, signer)
-    release2.add_package("game-1.2.0.zip", build_package({"HPMMO.exe": b"GAME-1.2.0"}))
+    release2.add_package("game-1.2.0.zip", build_package({GAME_EXE: b"GAME-1.2.0"}))
     release2.write_manifest("1.2.0")
     release2.write_status("ONLINE")
 
@@ -633,7 +643,7 @@ def test_activation_recovery(t: Path, server: ReleaseServer, signer: ed25519.Ed2
 
     # Harder kill: rename happened, pointer not written.
     release3 = Release(rel, signer)
-    release3.add_package("game-1.3.0.zip", build_package({"HPMMO.exe": b"GAME-1.3.0"}))
+    release3.add_package("game-1.3.0.zip", build_package({GAME_EXE: b"GAME-1.3.0"}))
     release3.write_manifest("1.3.0")
     release3.write_status("ONLINE")
     rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update", "--stop-after", "stage"])
@@ -652,7 +662,7 @@ def test_maintenance(t: Path, server: ReleaseServer, signer: ed25519.Ed25519Priv
     rel.mkdir()
     server.httpd.release_root = rel
     release = Release(rel, signer)
-    release.add_package("game-1.2.0.zip", build_package({"HPMMO.exe": b"GAME-1.2.0"}))
+    release.add_package("game-1.2.0.zip", build_package({GAME_EXE: b"GAME-1.2.0"}))
     release.write_manifest("1.2.0")
     release.write_status("MAINTENANCE", "Veritabani yukseltmesi: 20 dk", until="2026-10-04T13:00:00Z")
 
@@ -678,7 +688,7 @@ def test_protocol(t: Path, server: ReleaseServer, signer: ed25519.Ed25519Private
     rel.mkdir()
     server.httpd.release_root = rel
     release = Release(rel, signer)
-    release.add_package("game-1.2.0.zip", build_package({"HPMMO.exe": b"GAME-1.2.0"}))
+    release.add_package("game-1.2.0.zip", build_package({GAME_EXE: b"GAME-1.2.0"}))
     release.write_manifest("1.2.0", protocol_version="4", protocol_min="5", protocol_max="6")
     release.write_status("ONLINE")
 
@@ -704,21 +714,29 @@ def test_game_running(t: Path, server: ReleaseServer, signer: ed25519.Ed25519Pri
     rel.mkdir()
     server.httpd.release_root = rel
     release = Release(rel, signer)
-    release.add_package("game-1.1.0.zip", build_package({"HPMMO.exe": b"GAME-1.1.0"}))
+    release.add_package("game-1.1.0.zip", build_package({GAME_EXE: b"GAME-1.1.0"}))
     release.write_manifest("1.1.0")
     release.write_status("ONLINE")
     rc, _, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
     check("game-running: baseline install", rc == 0, log)
 
     release2 = Release(rel, signer)
-    release2.add_package("game-1.2.0.zip", build_package({"HPMMO.exe": b"GAME-1.2.0"}))
+    release2.add_package("game-1.2.0.zip", build_package({GAME_EXE: b"GAME-1.2.0"}))
     release2.write_manifest("1.2.0")
     release2.write_status("ONLINE")
 
-    ping_src = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "ping.exe"
-    fake_game = root / "versions" / "1.1.0" / "ping.exe"
+    # Any long-running program copied into the install stands in for the game.
+    if IS_WINDOWS:
+        ping_src = Path(os.environ.get("SystemRoot", "C:/Windows")) / "System32" / "ping.exe"
+        fake_game = root / "versions" / "1.1.0" / "ping.exe"
+        fake_args = ["-n", "120", "127.0.0.1"]
+    else:
+        ping_src = Path(shutil.which("sleep") or "/bin/sleep")
+        fake_game = root / "versions" / "1.1.0" / "sleep"
+        fake_args = ["120"]
     shutil.copy(str(ping_src), str(fake_game))
-    proc = subprocess.Popen([str(fake_game), "-n", "120", "127.0.0.1"],
+    os.chmod(str(fake_game), 0o755)
+    proc = subprocess.Popen([str(fake_game), *fake_args],
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
         time.sleep(0.8)
@@ -748,12 +766,16 @@ def test_self_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519Priv
     if not gui_launcher.is_file():
         check("self-update: GUI launcher present", False, str(gui_launcher))
         return
-    running_copy = root / "HPMMO_Launcher.exe"
+    running_copy = root / ("HPMMO_Launcher" + EXE)
     root.mkdir(parents=True, exist_ok=True)
     shutil.copy(str(ARGS.launcher), str(running_copy))
 
     release = Release(rel, signer)
     new_launcher = gui_launcher.read_bytes()
+    if new_launcher == Path(ARGS.launcher).read_bytes():
+        # No separate GUI build (Linux before L2): a byte-different copy of the
+        # CLI still runs (trailing bytes after an ELF image are ignored).
+        new_launcher += b"#hpmmo-self-update-test-build"
     release.add_package("launcher-9.9.9.exe", new_launcher, kind="launcher")
     release.write_manifest("9.9.9", min_launcher_version="9.9.9")
     release.write_status("ONLINE")
@@ -771,7 +793,7 @@ def test_self_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519Priv
     check("self-update: helper handed off", bool(js and js.get("self_update")), str(js))
 
     deadline = time.time() + 40
-    target = sha256_file(gui_launcher)
+    target = hashlib.sha256(new_launcher).hexdigest()
     swapped = False
     while time.time() < deadline:
         if sha256_file(running_copy) == target:
@@ -795,7 +817,7 @@ def test_launcher_version_update(t: Path, server: ReleaseServer, signer: ed25519
     rel.mkdir()
     server.httpd.release_root = rel
     release = Release(rel, signer)
-    release.add_package("game-1.2.0.zip", build_package({"HPMMO.exe": b"GAME"}))
+    release.add_package("game-1.2.0.zip", build_package({GAME_EXE: b"GAME"}))
     release.add_package("launcher-99.0.0.exe", b"MZ-new-launcher", kind="launcher")
     release.write_manifest("1.2.0", launcher_version="99.0.0")
     release.write_status("ONLINE")
@@ -839,7 +861,7 @@ def test_chunked_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519P
     rnd = __import__("random").Random(7)
     exe = b"MZ" + bytes(rnd.getrandbits(8) for _ in range(300_000))
     pck = bytes(rnd.getrandbits(8) for _ in range(4_000_000))
-    v1 = {"HPMMO.exe": exe, "HPMMO.pck": pck, "data/notes.txt": b"one"}
+    v1 = {GAME_EXE: exe, "HPMMO.pck": pck, "data/notes.txt": b"one"}
     build = t / "build"
     _write_build(build, v1)
     release = Release(rel, signer)
@@ -860,7 +882,7 @@ def test_chunked_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519P
     pck2 = bytearray(pck)
     pck2[2_000_000:2_100_000] = bytes(rnd.getrandbits(8) for _ in range(100_000))
     pck2[1_000_000:1_000_000] = bytes(rnd.getrandbits(8) for _ in range(10_000))
-    v2 = {"HPMMO.exe": exe, "HPMMO.pck": bytes(pck2), "data/notes.txt": b"two"}
+    v2 = {GAME_EXE: exe, "HPMMO.pck": bytes(pck2), "data/notes.txt": b"two"}
     _write_build(build, v2)
     release = Release(rel, signer)
     release.add_package("game-1.0.1.zip", build_package(v2))
@@ -878,7 +900,7 @@ def test_chunked_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519P
 
     # v3: the chunk file is missing -> the full package still installs.
     shutil.copy(rel / "files" / "content.json", t / "prev.json")
-    v3 = {"HPMMO.exe": exe, "HPMMO.pck": bytes(pck2[:-5000]), "data/notes.txt": b"three"}
+    v3 = {GAME_EXE: exe, "HPMMO.pck": bytes(pck2[:-5000]), "data/notes.txt": b"three"}
     _write_build(build, v3)
     release = Release(rel, signer)
     release.add_package("game-1.0.2.zip", build_package(v3))
@@ -899,13 +921,18 @@ def test_pinning(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateK
     rel.mkdir()
     server.httpd.release_root = rel
     release = Release(rel, signer)
-    release.add_package("game-1.2.0.zip", build_package({"HPMMO.exe": b"GAME-1.2.0"}))
+    release.add_package("game-1.2.0.zip", build_package({GAME_EXE: b"GAME-1.2.0"}))
     release.write_manifest("1.2.0")
     release.write_status("ONLINE")
 
     rc, js, log = run_cli(["--install-root", str(root), "--user-dir", str(root / "user"),
                            "--print-cert-pin", server.base + "/manifest.json"])
-    check("pin: print-cert-pin works", rc == 0 and js.get("cert_spki_sha256") == pin, log)
+    if IS_WINDOWS:
+        check("pin: print-cert-pin works", rc == 0 and js.get("cert_spki_sha256") == pin, log)
+    else:
+        # Pin bootstrapping is a Windows-build operator helper (http_curl.cpp).
+        check("pin: print-cert-pin refused clearly off Windows",
+              rc != 0 and js and js.get("error_kind") == "config", log)
 
     rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--check"])
     check("pin: pinned certificate accepted", rc == 0, log)
@@ -932,7 +959,7 @@ def test_unsafe_archive(t: Path, server: ReleaseServer, signer: ed25519.Ed25519P
     server.httpd.release_root = rel
     release = Release(rel, signer)
     release.add_package("game-1.2.0.zip",
-                        build_package({"HPMMO.exe": b"GAME"}, bad_entries=["../escape.txt"]))
+                        build_package({GAME_EXE: b"GAME"}, bad_entries=["../escape.txt"]))
     release.write_manifest("1.2.0")
     release.write_status("ONLINE")
     rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
@@ -955,7 +982,7 @@ def test_unsafe_archive(t: Path, server: ReleaseServer, signer: ed25519.Ed25519P
         release2 = Release(rel, signer)
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
-            z.writestr("HPMMO.exe", b"GAME")
+            z.writestr(GAME_EXE, b"GAME")
             info = zipfile.ZipInfo("link.txt")
             info.create_system = host_byte
             info.external_attr = (0o120777 << 16)
@@ -973,7 +1000,7 @@ def test_unsafe_archive(t: Path, server: ReleaseServer, signer: ed25519.Ed25519P
 
     release3 = Release(rel, signer)
     release3.add_package("game-1.4.0.zip",
-                         build_package({"HPMMO.exe": b"GAME"}, bad_entries=["/abs.txt"]))
+                         build_package({GAME_EXE: b"GAME"}, bad_entries=["/abs.txt"]))
     release3.write_manifest("1.4.0")
     release3.write_status("ONLINE")
     rc, js, log = run_cli(common_args(root, server.base, pin, pubkey) + ["--update"])
@@ -991,7 +1018,7 @@ def test_compression_methods(t: Path, server: ReleaseServer, signer: ed25519.Ed2
     stored = os.urandom(200000)
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as z:
-        z.writestr("HPMMO.exe", b"GAME-1.2.0")
+        z.writestr(GAME_EXE, b"GAME-1.2.0")
         zi = zipfile.ZipInfo("data/stored.bin")
         zi.compress_type = zipfile.ZIP_STORED
         z.writestr(zi, stored)
@@ -1008,7 +1035,7 @@ def test_compression_methods(t: Path, server: ReleaseServer, signer: ed25519.Ed2
     release2 = Release(rel, signer)
     buf2 = io.BytesIO()
     with zipfile.ZipFile(buf2, "w") as z:
-        z.writestr("HPMMO.exe", b"GAME-1.3.0", compress_type=zipfile.ZIP_BZIP2)
+        z.writestr(GAME_EXE, b"GAME-1.3.0", compress_type=zipfile.ZIP_BZIP2)
     release2.add_package("game-1.3.0.zip", buf2.getvalue())
     release2.write_manifest("1.3.0")
     release2.write_status("ONLINE")

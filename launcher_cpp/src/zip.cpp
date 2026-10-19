@@ -7,6 +7,13 @@
 #include <set>
 #include <vector>
 
+#ifndef _WIN32
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+
 namespace hpmmo {
 
 namespace {
@@ -50,12 +57,14 @@ uint32_t CrcUpdate(uint32_t crc, const unsigned char* data, size_t len) {
     return crc;
 }
 
+#ifdef _WIN32
 std::wstring LongPath(const std::wstring& p) {
     if (p.size() < 248) return p;
     if (p.compare(0, 4, L"\\\\?\\") == 0) return p;
     if (p.size() >= 2 && p[1] == L':') return L"\\\\?\\" + p;
     return p;
 }
+#endif
 
 bool IsBadWindowsComponent(const std::string& part, std::string& reason) {
     if (part.empty()) {
@@ -144,6 +153,7 @@ bool ValidateEntryName(const std::string& raw, std::string& normalized, bool& is
     return true;
 }
 
+#ifdef _WIN32
 class FileWriter {
 public:
     ~FileWriter() { Close(); }
@@ -175,17 +185,51 @@ public:
 private:
     HANDLE h_ = INVALID_HANDLE_VALUE;
 };
+#else
+class FileWriter {
+public:
+    ~FileWriter() { Close(); }
+    bool Open(const std::wstring& path) {
+        Close();
+        f_ = OpenFileW(path, L"wb");
+        return f_ != nullptr;
+    }
+    bool Write(const unsigned char* data, size_t len) {
+        return len == 0 || fwrite(data, 1, len, f_) == len;
+    }
+    bool Close() {
+        if (f_) {
+            fflush(f_);
+            fsync(fileno(f_));
+            fclose(f_);
+            f_ = nullptr;
+        }
+        return true;
+    }
+
+private:
+    FILE* f_ = nullptr;
+};
+#endif
 
 }  // namespace
 
+#ifdef _WIN32
 ZipReader::~ZipReader() {
     if (data_) UnmapViewOfFile(data_);
     if (mapping_) CloseHandle(mapping_);
     if (file_ != INVALID_HANDLE_VALUE) CloseHandle(file_);
 }
+#else
+ZipReader::~ZipReader() {
+    if (data_) munmap((void*)data_, (size_t)size_);
+    if (fd_ >= 0) close(fd_);
+}
+#endif
 
 bool ZipReader::Open(const std::wstring& path, std::string& err) {
     entries_.clear();
+#ifdef _WIN32
     file_ = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
                         FILE_ATTRIBUTE_NORMAL, NULL);
     if (file_ == INVALID_HANDLE_VALUE) {
@@ -208,6 +252,25 @@ bool ZipReader::Open(const std::wstring& path, std::string& err) {
         err = "cannot map archive";
         return false;
     }
+#else
+    fd_ = open(WideToUtf8(path).c_str(), O_RDONLY | O_CLOEXEC);
+    if (fd_ < 0) {
+        err = "cannot open archive";
+        return false;
+    }
+    struct stat st;
+    if (fstat(fd_, &st) != 0 || st.st_size < 22) {
+        err = "archive too small";
+        return false;
+    }
+    size_ = (uint64_t)st.st_size;
+    void* map = mmap(nullptr, (size_t)size_, PROT_READ, MAP_PRIVATE, fd_, 0);
+    if (map == MAP_FAILED) {
+        err = "cannot map archive";
+        return false;
+    }
+    data_ = (const unsigned char*)map;
+#endif
 
     // Locate the end-of-central-directory record.
     size_t back = (size_t)(size_ < 65557 + 22 ? size_ : 65557 + 22);
@@ -370,7 +433,7 @@ bool ZipReader::ExtractAll(const std::wstring& destDir, std::vector<ExtractedFil
 
         std::wstring rel = Utf8ToWide(normalized);
         for (auto& c : rel)
-            if (c == L'/') c = L'\\';
+            if (c == L'/') c = kPathSep;
         std::wstring target = JoinPath(destNorm, rel);
         std::wstring targetNorm = NormalizePath(target);
         if (!PathStartsWithCI(targetNorm, destNorm)) {
@@ -409,7 +472,7 @@ bool ZipReader::ExtractAll(const std::wstring& destDir, std::vector<ExtractedFil
             return false;
         }
 
-        size_t slash = targetNorm.find_last_of(L'\\');
+        size_t slash = targetNorm.find_last_of(kPathSep);
         if (slash != std::wstring::npos && slash > 2) {
             if (!CreateDirs(targetNorm.substr(0, slash))) {
                 err = "cannot create parent directory for '" + normalized + "'";

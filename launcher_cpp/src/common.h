@@ -1,16 +1,30 @@
 // HPMMO launcher - shared utilities (Release pipeline updater support).
 #pragma once
 
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#endif
 
 #include <cstdint>
+#include <cstdio>
 #include <string>
 #include <vector>
 
 namespace hpmmo {
+
+// The core keeps std::wstring paths on every platform. On POSIX they are
+// converted to UTF-8 at the system-call edge (common_posix.cpp); Windows code
+// paths are unchanged. The Win32 implementations live in common_win.cpp.
+#ifdef _WIN32
+constexpr wchar_t kPathSep = L'\\';
+#else
+constexpr wchar_t kPathSep = L'/';
+#endif
+// Release platform this binary installs ("windows-x86_64", "linux-x86_64", ...).
+const char* HostPlatform();
 
 // ---------------------------------------------------------------- strings --
 std::wstring Utf8ToWide(const std::string& str);
@@ -44,6 +58,26 @@ uint64_t FreeDiskSpaceBytes(const std::wstring& dir);
 uint64_t DirSizeBytes(const std::wstring& dir);
 // Recursively list files under dir (relative paths, forward slashes).
 bool ListFilesRecursive(const std::wstring& dir, std::vector<std::wstring>& out, std::string& err);
+// Names of the direct subdirectories of dir.
+std::vector<std::wstring> ListSubdirs(const std::wstring& dir);
+// rename() that replaces an existing file (MoveFileEx REPLACE_EXISTING on Windows).
+bool MoveReplace(const std::wstring& from, const std::wstring& to, bool writeThrough = false);
+// rename() that refuses to replace (used for whole version directories).
+bool MoveNoReplace(const std::wstring& from, const std::wstring& to);
+// Copies a file, replacing dst.
+bool CopyFilePlain(const std::wstring& src, const std::wstring& dst);
+// Marks a file executable (no-op on Windows).
+bool MakeExecutable(const std::wstring& path);
+FILE* OpenFileW(const std::wstring& path, const wchar_t* mode);
+bool SeekFile64(FILE* f, uint64_t offset);
+uint64_t TellFile64(FILE* f);
+// Last OS error number (GetLastError / errno), for log messages only.
+int LastErrorCode();
+std::wstring GetEnvW(const wchar_t* name);
+// Per-user application data root: %LOCALAPPDATA%, ~/.local/share
+// ($XDG_DATA_HOME) or ~/Library/Application Support. Empty when unknown.
+std::wstring UserDataRoot();
+uint32_t CurrentProcessId();
 
 // ------------------------------------------------------------------ version --
 // Returns -1/0/1. Numeric dotted comparison; a pre-release suffix sorts lower.
@@ -63,9 +97,9 @@ void LogMsg(const std::string& msg);
 std::string GetLogPathUtf8();
 
 // ----------------------------------------------------------------- processes --
-bool IsProcessRunning(DWORD pid);
+bool IsProcessRunning(uint32_t pid);
 struct RunningProcess {
-    DWORD pid = 0;
+    uint32_t pid = 0;
     std::wstring name;
     std::wstring imagePath;
 };
@@ -77,7 +111,7 @@ bool IsGameRunning(const std::wstring& installRoot,
                    std::vector<RunningProcess>* matches);
 
 // ------------------------------------------------------------------- config --
-// Built-in release source: a lone HPMMO_Launcher.exe with no client_config.json
+// Built-in release source: a lone launcher with no client_config.json
 // next to it still knows where updates live and which key signs them.
 // GitHub's "latest" alias always resolves to the newest published release.
 #ifndef HPMMO_DEFAULT_RELEASE_BASE

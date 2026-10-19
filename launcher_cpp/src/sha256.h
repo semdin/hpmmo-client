@@ -1,4 +1,5 @@
-// SHA-256 via the Windows CNG API (bcrypt.dll) - no vendored crypto here.
+// SHA-256: the Windows CNG API (bcrypt.dll) on Windows, a portable
+// implementation elsewhere (sha256.cpp).
 #pragma once
 
 #include <cstdint>

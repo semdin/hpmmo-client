@@ -1,10 +1,12 @@
 // Minimal, defensive ZIP reader for launcher packages.
 #pragma once
 
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#endif
 
 #include <cstdint>
 #include <functional>
@@ -44,8 +46,12 @@ public:
                     std::string& err, const std::function<bool()>& cancelled = {});
 
 private:
+#ifdef _WIN32
     HANDLE file_ = INVALID_HANDLE_VALUE;
     HANDLE mapping_ = NULL;
+#else
+    int fd_ = -1;
+#endif
     const unsigned char* data_ = nullptr;
     uint64_t size_ = 0;
     std::vector<ZipEntry> entries_;

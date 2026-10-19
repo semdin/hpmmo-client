@@ -1,4 +1,5 @@
-// WinHTTP transport: HTTPS with SPKI certificate pinning or Windows chain
+// HTTP transport (WinHTTP on Windows, libcurl elsewhere): HTTPS with SPKI
+// certificate pinning or system chain
 // validation (systemTrust), plus plain HTTP for advisory documents.
 #pragma once
 
