@@ -186,11 +186,14 @@ def make_manifest(args: argparse.Namespace) -> dict:
         rc.fail("a delta publication carries exactly one artifact (from %s)" % args.delta_from, 2)
 
     content_sha256 = args.content_sha256
-    if not content_sha256:
+    if not content_sha256 and args.artifact:
         try:
             content_sha256 = content_sha256_of_artifact(args.artifact[0])
         except (ValueError, zipfile.BadZipFile) as exc:
             rc.fail("cannot compute content_sha256: %s (pass --content-sha256 to override)" % exc, 3)
+    elif not content_sha256:
+        # Chunk-only release: the content index lists every file with its hash.
+        content_sha256 = rc.sha256_file(args.content_index)
     if not re.match(r"^[0-9a-f]{64}$", content_sha256 or ""):
         rc.fail("content_sha256 must be 64 lowercase hex characters", 2)
 
@@ -536,8 +539,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def cmd_build(args: argparse.Namespace) -> int:
-    if not args.artifact:
-        rc.fail("--artifact is required", 2)
+    # Releases ship the game as chunks (--content-index); a full zip
+    # (--artifact) is optional since 1.0.64.
+    if not args.artifact and not args.content_index:
+        rc.fail("--artifact or --content-index is required", 2)
     required = {"--client-version": args.client_version, "--min-launcher-version": args.min_launcher_version,
                 "--protocol-version": args.protocol_version, "--protocol-min": args.protocol_min,
                 "--protocol-max": args.protocol_max, "--content-version": args.content_version,
@@ -572,7 +577,8 @@ def cmd_build(args: argparse.Namespace) -> int:
 
     manifest = make_manifest(args)
 
-    out_dir = args.out or os.path.dirname(os.path.abspath(args.artifact[0]))
+    inputs_dir = os.path.dirname(os.path.abspath(args.artifact[0] if args.artifact else args.content_index))
+    out_dir = args.out or inputs_dir
     os.makedirs(out_dir, exist_ok=True)
     manifest_path = os.path.join(out_dir, rc.manifest_name(args.platform))
     with open(manifest_path, "wb") as handle:
@@ -580,7 +586,7 @@ def cmd_build(args: argparse.Namespace) -> int:
     say("wrote %s" % manifest_path)
     for entry in manifest["artifacts"]:
         name = entry["url"].rsplit("/", 1)[-1]
-        local = os.path.join(os.path.dirname(os.path.abspath(args.artifact[0])), name)
+        local = os.path.join(inputs_dir, name)
         if os.path.isfile(local):
             sidecar = local + ".sha256"
             with open(sidecar, "w", encoding="ascii", newline="\n") as handle:
@@ -604,7 +610,7 @@ def cmd_build(args: argparse.Namespace) -> int:
         args.manifest = manifest_path
         args.pubkey = _public_key_of(args.key, os.path.join(workdir, "release.pub.pem"))
         args.no_artifacts = False
-        args.artifacts = args.artifacts or os.path.dirname(os.path.abspath(args.artifact[0]))
+        args.artifacts = args.artifacts or inputs_dir
         return cmd_verify(args)
     finally:
         import shutil

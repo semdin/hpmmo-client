@@ -283,8 +283,10 @@ bool ParseManifest(const std::string& raw, ReleaseManifest& m, std::string& err)
         err = "manifest is missing client_version";
         return false;
     }
+    // A chunk-only release (no full zip since 1.0.64) may list no artifact at
+    // all when it ships no launcher either: the content index is the package.
     const auto* arts = root.arr("artifacts");
-    if (!arts || arts->empty()) {
+    if (!arts || (arts->empty() && m.contentIndexUrl.empty())) {
         err = "manifest has no artifacts";
         return false;
     }
@@ -1453,9 +1455,9 @@ CommandResult UpdateImpl(UpdaterContext& ctx, CheckSummary* summary) {
     // Delta first: only the changed chunks travel. Any failure other than a
     // cancel or a full disk falls back to the complete package below.
     bool chunked = false;
+    std::string chunkMsg;
+    int chunkCode = kExitOk;
     if (!m.contentIndexUrl.empty() && ctx.cli.stopAfter.empty() && !FullPackageForced()) {
-        std::string chunkMsg;
-        int chunkCode = kExitOk;
         chunked = StageFromChunks(ctx, m, inst, tmpDir, chunkMsg, chunkCode);
         if (chunked) {
             pkgPath = Utf8ToWide(m.contentIndexUrl);
@@ -1469,6 +1471,9 @@ CommandResult UpdateImpl(UpdaterContext& ctx, CheckSummary* summary) {
         Artifact art;
         std::string why;
         if (!SelectInstallArtifact(m, inst.version, art, why)) {
+            // Releases since 1.0.64 ship chunks only (no full zip): the chunk
+            // error is the real reason.
+            if (!chunkMsg.empty()) return Fail("update", chunkCode != kExitOk ? chunkCode : kExitDownload, chunkMsg);
             return Fail("update", kExitIntegrity, why);
         }
         if (ctx.status) ctx.status(L"Downloading the new version...");
@@ -1660,9 +1665,13 @@ CommandResult RepairImpl(UpdaterContext& ctx) {
     if (!RunFetchAndCompare(ctx, m, st, inst, &tmp, message, code)) {
         return Fail("repair", code, message);
     }
+    // A clean copy comes from the chunks when the release is the installed
+    // version (healthy local files are reused, only broken ones download);
+    // otherwise from the full package, when the release still has one.
+    bool viaChunks = !m.contentIndexUrl.empty() && SameVersion(inst.version, m.clientVersion) && !FullPackageForced();
     Artifact art;
     std::string why;
-    if (!SelectInstallArtifact(m, inst.version, art, why)) {
+    if (!viaChunks && !SelectInstallArtifact(m, inst.version, art, why)) {
         return Fail("repair", kExitLocalVerify, why + "; run --update");
     }
     std::vector<RunningProcess> running;
@@ -1671,21 +1680,30 @@ CommandResult RepairImpl(UpdaterContext& ctx) {
                     "the game is running; close it before repairing - nothing was written");
     }
     if (ctx.status) ctx.status(L"Downloading a clean copy for repair...");
-    std::wstring pkgPath;
-    if (!DownloadArtifact(ctx, art, pkgPath, message, code)) {
-        return Fail("repair", code, message);
-    }
     std::wstring repairDir = JoinPath(ctx.paths.versionsDir, Utf8ToWide(inst.version)) + L".repair";
     RemoveDirRecursive(repairDir);
-    ZipReader zip;
-    if (!zip.Open(pkgPath, err)) {
-        return Fail("repair", kExitIntegrity, "package is not a readable zip: " + err);
-    }
-    std::vector<ExtractedFile> files;
-    if (!zip.ExtractAll(repairDir, files, err, [&]() { return ctx.cancel && ctx.cancel->load(); })) {
-        RemoveDirRecursive(repairDir);
-        int c = err == "cancelled" ? kExitCancelled : kExitIntegrity;
-        return Fail("repair", c, "repair extraction failed: " + err);
+    if (viaChunks) {
+        std::string chunkMsg;
+        int chunkCode = kExitOk;
+        if (!StageFromChunks(ctx, m, inst, repairDir, chunkMsg, chunkCode)) {
+            RemoveDirRecursive(repairDir);
+            return Fail("repair", chunkCode != kExitOk ? chunkCode : kExitDownload, "repair download failed: " + chunkMsg);
+        }
+    } else {
+        std::wstring pkgPath;
+        if (!DownloadArtifact(ctx, art, pkgPath, message, code)) {
+            return Fail("repair", code, message);
+        }
+        ZipReader zip;
+        if (!zip.Open(pkgPath, err)) {
+            return Fail("repair", kExitIntegrity, "package is not a readable zip: " + err);
+        }
+        std::vector<ExtractedFile> files;
+        if (!zip.ExtractAll(repairDir, files, err, [&]() { return ctx.cancel && ctx.cancel->load(); })) {
+            RemoveDirRecursive(repairDir);
+            int c = err == "cancelled" ? kExitCancelled : kExitIntegrity;
+            return Fail("repair", c, "repair extraction failed: " + err);
+        }
     }
     // Verify the fresh extraction against the trusted record before copying.
     JsonValue freshRec;

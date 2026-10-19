@@ -1,4 +1,6 @@
 # HPMMO client release -> GitHub Releases (what the launcher updates from).
+# Since 1.0.64 the game ships as chunks only (content*.json + chunks*.bin):
+# no full zip; the launchers install and repair from chunks.
 #
 #   push to main       -> export the game, build the launcher, package, sign the
 #                         manifest, and publish GitHub Release v<version>
@@ -194,20 +196,22 @@ jobs:
           test -f build-linux/client/HPMMO.pck
           ls -la build-linux/client
 
-      - name: Package the client (refuses user data, caches and secrets)
+      # No full zip since 1.0.64: the packager only enforces its refusal rules
+      # (no user data, caches or secrets) on what the chunks are cut from.
+      - name: Validate the client builds (refuses user data, caches and secrets)
         run: |
           python3 tools/release/package_client.py \
             --build-dir build \
             --client-version "${{ steps.v.outputs.client }}" \
             --content-version "${{ steps.v.outputs.content }}" \
             --platform "$PLATFORM" \
-            --out dist
+            --check
           python3 tools/release/package_client.py \
             --build-dir build-linux \
             --client-version "${{ steps.v.outputs.client }}" \
             --content-version "${{ steps.v.outputs.content }}" \
             --platform linux-x86_64 \
-            --out dist
+            --check
 
       # Delta delivery: chunks the previous release already published are
       # referenced, only new ones go into chunks-<ver>.bin.
@@ -257,7 +261,6 @@ jobs:
             printf '%s\n' "$SIGNING_KEY" > "$key"
           fi
           python3 tools/release/gen_manifest.py \
-            --artifact "dist/hpmmo-client-${{ steps.v.outputs.client }}-$PLATFORM.zip" \
             --launcher-artifact dist/HPMMO_Launcher.exe \
             --launcher-version "${{ steps.v.outputs.launcher }}" \
             --channel release \
@@ -272,7 +275,6 @@ jobs:
             --out dist --key "$key"
           # Linux manifest (with the AppImage as the launcher self-update payload).
           python3 tools/release/gen_manifest.py \
-            --artifact "dist/hpmmo-client-${{ steps.v.outputs.client }}-linux-x86_64.zip" \
             --launcher-artifact dist/HPMMO_Launcher-x86_64.AppImage \
             --launcher-version "${{ steps.v.outputs.launcher }}" \
             --channel release \
@@ -310,10 +312,9 @@ jobs:
           shopt -s nullglob
           chunks=(dist/chunks-*.bin)
           gh release create "$tag" \
-            "dist/hpmmo-client-${{ steps.v.outputs.client }}-$PLATFORM.zip" \
             dist/HPMMO_Launcher.exe dist/content.json "${chunks[@]}" \
             dist/manifest.json dist/manifest.json.sig dist/manifest.json.keyid dist/SHA256SUMS \
-            "dist/hpmmo-client-${{ steps.v.outputs.client }}-linux-x86_64.zip" dist/content-linux-x86_64.json \
+            dist/content-linux-x86_64.json \
             dist/HPMMO_Launcher-x86_64.AppImage \
             dist/manifest-linux-x86_64.json dist/manifest-linux-x86_64.json.sig \
             dist/manifest-linux-x86_64.json.keyid dist/SHA256SUMS-linux-x86_64 \
