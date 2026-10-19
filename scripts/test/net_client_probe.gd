@@ -207,8 +207,10 @@ func _ready() -> void:
 		_setup_maintenance()
 	if mode == "transfer":
 		_setup_transfer()
-	if mode == "party":
+	if mode == "party" or mode == "portkey":
 		_setup_party()
+	if mode == "portkey":
+		_setup_portkey()
 	if mode == "encounter":
 		_setup_encounter()
 	SimAuthority.entity_health.connect(_on_health)
@@ -367,6 +369,9 @@ func _physics_process(delta: float) -> void:
 	if mode == "party":
 		_party_tick()
 		return
+	if mode == "portkey":
+		_portkey_tick()
+		return
 	_update_target()
 	if mode == "agree":
 		if _pack_wiped() and _target_respawn_tick < 0:
@@ -420,6 +425,55 @@ func _party_tick() -> void:
 		_attack_target()
 	if _t >= duration:
 		_finish_party()
+
+# ------------------------------------------------------------------ portkey
+# Manual group-travel check (not part of multiplayer_sim): Lead invites Mate,
+# sets a Portkey down for Hagrid's hut once the party stands, Mate grabs hold;
+# both acknowledge their transfers and record where they were set down.
+# Run with the world server's HPMMO_DEV_ITEMS=portkey_boot:1.
+
+var _portkey_placed := false
+var _portkey_grabbed := false
+var _portkey_states: Array = []
+
+func _setup_portkey() -> void:
+	SimAuthority.portkey_state.connect(func(uid: int, state: Dictionary):
+		if uid == SimAuthority.local_uid:
+			_portkey_states.append(state)
+			_record("portkey_state", {"id": int(state.get("id", 0)), "phase": String(state.get("phase", "")),
+				"holders": (state.get("holders", []) as Array).size(), "dest": String(state.get("dest", ""))}))
+	SimAuthority.transfer_granted.connect(func(peer_id: int, token: int, map_id: String, spawn_id: String):
+		if peer_id == SimNet.local_peer_id:
+			_record("transfer_granted", {"token": token, "map": map_id, "spawn": spawn_id})
+			SimNet.mark_transfer_ready(token))
+	SimAuthority.transfer_committed.connect(func(peer_id: int, _token: int, map_id: String, pos: Vector3, spawn_id: String):
+		if peer_id == SimNet.local_peer_id:
+			if player != null:
+				player.global_position = pos
+			_record("transfer_committed", {"map": map_id, "spawn": spawn_id, "pos": [pos.x, pos.y, pos.z]}))
+	SimAuthority.transfer_refused.connect(func(peer_id: int, reason: String):
+		if peer_id == SimNet.local_peer_id:
+			_record("refused", {"reason": reason}))
+
+func _portkey_tick() -> void:
+	if probe_name == "Lead" and not _party_invite_sent and _t > 3.0:
+		_party_invite_sent = true
+		NetworkManager.send_chat("/invite Mate")
+	if probe_name == "Lead" and not _portkey_placed and _party_size() >= 2 and _t > 6.0:
+		_portkey_placed = true
+		SimNet.portkey_place(player, "floo_hagrid")
+		_record("portkey_place", {"dest": "floo_hagrid"})
+	if probe_name == "Mate" and not _portkey_grabbed and not _portkey_states.is_empty():
+		var state: Dictionary = _portkey_states[-1]
+		if String(state.get("phase", "")) == "placed":
+			_portkey_grabbed = true
+			SimNet.portkey_grab(player, int(state.get("id", 0)), true)
+			_record("portkey_grab", {"id": int(state.get("id", 0))})
+	if _t >= duration:
+		_done = true
+		_record("final", {"pos": [player.global_position.x, player.global_position.y, player.global_position.z] if player != null else [],
+			"party": _party_size()})
+		_finish(0)
 
 func _party_size() -> int:
 	if _party_states.is_empty():

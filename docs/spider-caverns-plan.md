@@ -27,7 +27,13 @@
 > stats payload'da. Uçuç Tozu (`floo_powder`, `buy_price` 2.500 — equipment `buy` işlemi, pencereden), taş %25 / örümcek %2.
 > İstemci: `TravelNodes` (şömineler, ocak ateşi, yeşil alev `burst` + `floo_whoosh` sesi), `HudFloo` penceresi,
 > map_controller F istemi / kalkış-varış alevi. Doğrulama `tools/capture/floo_probe.tscn` (4 yolculuk + ret + satın alma).
-> Not: kalkış alevini yalnızca yolcu görüyor (diğer oyunculara yayın yok). Görüntüler: `tools/capture/world_shots.tscn -- --map=spider_caverns`. Kararlar bölümündeki varsayılanlarla ilerlenecek;
+> Not: kalkış alevini yalnızca yolcu görüyor (diğer oyunculara yayın yok).
+> **S5 (2026-10-19, protokol v21):** Anahtar (Portkey). travel.json `portkey` (10 sn, 3 m, 4 hedef), eşya `portkey_boot`
+> (10.000 G, Uçuç penceresinden; taşlardan %4-5). authority `request_portkey_place/grab`, `_advance_portkeys`, ateşlenince
+> her tutunana `_grant_transfer` (halka dizilim, spawn `portkey:<dest>`), kimse kalmazsa çizme iade. Durum sahibine +
+> partiye `sim_portkey_state`. İstemci `PortkeyViews` (çizme, halka, geri sayım, ışık bağı, mavi girdap + `portkey_whoosh`),
+> `HudPortkey` (envanterde sağ tık), F ile tutun/bırak. Doğrulama: `tools/capture/portkey_probe.tscn` (tek oyuncu) ve
+> sunucu + 2 istemci (`net_client_probe --mode=portkey`, sunucu `HPMMO_DEV_ITEMS=portkey_boot:1`): ikisi birlikte taşındı. Görüntüler: `tools/capture/world_shots.tscn -- --map=spider_caverns`. Kararlar bölümündeki varsayılanlarla ilerlenecek;
 > her fazın sonunda oyunda gösterilip onay alınır. Konsept görselleri 3D'ye geçmeden önce onaya sunulur.
 
 ## Hedef

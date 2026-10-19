@@ -108,3 +108,5 @@ template as the 2026-10-13 menu set, text prompt only (no input image).
   spool of pearly silk), resized to 512 px. Sources in `art/spider_caverns/icons/`.
 * `icon_floo_powder.png` (2026-10-19, Floo Network) - same sunburst full-bleed template (brass pot of
   glittering green powder puffing into green flames), 512 px. Source `art/spider_caverns/icons/`.
+* `icon_portkey_boot.png` (2026-10-19, Portkey) - same sunburst full-bleed template (battered leather boot
+  in a swirling blue aura), 512 px. Source `art/spider_caverns/icons/`.

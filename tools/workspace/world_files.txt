@@ -547,6 +547,7 @@ scripts/ui/hud_game_menu.gd
 scripts/ui/hud_kit.gd
 scripts/ui/hud_notices.gd
 scripts/ui/hud_party.gd
+scripts/ui/hud_portkey.gd
 scripts/ui/hud_quest_log.gd
 scripts/ui/hud_quest_scroll.gd
 scripts/ui/hud_skill_pick.gd
@@ -605,6 +606,7 @@ scripts/world/grounds/grounds_sites.gd
 scripts/world/grounds_terrain.gd
 scripts/world/map_controller.gd
 scripts/world/npc.gd
+scripts/world/portkey_views.gd
 scripts/world/quality_preset.gd
 scripts/world/safe_zone.gd
 scripts/world/target_ring.gd
