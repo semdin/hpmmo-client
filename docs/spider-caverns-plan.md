@@ -8,7 +8,13 @@
 > dünya açılışında kalıcı (`cavern_colliders.gd`, maps.json `collision`), atmosfer `cavern_atmosphere.gd`
 > (maps.json `atmosphere: "cavern"`), map_controller'da "sahne haritası" (`_scene_map`), sunucu map_host aynı.
 > Portallar: `crypt_descend` (grounds, mahzen kapısı) ↔ `caverns_ascend` (merdiven dibi); kamp güvenli bölge.
-> Gidiş-dönüş `tools/capture/portal_probe.tscn` ile doğrulandı. Görüntüler: `tools/capture/world_shots.tscn -- --map=spider_caverns`. Kararlar bölümündeki varsayılanlarla ilerlenecek;
+> Gidiş-dönüş `tools/capture/portal_probe.tscn` ile doğrulandı.
+> **S2 (2026-10-19):** Zehirdiş + Kuluçka Muhafızı: `creature_prepare.py` → `art/pipeline/scripts/spider_rig.py` (ayak adaları
+> → bacak zincirleri, 10 bacak/taraf 5 da olabilir; klipler Idle/Walk/Turn/Bite/Spit/Leap/Hit/Stun/Death). Yetenekler:
+> `poison` (yanma saatinde zehir, `apply_poison`) ve `web_s` (yayan %50 hız, `apply_web`, player.gd `WEBBED_FACTOR`,
+> stats payload `webbed_until_tick`). Mağara spawn'ları `art/spider_caverns/scripts/cavern_spawns.py` (43 paket / 191 yaratık,
+> agresif, `respawn_s` 12-18, `clear_radius` 5, paket `y` = zemin), bölgeler `caverns_f1/f2` (`map`), loot `cavern_spider`.
+> Doğrulama: `tools/capture/cavern_probe.tscn` (zemine oturma, zehir/ağ tetiklenmesi). Görüntüler: `tools/capture/world_shots.tscn -- --map=spider_caverns`. Kararlar bölümündeki varsayılanlarla ilerlenecek;
 > her fazın sonunda oyunda gösterilip onay alınır. Konsept görselleri 3D'ye geçmeden önce onaya sunulur.
 
 ## Hedef

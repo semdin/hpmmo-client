@@ -481,10 +481,21 @@ func _update_target() -> void:
 	# of the same pack (a pack respawns together only when all of it is dead).
 	if _target_uid != 0 and not _is_dead(_target_uid):
 		return
+	# The weakest live member first: an elite (x3 health, rolled per life, so a
+	# seed or content change can put one in the probed pack) would outlast a
+	# level-1 caster and the run would measure its death instead.
+	var best := 0
+	var best_hp := 0
 	for uid in _pack_uids:
-		if not _is_dead(uid):
-			_set_target(uid)
-			return
+		if _is_dead(uid):
+			continue
+		var hp := int((SimAuthority.entities.get(uid, {}) as Dictionary).get("max_hp", 0))
+		if best == 0 or hp < best_hp:
+			best = uid
+			best_hp = hp
+	if best != 0:
+		_set_target(best)
+		return
 	# Whole pack down: watch it for the respawn.
 	if _target_uid == 0 and not _pack_uids.is_empty():
 		_set_target(int(_pack_uids[0]))

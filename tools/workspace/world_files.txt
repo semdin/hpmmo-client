@@ -175,6 +175,8 @@ assets/models/monsters/acromantula.glb
 assets/models/monsters/acromantula_acromantula_albedo.png
 assets/models/monsters/acromantula_acromantula_normal.png
 assets/models/monsters/acromantula_acromantula_rough.png
+assets/models/monsters/acromantula_broodguard.glb
+assets/models/monsters/acromantula_venomfang.glb
 assets/models/monsters/armour_commander.glb
 assets/models/monsters/armour_guard.glb
 assets/models/monsters/boss_commander.glb
@@ -441,6 +443,8 @@ data/json/quests.json
 project.godot
 scenes/entities/loot/loot_drop.tscn
 scenes/entities/mobs/mob_acromantula.tscn
+scenes/entities/mobs/mob_acromantula_broodguard.tscn
+scenes/entities/mobs/mob_acromantula_venomfang.tscn
 scenes/entities/mobs/mob_armour_commander.tscn
 scenes/entities/mobs/mob_armour_guard.tscn
 scenes/entities/mobs/mob_cornish_pixie.tscn
