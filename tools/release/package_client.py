@@ -93,7 +93,7 @@ def collect_tree(root: str) -> list[tuple[str, str]]:
     return entries
 
 
-def validate_build_dir(build_dir: str) -> None:
+def validate_build_dir(build_dir: str, platform: str = rc.LEGACY_PLATFORM) -> None:
     if not os.path.isdir(build_dir):
         rc.fail("build directory %s does not exist" % build_dir)
     top = sorted(os.listdir(build_dir))
@@ -107,8 +107,9 @@ def validate_build_dir(build_dir: str) -> None:
     client_files = [name for name in os.listdir(client) if os.path.isfile(os.path.join(client, name))]
     if not any(name.lower().endswith(".pck") for name in client_files):
         rc.fail("client/ contains no .pck (the exported game payload is missing)")
-    if not any(name.lower().endswith(".exe") for name in client_files):
-        rc.fail("client/ contains no .exe (the game executable is missing)")
+    wanted = rc.GAME_EXECUTABLES[platform]
+    if not any(name.lower() in wanted for name in client_files) and not os.path.isdir(os.path.join(client, "HPMMO.app")):
+        rc.fail("client/ contains no game executable for %s (expected one of %s)" % (platform, ", ".join(wanted)))
 
     findings = rc.check_tree(build_dir)
     if findings:
@@ -177,7 +178,7 @@ def main(argv: list[str]) -> int:
         rc.fail(str(exc), 2)
 
     say("validating %s" % args.build_dir)
-    validate_build_dir(args.build_dir)
+    validate_build_dir(args.build_dir, platform)
     if args.check:
         say("check passed: %s is packageable (nothing was written)" % args.build_dir)
         return 0
@@ -195,10 +196,9 @@ def main(argv: list[str]) -> int:
         for required in ("release.json",):
             if required not in names:
                 rc.fail("the artifact is missing %s" % required)
-        if not any(name.lower() in ("hpmmo.exe", "hpmmo_game.exe", "game.exe", "godot.exe")
-                   for name in names):
-            rc.fail("the artifact has no game executable at the archive root - "
-                    "the launcher resolves <versionDir>/HPMMO.exe and would install an unlaunchable build")
+        if not any(name.lower() in rc.GAME_EXECUTABLES[platform] for name in names):
+            rc.fail("the artifact has no %s game executable at the archive root - "
+                    "the launcher would install an unlaunchable build" % platform)
         for rel in names:
             reason = rc.path_refusal(rel)
             if reason:

@@ -249,8 +249,8 @@ def sign_manifest(manifest_path: str, key_path: str, key_id: str) -> tuple[str, 
     return sig_path, keyid_path
 
 
-def write_sums(directory: str, names: list[str]) -> str:
-    path = os.path.join(directory, "SHA256SUMS")
+def write_sums(directory: str, names: list[str], sums_name: str = "SHA256SUMS") -> str:
+    path = os.path.join(directory, sums_name)
     lines = []
     for name in sorted(names):
         full = os.path.join(directory, name)
@@ -571,7 +571,7 @@ def cmd_build(args: argparse.Namespace) -> int:
 
     out_dir = args.out or os.path.dirname(os.path.abspath(args.artifact[0]))
     os.makedirs(out_dir, exist_ok=True)
-    manifest_path = os.path.join(out_dir, "manifest.json")
+    manifest_path = os.path.join(out_dir, rc.manifest_name(args.platform))
     with open(manifest_path, "wb") as handle:
         handle.write(rc.json_bytes(manifest))
     say("wrote %s" % manifest_path)
@@ -590,7 +590,8 @@ def cmd_build(args: argparse.Namespace) -> int:
     say("wrote %s (%s)" % (sig_path, "ed25519"))
     say("wrote %s" % keyid_path)
 
-    sums = write_sums(out_dir, ["manifest.json", os.path.basename(sig_path), os.path.basename(keyid_path)])
+    sums = write_sums(out_dir, [os.path.basename(manifest_path), os.path.basename(sig_path),
+                                os.path.basename(keyid_path)], rc.sums_name(args.platform))
     say("wrote %s" % sums)
 
     # Prove our own output before anyone can publish it.

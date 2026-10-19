@@ -42,6 +42,17 @@ std::string ToLowerAscii(const std::string& s) {
 
 std::string ToLowerString(const std::string& s) { return ToLowerAscii(s); }
 
+// Windows keeps the original manifest.json (every installed Windows launcher
+// fetches it); other platforms publish manifest-<platform>.json into the same
+// release (tools/release/release_common.py manifest_name).
+std::string ManifestFileName() {
+#ifdef _WIN32
+    return "manifest.json";
+#else
+    return std::string("manifest-") + HostPlatform() + ".json";
+#endif
+}
+
 #ifndef _WIN32
 // Starts exe detached from the launcher (double fork + setsid, so it is not
 // our child and survives the launcher exiting). The environment is the current
@@ -370,7 +381,7 @@ int CodeForDocError(const DocFetch& f) {
 }
 
 bool FetchManifest(UpdaterContext& ctx, ReleaseManifest& m, std::string& message, int& code) {
-    std::wstring url = Utf8ToWide(JoinUrlBase(ctx.releaseBase, "manifest.json"));
+    std::wstring url = Utf8ToWide(JoinUrlBase(ctx.releaseBase, ManifestFileName()));
     std::string body;
     DocFetch f = FetchDoc(ctx, url, body, kMaxManifestBytes, true);
     if (!f.ok) {
@@ -378,7 +389,7 @@ bool FetchManifest(UpdaterContext& ctx, ReleaseManifest& m, std::string& message
         code = CodeForDocError(f);
         return false;
     }
-    std::wstring sigUrl = Utf8ToWide(JoinUrlBase(ctx.releaseBase, "manifest.json.sig"));
+    std::wstring sigUrl = Utf8ToWide(JoinUrlBase(ctx.releaseBase, ManifestFileName() + ".sig"));
     std::string sigBody;
     DocFetch sf = FetchDoc(ctx, sigUrl, sigBody, kMaxSignatureBytes, true);
     if (!sf.ok) {

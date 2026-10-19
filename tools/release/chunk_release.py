@@ -34,6 +34,9 @@ import zlib
 
 import numpy as np
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import release_common as rc  # noqa: E402
+
 FORMAT = 1
 MIN_CHUNK = 64 * 1024
 MAX_CHUNK = 1024 * 1024
@@ -104,7 +107,8 @@ def deflate_raw(data: bytes) -> bytes:
     return c.compress(data) + c.flush()
 
 
-def build(build_dir: str, version: str, download_base: str, previous: dict | None, out_dir: str) -> dict:
+def build(build_dir: str, version: str, download_base: str, previous: dict | None, out_dir: str,
+          platform: str = rc.LEGACY_PLATFORM) -> dict:
     known = {}   # sha256 -> (source url, offset, clen)
     if previous:
         sources = previous.get("sources", [])
@@ -112,7 +116,7 @@ def build(build_dir: str, version: str, download_base: str, previous: dict | Non
             for digest, _length, src, offset, clen in f["chunks"]:
                 known.setdefault(digest, (sources[src], offset, clen))
 
-    bin_name = "chunks-%s.bin" % version
+    bin_name = rc.chunks_bin_name(version, platform)
     bin_url = download_base.rstrip("/") + "/" + bin_name
     sources: list[str] = []
     source_ids: dict[str, int] = {}
@@ -158,7 +162,7 @@ def build(build_dir: str, version: str, download_base: str, previous: dict | Non
     doc = {"format": FORMAT, "client_version": version,
            "chunking": {"min": MIN_CHUNK, "mask_bits": 18, "max": MAX_CHUNK},
            "sources": sources, "files": files}
-    with open(os.path.join(out_dir, "content.json"), "w", encoding="utf-8", newline="\n") as handle:
+    with open(os.path.join(out_dir, rc.content_index_name(platform)), "w", encoding="utf-8", newline="\n") as handle:
         json.dump(doc, handle, separators=(",", ":"))
     total = sum(f["size"] for f in files)
     print("[chunks] %d files, %.1f MB; new chunks %d (%.1f MB compressed) -> %s"
@@ -173,7 +177,10 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--download-base", required=True, help="URL the new chunks-<ver>.bin will live under")
     parser.add_argument("--previous", default="", help="content.json of the previous release (optional)")
     parser.add_argument("--out", default="dist")
+    parser.add_argument("--platform", default=rc.LEGACY_PLATFORM,
+                        help="names the outputs: content[-<platform>].json, chunks[-<platform>]-<ver>.bin")
     args = parser.parse_args(argv)
+    rc.validate_platform(args.platform)
     previous = None
     if args.previous and os.path.isfile(args.previous):
         with open(args.previous, encoding="utf-8") as handle:
@@ -181,7 +188,7 @@ def main(argv: list[str]) -> int:
         if previous.get("format") != FORMAT:
             print("[chunks] previous content.json has another format; starting fresh")
             previous = None
-    build(args.build_dir, args.version, args.download_base, previous, args.out)
+    build(args.build_dir, args.version, args.download_base, previous, args.out, args.platform)
     return 0
 
 

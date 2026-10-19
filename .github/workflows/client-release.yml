@@ -159,13 +159,13 @@ jobs:
             echo "::error::Godot ${GODOT_VERSION} export templates are missing in $HOME"; exit 1; }
           echo "path=$godot" >> "$GITHUB_OUTPUT"
 
-      - name: Export the game
+      - name: Export the game (Windows + Linux)
         run: |
           set -eu
-          rm -rf build && mkdir -p build/client
-          if [ ! -f export_presets.cfg ]; then
-            cp tools/release/windows-desktop.export_presets.cfg export_presets.cfg
-          fi
+          rm -rf build build-linux && mkdir -p build/client build-linux/client
+          # Always the release presets: export_presets.cfg is gitignored and the
+          # runner keeps it between runs, so a stale copy must never win.
+          cp tools/release/release.export_presets.cfg export_presets.cfg
           # The login screen shows this version.
           sed -i "s/^config\/description=/config\/version=\"${{ steps.v.outputs.client }}\"\nconfig\/description=/" project.godot
           "${{ steps.godot.outputs.path }}" --headless --path . --editor --import --quit \
@@ -176,6 +176,12 @@ jobs:
           test -f build/client/HPMMO.exe
           test -f build/client/HPMMO.pck
           ls -la build/client
+          "${{ steps.godot.outputs.path }}" --headless --path . \
+            --export-release "Linux" "$PWD/build-linux/client/HPMMO.x86_64" \
+            > "$RUNNER_TEMP/export-linux.log" 2>&1 || { tail -80 "$RUNNER_TEMP/export-linux.log"; echo "the Linux export failed" >&2; exit 1; }
+          test -x build-linux/client/HPMMO.x86_64
+          test -f build-linux/client/HPMMO.pck
+          ls -la build-linux/client
 
       - name: Package the client (refuses user data, caches and secrets)
         run: |
@@ -184,6 +190,12 @@ jobs:
             --client-version "${{ steps.v.outputs.client }}" \
             --content-version "${{ steps.v.outputs.content }}" \
             --platform "$PLATFORM" \
+            --out dist
+          python3 tools/release/package_client.py \
+            --build-dir build-linux \
+            --client-version "${{ steps.v.outputs.client }}" \
+            --content-version "${{ steps.v.outputs.content }}" \
+            --platform linux-x86_64 \
             --out dist
 
       # Delta delivery: chunks the previous release already published are
@@ -201,6 +213,19 @@ jobs:
             --version "${{ steps.v.outputs.client }}" \
             --download-base "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
             --previous "$prev" \
+            --out dist
+          # Linux: content-linux-x86_64.json / chunks-linux-x86_64-<ver>.bin
+          prev_linux="$RUNNER_TEMP/previous-content-linux.json"
+          if ! curl -fsSL "https://github.com/${{ github.repository }}/releases/latest/download/content-linux-x86_64.json" -o "$prev_linux"; then
+            echo "no previous Linux content index: every Linux chunk is new"
+            rm -f "$prev_linux"
+          fi
+          python3 tools/release/chunk_release.py \
+            --build-dir build-linux/client \
+            --platform linux-x86_64 \
+            --version "${{ steps.v.outputs.client }}" \
+            --download-base "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
+            --previous "$prev_linux" \
             --out dist
 
       - name: Sign the manifest
@@ -234,10 +259,25 @@ jobs:
             --release-notes-file "$RUNNER_TEMP/release_notes.txt" \
             --content-index dist/content.json \
             --out dist --key "$key"
+          # Linux manifest (no launcher self-update payload until the Linux launcher ships).
+          python3 tools/release/gen_manifest.py \
+            --artifact "dist/hpmmo-client-${{ steps.v.outputs.client }}-linux-x86_64.zip" \
+            --channel release \
+            --client-version "${{ steps.v.outputs.client }}" \
+            --min-launcher-version "$MIN_LAUNCHER_VERSION" \
+            --protocol-version "$PROTOCOL_VERSION" --protocol-min "$PROTOCOL_MIN" --protocol-max "$PROTOCOL_MAX" \
+            --content-version "${{ steps.v.outputs.content }}" --server-version "$SERVER_VERSION" \
+            --schema-version "$SCHEMA_VERSION" --platform linux-x86_64 \
+            --base-url "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
+            --release-notes-file "$RUNNER_TEMP/release_notes.txt" \
+            --content-index dist/content-linux-x86_64.json \
+            --out dist --key "$key"
           openssl pkey -in "$key" -pubout -out "$RUNNER_TEMP/release.pub.pem"
           rm -f "$key"
           python3 tools/release/gen_manifest.py --verify \
             --manifest dist/manifest.json --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
+          python3 tools/release/gen_manifest.py --verify \
+            --manifest dist/manifest-linux-x86_64.json --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
           # The key the launcher has built in must be the key that signed this.
           built_in="$(grep -o 'HPMMO_DEFAULT_RELEASE_KEY L"[^"]*"' launcher_cpp/src/common.h | sed 's/.*L"\(.*\)"/\1/')"
           signing="$(openssl pkey -pubin -in "$RUNNER_TEMP/release.pub.pem" -outform DER | tail -c 32 | base64)"
@@ -253,13 +293,16 @@ jobs:
         run: |
           set -eu
           tag="${{ steps.v.outputs.tag }}"
-          # chunks-<ver>.bin is absent when no chunk changed.
+          # chunks[-<platform>]-<ver>.bin is absent when no chunk changed.
+          shopt -s nullglob
           chunks=(dist/chunks-*.bin)
-          [ -e "${chunks[0]}" ] || chunks=()
           gh release create "$tag" \
             "dist/hpmmo-client-${{ steps.v.outputs.client }}-$PLATFORM.zip" \
             dist/HPMMO_Launcher.exe dist/content.json "${chunks[@]}" \
             dist/manifest.json dist/manifest.json.sig dist/manifest.json.keyid dist/SHA256SUMS \
+            "dist/hpmmo-client-${{ steps.v.outputs.client }}-linux-x86_64.zip" dist/content-linux-x86_64.json \
+            dist/manifest-linux-x86_64.json dist/manifest-linux-x86_64.json.sig \
+            dist/manifest-linux-x86_64.json.keyid dist/SHA256SUMS-linux-x86_64 \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --title "HPMMO $tag" \
@@ -277,6 +320,9 @@ jobs:
           curl -fsSL "$base/manifest.json.sig" -o "$RUNNER_TEMP/live.json.sig"
           python3 tools/release/gen_manifest.py --verify \
             --manifest "$RUNNER_TEMP/live.json" --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
+          curl -fsSL "$base/manifest-linux-x86_64.json" -o "$RUNNER_TEMP/live-linux.json"
+          python3 tools/release/gen_manifest.py --verify \
+            --manifest "$RUNNER_TEMP/live-linux.json" --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
           {
             echo "### HPMMO ${{ steps.v.outputs.tag }}"
             echo "- client \`${{ steps.v.outputs.client }}\`, launcher \`${{ steps.v.outputs.launcher }}\`"

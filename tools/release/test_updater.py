@@ -57,6 +57,8 @@ elif sys.platform == "darwin":
     HOST_PLATFORM, GAME_EXE = "macos-universal", "HPMMO.app/Contents/MacOS/HPMMO"
 else:
     HOST_PLATFORM, GAME_EXE = "linux-x86_64", "HPMMO.x86_64"
+# Windows keeps manifest.json; other platforms fetch manifest-<platform>.json.
+MANIFEST = "manifest.json" if HOST_PLATFORM == "windows-x86_64" else "manifest-%s.json" % HOST_PLATFORM
 
 CHECKS: list[tuple[str, bool, str]] = []
 
@@ -92,8 +94,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):  # noqa: N802
         path = self.path.split("?", 1)[0]
         srv = self.server
-        if not path.startswith("/files/") and path not in ("/manifest.json",
-                                                           "/manifest.json.sig",
+        if not path.startswith("/files/") and path not in ("/" + MANIFEST,
+                                                           "/" + MANIFEST + ".sig",
                                                            "/SHA256SUMS", "/status.json"):
             self._send(404, b"not found")
             return
@@ -316,9 +318,9 @@ class Release:
         if content_index is not None:
             manifest["content_index"] = content_index
         raw = json.dumps(manifest, separators=(",", ":"), sort_keys=False).encode()
-        (self.root / "manifest.json").write_bytes(raw)
+        (self.root / MANIFEST).write_bytes(raw)
         sig = self.key.sign(raw)
-        (self.root / "manifest.json.sig").write_text(base64.b64encode(sig).decode() + "\n")
+        (self.root / (MANIFEST + ".sig")).write_text(base64.b64encode(sig).decode() + "\n")
         (self.root / "SHA256SUMS").write_text("\n".join(self.sha256sums) + "\n")
         return raw
 
@@ -506,7 +508,7 @@ def test_tampered(t: Path, server: ReleaseServer, signer: ed25519.Ed25519Private
 
     # Tampered manifest signature.
     release.write_manifest("1.3.0")
-    sig_path = rel / "manifest.json.sig"
+    sig_path = rel / (MANIFEST + ".sig")
     sig = bytearray(base64.b64decode(sig_path.read_text()))
     sig[5] ^= 0x01
     sig_path.write_text(base64.b64encode(bytes(sig)).decode() + "\n")
@@ -926,7 +928,7 @@ def test_pinning(t: Path, server: ReleaseServer, signer: ed25519.Ed25519PrivateK
     release.write_status("ONLINE")
 
     rc, js, log = run_cli(["--install-root", str(root), "--user-dir", str(root / "user"),
-                           "--print-cert-pin", server.base + "/manifest.json"])
+                           "--print-cert-pin", server.base + "/" + MANIFEST])
     if IS_WINDOWS:
         check("pin: print-cert-pin works", rc == 0 and js.get("cert_spki_sha256") == pin, log)
     else:

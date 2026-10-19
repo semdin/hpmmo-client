@@ -40,7 +40,18 @@ import sys
 
 VERSION_RE = re.compile(r"^[0-9]+(\.[0-9]+){1,3}$")
 CHANNELS = ("dev", "beta", "release")
-PLATFORMS = ("windows-x86_64",)
+PLATFORMS = ("windows-x86_64", "linux-x86_64", "macos-universal")
+#: The first platform keeps the original, unsuffixed release file names
+#: (manifest.json, content.json, chunks-<ver>.bin, SHA256SUMS): every Windows
+#: launcher already installed fetches exactly those. Other platforms publish
+#: into the same GitHub release with a "-<platform>" suffix.
+LEGACY_PLATFORM = "windows-x86_64"
+#: Game executable names the launcher resolves at the version root (lower case).
+GAME_EXECUTABLES = {
+    "windows-x86_64": ("hpmmo.exe", "hpmmo_game.exe", "game.exe", "godot.exe"),
+    "linux-x86_64": ("hpmmo.x86_64", "hpmmo"),
+    "macos-universal": ("hpmmo.app/contents/macos/hpmmo",),
+}
 #: What this pipeline publishes today. Deltas are accepted by the tooling but
 #: the plan's order is full packages first.
 KINDS = ("full", "delta")
@@ -72,6 +83,27 @@ def validate_platform(value: str) -> str:
     if value not in PLATFORMS:
         raise ValueError("platform %r is not one of: %s" % (value, ", ".join(PLATFORMS)))
     return value
+
+
+def platform_suffix(platform: str) -> str:
+    validate_platform(platform)
+    return "" if platform == LEGACY_PLATFORM else "-" + platform
+
+
+def manifest_name(platform: str) -> str:
+    return "manifest%s.json" % platform_suffix(platform)
+
+
+def content_index_name(platform: str) -> str:
+    return "content%s.json" % platform_suffix(platform)
+
+
+def chunks_bin_name(version: str, platform: str) -> str:
+    return "chunks%s-%s.bin" % (platform_suffix(platform), version)
+
+
+def sums_name(platform: str) -> str:
+    return "SHA256SUMS%s" % platform_suffix(platform)
 
 
 def version_dir_name(client_version: str, platform: str) -> str:
