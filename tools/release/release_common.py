@@ -40,7 +40,7 @@ import sys
 
 VERSION_RE = re.compile(r"^[0-9]+(\.[0-9]+){1,3}$")
 CHANNELS = ("dev", "beta", "release")
-PLATFORMS = ("windows-x86_64", "linux-x86_64", "macos-universal")
+PLATFORMS = ("windows-x86_64", "linux-x86_64", "macos")
 #: The first platform keeps the original, unsuffixed release file names
 #: (manifest.json, content.json, chunks-<ver>.bin, SHA256SUMS): every Windows
 #: launcher already installed fetches exactly those. Other platforms publish
@@ -50,7 +50,7 @@ LEGACY_PLATFORM = "windows-x86_64"
 GAME_EXECUTABLES = {
     "windows-x86_64": ("hpmmo.exe", "hpmmo_game.exe", "game.exe", "godot.exe"),
     "linux-x86_64": ("hpmmo.x86_64", "hpmmo"),
-    "macos-universal": ("hpmmo.app/contents/macos/hpmmo",),
+    "macos": ("hpmmo.app/contents/macos/hpmmo",),
 }
 #: What this pipeline publishes today. Deltas are accepted by the tooling but
 #: the plan's order is full packages first.

@@ -169,7 +169,8 @@ def make_manifest(args: argparse.Namespace) -> dict:
         if not os.path.isfile(args.launcher_artifact):
             rc.fail("launcher artifact %s does not exist" % args.launcher_artifact, 2)
         # Self-update swaps one raw executable: an .exe on Windows, the AppImage on Linux.
-        wanted = {"windows-x86_64": ".exe", "linux-x86_64": ".appimage"}.get(args.platform)
+        # macOS: the bare Mach-O inside "HPMMO Launcher.app" (HPMMO_Launcher-macos).
+        wanted = {"windows-x86_64": ".exe", "linux-x86_64": ".appimage", "macos": "-macos"}.get(args.platform)
         if not wanted or not args.launcher_artifact.lower().endswith(wanted):
             rc.fail("the %s launcher artifact must be a raw %s (self-update swaps the executable)"
                     % (args.platform, wanted or "executable"), 2)

@@ -2131,6 +2131,27 @@ int RunSelfUpdateSwap(const std::string& pidStr, const std::wstring& target,
             return kExitSelfUpdateFailed;
         }
     }
+#ifdef __APPLE__
+    // The binary lives in "HPMMO Launcher.app/Contents/MacOS/": a new binary
+    // breaks the bundle's ad-hoc seal, so the bundle is re-signed (ad-hoc) with
+    // the system codesign, which every macOS ships.
+    {
+        std::string t = WideToUtf8(target);
+        size_t at = t.find(".app/Contents/MacOS/");
+        if (at != std::string::npos) {
+            std::string bundle = t.substr(0, at + 4);
+            pid_t pid = fork();
+            if (pid == 0) {
+                execl("/usr/bin/codesign", "codesign", "--force", "--deep", "--sign", "-", bundle.c_str(), (char*)nullptr);
+                _exit(127);
+            }
+            int status = 0;
+            if (pid > 0) waitpid(pid, &status, 0);
+            if (pid < 0 || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
+                LogMsg("[Updater] re-signing " + bundle + " failed; macOS may refuse to open it");
+        }
+    }
+#endif
     LogMsg("[Updater] launcher self-update applied to " + WideToUtf8(target));
     if (relaunch) {
         std::string err;

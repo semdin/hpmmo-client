@@ -27,7 +27,7 @@ namespace hpmmo {
 
 const char* HostPlatform() {
 #if defined(__APPLE__)
-    return "macos-universal";
+    return "macos";
 #elif defined(__aarch64__)
     return "linux-arm64";
 #else

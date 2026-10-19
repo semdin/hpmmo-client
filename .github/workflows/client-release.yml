@@ -63,8 +63,53 @@ env:
   SCHEMA_VERSION: '4'
 
 jobs:
+  # macOS launcher: needs a Mac to compile, link and sign, so it runs on a
+  # GitHub-hosted macOS runner (free for this public repository). The release
+  # job below picks the result up as an artifact. Its sources need no LFS: the
+  # launcher's assets are plain git (.gitattributes).
+  launcher-macos:
+    name: macOS launcher (universal, ad-hoc signed) + updater tests
+    runs-on: macos-14
+    env:
+      GIT_LFS_SKIP_SMUDGE: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # the launcher version is the last launcher_cpp commit time
+          lfs: false
+
+      - name: Resolve the launcher version
+        id: v
+        run: |
+          launcher_ts="$(git log -1 --format=%ct -- launcher_cpp)"
+          echo "launcher=3.0.${launcher_ts:-0}" >> "$GITHUB_OUTPUT"
+
+      - name: Build the app bundle
+        run: |
+          brew list ninja >/dev/null 2>&1 || brew install ninja
+          bash launcher_cpp/packaging/macos/build_app.sh launcher_cpp "${{ steps.v.outputs.launcher }}" "$RUNNER_TEMP/mac"
+
+      - name: Updater tests against the macOS build (113 checks)
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet cryptography numpy
+          "$RUNNER_TEMP/venv/bin/python" tools/release/test_updater.py \
+            --launcher "$RUNNER_TEMP/mac/HPMMO_UpdaterCLI-macos" \
+            --gui-launcher "$RUNNER_TEMP/mac/HPMMO_Launcher-macos" | tee "$RUNNER_TEMP/updater-tests.log"
+          grep -q "UPDATER RESULT: .*, 0 failures" "$RUNNER_TEMP/updater-tests.log"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: launcher-macos
+          path: |
+            ${{ runner.temp }}/mac/HPMMO_Launcher-macos.zip
+            ${{ runner.temp }}/mac/HPMMO_Launcher-macos
+          if-no-files-found: error
+          retention-days: 7
+
   release:
-    name: build + sign + publish (windows-x86_64)
+    name: build + sign + publish (windows, linux, macos)
+    needs: [launcher-macos]
     # Self-hosted on the game host (2026-10-19): the workspace persists, so Git
     # LFS only fetches changed objects and the .godot import cache survives
     # between releases without a GitHub cache round trip. Never add a
@@ -149,6 +194,12 @@ jobs:
           mkdir -p dist
           cp launcher_cpp/build-mingw/HPMMO_Launcher.exe dist/HPMMO_Launcher.exe
 
+      - name: Fetch the macOS launcher built by launcher-macos
+        uses: actions/download-artifact@v4
+        with:
+          name: launcher-macos
+          path: dist
+
       - name: Build the Linux launcher (AppImage)
         # Built in the pinned Ubuntu 22.04 image (launcher_cpp/packaging/linux)
         # through the host's root wrapper, so it runs on glibc >= 2.34 distros.
@@ -195,6 +246,22 @@ jobs:
           test -x build-linux/client/HPMMO.x86_64
           test -f build-linux/client/HPMMO.pck
           ls -la build-linux/client
+          # macOS: x86_64 .app (Rosetta 2 on Apple Silicon) from an x86_64
+          # template thinned out of the official universal one, made once.
+          template=/opt/hpmmo-ci/godot/macos_x86_64-${GODOT_VERSION}.zip
+          if [ ! -f "$template" ]; then
+            python3 tools/release/make_macos_x86_template.py \
+              "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/macos.zip" "$template"
+          fi
+          rm -rf build-mac && mkdir -p build-mac/client
+          "${{ steps.godot.outputs.path }}" --headless --path . \
+            --export-release "macOS" "$RUNNER_TEMP/HPMMO-macos.zip" \
+            > "$RUNNER_TEMP/export-macos.log" 2>&1 || { tail -80 "$RUNNER_TEMP/export-macos.log"; echo "the macOS export failed" >&2; exit 1; }
+          unzip -q "$RUNNER_TEMP/HPMMO-macos.zip" -d build-mac/client
+          rm -f "$RUNNER_TEMP/HPMMO-macos.zip"
+          test -x build-mac/client/HPMMO.app/Contents/MacOS/HPMMO
+          test -f build-mac/client/HPMMO.app/Contents/Resources/HPMMO.pck
+          test -d build-mac/client/HPMMO.app/Contents/Frameworks/libterrain.macos.release.framework
 
       # No full zip since 1.0.64: the packager only enforces its refusal rules
       # (no user data, caches or secrets) on what the chunks are cut from.
@@ -211,6 +278,12 @@ jobs:
             --client-version "${{ steps.v.outputs.client }}" \
             --content-version "${{ steps.v.outputs.content }}" \
             --platform linux-x86_64 \
+            --check
+          python3 tools/release/package_client.py \
+            --build-dir build-mac \
+            --client-version "${{ steps.v.outputs.client }}" \
+            --content-version "${{ steps.v.outputs.content }}" \
+            --platform macos \
             --check
 
       # Delta delivery: chunks the previous release already published are
@@ -241,6 +314,19 @@ jobs:
             --version "${{ steps.v.outputs.client }}" \
             --download-base "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
             --previous "$prev_linux" \
+            --out dist
+          # macOS: content-macos.json / chunks-macos-<ver>.bin
+          prev_mac="$RUNNER_TEMP/previous-content-macos.json"
+          if ! curl -fsSL "https://github.com/${{ github.repository }}/releases/latest/download/content-macos.json" -o "$prev_mac"; then
+            echo "no previous macOS content index: every macOS chunk is new"
+            rm -f "$prev_mac"
+          fi
+          python3 tools/release/chunk_release.py \
+            --build-dir build-mac/client \
+            --platform macos \
+            --version "${{ steps.v.outputs.client }}" \
+            --download-base "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
+            --previous "$prev_mac" \
             --out dist
 
       - name: Sign the manifest
@@ -287,12 +373,28 @@ jobs:
             --release-notes-file "$RUNNER_TEMP/release_notes.txt" \
             --content-index dist/content-linux-x86_64.json \
             --out dist --key "$key"
+          # macOS manifest (the bare launcher Mach-O is the self-update payload).
+          python3 tools/release/gen_manifest.py \
+            --launcher-artifact dist/HPMMO_Launcher-macos \
+            --launcher-version "${{ steps.v.outputs.launcher }}" \
+            --channel release \
+            --client-version "${{ steps.v.outputs.client }}" \
+            --min-launcher-version "$MIN_LAUNCHER_VERSION" \
+            --protocol-version "$PROTOCOL_VERSION" --protocol-min "$PROTOCOL_MIN" --protocol-max "$PROTOCOL_MAX" \
+            --content-version "${{ steps.v.outputs.content }}" --server-version "$SERVER_VERSION" \
+            --schema-version "$SCHEMA_VERSION" --platform macos \
+            --base-url "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
+            --release-notes-file "$RUNNER_TEMP/release_notes.txt" \
+            --content-index dist/content-macos.json \
+            --out dist --key "$key"
           openssl pkey -in "$key" -pubout -out "$RUNNER_TEMP/release.pub.pem"
           rm -f "$key"
           python3 tools/release/gen_manifest.py --verify \
             --manifest dist/manifest.json --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
           python3 tools/release/gen_manifest.py --verify \
             --manifest dist/manifest-linux-x86_64.json --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
+          python3 tools/release/gen_manifest.py --verify \
+            --manifest dist/manifest-macos.json --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
           # The key the launcher has built in must be the key that signed this.
           built_in="$(grep -o 'HPMMO_DEFAULT_RELEASE_KEY L"[^"]*"' launcher_cpp/src/common.h | sed 's/.*L"\(.*\)"/\1/')"
           signing="$(openssl pkey -pubin -in "$RUNNER_TEMP/release.pub.pem" -outform DER | tail -c 32 | base64)"
@@ -318,6 +420,9 @@ jobs:
             dist/HPMMO_Launcher-x86_64.AppImage \
             dist/manifest-linux-x86_64.json dist/manifest-linux-x86_64.json.sig \
             dist/manifest-linux-x86_64.json.keyid dist/SHA256SUMS-linux-x86_64 \
+            dist/content-macos.json dist/HPMMO_Launcher-macos dist/HPMMO_Launcher-macos.zip \
+            dist/manifest-macos.json dist/manifest-macos.json.sig \
+            dist/manifest-macos.json.keyid dist/SHA256SUMS-macos \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --title "HPMMO $tag" \
@@ -339,9 +444,47 @@ jobs:
           curl -fsSL "$base/manifest-linux-x86_64.json.sig" -o "$RUNNER_TEMP/live-linux.json.sig"
           python3 tools/release/gen_manifest.py --verify \
             --manifest "$RUNNER_TEMP/live-linux.json" --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
+          curl -fsSL "$base/manifest-macos.json" -o "$RUNNER_TEMP/live-macos.json"
+          curl -fsSL "$base/manifest-macos.json.sig" -o "$RUNNER_TEMP/live-macos.json.sig"
+          python3 tools/release/gen_manifest.py --verify \
+            --manifest "$RUNNER_TEMP/live-macos.json" --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
           {
             echo "### HPMMO ${{ steps.v.outputs.tag }}"
             echo "- client \`${{ steps.v.outputs.client }}\`, launcher \`${{ steps.v.outputs.launcher }}\`"
             echo "- installer link: $base/HPMMO_Launcher.exe"
             echo "- Linux launcher: $base/HPMMO_Launcher-x86_64.AppImage"
+            echo "- macOS launcher: $base/HPMMO_Launcher-macos.zip"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # The published release, on a Mac: the downloaded launcher installs the game
+  # from the macOS chunks and the installed game boots (headless; on this
+  # Apple Silicon runner the x86_64 game runs through Rosetta 2).
+  verify-macos:
+    name: macOS install + boot check
+    needs: [release]
+    runs-on: macos-14
+    steps:
+      - name: Install the release with the published launcher and boot the game
+        run: |
+          set -eu
+          base="https://github.com/${{ github.repository }}/releases/latest/download"
+          work="$RUNNER_TEMP/hpmmo"
+          mkdir -p "$work" && cd "$work"
+          curl -fsSL -o launcher.zip "$base/HPMMO_Launcher-macos.zip"
+          ditto -x -k launcher.zip .
+          codesign --verify --deep --strict "HPMMO Launcher.app"
+          bin="$work/HPMMO Launcher.app/Contents/MacOS/HPMMO_Launcher"
+          "$bin" --install-root "$work/install" --user-dir "$work/install/user" --update | tee update.json
+          grep -q '"ok":true' update.json
+          game="$(ls -d "$work"/install/versions/*/HPMMO.app/Contents/MacOS/HPMMO)"
+          chmod +x "$game"
+          codesign --verify --deep --strict "$(dirname "$(dirname "$(dirname "$game")")")"
+          # The x86_64 game needs Rosetta 2 on Apple Silicon (a player's Mac
+          # offers to install it on the first start).
+          if [ "$(uname -m)" = "arm64" ] && ! /usr/bin/pgrep -q oahd; then
+            sudo softwareupdate --install-rosetta --agree-to-license || true
+          fi
+          # A pty keeps Godot's output line-buffered.
+          script -q "$work/boot.log" "$game" --headless --quit-after 600 || true
+          cat "$work/boot.log" | tr -d '\r' | tail -20
+          grep -q "Loaded client configuration" "$work/boot.log"

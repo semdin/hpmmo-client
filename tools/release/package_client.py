@@ -104,11 +104,17 @@ def validate_build_dir(build_dir: str, platform: str = rc.LEGACY_PLATFORM) -> No
     client = os.path.join(build_dir, "client")
     if not os.path.isdir(client):
         rc.fail("%s has no client/ directory - there is nothing to install" % build_dir)
-    client_files = [name for name in os.listdir(client) if os.path.isfile(os.path.join(client, name))]
-    if not any(name.lower().endswith(".pck") for name in client_files):
+    # Every file below client/ as a lower-case relative path: on macOS the game
+    # is a bundle (HPMMO.app/Contents/MacOS/HPMMO, .../Resources/HPMMO.pck).
+    client_files = []
+    for base, _dirs, names in os.walk(client):
+        for name in names:
+            rel = os.path.relpath(os.path.join(base, name), client).replace(os.sep, "/")
+            client_files.append(rel.lower())
+    if not any(name.endswith(".pck") for name in client_files):
         rc.fail("client/ contains no .pck (the exported game payload is missing)")
     wanted = rc.GAME_EXECUTABLES[platform]
-    if not any(name.lower() in wanted for name in client_files) and not os.path.isdir(os.path.join(client, "HPMMO.app")):
+    if not any(name in wanted for name in client_files):
         rc.fail("client/ contains no game executable for %s (expected one of %s)" % (platform, ", ".join(wanted)))
 
     findings = rc.check_tree(build_dir)

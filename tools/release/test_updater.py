@@ -54,7 +54,7 @@ DEFAULT_GUI_LAUNCHER = CLIENT / "launcher_cpp" / "build" / ("HPMMO_Launcher" + E
 if IS_WINDOWS:
     HOST_PLATFORM, GAME_EXE = "windows-x86_64", "HPMMO.exe"
 elif sys.platform == "darwin":
-    HOST_PLATFORM, GAME_EXE = "macos-universal", "HPMMO.app/Contents/MacOS/HPMMO"
+    HOST_PLATFORM, GAME_EXE = "macos", "HPMMO.app/Contents/MacOS/HPMMO"
 else:
     HOST_PLATFORM, GAME_EXE = "linux-x86_64", "HPMMO.x86_64"
 # Windows keeps manifest.json; other platforms fetch manifest-<platform>.json.
