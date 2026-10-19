@@ -642,11 +642,15 @@ bool LoadConfig(const std::wstring& explicitPath) {
     s("server_ip", g_config.serverIp);
     if (root.i64("server_port", 0) > 0) g_config.serverPort = (int)root.i64("server_port", 7777);
     if (root.i64("api_port", 0) > 0) g_config.apiPort = (int)root.i64("api_port", 8081);
+    // The first host (213.250.145.75) was retired on 2026-10-19; installs that
+    // saved it in client_config.json follow the built-in default instead.
+    if (g_config.serverIp == L"213.250.145.75") g_config.serverIp = AppConfig().serverIp;
     s("last_username", g_config.lastUsername);
     if (root.has("remember_me")) g_config.rememberMe = root.boolean("remember_me", true);
 
     s("release_base_url", g_config.releaseBaseUrl);
     s("status_url", g_config.statusUrl);
+    if (g_config.statusUrl.find(L"213.250.145.75") != std::wstring::npos) g_config.statusUrl.clear();
     s("release_public_key", g_config.releasePublicKey);
     s("release_public_key_id", g_config.releasePublicKeyId);
     s("release_channel", g_config.releaseChannel);

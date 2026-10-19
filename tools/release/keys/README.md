@@ -87,7 +87,7 @@ values are what `deploy/tls/make_cert.sh` and `manifest.json.keyid` print.
 ### Who holds it
 
 * **Custodian: the project owner** - the only person with root on the
-  deployment host (`ssh root@213.250.145.75`). The key file is readable by root
+  deployment host (`ssh root@185.118.141.74`). The key file is readable by root
   alone; the host's SSH login is therefore release-signing access.
 * A copy for CI (`HPMMO_CLIENT_SIGNING_KEY`, a GitHub Actions secret) is
   **not yet provisioned**. Until it is, releases are signed on the host by an

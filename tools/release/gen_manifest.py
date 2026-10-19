@@ -34,7 +34,7 @@ Usage:
         --channel dev --client-version 0.7.0 --min-launcher-version 0.7.0 \\
         --protocol-version 4 --protocol-min 4 --protocol-max 4 \\
         --content-version 2026.10.04-1 --server-version 0.7.0 --schema-version 4 \\
-        --base-url https://213.250.145.75:8443/releases \\
+        --base-url https://185.118.141.74:8443/releases \\
         --key /secure/hpmmo-release.key.pem --out dist
 
     python gen_manifest.py --verify --manifest dist/manifest.json --pubkey release.pub.pem
@@ -507,7 +507,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--server-version")
     parser.add_argument("--schema-version", type=int)
     parser.add_argument("--platform", default="windows-x86_64")
-    parser.add_argument("--base-url", default="https://213.250.145.75:8443/releases")
+    parser.add_argument("--base-url", default="https://185.118.141.74:8443/releases")
     parser.add_argument("--release-notes", default="")
     parser.add_argument("--release-notes-file", default="")
     parser.add_argument("--launcher-artifact", default="", help="the launcher .exe for self-update (optional)")

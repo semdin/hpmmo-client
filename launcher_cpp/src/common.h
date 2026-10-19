@@ -84,7 +84,7 @@ bool IsGameRunning(const std::wstring& installRoot,
 #define HPMMO_DEFAULT_RELEASE_BASE L"https://github.com/semdin/hpmmo-client/releases/latest/download"
 #endif
 #ifndef HPMMO_DEFAULT_STATUS_URL
-#define HPMMO_DEFAULT_STATUS_URL L"http://213.250.145.75:8081/api/status"
+#define HPMMO_DEFAULT_STATUS_URL L"http://185.118.141.74:8081/api/status"
 #endif
 // Raw 32-byte Ed25519 public key (base64) of the release signing key; its
 // private half is the HPMMO_CLIENT_SIGNING_KEY GitHub secret.
@@ -97,7 +97,7 @@ bool IsGameRunning(const std::wstring& installRoot,
 
 struct AppConfig {
     // Existing launcher fields (behaviour preserved).
-    std::wstring serverIp = L"213.250.145.75";
+    std::wstring serverIp = L"185.118.141.74";
     int serverPort = 7777;
     int apiPort = 8081;
     std::wstring lastUsername;

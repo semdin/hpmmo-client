@@ -27,7 +27,7 @@ A 3D Wizarding MMO Action RPG inspired by Metin2 mechanics, built with real-time
 - **Native C++ Standalone Launcher (`HPMMO_Launcher.exe`)**:
   - Standalone compiled binary (< 1.5 MB) using WinHTTP, WinSock, and GDI+.
   - In-launcher Account Registration & Login with single sign-on credential pass-through.
-  - Live VPS Realm Ping monitor (`213.250.145.75:7777` UDP / `8081` HTTP).
+  - Live VPS Realm Ping monitor (`185.118.141.74:7777` UDP / `8081` HTTP).
   - One-click **⚔️ OYUNA BAŞLA (PLAY NOW)** and **🕹️ ÇEVRİMDIŞI OYNA (SOLO OFFLINE)** modes.
 
 ---
@@ -84,13 +84,13 @@ A 3D Wizarding MMO Action RPG inspired by Metin2 mechanics, built with real-time
 
 ---
 
-## 🚀 Dedicated Server Deployment (Linux VPS: `213.250.145.75`)
+## 🚀 Dedicated Server Deployment (Linux VPS: `185.118.141.74`)
 
 1. **Package on Windows**:
    Double click `package_server.bat` (creates `hpmmo_server.tar.gz`).
 2. **Send to VPS**:
    ```bash
-   scp hpmmo_server.tar.gz root@213.250.145.75:~/
+   scp hpmmo_server.tar.gz root@185.118.141.74:~/
    ```
 3. **First-Time Install**:
    ```bash
