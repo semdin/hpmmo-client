@@ -1,12 +1,12 @@
 {
  "generated": "2026-10-19",
  "source_repository": "hpmmo-server",
- "source_revision": "8708a054805f05188e48a635d22e00bec924373f",
+ "source_revision": "9883988656c93c53b8db5db6044b77f3ea648467",
  "note": "Generated from server/world/addons/hpmmo_sim by dev.ps1 sync-sim. Never edit these files in the client repository.",
  "files": {
   "admin.gd": "8605e27d706abc3eeafd3a7cce41de451734ff9d56652998b973fb4eacb7257c",
   "admin.gd.uid": "24f7c90288473ecc7fc5b60d2297064b566af1f7cb466a6dfa15da52c1d0fda7",
-  "authority.gd": "f83e7edd837ef0dfd6018869406bfd95c05dea99fbab58b1598b6220a0333829",
+  "authority.gd": "b418aa10f24be29d098b44f23ee60addf24050261a9f6b55c57741605bcbde90",
   "authority.gd.uid": "7a0e9dcb17566e2f6c5c2fa8067b1a57a8a7cd14c568c6dab087475a8628bb0e",
   "data/combat.json": "d8bfdb51542fbe40753160d2ecd1820b04f74281d64efe20211d74b7230198da",
   "data/dungeons.json": "16b4426dbcb7f5a90d7a96e48e75bdc154180772615e65179a0f6f460be171f5",
@@ -18,7 +18,7 @@
   "data/safe_zones.json": "0ac7eaefed63b5e47bd944aeba13055f338a61ad476975ade0289e0a52455095",
   "data/spawn_tables.json": "25725dade2b37f68cabf34df794252ba2c9c56008d5a038e32c227b4049e4847",
   "data/spells.json": "a5381b46462993ed98351bf35011680252192b3e61504b536ba7723ca492c774",
-  "data/travel.json": "d94d1edd7b8558c60bd468af87b4a4ae49b535b3a964176969e612039bd168cd",
+  "data/travel.json": "aaa879afb0e3e1af0b22915589d58377e39471a7c740e570b551f6de347697b5",
   "equipment.gd": "e69dd41959abeec150cfb64463587cdff7448bb47e758b67c6a8c34efbbb61a9",
   "equipment.gd.uid": "765445bf42c1853a758d612d2a279a8fd03e85ff99384e6652f69dce02ffc4b1",
   "maps.gd": "6213b3cfec27d8c3e0a1dbb80bb00507c0bb1294de779dae6178b1017921dee1",

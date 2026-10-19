@@ -266,3 +266,9 @@ mevcut import kontrolü ve `multiplayer_sim`.
 4. **Uçuç Tozu:** tüketilir, satıcı 2.500 galleon + drop; sadece daha önce ziyaret edilen şöminelere gidilir.
 5. **Anahtar:** tek kullanımlık, 10 sn geri sayım, sadece parti; satıcı 10.000 galleon + nadir drop.
 6. **Dolap / Cadı geçidi:** S7'de (ilk turda değil).
+
+> **S7 (2026-10-19):** Kaybolan Dolaplar (İhtiyaç Odası, 7. kat <-> Yumurta Eşiği, Sv 28) ve Tek Gözlü Cadı geçidi (3. kat doğu
+> koridoru <-> Hogsmeade, Balparmak bodrum kapağı). travel.json `cabinet` / `passage` düğümleri (`pair`, ücretsiz, tek kişi,
+> savaş kilidi); authority `request_travel` türe göre kural, spawn `<tür>:<hedef>`. İstemci TravelNodes modelleri (Hunyuan dolap
+> + cadı heykeli, prosedürel kapak), F istemi, mor duman / toz efekti + `cabinet_vanish` / `passage_stone` sesleri.
+> Doğrulama `tools/capture/passage_probe.tscn` (4 yön). Görev kilidi (plan: dolap görevle açılır) henüz yok - herkese açık.
