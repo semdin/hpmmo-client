@@ -181,6 +181,13 @@ std::wstring NormalizePath(const std::wstring& path) {
     return out.empty() ? L"/" : out;
 }
 
+std::wstring CanonicalPath(const std::wstring& path) {
+    std::wstring norm = NormalizePath(path);
+    char real[PATH_MAX];
+    if (!norm.empty() && realpath(U8(norm).c_str(), real)) return Utf8ToWide(real);
+    return norm;
+}
+
 bool FileExists(const std::wstring& path) {
     struct stat st;
     return StatPath(path, st) && S_ISREG(st.st_mode);

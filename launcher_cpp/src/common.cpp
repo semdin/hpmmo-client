@@ -206,13 +206,13 @@ bool IsGameRunning(const std::wstring& installRoot,
                    const std::vector<std::wstring>& extraNames,
                    std::vector<RunningProcess>* matches) {
     uint32_t self = CurrentProcessId();
-    std::wstring versionsPrefix = JoinPath(NormalizePath(installRoot), L"versions");
+    std::wstring versionsPrefix = JoinPath(CanonicalPath(installRoot), L"versions");
     std::vector<RunningProcess> found;
     for (const auto& p : SnapshotProcesses()) {
         if (p.pid == self || p.pid == 0) continue;
         bool hit = false;
         if (!p.imagePath.empty()) {
-            if (PathStartsWithCI(NormalizePath(p.imagePath), versionsPrefix)) hit = true;
+            if (PathStartsWithCI(CanonicalPath(p.imagePath), versionsPrefix)) hit = true;
         }
         if (!hit) {
             for (const auto& n : extraNames) {

@@ -45,6 +45,10 @@ std::wstring GetExeDir();
 std::wstring GetCwd();
 std::wstring TempDirPath();
 std::wstring NormalizePath(const std::wstring& path);
+// NormalizePath plus symlinks resolved on POSIX (realpath), for comparing with
+// paths the kernel reports (macOS: /var -> /private/var). Same as
+// NormalizePath on Windows.
+std::wstring CanonicalPath(const std::wstring& path);
 bool FileExists(const std::wstring& path);
 bool DirExists(const std::wstring& path);
 uint64_t FileSizeOrZero(const std::wstring& path);

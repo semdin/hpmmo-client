@@ -13,6 +13,8 @@ namespace hpmmo {
 
 const char* HostPlatform() { return "windows-x86_64"; }
 
+std::wstring CanonicalPath(const std::wstring& path) { return NormalizePath(path); }
+
 // ---------------------------------------------------------------- strings --
 std::wstring Utf8ToWide(const std::string& str) {
     if (str.empty()) return L"";
