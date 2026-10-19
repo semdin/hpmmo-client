@@ -63,7 +63,11 @@ env:
 jobs:
   release:
     name: build + sign + publish (windows-x86_64)
-    runs-on: ubuntu-22.04
+    # Self-hosted on the game host (2026-10-19): the workspace persists, so Git
+    # LFS only fetches changed objects and the .godot import cache survives
+    # between releases without a GitHub cache round trip. Never add a
+    # pull_request trigger to this workflow.
+    runs-on: [self-hosted, hpmmo-client]
     steps:
       - name: Require the signing key (fail closed)
         env:
@@ -76,27 +80,22 @@ jobs:
           fi
           echo "signing key present (value never printed)"
 
-      # Full history for the launcher version. The game's models/textures are
-      # Git LFS objects (~700 MB): they are pulled through a cache keyed by the
-      # object list, so a release only downloads the objects that changed and
-      # the repository's LFS bandwidth quota is not spent on every push.
+      # Full history for the launcher version. clean: false keeps the ignored
+      # .godot import cache: Godot re-imports only changed sources, so unchanged
+      # models/textures keep byte-identical output and players do not
+      # re-download their chunks (imports are not bit-reproducible).
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          lfs: true
+          clean: false
 
-      - name: List the LFS objects of this commit
-        # hashFiles() only reads inside the workspace.
-        run: git lfs ls-files --long | cut -d' ' -f1 | sort > .lfs-ids.txt
-
-      - uses: actions/cache@v4
-        with:
-          path: .git/lfs
-          key: lfs-${{ hashFiles('.lfs-ids.txt') }}
-          restore-keys: lfs-
-
-      - name: Pull the LFS objects (cache misses only)
+      - name: Reset the workspace (keep only the import cache)
         run: |
-          git lfs pull
+          set -eu
+          # Untracked leftovers of an earlier run must not leak into this one
+          # (a stale chunks-*.bin in dist/ would be published).
+          git clean -ffdx -e .godot -e export_presets.cfg
           # A pointer file left in the tree would export as a broken asset.
           if git lfs ls-files | grep -q ' - '; then
             echo "::error::some LFS objects were not downloaded"; git lfs ls-files | grep ' - ' | head; exit 1
@@ -124,12 +123,6 @@ jobs:
           printf '%s' "$notes" > "$RUNNER_TEMP/release_notes.txt"
           echo "client $client / content $content / launcher $launcher"
 
-      - name: Install the toolchain (python + mingw + ninja + cmake)
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq python3 python3-pip ninja-build cmake mingw-w64
-          python3 -m pip install --quiet cryptography numpy
-
       - name: Build the launcher
         run: |
           set -eu
@@ -152,30 +145,17 @@ jobs:
           mkdir -p dist
           cp launcher_cpp/build-mingw/HPMMO_Launcher.exe dist/HPMMO_Launcher.exe
 
-      - name: Fetch the pinned Godot engine and export templates
+      - name: Check the pinned Godot engine and export templates
         id: godot
         run: |
           set -eu
-          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
-          curl -fsSL -o /tmp/godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
-          unzip -q -o /tmp/godot.zip -d /tmp/godot
-          godot="/tmp/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
-          chmod +x "$godot"
-          curl -fsSL -o /tmp/templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
-          mkdir -p "$HOME/.local/share/godot/export_templates"
-          rm -rf /tmp/templates "${HOME:?}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
-          unzip -q -o /tmp/templates.tpz -d /tmp/templates
-          mv /tmp/templates/templates "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          # Installed once on the host (server/docs/self-hosted-runner.md).
+          godot=/opt/hpmmo-ci/godot/godot
+          "$godot" --version | grep -q "^${GODOT_VERSION}\.stable" || {
+            echo "::error::$godot is not Godot ${GODOT_VERSION}"; exit 1; }
+          test -f "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/windows_release_x86_64.exe" || {
+            echo "::error::Godot ${GODOT_VERSION} export templates are missing in $HOME"; exit 1; }
           echo "path=$godot" >> "$GITHUB_OUTPUT"
-
-      # The import cache: Godot re-imports only sources that changed, so an
-      # unchanged model or texture keeps byte-identical output and its chunks
-      # are not re-downloaded by players (imports are not bit-reproducible).
-      - uses: actions/cache@v4
-        with:
-          path: .godot
-          key: godot-import-${{ github.sha }}
-          restore-keys: godot-import-
 
       - name: Export the game
         run: |
@@ -187,10 +167,10 @@ jobs:
           # The login screen shows this version.
           sed -i "s/^config\/description=/config\/version=\"${{ steps.v.outputs.client }}\"\nconfig\/description=/" project.godot
           "${{ steps.godot.outputs.path }}" --headless --path . --editor --import --quit \
-            > /tmp/import.log 2>&1 || { tail -80 /tmp/import.log; exit 1; }
+            > "$RUNNER_TEMP/import.log" 2>&1 || { tail -80 "$RUNNER_TEMP/import.log"; exit 1; }
           "${{ steps.godot.outputs.path }}" --headless --path . \
             --export-release "Windows Desktop" "$PWD/build/client/HPMMO.exe" \
-            > /tmp/export.log 2>&1 || { tail -80 /tmp/export.log; echo "the Godot export failed" >&2; exit 1; }
+            > "$RUNNER_TEMP/export.log" 2>&1 || { tail -80 "$RUNNER_TEMP/export.log"; echo "the Godot export failed" >&2; exit 1; }
           test -f build/client/HPMMO.exe
           test -f build/client/HPMMO.pck
           ls -la build/client
