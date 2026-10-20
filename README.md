@@ -1,110 +1,69 @@
-# 🏰 HPMMO (Godot 4.7.2) — Wizarding Realm MMORPG
+# HPMMO — Wizarding Realm MMORPG
 
-A 3D Wizarding MMO Action RPG inspired by Metin2 mechanics, built with real-time spell combat, Dark Monolith (Metin Stone) wave battles, wand upgrading via Ollivander, broom mounts, and persistent PostgreSQL character progression.
+An online 3D wizarding action RPG: real-time spell combat, monster packs and bosses, dungeons, broom flight, quests and Hogwarts houses.
 
-![HPMMO Key Art Banner](assets/branding/hpmmo_banner.jpg)
+![HPMMO](assets/branding/hpmmo_banner.jpg)
 
-**2 October 2026 gameplay update:** walkable castle interiors, new animated enemies, coordinated random encounter respawns, smoother combat and flight, live HUD fixes, and resolved startup/shutdown errors. See [new asset credits](assets/ASSET_CREDITS.md). The local update has not been deployed to the VPS; shared server-authoritative encounters remain separate networking work.
+## Download
 
----
+Download the launcher for your system. It installs the game, keeps it up to date and starts it.
 
-## ⚡ Key Features
+| System | Download |
+|---|---|
+| Windows 10/11 (64-bit) | [HPMMO_Launcher.exe](https://github.com/semdin/hpmmo-client/releases/latest/download/HPMMO_Launcher.exe) |
+| macOS 11+ (Apple Silicon or Intel) | [HPMMO_Launcher-macos.zip](https://github.com/semdin/hpmmo-client/releases/latest/download/HPMMO_Launcher-macos.zip) |
+| Linux (x86_64) | [HPMMO_Launcher-x86_64.AppImage](https://github.com/semdin/hpmmo-client/releases/latest/download/HPMMO_Launcher-x86_64.AppImage) |
 
-- **Metin2-Style Real-Time Spell Combat & Ballistic Skillshots**: True mouse-aim ground raycast targeting (League of Legends style skillshots) with 3-hit basic wand combo chain (*flick -> swish -> overhead whip*). Cast *Stupefy* (stun shockwave), *Incendio* (flame plume), *Bombarda* (crater explosion AOE), *Expelliarmus* (spell break), *Protego* (reflective shield), and house-specific Ultimates.
-- **Mob Packs, Pack Aggro & World Bosses**: Pack coordination (2/3/5 pack formations) with linked aggro pull, 4.0s corpse decay lifecycle with ground sinking before zone respawn, plus dedicated World Bosses (*Corrupted Acromantula Matriarch* with telegraphed AOE ground slam and *Dark Snatcher Commander* with bodyguard enrage).
-- **World Boundaries & Broom Flight Safeguards**: 60m tall invisible perimeter collision barriers with magical ward visuals, broom dismount safety ground raycasting (`can_dismount_safely()`), and infinite fall kill-plane teleportation.
-- **Walkable Castle & Clear Lighting**: Enter the Great Hall, library and Charms classroom through connected passages. Textured masonry, arches, furnishings, floating candles and batched geometry; fog disabled, restrained bloom and clear daylight.
-- **3D Character Selection Podium**: Cinematic stone podium with glowing house runes, directional rim lighting, 2 characters maximum per account, and smooth arrow-key switching.
-- **4 Hogwarts Houses & Passives**:
-  - **Gryffindor**: +15% Critical Spell Damage.
-  - **Slytherin**: +25% Mana Regeneration Rate.
-  - **Ravenclaw**: +20% Spell Cast Range.
-  - **Hufflepuff**: +20% Maximum HP & Potion Effectiveness.
-- **Hybrid Persistence (PostgreSQL + RAM + JSON)**:
-  - High-frequency 15 Hz combat and movement calculated in Dedicated Server RAM (no DB I/O lag).
-  - ACID persistent accounts and characters stored in PostgreSQL (with SQLite backup) bound to `0.0.0.0:8081`.
-  - Solo Offline Mode saves progress locally to `user://hpmmo_character_save.json`.
-- **Native C++ Standalone Launcher (`HPMMO_Launcher.exe`)**:
-  - Standalone compiled binary (< 1.5 MB) using WinHTTP, WinSock, and GDI+.
-  - In-launcher Account Registration & Login with single sign-on credential pass-through.
-  - Live VPS Realm Ping monitor (`185.118.141.74:7777` UDP / `8081` HTTP).
-  - One-click **⚔️ OYUNA BAŞLA (PLAY NOW)** and **🕹️ ÇEVRİMDIŞI OYNA (SOLO OFFLINE)** modes.
+**First start:**
 
----
+- **Windows:** if SmartScreen warns you, click **More info → Run anyway**.
+- **macOS:** unzip the file and open **HPMMO Launcher**. If macOS blocks it, go to **System Settings → Privacy & Security** and click **Open Anyway**.
+- **Linux:** make the file executable (`chmod +x HPMMO_Launcher-x86_64.AppImage`), then run it.
 
-## 🎮 How to Play
+The game is about 1 GB. Updates download only what changed.
 
-### 1. Launching
-- **Native C++ Launcher**: Launch `HPMMO_Launcher.exe` directly or run `Launcher.bat`.
-- **Direct Client Launch**: Double-click `play.bat` or run `godot scenes/main/main_menu.tscn`.
-- **Dedicated Server Start**:
-  ```powershell
-  godot --headless scenes/server/dedicated_server.tscn
-  ```
-- **In-Engine Automated Test Suite**:
-  ```powershell
-  godot --headless --path . res://scenes/test/test_scenario.tscn
-  ```
-- **Spell Animation Viewer** (live preview for tuning spell VFX — caster, effect
-  and a human-sized scale reference in one shot):
-  ```powershell
-  godot --path . res://scenes/test/vfx_viewer.tscn
-  # batch evidence: one PNG per stage into tools/downloads, then exit
-  godot --path . res://scenes/test/vfx_viewer.tscn -- --quality=high --spell=bombarda --shot
-  ```
-  `Space` pause · `←/→` spell · `R` replay · `-`/`=` speed · `1/2/3` quality ·
-  `O` orbit · `T` reference · `C` PNG · `Esc` quit · drag/wheel orbit and zoom.
+## Join the game
 
-### 2. Controls
+1. Open the launcher and wait until the game is installed and up to date.
+2. Click **PLAY**.
+3. On the login screen, open **HESAP OLUŞTUR**, pick a username (3–24 characters) and a password (at least 8 characters, letters and numbers), and create your account.
+4. Log in with **OYUNA GİR**, create a character, choose your house and enter the world.
+
+The server status ("Sunucu çevrimiçi" = online) is shown on the login screen. During maintenance you can log in again once it finishes.
+
+## Controls
+
 | Key | Action |
-| :--- | :--- |
-| **W A S D** | Move (camera-relative) |
-| **SPACE** | Jump / Rise on broom |
-| **Right Mouse (Hold & Drag)** | Orbit Camera / Free Aim |
-| **Wheel** | Camera Zoom |
-| **Left Click / 1-4** | Aimed Skillshot Spell / 3-Hit Wand Combo |
-| **Left / Right Arrow (Select Screen)** | Switch character slot; drag on the dais to turn the wizard |
-| **Tab** | Cycle Target |
-| **1 (Stupefy)** | Red energy bolt + 1.8s Stun Shockwave |
-| **2 (Incendio)** | Flame cone plume (200% damage vs Inferi) |
-| **3 (Bombarda)** | Explosive crater AOE + knockback |
-| **4 (Expelliarmus)** | Disarm, interrupt & weaken |
-| **Q (Protego)** | Arcane shield, halves incoming damage, reflects bolts |
-| **E (Ultimate)** | House-specific celestial aura & burst |
-| **Shift** | Mount / Dismount Nimbus 2000 Broom (near ground) |
-| **Ctrl** | Descend on broom |
-| **Z** | Pick up ground loot |
-| **F** | Interact with nearby NPC |
-| **I / O** | Bag Inventory / Ollivander Wand Refine (+0 to +9) |
-| **F1 - F4** | Quick slots: potions (drag one from the bag onto a slot; right-click clears) |
-| **Enter** | Chat - nearby players hear you (speech bubble); start with `!` to shout to the whole server |
-| **M** | World map |
-| **J** | Training guide |
-| **Esc** | Close the top-most window; with nothing open, the game menu (Settings, Change Character, Quit) |
+|---|---|
+| W A S D | Move |
+| Right mouse (hold) | Turn camera / aim |
+| Mouse wheel | Zoom |
+| Left click, 1–4 | Wand attack / spells |
+| Q / E | Protego shield / house ultimate |
+| Space | Jump, rise on broom |
+| Shift / Ctrl | Mount or dismount broom / descend |
+| Tab | Next target |
+| F | Talk to NPC |
+| Z | Pick up loot |
+| F1–F4 | Potion quick slots |
+| I / C / V | Inventory / character / skills |
+| M / B / J | Map / bestiary / guide |
+| O | Ollivander (wand upgrade) |
+| Enter | Chat (start with `!` to shout to everyone) |
+| Esc | Menu: settings, change character, quit |
 
----
+## Problems?
 
-## 🚀 Dedicated Server Deployment (Linux VPS: `185.118.141.74`)
+- **The game won't start or crashes:** update your graphics drivers (Windows and Linux need Vulkan support), then click **Dosyaları onar** (repair files) in the launcher.
+- **Bug reports:** send the log file along with what happened:
+  - Windows: `%APPDATA%\Godot\app_userdata\HPMMO\logs`
+  - macOS: `~/Library/Application Support/Godot/app_userdata/HPMMO/logs`
+  - Linux: `~/.local/share/godot/app_userdata/HPMMO/logs`
 
-1. **Package on Windows**:
-   Double click `package_server.bat` (creates `hpmmo_server.tar.gz`).
-2. **Send to VPS**:
-   ```bash
-   scp hpmmo_server.tar.gz root@185.118.141.74:~/
-   ```
-3. **First-Time Install**:
-   ```bash
-   bash ~/hpmmo/game/setup_server.sh
-   ```
-4. **Update Server**:
-   ```bash
-   bash ~/hpmmo/game/update_server.sh
-   ```
-5. **Monitor Live Logs**:
-   ```bash
-   # Dedicated Game Server
-   journalctl -u hpmmo -f
+## For developers
 
-   # PostgreSQL & Account API
-   journalctl -u hpmmo-db -f
-   ```
+Godot 4.7.2 project. Releases are published automatically on every push to `main`.
+
+- Development cycle: [docs/dev-cycle.md](docs/dev-cycle.md)
+- Launcher, releases and maintenance: [docs/launcher-and-releases.md](docs/launcher-and-releases.md)
+- Asset credits: [assets/ASSET_CREDITS.md](assets/ASSET_CREDITS.md)
