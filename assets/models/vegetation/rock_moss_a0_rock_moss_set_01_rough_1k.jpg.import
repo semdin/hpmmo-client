@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://brpln2tgf8457"
 path.s3tc="res://.godot/imported/rock_moss_a0_rock_moss_set_01_rough_1k.jpg-b91d6c3a0adc3420908bb61787fee703.s3tc.ctex"
+path.etc2="res://.godot/imported/rock_moss_a0_rock_moss_set_01_rough_1k.jpg-b91d6c3a0adc3420908bb61787fee703.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/rock_moss_a0_rock_moss_set_01_rough_1k.jpg"
-dest_files=["res://.godot/imported/rock_moss_a0_rock_moss_set_01_rough_1k.jpg-b91d6c3a0adc3420908bb61787fee703.s3tc.ctex"]
+dest_files=["res://.godot/imported/rock_moss_a0_rock_moss_set_01_rough_1k.jpg-b91d6c3a0adc3420908bb61787fee703.s3tc.ctex", "res://.godot/imported/rock_moss_a0_rock_moss_set_01_rough_1k.jpg-b91d6c3a0adc3420908bb61787fee703.etc2.ctex"]
 
 [params]
 

@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b5fxm53yjqcq1"
 path.s3tc="res://.godot/imported/fir_a_fir_tree_01_trunk_a_diff_1k.jpg-277e649c039fb4196a2e77c3e9f586ac.s3tc.ctex"
+path.etc2="res://.godot/imported/fir_a_fir_tree_01_trunk_a_diff_1k.jpg-277e649c039fb4196a2e77c3e9f586ac.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/fir_a_fir_tree_01_trunk_a_diff_1k.jpg"
-dest_files=["res://.godot/imported/fir_a_fir_tree_01_trunk_a_diff_1k.jpg-277e649c039fb4196a2e77c3e9f586ac.s3tc.ctex"]
+dest_files=["res://.godot/imported/fir_a_fir_tree_01_trunk_a_diff_1k.jpg-277e649c039fb4196a2e77c3e9f586ac.s3tc.ctex", "res://.godot/imported/fir_a_fir_tree_01_trunk_a_diff_1k.jpg-277e649c039fb4196a2e77c3e9f586ac.etc2.ctex"]
 
 [params]
 

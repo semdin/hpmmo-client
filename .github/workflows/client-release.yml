@@ -219,7 +219,8 @@ jobs:
           godot=/opt/hpmmo-ci/godot/godot
           "$godot" --version | grep -q "^${GODOT_VERSION}\.stable" || {
             echo "::error::$godot is not Godot ${GODOT_VERSION}"; exit 1; }
-          test -f "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/windows_release_x86_64.exe" || {
+          test -f "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/windows_release_x86_64.exe" \
+            && test -f "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/macos.zip" || {
             echo "::error::Godot ${GODOT_VERSION} export templates are missing in $HOME"; exit 1; }
           echo "path=$godot" >> "$GITHUB_OUTPUT"
 
@@ -246,13 +247,8 @@ jobs:
           test -x build-linux/client/HPMMO.x86_64
           test -f build-linux/client/HPMMO.pck
           ls -la build-linux/client
-          # macOS: x86_64 .app (Rosetta 2 on Apple Silicon) from an x86_64
-          # template thinned out of the official universal one, made once.
-          template=/opt/hpmmo-ci/godot/macos_x86_64-${GODOT_VERSION}.zip
-          if [ ! -f "$template" ]; then
-            python3 tools/release/make_macos_x86_template.py \
-              "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/macos.zip" "$template"
-          fi
+          # macOS: universal .app (native on Apple Silicon -> Metal, and on Intel)
+          # from the official template.
           rm -rf build-mac && mkdir -p build-mac/client
           "${{ steps.godot.outputs.path }}" --headless --path . \
             --export-release "macOS" "$RUNNER_TEMP/HPMMO-macos.zip" \
@@ -262,6 +258,18 @@ jobs:
           test -x build-mac/client/HPMMO.app/Contents/MacOS/HPMMO
           test -f build-mac/client/HPMMO.app/Contents/Resources/HPMMO.pck
           test -d build-mac/client/HPMMO.app/Contents/Frameworks/libterrain.macos.release.framework
+          # The game and Terrain3D must both carry an arm64 and an x86_64 slice.
+          python3 - build-mac/client/HPMMO.app/Contents/MacOS/HPMMO \
+            build-mac/client/HPMMO.app/Contents/Frameworks/libterrain.macos.release.framework/libterrain.macos.release <<'PY'
+          import struct, sys
+          for path in sys.argv[1:]:
+              d = open(path, "rb").read(4096)
+              magic, n = struct.unpack_from(">II", d, 0)
+              assert magic == 0xCAFEBABE, f"{path}: not a universal Mach-O"
+              cpus = {struct.unpack_from(">I", d, 8 + 20 * i)[0] for i in range(n)}
+              assert {0x01000007, 0x0100000C} <= cpus, f"{path}: slices {sorted(map(hex, cpus))}"
+              print(path, "universal (x86_64 + arm64)")
+          PY
 
       # No full zip since 1.0.64: the packager only enforces its refusal rules
       # (no user data, caches or secrets) on what the chunks are cut from.
@@ -457,8 +465,8 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   # The published release, on a Mac: the downloaded launcher installs the game
-  # from the macOS chunks and the installed game boots (headless; on this
-  # Apple Silicon runner the x86_64 game runs through Rosetta 2).
+  # from the macOS chunks and the installed game boots natively on this Apple
+  # Silicon runner (headless, arm64 slice), and its x86_64 slice under Rosetta 2.
   verify-macos:
     name: macOS install + boot check
     needs: [release]
@@ -479,12 +487,21 @@ jobs:
           game="$(ls -d "$work"/install/versions/*/HPMMO.app/Contents/MacOS/HPMMO)"
           chmod +x "$game"
           codesign --verify --deep --strict "$(dirname "$(dirname "$(dirname "$game")")")"
-          # The x86_64 game needs Rosetta 2 on Apple Silicon (a player's Mac
-          # offers to install it on the first start).
+          lipo -archs "$game" | tee archs.txt
+          grep -qw arm64 archs.txt && grep -qw x86_64 archs.txt
+          # Rosetta 2 only for the x86_64 (Intel Mac) slice check below.
           if [ "$(uname -m)" = "arm64" ] && ! /usr/bin/pgrep -q oahd; then
             sudo softwareupdate --install-rosetta --agree-to-license || true
           fi
-          # A pty keeps Godot's output line-buffered.
-          script -q "$work/boot.log" "$game" --headless --quit-after 600 || true
-          cat "$work/boot.log" | tr -d '\r' | tail -20
-          grep -q "Loaded client configuration" "$work/boot.log"
+          # A pty keeps Godot's output line-buffered. arch -arm64 fails unless
+          # the game runs natively (no Rosetta).
+          for a in arm64 x86_64; do
+            script -q "$work/boot-$a.log" arch -$a "$game" --headless --quit-after 600 || true
+            echo "--- $a"; tr -d '\r' < "$work/boot-$a.log" | tail -20
+            grep -q "Loaded client configuration" "$work/boot-$a.log"
+          done
+          # Best effort: a windowed native boot shows the renderer (Metal on
+          # Apple Silicon); hosted runners may lack a usable GPU, so not fatal.
+          script -q "$work/boot-metal.log" perl -e 'alarm 120; exec @ARGV' \
+            arch -arm64 "$game" --quit-after 300 || true
+          tr -d '\r' < "$work/boot-metal.log" | grep -iE "metal|vulkan|opengl|error" | head -10 || true

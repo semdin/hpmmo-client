@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://gpthpgqronqe"
 path.s3tc="res://.godot/imported/lightning_strands_512.png-a0e9396c6f888b332f52060c25be5fcd.s3tc.ctex"
+path.etc2="res://.godot/imported/lightning_strands_512.png-a0e9396c6f888b332f52060c25be5fcd.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/tex/lightning_strands_512.png"
-dest_files=["res://.godot/imported/lightning_strands_512.png-a0e9396c6f888b332f52060c25be5fcd.s3tc.ctex"]
+dest_files=["res://.godot/imported/lightning_strands_512.png-a0e9396c6f888b332f52060c25be5fcd.s3tc.ctex", "res://.godot/imported/lightning_strands_512.png-a0e9396c6f888b332f52060c25be5fcd.etc2.ctex"]
 
 [params]
 

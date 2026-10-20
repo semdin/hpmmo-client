@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cen3ptifjxv2w"
 path.bptc="res://.godot/imported/sand_shore_nrm_rgh.png-9bbbc91a06f3a14dd42e0d1c11ea84f5.bptc.ctex"
+path.astc="res://.godot/imported/sand_shore_nrm_rgh.png-9bbbc91a06f3a14dd42e0d1c11ea84f5.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/terrain/textures/sand_shore_nrm_rgh.png"
-dest_files=["res://.godot/imported/sand_shore_nrm_rgh.png-9bbbc91a06f3a14dd42e0d1c11ea84f5.bptc.ctex"]
+dest_files=["res://.godot/imported/sand_shore_nrm_rgh.png-9bbbc91a06f3a14dd42e0d1c11ea84f5.bptc.ctex", "res://.godot/imported/sand_shore_nrm_rgh.png-9bbbc91a06f3a14dd42e0d1c11ea84f5.astc.ctex"]
 
 [params]
 

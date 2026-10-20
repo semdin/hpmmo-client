@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bmwpnmja4dkcd"
 path.s3tc="res://.godot/imported/hero_wizard_hero_orm.png-cb310491d6d30057a8e542a34bda4851.s3tc.ctex"
+path.etc2="res://.godot/imported/hero_wizard_hero_orm.png-cb310491d6d30057a8e542a34bda4851.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/characters/hero_wizard_hero_orm.png"
-dest_files=["res://.godot/imported/hero_wizard_hero_orm.png-cb310491d6d30057a8e542a34bda4851.s3tc.ctex"]
+dest_files=["res://.godot/imported/hero_wizard_hero_orm.png-cb310491d6d30057a8e542a34bda4851.s3tc.ctex", "res://.godot/imported/hero_wizard_hero_orm.png-cb310491d6d30057a8e542a34bda4851.etc2.ctex"]
 
 [params]
 

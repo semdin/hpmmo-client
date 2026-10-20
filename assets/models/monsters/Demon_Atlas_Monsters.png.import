@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://djrb3m2taac1r"
 path.s3tc="res://.godot/imported/Demon_Atlas_Monsters.png-5e6c5d55987945969f82411151b75b7c.s3tc.ctex"
+path.etc2="res://.godot/imported/Demon_Atlas_Monsters.png-5e6c5d55987945969f82411151b75b7c.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monsters/Demon_Atlas_Monsters.png"
-dest_files=["res://.godot/imported/Demon_Atlas_Monsters.png-5e6c5d55987945969f82411151b75b7c.s3tc.ctex"]
+dest_files=["res://.godot/imported/Demon_Atlas_Monsters.png-5e6c5d55987945969f82411151b75b7c.s3tc.ctex", "res://.godot/imported/Demon_Atlas_Monsters.png-5e6c5d55987945969f82411151b75b7c.etc2.ctex"]
 
 [params]
 

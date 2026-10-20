@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b2cx3e0tlnu2q"
 path.s3tc="res://.godot/imported/broadleaf_b_broadleaf_b_leaves_nrm.png-806d81edf4e25b34989bc54954f50f75.s3tc.ctex"
+path.etc2="res://.godot/imported/broadleaf_b_broadleaf_b_leaves_nrm.png-806d81edf4e25b34989bc54954f50f75.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/broadleaf_b_broadleaf_b_leaves_nrm.png"
-dest_files=["res://.godot/imported/broadleaf_b_broadleaf_b_leaves_nrm.png-806d81edf4e25b34989bc54954f50f75.s3tc.ctex"]
+dest_files=["res://.godot/imported/broadleaf_b_broadleaf_b_leaves_nrm.png-806d81edf4e25b34989bc54954f50f75.s3tc.ctex", "res://.godot/imported/broadleaf_b_broadleaf_b_leaves_nrm.png-806d81edf4e25b34989bc54954f50f75.etc2.ctex"]
 
 [params]
 

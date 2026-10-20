@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bk3f4chxatmbd"
 path.s3tc="res://.godot/imported/star_flare_256.png-4a08e2c27f3e0e510612671f3c71fcec.s3tc.ctex"
+path.etc2="res://.godot/imported/star_flare_256.png-4a08e2c27f3e0e510612671f3c71fcec.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/tex/star_flare_256.png"
-dest_files=["res://.godot/imported/star_flare_256.png-4a08e2c27f3e0e510612671f3c71fcec.s3tc.ctex"]
+dest_files=["res://.godot/imported/star_flare_256.png-4a08e2c27f3e0e510612671f3c71fcec.s3tc.ctex", "res://.godot/imported/star_flare_256.png-4a08e2c27f3e0e510612671f3c71fcec.etc2.ctex"]
 
 [params]
 

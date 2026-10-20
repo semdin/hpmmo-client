@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bl72f4n1kvp1"
 path.bptc="res://.godot/imported/cave_dust_alb_ht.png-0e698439285c62fab9c16f8bd74d52d7.bptc.ctex"
+path.astc="res://.godot/imported/cave_dust_alb_ht.png-0e698439285c62fab9c16f8bd74d52d7.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/terrain/textures/cave_dust_alb_ht.png"
-dest_files=["res://.godot/imported/cave_dust_alb_ht.png-0e698439285c62fab9c16f8bd74d52d7.bptc.ctex"]
+dest_files=["res://.godot/imported/cave_dust_alb_ht.png-0e698439285c62fab9c16f8bd74d52d7.bptc.ctex", "res://.godot/imported/cave_dust_alb_ht.png-0e698439285c62fab9c16f8bd74d52d7.astc.ctex"]
 
 [params]
 

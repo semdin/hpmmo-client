@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://3vpyqrn7ol5d"
 path.s3tc="res://.godot/imported/energy_orb_8x8_1k.png-e0d7b0b662fdb045ec943b85a219c200.s3tc.ctex"
+path.etc2="res://.godot/imported/energy_orb_8x8_1k.png-e0d7b0b662fdb045ec943b85a219c200.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/atlases/energy_orb_8x8_1k.png"
-dest_files=["res://.godot/imported/energy_orb_8x8_1k.png-e0d7b0b662fdb045ec943b85a219c200.s3tc.ctex"]
+dest_files=["res://.godot/imported/energy_orb_8x8_1k.png-e0d7b0b662fdb045ec943b85a219c200.s3tc.ctex", "res://.godot/imported/energy_orb_8x8_1k.png-e0d7b0b662fdb045ec943b85a219c200.etc2.ctex"]
 
 [params]
 

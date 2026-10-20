@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://2wvyji45acxi"
 path.s3tc="res://.godot/imported/castle_wall_varriation_ao_2k.jpg-c979771d5ecbd022aa2cb14a1f9efca1.s3tc.ctex"
+path.etc2="res://.godot/imported/castle_wall_varriation_ao_2k.jpg-c979771d5ecbd022aa2cb14a1f9efca1.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/pbr/castle_wall_varriation/castle_wall_varriation_ao_2k.jpg"
-dest_files=["res://.godot/imported/castle_wall_varriation_ao_2k.jpg-c979771d5ecbd022aa2cb14a1f9efca1.s3tc.ctex"]
+dest_files=["res://.godot/imported/castle_wall_varriation_ao_2k.jpg-c979771d5ecbd022aa2cb14a1f9efca1.s3tc.ctex", "res://.godot/imported/castle_wall_varriation_ao_2k.jpg-c979771d5ecbd022aa2cb14a1f9efca1.etc2.ctex"]
 
 [params]
 

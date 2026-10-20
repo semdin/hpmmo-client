@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://20aea83oxl03"
 path.bptc="res://.godot/imported/grass_lush_nrm_rgh.png-f6e1164af6ff73ee6988eca2d3d35b96.bptc.ctex"
+path.astc="res://.godot/imported/grass_lush_nrm_rgh.png-f6e1164af6ff73ee6988eca2d3d35b96.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/terrain/textures/grass_lush_nrm_rgh.png"
-dest_files=["res://.godot/imported/grass_lush_nrm_rgh.png-f6e1164af6ff73ee6988eca2d3d35b96.bptc.ctex"]
+dest_files=["res://.godot/imported/grass_lush_nrm_rgh.png-f6e1164af6ff73ee6988eca2d3d35b96.bptc.ctex", "res://.godot/imported/grass_lush_nrm_rgh.png-f6e1164af6ff73ee6988eca2d3d35b96.astc.ctex"]
 
 [params]
 

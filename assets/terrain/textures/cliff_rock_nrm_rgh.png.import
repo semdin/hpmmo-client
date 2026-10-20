@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bm6skcdli7qxf"
 path.bptc="res://.godot/imported/cliff_rock_nrm_rgh.png-b9a6b838af626bca00eda5e65f0c6fbe.bptc.ctex"
+path.astc="res://.godot/imported/cliff_rock_nrm_rgh.png-b9a6b838af626bca00eda5e65f0c6fbe.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/terrain/textures/cliff_rock_nrm_rgh.png"
-dest_files=["res://.godot/imported/cliff_rock_nrm_rgh.png-b9a6b838af626bca00eda5e65f0c6fbe.bptc.ctex"]
+dest_files=["res://.godot/imported/cliff_rock_nrm_rgh.png-b9a6b838af626bca00eda5e65f0c6fbe.bptc.ctex", "res://.godot/imported/cliff_rock_nrm_rgh.png-b9a6b838af626bca00eda5e65f0c6fbe.astc.ctex"]
 
 [params]
 

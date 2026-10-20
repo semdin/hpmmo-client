@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bt5hcdt3hj8qh"
 path.s3tc="res://.godot/imported/rock_slab_namaqualand_boulder_05_arm_1k.jpg-6037ce38dccac4f8ee0e1126f6b9a851.s3tc.ctex"
+path.etc2="res://.godot/imported/rock_slab_namaqualand_boulder_05_arm_1k.jpg-6037ce38dccac4f8ee0e1126f6b9a851.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/rock_slab_namaqualand_boulder_05_arm_1k.jpg"
-dest_files=["res://.godot/imported/rock_slab_namaqualand_boulder_05_arm_1k.jpg-6037ce38dccac4f8ee0e1126f6b9a851.s3tc.ctex"]
+dest_files=["res://.godot/imported/rock_slab_namaqualand_boulder_05_arm_1k.jpg-6037ce38dccac4f8ee0e1126f6b9a851.s3tc.ctex", "res://.godot/imported/rock_slab_namaqualand_boulder_05_arm_1k.jpg-6037ce38dccac4f8ee0e1126f6b9a851.etc2.ctex"]
 
 [params]
 

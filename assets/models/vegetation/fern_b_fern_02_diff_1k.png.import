@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://ckw5xw2hh1onl"
 path.s3tc="res://.godot/imported/fern_b_fern_02_diff_1k.png-89eece37e38633ae3c6c97628756976d.s3tc.ctex"
+path.etc2="res://.godot/imported/fern_b_fern_02_diff_1k.png-89eece37e38633ae3c6c97628756976d.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/fern_b_fern_02_diff_1k.png"
-dest_files=["res://.godot/imported/fern_b_fern_02_diff_1k.png-89eece37e38633ae3c6c97628756976d.s3tc.ctex"]
+dest_files=["res://.godot/imported/fern_b_fern_02_diff_1k.png-89eece37e38633ae3c6c97628756976d.s3tc.ctex", "res://.godot/imported/fern_b_fern_02_diff_1k.png-89eece37e38633ae3c6c97628756976d.etc2.ctex"]
 
 [params]
 

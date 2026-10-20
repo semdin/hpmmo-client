@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://rxwxtmbj55df"
 path.s3tc="res://.godot/imported/grey_roof_tiles_diff_2k.jpg-3fdb05caa07259027dcfcf07600ea6db.s3tc.ctex"
+path.etc2="res://.godot/imported/grey_roof_tiles_diff_2k.jpg-3fdb05caa07259027dcfcf07600ea6db.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/pbr/grey_roof_tiles/grey_roof_tiles_diff_2k.jpg"
-dest_files=["res://.godot/imported/grey_roof_tiles_diff_2k.jpg-3fdb05caa07259027dcfcf07600ea6db.s3tc.ctex"]
+dest_files=["res://.godot/imported/grey_roof_tiles_diff_2k.jpg-3fdb05caa07259027dcfcf07600ea6db.s3tc.ctex", "res://.godot/imported/grey_roof_tiles_diff_2k.jpg-3fdb05caa07259027dcfcf07600ea6db.etc2.ctex"]
 
 [params]
 

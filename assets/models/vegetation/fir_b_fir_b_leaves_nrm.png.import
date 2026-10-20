@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://ci3de0k2guovu"
 path.s3tc="res://.godot/imported/fir_b_fir_b_leaves_nrm.png-15da6f0cad2c8b74f8fe1b2a15765080.s3tc.ctex"
+path.etc2="res://.godot/imported/fir_b_fir_b_leaves_nrm.png-15da6f0cad2c8b74f8fe1b2a15765080.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/fir_b_fir_b_leaves_nrm.png"
-dest_files=["res://.godot/imported/fir_b_fir_b_leaves_nrm.png-15da6f0cad2c8b74f8fe1b2a15765080.s3tc.ctex"]
+dest_files=["res://.godot/imported/fir_b_fir_b_leaves_nrm.png-15da6f0cad2c8b74f8fe1b2a15765080.s3tc.ctex", "res://.godot/imported/fir_b_fir_b_leaves_nrm.png-15da6f0cad2c8b74f8fe1b2a15765080.etc2.ctex"]
 
 [params]
 

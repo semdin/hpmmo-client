@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://s538s1inpmvv"
 path.s3tc="res://.godot/imported/shockwave_8x8_1k.png-94a6d50cbbf13426f18f42122b4cce2c.s3tc.ctex"
+path.etc2="res://.godot/imported/shockwave_8x8_1k.png-94a6d50cbbf13426f18f42122b4cce2c.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/atlases/shockwave_8x8_1k.png"
-dest_files=["res://.godot/imported/shockwave_8x8_1k.png-94a6d50cbbf13426f18f42122b4cce2c.s3tc.ctex"]
+dest_files=["res://.godot/imported/shockwave_8x8_1k.png-94a6d50cbbf13426f18f42122b4cce2c.s3tc.ctex", "res://.godot/imported/shockwave_8x8_1k.png-94a6d50cbbf13426f18f42122b4cce2c.etc2.ctex"]
 
 [params]
 

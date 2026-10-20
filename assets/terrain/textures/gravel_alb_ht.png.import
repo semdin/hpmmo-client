@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://c3gw0ic38brhx"
 path.bptc="res://.godot/imported/gravel_alb_ht.png-b2dc56547089f9011bbe4f6127c36a44.bptc.ctex"
+path.astc="res://.godot/imported/gravel_alb_ht.png-b2dc56547089f9011bbe4f6127c36a44.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/terrain/textures/gravel_alb_ht.png"
-dest_files=["res://.godot/imported/gravel_alb_ht.png-b2dc56547089f9011bbe4f6127c36a44.bptc.ctex"]
+dest_files=["res://.godot/imported/gravel_alb_ht.png-b2dc56547089f9011bbe4f6127c36a44.bptc.ctex", "res://.godot/imported/gravel_alb_ht.png-b2dc56547089f9011bbe4f6127c36a44.astc.ctex"]
 
 [params]
 

@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bi4ymssygdsfa"
 path.s3tc="res://.godot/imported/broadleaf_b_island_tree_01_arm_1k.jpg-675a8c1dfa81a0323e0967e80527bd4b.s3tc.ctex"
+path.etc2="res://.godot/imported/broadleaf_b_island_tree_01_arm_1k.jpg-675a8c1dfa81a0323e0967e80527bd4b.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/broadleaf_b_island_tree_01_arm_1k.jpg"
-dest_files=["res://.godot/imported/broadleaf_b_island_tree_01_arm_1k.jpg-675a8c1dfa81a0323e0967e80527bd4b.s3tc.ctex"]
+dest_files=["res://.godot/imported/broadleaf_b_island_tree_01_arm_1k.jpg-675a8c1dfa81a0323e0967e80527bd4b.s3tc.ctex", "res://.godot/imported/broadleaf_b_island_tree_01_arm_1k.jpg-675a8c1dfa81a0323e0967e80527bd4b.etc2.ctex"]
 
 [params]
 

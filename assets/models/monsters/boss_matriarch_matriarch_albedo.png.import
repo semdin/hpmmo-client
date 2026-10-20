@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dxn70j8ag7rnt"
 path.s3tc="res://.godot/imported/boss_matriarch_matriarch_albedo.png-ccb5522bdbc72ebb5ef9caba4a548bd8.s3tc.ctex"
+path.etc2="res://.godot/imported/boss_matriarch_matriarch_albedo.png-ccb5522bdbc72ebb5ef9caba4a548bd8.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monsters/boss_matriarch_matriarch_albedo.png"
-dest_files=["res://.godot/imported/boss_matriarch_matriarch_albedo.png-ccb5522bdbc72ebb5ef9caba4a548bd8.s3tc.ctex"]
+dest_files=["res://.godot/imported/boss_matriarch_matriarch_albedo.png-ccb5522bdbc72ebb5ef9caba4a548bd8.s3tc.ctex", "res://.godot/imported/boss_matriarch_matriarch_albedo.png-ccb5522bdbc72ebb5ef9caba4a548bd8.etc2.ctex"]
 
 [params]
 

@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3vdpgrjhj0a5"
 path.bptc="res://.godot/imported/grass_meadow_nrm_rgh.png-da07e2f57c8b18b2b9d7597047ee179b.bptc.ctex"
+path.astc="res://.godot/imported/grass_meadow_nrm_rgh.png-da07e2f57c8b18b2b9d7597047ee179b.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/terrain/textures/grass_meadow_nrm_rgh.png"
-dest_files=["res://.godot/imported/grass_meadow_nrm_rgh.png-da07e2f57c8b18b2b9d7597047ee179b.bptc.ctex"]
+dest_files=["res://.godot/imported/grass_meadow_nrm_rgh.png-da07e2f57c8b18b2b9d7597047ee179b.bptc.ctex", "res://.godot/imported/grass_meadow_nrm_rgh.png-da07e2f57c8b18b2b9d7597047ee179b.astc.ctex"]
 
 [params]
 

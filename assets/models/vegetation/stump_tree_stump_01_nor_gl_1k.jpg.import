@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://22rqiov8nvl8"
 path.s3tc="res://.godot/imported/stump_tree_stump_01_nor_gl_1k.jpg-0b9f74a926262c6f9710d1c34359b95f.s3tc.ctex"
+path.etc2="res://.godot/imported/stump_tree_stump_01_nor_gl_1k.jpg-0b9f74a926262c6f9710d1c34359b95f.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/stump_tree_stump_01_nor_gl_1k.jpg"
-dest_files=["res://.godot/imported/stump_tree_stump_01_nor_gl_1k.jpg-0b9f74a926262c6f9710d1c34359b95f.s3tc.ctex"]
+dest_files=["res://.godot/imported/stump_tree_stump_01_nor_gl_1k.jpg-0b9f74a926262c6f9710d1c34359b95f.s3tc.ctex", "res://.godot/imported/stump_tree_stump_01_nor_gl_1k.jpg-0b9f74a926262c6f9710d1c34359b95f.etc2.ctex"]
 
 [params]
 

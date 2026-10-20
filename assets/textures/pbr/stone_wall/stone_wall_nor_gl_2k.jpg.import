@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://rvnbmbi86m2k"
 path.s3tc="res://.godot/imported/stone_wall_nor_gl_2k.jpg-8b0624fbf288e7df6ceeab7bf2e1653a.s3tc.ctex"
+path.etc2="res://.godot/imported/stone_wall_nor_gl_2k.jpg-8b0624fbf288e7df6ceeab7bf2e1653a.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/pbr/stone_wall/stone_wall_nor_gl_2k.jpg"
-dest_files=["res://.godot/imported/stone_wall_nor_gl_2k.jpg-8b0624fbf288e7df6ceeab7bf2e1653a.s3tc.ctex"]
+dest_files=["res://.godot/imported/stone_wall_nor_gl_2k.jpg-8b0624fbf288e7df6ceeab7bf2e1653a.s3tc.ctex", "res://.godot/imported/stone_wall_nor_gl_2k.jpg-8b0624fbf288e7df6ceeab7bf2e1653a.etc2.ctex"]
 
 [params]
 

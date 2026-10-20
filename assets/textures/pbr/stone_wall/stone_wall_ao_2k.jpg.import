@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7cmogth8si8e"
 path.s3tc="res://.godot/imported/stone_wall_ao_2k.jpg-c8f50cb05fef01bf0d01e0914e002fde.s3tc.ctex"
+path.etc2="res://.godot/imported/stone_wall_ao_2k.jpg-c8f50cb05fef01bf0d01e0914e002fde.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/pbr/stone_wall/stone_wall_ao_2k.jpg"
-dest_files=["res://.godot/imported/stone_wall_ao_2k.jpg-c8f50cb05fef01bf0d01e0914e002fde.s3tc.ctex"]
+dest_files=["res://.godot/imported/stone_wall_ao_2k.jpg-c8f50cb05fef01bf0d01e0914e002fde.s3tc.ctex", "res://.godot/imported/stone_wall_ao_2k.jpg-c8f50cb05fef01bf0d01e0914e002fde.etc2.ctex"]
 
 [params]
 

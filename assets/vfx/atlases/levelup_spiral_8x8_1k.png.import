@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bovx2htusddct"
 path.s3tc="res://.godot/imported/levelup_spiral_8x8_1k.png-4c077de3709915f5dba003d3ca71d71d.s3tc.ctex"
+path.etc2="res://.godot/imported/levelup_spiral_8x8_1k.png-4c077de3709915f5dba003d3ca71d71d.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/atlases/levelup_spiral_8x8_1k.png"
-dest_files=["res://.godot/imported/levelup_spiral_8x8_1k.png-4c077de3709915f5dba003d3ca71d71d.s3tc.ctex"]
+dest_files=["res://.godot/imported/levelup_spiral_8x8_1k.png-4c077de3709915f5dba003d3ca71d71d.s3tc.ctex", "res://.godot/imported/levelup_spiral_8x8_1k.png-4c077de3709915f5dba003d3ca71d71d.etc2.ctex"]
 
 [params]
 

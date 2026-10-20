@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b2vdomwsolk58"
 path.s3tc="res://.godot/imported/levelup_pillar_8x8_1k.png-f03457ff82cfc6a6ecc6f5e89ebca497.s3tc.ctex"
+path.etc2="res://.godot/imported/levelup_pillar_8x8_1k.png-f03457ff82cfc6a6ecc6f5e89ebca497.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/atlases/levelup_pillar_8x8_1k.png"
-dest_files=["res://.godot/imported/levelup_pillar_8x8_1k.png-f03457ff82cfc6a6ecc6f5e89ebca497.s3tc.ctex"]
+dest_files=["res://.godot/imported/levelup_pillar_8x8_1k.png-f03457ff82cfc6a6ecc6f5e89ebca497.s3tc.ctex", "res://.godot/imported/levelup_pillar_8x8_1k.png-f03457ff82cfc6a6ecc6f5e89ebca497.etc2.ctex"]
 
 [params]
 

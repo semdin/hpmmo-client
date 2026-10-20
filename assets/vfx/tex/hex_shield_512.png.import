@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://ct6w4b0ew60jo"
 path.s3tc="res://.godot/imported/hex_shield_512.png-df4ce4a63f07d5b6756c845b21806910.s3tc.ctex"
+path.etc2="res://.godot/imported/hex_shield_512.png-df4ce4a63f07d5b6756c845b21806910.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/tex/hex_shield_512.png"
-dest_files=["res://.godot/imported/hex_shield_512.png-df4ce4a63f07d5b6756c845b21806910.s3tc.ctex"]
+dest_files=["res://.godot/imported/hex_shield_512.png-df4ce4a63f07d5b6756c845b21806910.s3tc.ctex", "res://.godot/imported/hex_shield_512.png-df4ce4a63f07d5b6756c845b21806910.etc2.ctex"]
 
 [params]
 

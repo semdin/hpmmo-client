@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cnhhqytuke11w"
 path.s3tc="res://.godot/imported/wall_arched_dungeon_texture.png-317bd77e9fe40d4e4c286044b4103a7a.s3tc.ctex"
+path.etc2="res://.godot/imported/wall_arched_dungeon_texture.png-317bd77e9fe40d4e4c286044b4103a7a.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/environment/wall_arched_dungeon_texture.png"
-dest_files=["res://.godot/imported/wall_arched_dungeon_texture.png-317bd77e9fe40d4e4c286044b4103a7a.s3tc.ctex"]
+dest_files=["res://.godot/imported/wall_arched_dungeon_texture.png-317bd77e9fe40d4e4c286044b4103a7a.s3tc.ctex", "res://.godot/imported/wall_arched_dungeon_texture.png-317bd77e9fe40d4e4c286044b4103a7a.etc2.ctex"]
 
 [params]
 

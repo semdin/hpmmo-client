@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bktuatl2yqc2x"
 path.s3tc="res://.godot/imported/boss_commander_commander_rough.png-b098d2fcede997fa25c6f032544ad25a.s3tc.ctex"
+path.etc2="res://.godot/imported/boss_commander_commander_rough.png-b098d2fcede997fa25c6f032544ad25a.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monsters/boss_commander_commander_rough.png"
-dest_files=["res://.godot/imported/boss_commander_commander_rough.png-b098d2fcede997fa25c6f032544ad25a.s3tc.ctex"]
+dest_files=["res://.godot/imported/boss_commander_commander_rough.png-b098d2fcede997fa25c6f032544ad25a.s3tc.ctex", "res://.godot/imported/boss_commander_commander_rough.png-b098d2fcede997fa25c6f032544ad25a.etc2.ctex"]
 
 [params]
 

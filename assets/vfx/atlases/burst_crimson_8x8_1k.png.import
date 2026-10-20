@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://ba21dkoh0kj4n"
 path.s3tc="res://.godot/imported/burst_crimson_8x8_1k.png-1d75e176e0701dd74e27146e4da964c6.s3tc.ctex"
+path.etc2="res://.godot/imported/burst_crimson_8x8_1k.png-1d75e176e0701dd74e27146e4da964c6.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/atlases/burst_crimson_8x8_1k.png"
-dest_files=["res://.godot/imported/burst_crimson_8x8_1k.png-1d75e176e0701dd74e27146e4da964c6.s3tc.ctex"]
+dest_files=["res://.godot/imported/burst_crimson_8x8_1k.png-1d75e176e0701dd74e27146e4da964c6.s3tc.ctex", "res://.godot/imported/burst_crimson_8x8_1k.png-1d75e176e0701dd74e27146e4da964c6.etc2.ctex"]
 
 [params]
 

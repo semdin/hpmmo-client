@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dtubevrva1nii"
 path.s3tc="res://.godot/imported/acromantula_acromantula_normal.png-523e44ad7b1ee400f4c73d1b9c8ffb4f.s3tc.ctex"
+path.etc2="res://.godot/imported/acromantula_acromantula_normal.png-523e44ad7b1ee400f4c73d1b9c8ffb4f.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monsters/acromantula_acromantula_normal.png"
-dest_files=["res://.godot/imported/acromantula_acromantula_normal.png-523e44ad7b1ee400f4c73d1b9c8ffb4f.s3tc.ctex"]
+dest_files=["res://.godot/imported/acromantula_acromantula_normal.png-523e44ad7b1ee400f4c73d1b9c8ffb4f.s3tc.ctex", "res://.godot/imported/acromantula_acromantula_normal.png-523e44ad7b1ee400f4c73d1b9c8ffb4f.etc2.ctex"]
 
 [params]
 

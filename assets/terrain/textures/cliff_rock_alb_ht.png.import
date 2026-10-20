@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7qsyn7wyp138"
 path.bptc="res://.godot/imported/cliff_rock_alb_ht.png-7a1a12cc479d85919796e1e1e5cc5751.bptc.ctex"
+path.astc="res://.godot/imported/cliff_rock_alb_ht.png-7a1a12cc479d85919796e1e1e5cc5751.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/terrain/textures/cliff_rock_alb_ht.png"
-dest_files=["res://.godot/imported/cliff_rock_alb_ht.png-7a1a12cc479d85919796e1e1e5cc5751.bptc.ctex"]
+dest_files=["res://.godot/imported/cliff_rock_alb_ht.png-7a1a12cc479d85919796e1e1e5cc5751.bptc.ctex", "res://.godot/imported/cliff_rock_alb_ht.png-7a1a12cc479d85919796e1e1e5cc5751.astc.ctex"]
 
 [params]
 

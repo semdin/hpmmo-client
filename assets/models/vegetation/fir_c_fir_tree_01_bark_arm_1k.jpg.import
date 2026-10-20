@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dq0kq3wwacg7o"
 path.s3tc="res://.godot/imported/fir_c_fir_tree_01_bark_arm_1k.jpg-18bf8f4e6c6cd95d9f383a8108f6a1c8.s3tc.ctex"
+path.etc2="res://.godot/imported/fir_c_fir_tree_01_bark_arm_1k.jpg-18bf8f4e6c6cd95d9f383a8108f6a1c8.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/fir_c_fir_tree_01_bark_arm_1k.jpg"
-dest_files=["res://.godot/imported/fir_c_fir_tree_01_bark_arm_1k.jpg-18bf8f4e6c6cd95d9f383a8108f6a1c8.s3tc.ctex"]
+dest_files=["res://.godot/imported/fir_c_fir_tree_01_bark_arm_1k.jpg-18bf8f4e6c6cd95d9f383a8108f6a1c8.s3tc.ctex", "res://.godot/imported/fir_c_fir_tree_01_bark_arm_1k.jpg-18bf8f4e6c6cd95d9f383a8108f6a1c8.etc2.ctex"]
 
 [params]
 

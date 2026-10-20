@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://duwpn42qxpwwn"
 path.s3tc="res://.godot/imported/scorch_decal_512.png-db9957519b1c9ca0b1fed1e9a25fbece.s3tc.ctex"
+path.etc2="res://.godot/imported/scorch_decal_512.png-db9957519b1c9ca0b1fed1e9a25fbece.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/tex/scorch_decal_512.png"
-dest_files=["res://.godot/imported/scorch_decal_512.png-db9957519b1c9ca0b1fed1e9a25fbece.s3tc.ctex"]
+dest_files=["res://.godot/imported/scorch_decal_512.png-db9957519b1c9ca0b1fed1e9a25fbece.s3tc.ctex", "res://.godot/imported/scorch_decal_512.png-db9957519b1c9ca0b1fed1e9a25fbece.etc2.ctex"]
 
 [params]
 

@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://giu0abvb4yg2"
 path.s3tc="res://.godot/imported/floo_column_8x8_2k.png-97b8ac56de01ae6d8c3ff5d15d72d51b.s3tc.ctex"
+path.etc2="res://.godot/imported/floo_column_8x8_2k.png-97b8ac56de01ae6d8c3ff5d15d72d51b.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/atlases/floo_column_8x8_2k.png"
-dest_files=["res://.godot/imported/floo_column_8x8_2k.png-97b8ac56de01ae6d8c3ff5d15d72d51b.s3tc.ctex"]
+dest_files=["res://.godot/imported/floo_column_8x8_2k.png-97b8ac56de01ae6d8c3ff5d15d72d51b.s3tc.ctex", "res://.godot/imported/floo_column_8x8_2k.png-97b8ac56de01ae6d8c3ff5d15d72d51b.etc2.ctex"]
 
 [params]
 

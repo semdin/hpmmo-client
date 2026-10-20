@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://crs6rmg7hil7d"
 path.s3tc="res://.godot/imported/roof_slates_02_nor_gl_2k.jpg-b748fe2420a03398619e65ef95d2f373.s3tc.ctex"
+path.etc2="res://.godot/imported/roof_slates_02_nor_gl_2k.jpg-b748fe2420a03398619e65ef95d2f373.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/pbr/roof_slates_02/roof_slates_02_nor_gl_2k.jpg"
-dest_files=["res://.godot/imported/roof_slates_02_nor_gl_2k.jpg-b748fe2420a03398619e65ef95d2f373.s3tc.ctex"]
+dest_files=["res://.godot/imported/roof_slates_02_nor_gl_2k.jpg-b748fe2420a03398619e65ef95d2f373.s3tc.ctex", "res://.godot/imported/roof_slates_02_nor_gl_2k.jpg-b748fe2420a03398619e65ef95d2f373.etc2.ctex"]
 
 [params]
 

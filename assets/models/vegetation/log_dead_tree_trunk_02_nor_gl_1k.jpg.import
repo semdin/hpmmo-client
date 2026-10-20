@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://nejx21iskwh2"
 path.s3tc="res://.godot/imported/log_dead_tree_trunk_02_nor_gl_1k.jpg-4a0b370ec7c956bfc7c8afb040f04708.s3tc.ctex"
+path.etc2="res://.godot/imported/log_dead_tree_trunk_02_nor_gl_1k.jpg-4a0b370ec7c956bfc7c8afb040f04708.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/log_dead_tree_trunk_02_nor_gl_1k.jpg"
-dest_files=["res://.godot/imported/log_dead_tree_trunk_02_nor_gl_1k.jpg-4a0b370ec7c956bfc7c8afb040f04708.s3tc.ctex"]
+dest_files=["res://.godot/imported/log_dead_tree_trunk_02_nor_gl_1k.jpg-4a0b370ec7c956bfc7c8afb040f04708.s3tc.ctex", "res://.godot/imported/log_dead_tree_trunk_02_nor_gl_1k.jpg-4a0b370ec7c956bfc7c8afb040f04708.etc2.ctex"]
 
 [params]
 

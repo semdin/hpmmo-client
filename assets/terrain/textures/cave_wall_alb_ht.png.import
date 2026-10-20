@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://blx4tuq3dcclj"
 path.bptc="res://.godot/imported/cave_wall_alb_ht.png-90ca4e744355329b7694429d78cf9eb4.bptc.ctex"
+path.astc="res://.godot/imported/cave_wall_alb_ht.png-90ca4e744355329b7694429d78cf9eb4.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/terrain/textures/cave_wall_alb_ht.png"
-dest_files=["res://.godot/imported/cave_wall_alb_ht.png-90ca4e744355329b7694429d78cf9eb4.bptc.ctex"]
+dest_files=["res://.godot/imported/cave_wall_alb_ht.png-90ca4e744355329b7694429d78cf9eb4.bptc.ctex", "res://.godot/imported/cave_wall_alb_ht.png-90ca4e744355329b7694429d78cf9eb4.astc.ctex"]
 
 [params]
 

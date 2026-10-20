@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://brd8hkklfw176"
 path.s3tc="res://.godot/imported/flame_loop_8x8_1k.png-461ecbccfac265e501a1c3df39d27080.s3tc.ctex"
+path.etc2="res://.godot/imported/flame_loop_8x8_1k.png-461ecbccfac265e501a1c3df39d27080.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/atlases/flame_loop_8x8_1k.png"
-dest_files=["res://.godot/imported/flame_loop_8x8_1k.png-461ecbccfac265e501a1c3df39d27080.s3tc.ctex"]
+dest_files=["res://.godot/imported/flame_loop_8x8_1k.png-461ecbccfac265e501a1c3df39d27080.s3tc.ctex", "res://.godot/imported/flame_loop_8x8_1k.png-461ecbccfac265e501a1c3df39d27080.etc2.ctex"]
 
 [params]
 

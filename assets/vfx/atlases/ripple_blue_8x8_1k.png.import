@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cvsxnk0bli3jp"
 path.s3tc="res://.godot/imported/ripple_blue_8x8_1k.png-9d7308cabfac811857b8b2c6289012dc.s3tc.ctex"
+path.etc2="res://.godot/imported/ripple_blue_8x8_1k.png-9d7308cabfac811857b8b2c6289012dc.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/atlases/ripple_blue_8x8_1k.png"
-dest_files=["res://.godot/imported/ripple_blue_8x8_1k.png-9d7308cabfac811857b8b2c6289012dc.s3tc.ctex"]
+dest_files=["res://.godot/imported/ripple_blue_8x8_1k.png-9d7308cabfac811857b8b2c6289012dc.s3tc.ctex", "res://.godot/imported/ripple_blue_8x8_1k.png-9d7308cabfac811857b8b2c6289012dc.etc2.ctex"]
 
 [params]
 

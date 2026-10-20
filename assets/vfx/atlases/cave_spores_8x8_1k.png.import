@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dgpn7r7x8p4ep"
 path.s3tc="res://.godot/imported/cave_spores_8x8_1k.png-91951f68752dba89adb6502da6f56367.s3tc.ctex"
+path.etc2="res://.godot/imported/cave_spores_8x8_1k.png-91951f68752dba89adb6502da6f56367.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/atlases/cave_spores_8x8_1k.png"
-dest_files=["res://.godot/imported/cave_spores_8x8_1k.png-91951f68752dba89adb6502da6f56367.s3tc.ctex"]
+dest_files=["res://.godot/imported/cave_spores_8x8_1k.png-91951f68752dba89adb6502da6f56367.s3tc.ctex", "res://.godot/imported/cave_spores_8x8_1k.png-91951f68752dba89adb6502da6f56367.etc2.ctex"]
 
 [params]
 

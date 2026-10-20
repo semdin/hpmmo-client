@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dxoekkukgd2nr"
 path.bptc="res://.godot/imported/forest_floor_nrm_rgh.png-4d912857794eb2c4e92931cca152943b.bptc.ctex"
+path.astc="res://.godot/imported/forest_floor_nrm_rgh.png-4d912857794eb2c4e92931cca152943b.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/terrain/textures/forest_floor_nrm_rgh.png"
-dest_files=["res://.godot/imported/forest_floor_nrm_rgh.png-4d912857794eb2c4e92931cca152943b.bptc.ctex"]
+dest_files=["res://.godot/imported/forest_floor_nrm_rgh.png-4d912857794eb2c4e92931cca152943b.bptc.ctex", "res://.godot/imported/forest_floor_nrm_rgh.png-4d912857794eb2c4e92931cca152943b.astc.ctex"]
 
 [params]
 

@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dogc07r81koud"
 path.s3tc="res://.godot/imported/pine_b_pine_b_impostor_nrm.png-5018406c8952de0f14251bede12e337f.s3tc.ctex"
+path.etc2="res://.godot/imported/pine_b_pine_b_impostor_nrm.png-5018406c8952de0f14251bede12e337f.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/pine_b_pine_b_impostor_nrm.png"
-dest_files=["res://.godot/imported/pine_b_pine_b_impostor_nrm.png-5018406c8952de0f14251bede12e337f.s3tc.ctex"]
+dest_files=["res://.godot/imported/pine_b_pine_b_impostor_nrm.png-5018406c8952de0f14251bede12e337f.s3tc.ctex", "res://.godot/imported/pine_b_pine_b_impostor_nrm.png-5018406c8952de0f14251bede12e337f.etc2.ctex"]
 
 [params]
 
