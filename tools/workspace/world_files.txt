@@ -523,6 +523,7 @@ scripts/entities/rig_ik.gd
 scripts/entities/wand_grip_modifier.gd
 scripts/fx/flipbook_fx.gd
 scripts/fx/level_up_fx.gd
+scripts/fx/monolith_shatter.gd
 scripts/server/db_manager.gd
 scripts/server/dedicated_server.gd
 scripts/server/test_character.gd

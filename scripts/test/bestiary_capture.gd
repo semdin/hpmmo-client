@@ -11,6 +11,10 @@ const SIZE := 320
 const FRAME := {
 	"cornish_pixie": AABB(Vector3(-0.35, 0.75, -0.35), Vector3(0.7, 0.75, 0.7)),
 	"dementor": AABB(Vector3(-0.6, 0.6, -0.6), Vector3(1.2, 2.8, 1.2)),
+	# long-legged spiders spread far past their body proxy
+	"acromantula_venomfang": AABB(Vector3(-1.5, 0.0, -1.5), Vector3(3.0, 2.4, 3.0)),
+	"acromantula_broodguard": AABB(Vector3(-1.9, 0.0, -1.9), Vector3(3.8, 3.0, 3.8)),
+	"darksnatcher": AABB(Vector3(-0.45, 0.0, -0.45), Vector3(0.9, 1.85, 0.9)),
 }
 
 func _ready() -> void:
