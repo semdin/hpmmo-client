@@ -1,7 +1,7 @@
 {
  "generated": "2026-10-20",
  "source_repository": "hpmmo-server",
- "source_revision": "53129ca89e2b193b01a24490ce776abebe2871e8",
+ "source_revision": "4443b8d1e213aa23e7a26614e3d1cc7e68c15aca",
  "note": "Generated from server/world/addons/hpmmo_sim by dev.ps1 sync-sim. Never edit these files in the client repository.",
  "files": {
   "admin.gd": "8605e27d706abc3eeafd3a7cce41de451734ff9d56652998b973fb4eacb7257c",
