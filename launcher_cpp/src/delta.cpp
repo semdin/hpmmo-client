@@ -6,9 +6,13 @@
 #include "sha256.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cstdio>
 #include <map>
+#include <mutex>
 #include <set>
+#include <thread>
+#include <vector>
 
 namespace hpmmo {
 
@@ -19,6 +23,8 @@ namespace {
 constexpr uint64_t kMergeGap = 512u * 1024;
 constexpr uint64_t kMaxRange = 16u * 1024 * 1024;
 constexpr uint64_t kMaxChunk = 64u * 1024 * 1024;
+// Ranges in flight at once (each holds at most kMaxRange in memory, twice).
+constexpr size_t kParallelRanges = 6;
 
 std::string ToLowerString(std::string s) {
     for (auto& c : s) c = (char)tolower((unsigned char)c);
@@ -265,66 +271,101 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
            " range request(s) for " + std::to_string(totalBytes) + " bytes; " + std::to_string(wholeOk.size()) +
            " file(s) unchanged");
 
+    // Several ranges download at once: one connection to the release CDN was
+    // the limit (a 1 GB install crawled on a fast line). Each worker fetches,
+    // inflates and verifies its range; only the append to the chunk store and
+    // the progress report are serialised. A finished range is in the store, so
+    // a failed or cancelled run resumes from it next time.
     uint64_t done = 0;
     if (cb.progress) cb.progress(0, totalBytes);
-    std::string body, plain;
-    for (const auto& g : groups) {
-        if (stop()) return cancelled = true, false;
-        std::string ferr;
-        if (!cb.fetchRange(index.sources[g.source], g.first, g.last, body, ferr)) {
-            err = "chunk download failed: " + ferr;
-            return false;
-        }
-        if (body.size() != g.last - g.first + 1) {
-            err = "chunk download returned " + std::to_string(body.size()) + " bytes, expected " +
-                  std::to_string(g.last - g.first + 1);
-            return false;
-        }
-        stats.requests++;
-        stats.downloadBytes += body.size();
-        FILE* bin = OpenFileW(storeBin, L"ab");
-        FILE* idx = OpenFileW(storeIdx, L"ab");
-        if (!bin || !idx) {
-            if (bin) fclose(bin);
-            if (idx) fclose(idx);
-            err = "cannot write the chunk store";
-            return false;
-        }
-        for (const ContentChunk* c : g.chunks) {
-            plain.clear();
-            plain.reserve((size_t)c->length);
-            uint64_t produced = 0;
-            std::string ierr;
-            bool ok = InflateDecompress(reinterpret_cast<const unsigned char*>(body.data()) + (c->offset - g.first),
-                                        (size_t)c->clen, c->length,
-                                        [&](const unsigned char* d, size_t n) {
-                                            plain.append(reinterpret_cast<const char*>(d), n);
-                                            return true;
-                                        },
-                                        &produced, ierr);
-            if (!ok || plain.size() != c->length || Sha256Hex(plain.data(), plain.size()) != c->sha256) {
-                fclose(bin);
-                fclose(idx);
-                err = "a downloaded chunk failed verification (" + c->sha256.substr(0, 12) + ")";
-                return false;
+    std::mutex mu;
+    std::atomic<size_t> next{0};
+    std::atomic<bool> failed{false};
+    auto fail = [&](const std::string& message) {
+        std::lock_guard<std::mutex> lock(mu);
+        if (!failed.exchange(true)) err = message;
+    };
+    auto worker = [&]() {
+        std::string body;
+        std::vector<std::string> plains;
+        while (!failed.load() && !stop()) {
+            size_t gi = next.fetch_add(1);
+            if (gi >= groups.size()) return;
+            const Group& g = groups[gi];
+            std::string ferr;
+            if (!cb.fetchRange(index.sources[g.source], g.first, g.last, body, ferr)) {
+                if (!stop()) fail("chunk download failed: " + ferr);
+                return;
             }
+            if (body.size() != g.last - g.first + 1) {
+                fail("chunk download returned " + std::to_string(body.size()) + " bytes, expected " +
+                     std::to_string(g.last - g.first + 1));
+                return;
+            }
+            plains.assign(g.chunks.size(), std::string());
+            for (size_t ci = 0; ci < g.chunks.size(); ci++) {
+                const ContentChunk* c = g.chunks[ci];
+                std::string& plain = plains[ci];
+                plain.reserve((size_t)c->length);
+                uint64_t produced = 0;
+                std::string ierr;
+                bool ok = InflateDecompress(reinterpret_cast<const unsigned char*>(body.data()) + (c->offset - g.first),
+                                            (size_t)c->clen, c->length,
+                                            [&](const unsigned char* d, size_t n) {
+                                                plain.append(reinterpret_cast<const char*>(d), n);
+                                                return true;
+                                            },
+                                            &produced, ierr);
+                if (!ok || plain.size() != c->length || Sha256Hex(plain.data(), plain.size()) != c->sha256) {
+                    fail("a downloaded chunk failed verification (" + c->sha256.substr(0, 12) + ")");
+                    return;
+                }
+            }
+            std::lock_guard<std::mutex> lock(mu);
+            if (failed.load()) return;
+            FILE* bin = OpenFileW(storeBin, L"ab");
+            FILE* idx = OpenFileW(storeIdx, L"ab");
+            if (!bin || !idx) {
+                if (bin) fclose(bin);
+                if (idx) fclose(idx);
+                failed = true;
+                err = "cannot write the chunk store";
+                return;
+            }
+            for (size_t ci = 0; ci < g.chunks.size(); ci++) {
+                const ContentChunk* c = g.chunks[ci];
+                const std::string& plain = plains[ci];
 #ifdef _WIN32
-            _fseeki64(bin, 0, SEEK_END);
+                _fseeki64(bin, 0, SEEK_END);
 #else
-            fseeko(bin, 0, SEEK_END);
+                fseeko(bin, 0, SEEK_END);
 #endif
-            uint64_t off = TellFile64(bin);
-            fwrite(plain.data(), 1, plain.size(), bin);
-            fprintf(idx, "%s %llu %llu\n", c->sha256.c_str(), (unsigned long long)off, (unsigned long long)plain.size());
-            stored.emplace(c->sha256, Ref{storeBin, off, (uint64_t)plain.size()});
+                uint64_t off = TellFile64(bin);
+                fwrite(plain.data(), 1, plain.size(), bin);
+                fprintf(idx, "%s %llu %llu\n", c->sha256.c_str(), (unsigned long long)off,
+                        (unsigned long long)plain.size());
+                stored.emplace(c->sha256, Ref{storeBin, off, (uint64_t)plain.size()});
+            }
+            fflush(bin);
+            fflush(idx);
+            fclose(bin);
+            fclose(idx);
+            stats.requests++;
+            stats.downloadBytes += body.size();
+            done += body.size();
+            if (cb.progress) cb.progress(done, totalBytes);
         }
-        fflush(bin);
-        fflush(idx);
-        fclose(bin);
-        fclose(idx);
-        done += body.size();
-        if (cb.progress) cb.progress(done, totalBytes);
+    };
+    size_t workers = std::min<size_t>(kParallelRanges, groups.size());
+    if (workers <= 1) {
+        worker();
+    } else {
+        std::vector<std::thread> pool;
+        for (size_t i = 0; i < workers; i++) pool.emplace_back(worker);
+        for (auto& t : pool) t.join();
     }
+    if (failed.load()) return false;
+    if (stop()) return cancelled = true, false;
 
     // 6. Assemble every file, then prove it byte-for-byte.
     for (const auto& f : index.files) {

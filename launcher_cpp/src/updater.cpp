@@ -33,6 +33,7 @@ constexpr size_t kMaxSignatureBytes = 4096;
 constexpr size_t kMaxStatusBytes = 1u * 1024 * 1024;
 constexpr int kDocAttempts = 3;
 constexpr int kDownloadAttempts = 3;
+constexpr int kRangeAttempts = 10;
 
 std::string ToLowerAscii(const std::string& s) {
     std::string out = s;
@@ -1321,7 +1322,10 @@ bool StageFromChunks(UpdaterContext& ctx, const ReleaseManifest& m, const Instal
     };
     cb.fetchRange = [&](const std::string& url, uint64_t first, uint64_t last, std::string& body,
                         std::string& ferr) {
-        for (int attempt = 0; attempt < kDownloadAttempts; attempt++) {
+        // A Wi-Fi switch or a short outage stalls the connection: notice it in
+        // 20 s and keep retrying with a growing pause (~2 min in all) instead of
+        // giving up after three quick tries, as the launcher used to.
+        for (int attempt = 0; attempt < kRangeAttempts; attempt++) {
             HttpRequestOptions o;
             o.url = Utf8ToWide(url);
             o.pinnedSpkiHex = ctx.pinnedSpkiHex;
@@ -1330,7 +1334,7 @@ bool StageFromChunks(UpdaterContext& ctx, const ReleaseManifest& m, const Instal
             o.resumeFrom = first;
             o.rangeLast = last;
             o.maxBodyBytes = (size_t)(last - first + 1);
-            o.receiveTimeoutMs = 60000;
+            o.receiveTimeoutMs = 20000;
             HttpOutcome out = HttpGetToString(o, body);
             if (out.ok) return true;
             ferr = out.error;
@@ -1338,7 +1342,8 @@ bool StageFromChunks(UpdaterContext& ctx, const ReleaseManifest& m, const Instal
                 out.errorKind == "config" || out.errorKind == "cancel") {
                 return false;
             }
-            if (!SleepCancellable(ctx.cancel, 800 * (attempt + 1))) return false;
+            LogMsg("[Delta] range retry " + std::to_string(attempt + 1) + ": " + ferr);
+            if (!SleepCancellable(ctx.cancel, std::min(1000 * (1 << std::min(attempt, 4)), 15000))) return false;
         }
         return false;
     };
