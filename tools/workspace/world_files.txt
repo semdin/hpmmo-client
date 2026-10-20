@@ -234,6 +234,7 @@ assets/shaders/castle/window_view.gdshader
 assets/shaders/cavern_ground.gdshader
 assets/shaders/cloak.gdshader
 assets/shaders/cobweb.gdshader
+assets/shaders/fire_flipbook.gdshader
 assets/shaders/footprint.gdshader
 assets/shaders/lake_water.gdshader
 assets/shaders/loot/chest_beam.gdshader
@@ -316,6 +317,9 @@ assets/textures/pbr/grey_roof_tiles/grey_roof_tiles_ao_2k.jpg
 assets/textures/pbr/grey_roof_tiles/grey_roof_tiles_diff_2k.jpg
 assets/textures/pbr/grey_roof_tiles/grey_roof_tiles_nor_gl_2k.jpg
 assets/textures/pbr/grey_roof_tiles/grey_roof_tiles_rough_2k.jpg
+assets/textures/pbr/hessian_230/hessian_230_diff_1k.jpg
+assets/textures/pbr/hessian_230/hessian_230_nor_gl_1k.jpg
+assets/textures/pbr/hessian_230/hessian_230_rough_1k.jpg
 assets/textures/pbr/large_floor_tiles_02/large_floor_tiles_02_ao_2k.jpg
 assets/textures/pbr/large_floor_tiles_02/large_floor_tiles_02_diff_2k.jpg
 assets/textures/pbr/large_floor_tiles_02/large_floor_tiles_02_nor_gl_2k.jpg
@@ -521,6 +525,7 @@ scripts/entities/prediction_history.gd
 scripts/entities/rig_follower.gd
 scripts/entities/rig_ik.gd
 scripts/entities/wand_grip_modifier.gd
+scripts/fx/fire_card.gd
 scripts/fx/flipbook_fx.gd
 scripts/fx/level_up_fx.gd
 scripts/fx/monolith_shatter.gd
@@ -614,6 +619,7 @@ scripts/world/grounds/grounds_lake.gd
 scripts/world/grounds/grounds_layout.gd
 scripts/world/grounds/grounds_scatter.gd
 scripts/world/grounds/grounds_sites.gd
+scripts/world/grounds/pumpkin_mesh.gd
 scripts/world/grounds_terrain.gd
 scripts/world/map_controller.gd
 scripts/world/npc.gd

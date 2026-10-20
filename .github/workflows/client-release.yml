@@ -240,7 +240,11 @@ jobs:
           # warned "invalid UID" and fell back to the text path. The UID tables
           # are rebuilt from the .uid files on the import scan; the import
           # cache itself (the slow part) is kept.
+          # The export's text->binary scene conversions are cached in
+          # .godot/exported and reused while a .tscn is unchanged, so they kept
+          # the stale UIDs too (1.0.75 still warned): rebuilt every release.
           rm -f .godot/uid_cache.bin .godot/editor/filesystem_cache*
+          rm -rf .godot/exported
           "${{ steps.godot.outputs.path }}" --headless --path . --editor --import --quit \
             > "$RUNNER_TEMP/import.log" 2>&1 || { tail -80 "$RUNNER_TEMP/import.log"; exit 1; }
           "${{ steps.godot.outputs.path }}" --headless --path . \

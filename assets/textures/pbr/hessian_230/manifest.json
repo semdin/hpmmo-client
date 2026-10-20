@@ -1,0 +1,31 @@
+{
+ "id": "hessian-230",
+ "name": "Hessian 230",
+ "source_page": "https://polyhaven.com/a/hessian_230",
+ "author": "Poly Haven",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt (snapshot of https://polyhaven.com/license) in this folder; retrieved 2026-10-21",
+ "files": [
+  {
+   "file": "hessian_230_diff_1k.jpg",
+   "bytes": 1062404,
+   "sha256": "ef9ac1a0129b6d0f44b6d5beb68db7be7a0adf11e09fe52fd2cdc9370b27d4ba"
+  },
+  {
+   "file": "hessian_230_nor_gl_1k.jpg",
+   "bytes": 1030521,
+   "sha256": "6d5a6d23c880dbaae98477ed33dbd5d7c0eeda910a39319aec2d0014892974aa"
+  },
+  {
+   "file": "hessian_230_rough_1k.jpg",
+   "bytes": 923890,
+   "sha256": "469ea3c219147ba83d7a650d7769cc43f25b5e3d8ea8ae4e5e89e7226a32658a"
+  },
+  {
+   "file": "license.txt",
+   "bytes": 827,
+   "sha256": "359b9a624cc46cb83a63475c790ea1811edb1db41ebbaae9327c2c59019332c8"
+  }
+ ]
+}

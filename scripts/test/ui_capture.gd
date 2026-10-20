@@ -194,6 +194,10 @@ func _capture_windows() -> void:
 	await get_tree().create_timer(0.6).timeout
 	await _shot("character")
 	world.hud.character_window.close()
+	world.hud.floo.open_at(world.local_player, "floo_hagrid")
+	await get_tree().create_timer(0.6).timeout
+	await _shot("floo")
+	world.hud.floo.close()
 	world.ollivander_ui.open_for_player(world.local_player)
 	for entry in world.local_player.inventory:
 		if not (entry.get("bonuses", []) as Array).is_empty():
