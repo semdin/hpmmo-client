@@ -3,7 +3,8 @@ extends Node
 ## Floo Network round trip, offline, through the real request path:
 ## courtyard -> Hagrid (same map) -> Great Hall (castle) -> caverns camp ->
 ## courtyard. Reports where each trip lands, the powder spent and the refusals
-## (unknown hearth, no powder); saves the window and every arrival.
+## (no powder); saves the window (at level 19, the caverns locked) and every
+## arrival. Every hearth is open from the start; only `level_min` gates one.
 ##   godot --path . tools/capture/floo_probe.tscn -- [--out=<dir>]
 
 @onready var world = $GameWorld
@@ -27,18 +28,15 @@ func _ready() -> void:
 	player.global_position = court + Vector3.UP * 0.5
 	await get_tree().create_timer(0.8).timeout
 	print("FLOO at courtyard: active=%s" % mc.get("_active_travel"))
-	# Refused: Hagrid's hearth is not known yet.
-	SimNet.request_travel(player, "floo_courtyard", "floo_hagrid")
-	await get_tree().create_timer(0.4).timeout
-	print("FLOO unknown refused: map=%s pending=%s" % [mc.current_map, mc.busy])
-	for id in ["floo_hagrid", "floo_great_hall", "floo_caverns_camp"]:
-		player.call("learn_floo", id)
 	var hud0 = world.get("hud")
 	if hud0.get("skill_pick") != null:
 		hud0.skill_pick.close()
+	# The window at level 19: every hearth open but the caverns (level 24).
+	player.set("level", 19)
 	mc.call("open_floo", "floo_courtyard")
 	await get_tree().create_timer(0.6).timeout
 	await _shot("floo_window")
+	player.set("level", 30)
 	var hud = world.get("hud")
 	hud.floo.close()
 	for id in ["floo_courtyard", "floo_hogsmeade"]:
