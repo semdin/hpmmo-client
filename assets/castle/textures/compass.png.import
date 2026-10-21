@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d68hjp3wswn6"
-path="res://.godot/imported/compass.png-fdbcf461d05fa3b4e74e37aa99bdcd05.ctex"
+path.s3tc="res://.godot/imported/compass.png-fdbcf461d05fa3b4e74e37aa99bdcd05.s3tc.ctex"
+path.etc2="res://.godot/imported/compass.png-fdbcf461d05fa3b4e74e37aa99bdcd05.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/castle/textures/compass.png"
-dest_files=["res://.godot/imported/compass.png-fdbcf461d05fa3b4e74e37aa99bdcd05.ctex"]
+dest_files=["res://.godot/imported/compass.png-fdbcf461d05fa3b4e74e37aa99bdcd05.s3tc.ctex", "res://.godot/imported/compass.png-fdbcf461d05fa3b4e74e37aa99bdcd05.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -23,7 +25,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

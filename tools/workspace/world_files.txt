@@ -627,6 +627,7 @@ scripts/world/portkey_views.gd
 scripts/world/quality_preset.gd
 scripts/world/safe_zone.gd
 scripts/world/shader_warmup.gd
+scripts/world/static_merge.gd
 scripts/world/target_ring.gd
 scripts/world/training_dummy.gd
 scripts/world/travel_nodes.gd

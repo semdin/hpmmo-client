@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfbmyd6b6grrg"
-path="res://.godot/imported/owl_lectern_0.webp-7770c45cae938b50426e129d17ad7dcb.ctex"
+path.s3tc="res://.godot/imported/owl_lectern_0.webp-7770c45cae938b50426e129d17ad7dcb.s3tc.ctex"
+path.etc2="res://.godot/imported/owl_lectern_0.webp-7770c45cae938b50426e129d17ad7dcb.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6ecd5d0ab80c3195853817211088204b"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/castle/props/owl_lectern_0.webp"
-dest_files=["res://.godot/imported/owl_lectern_0.webp-7770c45cae938b50426e129d17ad7dcb.ctex"]
+dest_files=["res://.godot/imported/owl_lectern_0.webp-7770c45cae938b50426e129d17ad7dcb.s3tc.ctex", "res://.godot/imported/owl_lectern_0.webp-7770c45cae938b50426e129d17ad7dcb.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

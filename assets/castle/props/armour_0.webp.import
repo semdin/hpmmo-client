@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ufl61vpuon54"
-path="res://.godot/imported/armour_0.webp-c1464a98c91b9dea3bcf9b0fa8d94de9.ctex"
+path.s3tc="res://.godot/imported/armour_0.webp-c1464a98c91b9dea3bcf9b0fa8d94de9.s3tc.ctex"
+path.etc2="res://.godot/imported/armour_0.webp-c1464a98c91b9dea3bcf9b0fa8d94de9.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "049f56e1ebb78bee8ee54270f1c16c3c"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/castle/props/armour_0.webp"
-dest_files=["res://.godot/imported/armour_0.webp-c1464a98c91b9dea3bcf9b0fa8d94de9.ctex"]
+dest_files=["res://.godot/imported/armour_0.webp-c1464a98c91b9dea3bcf9b0fa8d94de9.s3tc.ctex", "res://.godot/imported/armour_0.webp-c1464a98c91b9dea3bcf9b0fa8d94de9.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
