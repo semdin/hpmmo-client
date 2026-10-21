@@ -22,7 +22,10 @@
 # Versions are automatic:
 #   client   1.0.<run number>                       (every release is newer)
 #   launcher 3.0.<unix time of the last commit touching launcher_cpp/>
-#            (a release that did not change the launcher does not re-install it)
+#            (a release that did not change the launcher does not re-install it,
+#            and does not rebuild it either: the live release's launcher files
+#            are reused - tools/release/reuse_launcher.py; manual dispatch with
+#            rebuild_launchers forces a full build + the macOS updater tests)
 #
 # Required secret: HPMMO_CLIENT_SIGNING_KEY = the Ed25519 private key (PEM, or the
 # 32-byte seed as 64 hex characters) whose
@@ -43,6 +46,10 @@ on:
         description: 'Release notes shown in the launcher (default: the commit message)'
         type: string
         required: false
+      rebuild_launchers:
+        description: 'Build and test the launchers even when launcher_cpp/ did not change'
+        type: boolean
+        default: false
 
 permissions:
   contents: write   # create the GitHub Release and upload its assets
@@ -66,7 +73,9 @@ jobs:
   # macOS launcher: needs a Mac to compile, link and sign, so it runs on a
   # GitHub-hosted macOS runner (free for this public repository). The release
   # job below picks the result up as an artifact. Its sources need no LFS: the
-  # launcher's assets are plain git (.gitattributes).
+  # launcher's assets are plain git (.gitattributes). When launcher_cpp/ did
+  # not change (same launcher version as the live release) the published
+  # launcher is reused and the ~9 min build + updater tests are skipped.
   launcher-macos:
     name: macOS launcher (universal, ad-hoc signed) + updater tests
     runs-on: macos-14
@@ -84,12 +93,23 @@ jobs:
           launcher_ts="$(git log -1 --format=%ct -- launcher_cpp)"
           echo "launcher=3.0.${launcher_ts:-0}" >> "$GITHUB_OUTPUT"
 
+      - name: Reuse the live launcher when launcher_cpp/ is unchanged
+        id: reuse
+        if: ${{ !inputs.rebuild_launchers }}
+        run: |
+          python3 tools/release/reuse_launcher.py \
+            --base "https://github.com/${{ github.repository }}/releases/latest/download" \
+            --manifest manifest-macos.json --version "${{ steps.v.outputs.launcher }}" \
+            --out "$RUNNER_TEMP/mac" HPMMO_Launcher-macos HPMMO_Launcher-macos.zip
+
       - name: Build the app bundle
+        if: steps.reuse.outputs.hit != 'true'
         run: |
           brew list ninja >/dev/null 2>&1 || brew install ninja
           bash launcher_cpp/packaging/macos/build_app.sh launcher_cpp "${{ steps.v.outputs.launcher }}" "$RUNNER_TEMP/mac"
 
       - name: Updater tests against the macOS build (113 checks)
+        if: steps.reuse.outputs.hit != 'true'
         run: |
           python3 -m venv "$RUNNER_TEMP/venv"
           "$RUNNER_TEMP/venv/bin/pip" install --quiet cryptography numpy
@@ -174,7 +194,22 @@ jobs:
           printf '%s' "$notes" > "$RUNNER_TEMP/release_notes.txt"
           echo "client $client / content $content / launcher $launcher"
 
+      # Windows + Linux launchers: reused from the live release while
+      # launcher_cpp/ is unchanged (the same version, the same sources).
+      - name: Reuse the live launchers when launcher_cpp/ is unchanged
+        id: reuse
+        if: ${{ !inputs.rebuild_launchers }}
+        run: |
+          set -eu
+          base="https://github.com/${{ github.repository }}/releases/latest/download"
+          mkdir -p dist
+          python3 tools/release/reuse_launcher.py --base "$base" --manifest manifest.json --key windows \
+            --version "${{ steps.v.outputs.launcher }}" --out dist HPMMO_Launcher.exe
+          python3 tools/release/reuse_launcher.py --base "$base" --manifest manifest-linux-x86_64.json --key linux \
+            --version "${{ steps.v.outputs.launcher }}" --out dist HPMMO_Launcher-x86_64.AppImage
+
       - name: Build the launcher
+        if: steps.reuse.outputs.windows != 'true'
         run: |
           set -eu
           # The -posix toolchain: the default win32-thread variant has no std::thread/std::mutex.
@@ -205,6 +240,7 @@ jobs:
       - name: Build the Linux launcher (AppImage)
         # Built in the pinned Ubuntu 22.04 image (launcher_cpp/packaging/linux)
         # through the host's root wrapper, so it runs on glibc >= 2.34 distros.
+        if: steps.reuse.outputs.linux != 'true'
         run: |
           set -eu
           out="$RUNNER_TEMP/linux-launcher"
@@ -308,46 +344,41 @@ jobs:
 
       # Delta delivery: chunks the previous release already published are
       # referenced, only new ones go into chunks-<ver>.bin.
+      # The three platforms are chunked in parallel (each writes only its own
+      # content[-<platform>].json + chunks[-<platform>]-<ver>.bin).
       - name: Chunk the build (delta updates)
         run: |
           set -eu
-          prev="$RUNNER_TEMP/previous-content.json"
-          if ! curl -fsSL "https://github.com/${{ github.repository }}/releases/latest/download/content.json" -o "$prev"; then
-            echo "no previous content index: every chunk is new"
-            rm -f "$prev"
-          fi
-          python3 tools/release/chunk_release.py \
-            --build-dir build/client \
-            --version "${{ steps.v.outputs.client }}" \
-            --download-base "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
-            --previous "$prev" \
-            --out dist
-          # Linux: content-linux-x86_64.json / chunks-linux-x86_64-<ver>.bin
-          prev_linux="$RUNNER_TEMP/previous-content-linux.json"
-          if ! curl -fsSL "https://github.com/${{ github.repository }}/releases/latest/download/content-linux-x86_64.json" -o "$prev_linux"; then
-            echo "no previous Linux content index: every Linux chunk is new"
-            rm -f "$prev_linux"
-          fi
-          python3 tools/release/chunk_release.py \
-            --build-dir build-linux/client \
-            --platform linux-x86_64 \
-            --version "${{ steps.v.outputs.client }}" \
-            --download-base "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
-            --previous "$prev_linux" \
-            --out dist
-          # macOS: content-macos.json / chunks-macos-<ver>.bin
-          prev_mac="$RUNNER_TEMP/previous-content-macos.json"
-          if ! curl -fsSL "https://github.com/${{ github.repository }}/releases/latest/download/content-macos.json" -o "$prev_mac"; then
-            echo "no previous macOS content index: every macOS chunk is new"
-            rm -f "$prev_mac"
-          fi
-          python3 tools/release/chunk_release.py \
-            --build-dir build-mac/client \
-            --platform macos \
-            --version "${{ steps.v.outputs.client }}" \
-            --download-base "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
-            --previous "$prev_mac" \
-            --out dist
+          latest="https://github.com/${{ github.repository }}/releases/latest/download"
+          # build dir | --platform ("" = Windows, the unsuffixed legacy names) | content index name
+          pids=()
+          while read -r dir platform index; do
+            [ "$platform" = "-" ] && platform=""
+            prev="$RUNNER_TEMP/previous-$index"
+            if ! curl -fsSL "$latest/$index" -o "$prev"; then
+              echo "no previous $index: every chunk is new"
+              rm -f "$prev"
+            fi
+            python3 tools/release/chunk_release.py \
+              --build-dir "$dir" \
+              ${platform:+--platform "$platform"} \
+              --version "${{ steps.v.outputs.client }}" \
+              --download-base "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}" \
+              --previous "$prev" \
+              --out dist > "$RUNNER_TEMP/chunk-$index.log" 2>&1 &
+            pids+=("$!:$index")
+          done <<'EOF'
+          build/client - content.json
+          build-linux/client linux-x86_64 content-linux-x86_64.json
+          build-mac/client macos content-macos.json
+          EOF
+          failed=0
+          for entry in "${pids[@]}"; do
+            index="${entry#*:}"
+            if ! wait "${entry%%:*}"; then echo "::error::chunking $index failed"; failed=1; fi
+            echo "--- $index"; cat "$RUNNER_TEMP/chunk-$index.log"
+          done
+          exit "$failed"
 
       - name: Sign the manifest
         env:

@@ -27,6 +27,7 @@ Usage:
 import argparse
 import hashlib
 import json
+import mmap
 import os
 import struct
 import sys
@@ -54,7 +55,7 @@ def _gear():
 GEAR = _gear()
 
 
-BLOCK = 32 * 1024 * 1024      # bytes hashed at a time (bounded memory)
+BLOCK = 16 * 1024 * 1024      # bytes hashed at a time (~0.5 GB of buffers)
 
 
 def _cut_candidates(arr: np.ndarray) -> np.ndarray:
@@ -137,24 +138,32 @@ def build(build_dir: str, version: str, download_base: str, previous: dict | Non
             for name in names:
                 full = os.path.join(root, name)
                 rel = os.path.relpath(full, build_dir).replace(os.sep, "/")
+                # Memory-mapped, not read: the three platforms are chunked in
+                # parallel under the runner's 5 GB cap, and a 1 GB .pck held as
+                # bytes per process does not fit beside the hashing buffers.
                 with open(full, "rb") as handle:
-                    data = handle.read()
-                entry = {"path": rel, "size": len(data), "sha256": hashlib.sha256(data).hexdigest(), "chunks": []}
-                for offset, length in chunk_boundaries(data):
-                    piece = data[offset:offset + length]
-                    digest = hashlib.sha256(piece).hexdigest()
-                    if digest in written:
-                        url, off, clen = written[digest]
-                    elif digest in known:
-                        url, off, clen = known[digest]
-                    else:
-                        packed = deflate_raw(piece)
-                        off = blob.tell()
-                        blob.write(packed)
-                        url, clen = bin_url, len(packed)
-                        written[digest] = (url, off, clen)
-                        new_bytes += clen
-                    entry["chunks"].append([digest, length, source_id(url), off, clen])
+                    size = os.fstat(handle.fileno()).st_size
+                    data = mmap.mmap(handle.fileno(), 0, access=mmap.ACCESS_READ) if size else b""
+                    try:
+                        entry = {"path": rel, "size": size, "sha256": hashlib.sha256(data).hexdigest(), "chunks": []}
+                        for offset, length in chunk_boundaries(data):
+                            piece = data[offset:offset + length]
+                            digest = hashlib.sha256(piece).hexdigest()
+                            if digest in written:
+                                url, off, clen = written[digest]
+                            elif digest in known:
+                                url, off, clen = known[digest]
+                            else:
+                                packed = deflate_raw(piece)
+                                off = blob.tell()
+                                blob.write(packed)
+                                url, clen = bin_url, len(packed)
+                                written[digest] = (url, off, clen)
+                                new_bytes += clen
+                            entry["chunks"].append([digest, length, source_id(url), off, clen])
+                    finally:
+                        if size:
+                            data.close()
                 files.append(entry)
     files.sort(key=lambda f: f["path"])
     if not written:
