@@ -11,6 +11,8 @@ assets/maps/spider_caverns/cavern_layout.json
 assets/models/characters/barbarian_texture.png
 assets/models/characters/dark_wizard.glb
 assets/models/characters/dark_wizard_rogue_texture.png
+assets/models/characters/hagrid.glb
+assets/models/characters/hagrid_Hagrid_Albedo.png
 assets/models/characters/hero_wizard.glb
 assets/models/characters/hero_wizard_hero_albedo.png
 assets/models/characters/hero_wizard_hero_normal.png
