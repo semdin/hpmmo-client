@@ -915,6 +915,34 @@ bool ActivateFromStaged(UpdaterContext& ctx, const std::string& version,
     return true;
 }
 
+// Every release used to stay on disk: one version directory per update (about
+// 1 GB each), never removed. Only the active version is kept - the next update
+// reuses its files, and nothing ever rolls back to an older directory. Nothing
+// is touched while an activation is pending or a game process is running from
+// the install (it may still be playing an older copy).
+void PruneOldVersions(UpdaterContext& ctx) {
+    if (FileExists(ctx.paths.journalFile)) return;
+    InstalledState inst;
+    LoadCurrentImpl(ctx, inst);
+    if (!inst.present || inst.dir.empty() || !DirExists(inst.dir)) return;
+    if (IsGameRunningNowImpl(ctx.paths, ctx.cfg, nullptr)) return;
+    const std::wstring keep = NormalizePath(inst.dir);
+    for (const auto& name : ListSubdirs(ctx.paths.versionsDir)) {
+        // In-progress staging (.tmp) and repair copies are CleanStaging's.
+        if ((name.size() > 4 && EqualsCI(name.substr(name.size() - 4), L".tmp")) ||
+            (name.size() > 7 && EqualsCI(name.substr(name.size() - 7), L".repair"))) {
+            continue;
+        }
+        const std::wstring dir = JoinPath(ctx.paths.versionsDir, name);
+        if (NormalizePath(dir) == keep) continue;
+        if (RemoveDirRecursive(dir)) {
+            LogMsg("[Updater] removed old version " + WideToUtf8(name));
+        } else {
+            LogMsg("[Updater] could not remove old version " + WideToUtf8(name) + "; will retry next start");
+        }
+    }
+}
+
 bool RecoverPendingActivation(UpdaterContext& ctx) {
     if (!FileExists(ctx.paths.journalFile)) return true;
     std::string bytes;
@@ -1178,6 +1206,7 @@ CommandResult CheckImpl(UpdaterContext& ctx, CheckSummary* summary) {
     // Completing an interrupted activation is idempotent and keeps every
     // command looking at the same state.
     RecoverPendingActivation(ctx);
+    PruneOldVersions(ctx);
     if (!RunFetchAndCompare(ctx, m, st, inst, summary, message, code)) {
         if (summary) {
             summary->ok = false;
@@ -1583,6 +1612,7 @@ CommandResult UpdateImpl(UpdaterContext& ctx, CheckSummary* summary) {
         }
         LogMsg("[Updater] staging cleared after activating " + m.clientVersion);
     }
+    PruneOldVersions(ctx);
     if (ctx.status) ctx.status(L"Update installed.");
     CommandResult r;
     JsonValue j = JsonValue::Obj();

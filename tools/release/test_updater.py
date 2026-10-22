@@ -436,7 +436,9 @@ def test_install_and_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25
     check("update/upgrade: activated 1.2.0", bool(js and js.get("installed_version") == "1.2.0"), log)
     current = json.loads((root / "current.json").read_text())
     check("update/upgrade: previous kept", current.get("previous") == "1.1.0", str(current))
-    check("update/upgrade: old version still on disk", (root / "versions" / "1.1.0").is_dir())
+    # Only the active version is kept (PruneOldVersions): every release used
+    # to stay on disk, about 1 GB each.
+    check("update/upgrade: old version removed", not (root / "versions" / "1.1.0").exists())
     check("update/upgrade: new files correct",
           (root / "versions" / "1.2.0" / GAME_EXE).read_bytes() == b"GAME-1.2.0")
 
