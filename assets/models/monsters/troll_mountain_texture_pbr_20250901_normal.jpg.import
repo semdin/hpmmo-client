@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://v6of7vpnftor"
-path="res://.godot/imported/troll_mountain_texture_pbr_20250901_normal.jpg-ee4d7413545310b041d0cf2bd03b6e8e.ctex"
+path.s3tc="res://.godot/imported/troll_mountain_texture_pbr_20250901_normal.jpg-ee4d7413545310b041d0cf2bd03b6e8e.s3tc.ctex"
+path.etc2="res://.godot/imported/troll_mountain_texture_pbr_20250901_normal.jpg-ee4d7413545310b041d0cf2bd03b6e8e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d9503bd2b916a5885b4f7c5c6080eb4a"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monsters/troll_mountain_texture_pbr_20250901_normal.jpg"
-dest_files=["res://.godot/imported/troll_mountain_texture_pbr_20250901_normal.jpg-ee4d7413545310b041d0cf2bd03b6e8e.ctex"]
+dest_files=["res://.godot/imported/troll_mountain_texture_pbr_20250901_normal.jpg-ee4d7413545310b041d0cf2bd03b6e8e.s3tc.ctex", "res://.godot/imported/troll_mountain_texture_pbr_20250901_normal.jpg-ee4d7413545310b041d0cf2bd03b6e8e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=2
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

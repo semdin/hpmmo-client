@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://sbjnsdt2m8o4"
-path="res://.godot/imported/broom_ashwood_Image_0.jpg-216ec0cbd27ad45ae95865095b41bd48.ctex"
+path.s3tc="res://.godot/imported/broom_ashwood_Image_0.jpg-216ec0cbd27ad45ae95865095b41bd48.s3tc.ctex"
+path.etc2="res://.godot/imported/broom_ashwood_Image_0.jpg-216ec0cbd27ad45ae95865095b41bd48.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d48955e8e37298e4baa6154941fd0145"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props/brooms/broom_ashwood_Image_0.jpg"
-dest_files=["res://.godot/imported/broom_ashwood_Image_0.jpg-216ec0cbd27ad45ae95865095b41bd48.ctex"]
+dest_files=["res://.godot/imported/broom_ashwood_Image_0.jpg-216ec0cbd27ad45ae95865095b41bd48.s3tc.ctex", "res://.godot/imported/broom_ashwood_Image_0.jpg-216ec0cbd27ad45ae95865095b41bd48.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://61i0ar0fnice"
-path="res://.godot/imported/fluffy_texture_pbr_20250901.jpg-2f2b20a28255589c541718dcb9c28f53.ctex"
+path.s3tc="res://.godot/imported/fluffy_texture_pbr_20250901.jpg-2f2b20a28255589c541718dcb9c28f53.s3tc.ctex"
+path.etc2="res://.godot/imported/fluffy_texture_pbr_20250901.jpg-2f2b20a28255589c541718dcb9c28f53.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "078c4256e56d26f66215aa5828527a62"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monsters/fluffy_texture_pbr_20250901.jpg"
-dest_files=["res://.godot/imported/fluffy_texture_pbr_20250901.jpg-2f2b20a28255589c541718dcb9c28f53.ctex"]
+dest_files=["res://.godot/imported/fluffy_texture_pbr_20250901.jpg-2f2b20a28255589c541718dcb9c28f53.s3tc.ctex", "res://.godot/imported/fluffy_texture_pbr_20250901.jpg-2f2b20a28255589c541718dcb9c28f53.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

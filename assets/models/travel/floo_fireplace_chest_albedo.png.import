@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://da723ugepvc0k"
-path="res://.godot/imported/floo_fireplace_chest_albedo.png-f4af808c359b10305b0aa3e1ca5c2f0b.ctex"
+path.s3tc="res://.godot/imported/floo_fireplace_chest_albedo.png-f4af808c359b10305b0aa3e1ca5c2f0b.s3tc.ctex"
+path.etc2="res://.godot/imported/floo_fireplace_chest_albedo.png-f4af808c359b10305b0aa3e1ca5c2f0b.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d3bc72ce8714bb851748f124592abaea"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/travel/floo_fireplace_chest_albedo.png"
-dest_files=["res://.godot/imported/floo_fireplace_chest_albedo.png-f4af808c359b10305b0aa3e1ca5c2f0b.ctex"]
+dest_files=["res://.godot/imported/floo_fireplace_chest_albedo.png-f4af808c359b10305b0aa3e1ca5c2f0b.s3tc.ctex", "res://.godot/imported/floo_fireplace_chest_albedo.png-f4af808c359b10305b0aa3e1ca5c2f0b.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

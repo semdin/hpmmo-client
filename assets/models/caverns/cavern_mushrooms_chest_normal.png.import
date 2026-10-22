@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cqdquq3023vfu"
-path="res://.godot/imported/cavern_mushrooms_chest_normal.png-a003f2f3c7d36b0333ecde15f02ce8c9.ctex"
+path.s3tc="res://.godot/imported/cavern_mushrooms_chest_normal.png-a003f2f3c7d36b0333ecde15f02ce8c9.s3tc.ctex"
+path.etc2="res://.godot/imported/cavern_mushrooms_chest_normal.png-a003f2f3c7d36b0333ecde15f02ce8c9.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "3a3163c6731071be22a12389d7770c58"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/caverns/cavern_mushrooms_chest_normal.png"
-dest_files=["res://.godot/imported/cavern_mushrooms_chest_normal.png-a003f2f3c7d36b0333ecde15f02ce8c9.ctex"]
+dest_files=["res://.godot/imported/cavern_mushrooms_chest_normal.png-a003f2f3c7d36b0333ecde15f02ce8c9.s3tc.ctex", "res://.godot/imported/cavern_mushrooms_chest_normal.png-a003f2f3c7d36b0333ecde15f02ce8c9.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=2
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

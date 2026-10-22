@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dmd56d7w0uhcc"
-path="res://.godot/imported/cavern_camp_chest_mr.png-f3126a054a5c19a5a89f43758eb982ce.ctex"
+path.s3tc="res://.godot/imported/cavern_camp_chest_mr.png-f3126a054a5c19a5a89f43758eb982ce.s3tc.ctex"
+path.etc2="res://.godot/imported/cavern_camp_chest_mr.png-f3126a054a5c19a5a89f43758eb982ce.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "58fe4a6819309ac0027ccfb6ecd92dbc"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/caverns/cavern_camp_chest_mr.png"
-dest_files=["res://.godot/imported/cavern_camp_chest_mr.png-f3126a054a5c19a5a89f43758eb982ce.ctex"]
+dest_files=["res://.godot/imported/cavern_camp_chest_mr.png-f3126a054a5c19a5a89f43758eb982ce.s3tc.ctex", "res://.godot/imported/cavern_camp_chest_mr.png-f3126a054a5c19a5a89f43758eb982ce.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

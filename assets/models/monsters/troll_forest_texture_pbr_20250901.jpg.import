@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bd7p3ie65r3sj"
-path="res://.godot/imported/troll_forest_texture_pbr_20250901.jpg-5767cce15c4f3539becc63d5566446b1.ctex"
+path.s3tc="res://.godot/imported/troll_forest_texture_pbr_20250901.jpg-5767cce15c4f3539becc63d5566446b1.s3tc.ctex"
+path.etc2="res://.godot/imported/troll_forest_texture_pbr_20250901.jpg-5767cce15c4f3539becc63d5566446b1.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "7edddb683f8ac7049f00a725fc30bdf8"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monsters/troll_forest_texture_pbr_20250901.jpg"
-dest_files=["res://.godot/imported/troll_forest_texture_pbr_20250901.jpg-5767cce15c4f3539becc63d5566446b1.ctex"]
+dest_files=["res://.godot/imported/troll_forest_texture_pbr_20250901.jpg-5767cce15c4f3539becc63d5566446b1.s3tc.ctex", "res://.godot/imported/troll_forest_texture_pbr_20250901.jpg-5767cce15c4f3539becc63d5566446b1.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

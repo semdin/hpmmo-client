@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://snu87b236xme"
-path="res://.godot/imported/broom_runebound_Image_0.jpg-78632c8c76ac8953f184f1d3a4341573.ctex"
+path.s3tc="res://.godot/imported/broom_runebound_Image_0.jpg-78632c8c76ac8953f184f1d3a4341573.s3tc.ctex"
+path.etc2="res://.godot/imported/broom_runebound_Image_0.jpg-78632c8c76ac8953f184f1d3a4341573.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "94071574b93e81917b9714ac3d84b2f5"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props/brooms/broom_runebound_Image_0.jpg"
-dest_files=["res://.godot/imported/broom_runebound_Image_0.jpg-78632c8c76ac8953f184f1d3a4341573.ctex"]
+dest_files=["res://.godot/imported/broom_runebound_Image_0.jpg-78632c8c76ac8953f184f1d3a4341573.s3tc.ctex", "res://.godot/imported/broom_runebound_Image_0.jpg-78632c8c76ac8953f184f1d3a4341573.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

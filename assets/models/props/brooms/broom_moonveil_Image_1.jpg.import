@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cn3b57bqi0a35"
-path="res://.godot/imported/broom_moonveil_Image_1.jpg-1749b851193d0d1559fd8ca9eb9f9442.ctex"
+path.s3tc="res://.godot/imported/broom_moonveil_Image_1.jpg-1749b851193d0d1559fd8ca9eb9f9442.s3tc.ctex"
+path.etc2="res://.godot/imported/broom_moonveil_Image_1.jpg-1749b851193d0d1559fd8ca9eb9f9442.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f227fb39d4b8b5cf8a1c6066914b588b"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props/brooms/broom_moonveil_Image_1.jpg"
-dest_files=["res://.godot/imported/broom_moonveil_Image_1.jpg-1749b851193d0d1559fd8ca9eb9f9442.ctex"]
+dest_files=["res://.godot/imported/broom_moonveil_Image_1.jpg-1749b851193d0d1559fd8ca9eb9f9442.s3tc.ctex", "res://.godot/imported/broom_moonveil_Image_1.jpg-1749b851193d0d1559fd8ca9eb9f9442.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

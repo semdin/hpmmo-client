@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://wpaaf11ty2g5"
-path="res://.godot/imported/witch_statue_chest_albedo.png-548517e7fb631a3d38bb88f891cec649.ctex"
+path.s3tc="res://.godot/imported/witch_statue_chest_albedo.png-548517e7fb631a3d38bb88f891cec649.s3tc.ctex"
+path.etc2="res://.godot/imported/witch_statue_chest_albedo.png-548517e7fb631a3d38bb88f891cec649.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "74f45c055e6d157fdd0e5e82354dc350"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/travel/witch_statue_chest_albedo.png"
-dest_files=["res://.godot/imported/witch_statue_chest_albedo.png-548517e7fb631a3d38bb88f891cec649.ctex"]
+dest_files=["res://.godot/imported/witch_statue_chest_albedo.png-548517e7fb631a3d38bb88f891cec649.s3tc.ctex", "res://.godot/imported/witch_statue_chest_albedo.png-548517e7fb631a3d38bb88f891cec649.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

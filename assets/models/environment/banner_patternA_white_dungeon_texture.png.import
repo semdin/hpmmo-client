@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bg73g1m1o6eso"
-path="res://.godot/imported/banner_patternA_white_dungeon_texture.png-bf0a8b0c0b6b7d1b84f25af3a3aa80df.ctex"
+path.s3tc="res://.godot/imported/banner_patternA_white_dungeon_texture.png-bf0a8b0c0b6b7d1b84f25af3a3aa80df.s3tc.ctex"
+path.etc2="res://.godot/imported/banner_patternA_white_dungeon_texture.png-bf0a8b0c0b6b7d1b84f25af3a3aa80df.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9a714bc33f4314ea4520009f20b048a8"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/environment/banner_patternA_white_dungeon_texture.png"
-dest_files=["res://.godot/imported/banner_patternA_white_dungeon_texture.png-bf0a8b0c0b6b7d1b84f25af3a3aa80df.ctex"]
+dest_files=["res://.godot/imported/banner_patternA_white_dungeon_texture.png-bf0a8b0c0b6b7d1b84f25af3a3aa80df.s3tc.ctex", "res://.godot/imported/banner_patternA_white_dungeon_texture.png-bf0a8b0c0b6b7d1b84f25af3a3aa80df.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

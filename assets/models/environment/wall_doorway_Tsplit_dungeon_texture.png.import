@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://2q6prdqlxcad"
-path="res://.godot/imported/wall_doorway_Tsplit_dungeon_texture.png-1c94de04337c254cb4ebc830fdd4e7b2.ctex"
+path.s3tc="res://.godot/imported/wall_doorway_Tsplit_dungeon_texture.png-1c94de04337c254cb4ebc830fdd4e7b2.s3tc.ctex"
+path.etc2="res://.godot/imported/wall_doorway_Tsplit_dungeon_texture.png-1c94de04337c254cb4ebc830fdd4e7b2.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9a714bc33f4314ea4520009f20b048a8"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/environment/wall_doorway_Tsplit_dungeon_texture.png"
-dest_files=["res://.godot/imported/wall_doorway_Tsplit_dungeon_texture.png-1c94de04337c254cb4ebc830fdd4e7b2.ctex"]
+dest_files=["res://.godot/imported/wall_doorway_Tsplit_dungeon_texture.png-1c94de04337c254cb4ebc830fdd4e7b2.s3tc.ctex", "res://.godot/imported/wall_doorway_Tsplit_dungeon_texture.png-1c94de04337c254cb4ebc830fdd4e7b2.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://i6racdpyhm5e"
-path="res://.godot/imported/floo_fireplace_chest_mr.png-e33fffdf754fd63d9cfcd4ae158fe399.ctex"
+path.s3tc="res://.godot/imported/floo_fireplace_chest_mr.png-e33fffdf754fd63d9cfcd4ae158fe399.s3tc.ctex"
+path.etc2="res://.godot/imported/floo_fireplace_chest_mr.png-e33fffdf754fd63d9cfcd4ae158fe399.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "dd2a442d6c2942a4f9cb53ff33609189"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/travel/floo_fireplace_chest_mr.png"
-dest_files=["res://.godot/imported/floo_fireplace_chest_mr.png-e33fffdf754fd63d9cfcd4ae158fe399.ctex"]
+dest_files=["res://.godot/imported/floo_fireplace_chest_mr.png-e33fffdf754fd63d9cfcd4ae158fe399.s3tc.ctex", "res://.godot/imported/floo_fireplace_chest_mr.png-e33fffdf754fd63d9cfcd4ae158fe399.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

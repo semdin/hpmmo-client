@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://i62d0e2elh60"
-path="res://.godot/imported/broom_emberwing_normal.png-e7eddab711f8e7087d931cecd49dc065.ctex"
+path.s3tc="res://.godot/imported/broom_emberwing_normal.png-e7eddab711f8e7087d931cecd49dc065.s3tc.ctex"
+path.etc2="res://.godot/imported/broom_emberwing_normal.png-e7eddab711f8e7087d931cecd49dc065.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "da3a7126f93d749f44e68024c3e0d1ff"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props/brooms/broom_emberwing_normal.png"
-dest_files=["res://.godot/imported/broom_emberwing_normal.png-e7eddab711f8e7087d931cecd49dc065.ctex"]
+dest_files=["res://.godot/imported/broom_emberwing_normal.png-e7eddab711f8e7087d931cecd49dc065.s3tc.ctex", "res://.godot/imported/broom_emberwing_normal.png-e7eddab711f8e7087d931cecd49dc065.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=2
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

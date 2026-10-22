@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d330nh6swnghc"
-path="res://.godot/imported/acromantula_broodguard_texture_pbr_20250901.jpg-752e7932c1f1373d4fb7a66830a98cab.ctex"
+path.s3tc="res://.godot/imported/acromantula_broodguard_texture_pbr_20250901.jpg-752e7932c1f1373d4fb7a66830a98cab.s3tc.ctex"
+path.etc2="res://.godot/imported/acromantula_broodguard_texture_pbr_20250901.jpg-752e7932c1f1373d4fb7a66830a98cab.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5a5fa4157c399e10195a00169b569f6b"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monsters/acromantula_broodguard_texture_pbr_20250901.jpg"
-dest_files=["res://.godot/imported/acromantula_broodguard_texture_pbr_20250901.jpg-752e7932c1f1373d4fb7a66830a98cab.ctex"]
+dest_files=["res://.godot/imported/acromantula_broodguard_texture_pbr_20250901.jpg-752e7932c1f1373d4fb7a66830a98cab.s3tc.ctex", "res://.godot/imported/acromantula_broodguard_texture_pbr_20250901.jpg-752e7932c1f1373d4fb7a66830a98cab.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

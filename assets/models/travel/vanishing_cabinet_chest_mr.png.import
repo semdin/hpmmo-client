@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://btfe7n0efkcut"
-path="res://.godot/imported/vanishing_cabinet_chest_mr.png-17049d6d5899869ed479e17c3993031d.ctex"
+path.s3tc="res://.godot/imported/vanishing_cabinet_chest_mr.png-17049d6d5899869ed479e17c3993031d.s3tc.ctex"
+path.etc2="res://.godot/imported/vanishing_cabinet_chest_mr.png-17049d6d5899869ed479e17c3993031d.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "8ef4cf0dd30661cf6d0e8606ff78cac7"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/travel/vanishing_cabinet_chest_mr.png"
-dest_files=["res://.godot/imported/vanishing_cabinet_chest_mr.png-17049d6d5899869ed479e17c3993031d.ctex"]
+dest_files=["res://.godot/imported/vanishing_cabinet_chest_mr.png-17049d6d5899869ed479e17c3993031d.s3tc.ctex", "res://.godot/imported/vanishing_cabinet_chest_mr.png-17049d6d5899869ed479e17c3993031d.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

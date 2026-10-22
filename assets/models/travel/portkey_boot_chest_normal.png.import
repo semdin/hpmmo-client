@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://daxxs5jlmo53y"
-path="res://.godot/imported/portkey_boot_chest_normal.png-fdda53f05bd2e4d281b8e416450ccca7.ctex"
+path.s3tc="res://.godot/imported/portkey_boot_chest_normal.png-fdda53f05bd2e4d281b8e416450ccca7.s3tc.ctex"
+path.etc2="res://.godot/imported/portkey_boot_chest_normal.png-fdda53f05bd2e4d281b8e416450ccca7.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d0cae822c8feeac5e8370b6270bba3f4"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/travel/portkey_boot_chest_normal.png"
-dest_files=["res://.godot/imported/portkey_boot_chest_normal.png-fdda53f05bd2e4d281b8e416450ccca7.ctex"]
+dest_files=["res://.godot/imported/portkey_boot_chest_normal.png-fdda53f05bd2e4d281b8e416450ccca7.s3tc.ctex", "res://.godot/imported/portkey_boot_chest_normal.png-fdda53f05bd2e4d281b8e416450ccca7.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=2
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

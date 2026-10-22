@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b1l6y38f1jo67"
-path="res://.godot/imported/acromantula_venomfang_texture_pbr_20250901.jpg-510a19d48da95749466c4ca1557a1070.ctex"
+path.s3tc="res://.godot/imported/acromantula_venomfang_texture_pbr_20250901.jpg-510a19d48da95749466c4ca1557a1070.s3tc.ctex"
+path.etc2="res://.godot/imported/acromantula_venomfang_texture_pbr_20250901.jpg-510a19d48da95749466c4ca1557a1070.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "25455a9628c4114620a499a9c9ea6fa3"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monsters/acromantula_venomfang_texture_pbr_20250901.jpg"
-dest_files=["res://.godot/imported/acromantula_venomfang_texture_pbr_20250901.jpg-510a19d48da95749466c4ca1557a1070.ctex"]
+dest_files=["res://.godot/imported/acromantula_venomfang_texture_pbr_20250901.jpg-510a19d48da95749466c4ca1557a1070.s3tc.ctex", "res://.godot/imported/acromantula_venomfang_texture_pbr_20250901.jpg-510a19d48da95749466c4ca1557a1070.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

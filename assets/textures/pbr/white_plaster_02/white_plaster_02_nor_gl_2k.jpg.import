@@ -3,27 +3,29 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c3n2j4ep6ffsq"
-path="res://.godot/imported/white_plaster_02_nor_gl_2k.jpg-7268baa98791ce198bda56c20826b7dc.ctex"
+path.s3tc="res://.godot/imported/white_plaster_02_nor_gl_2k.jpg-7268baa98791ce198bda56c20826b7dc.s3tc.ctex"
+path.etc2="res://.godot/imported/white_plaster_02_nor_gl_2k.jpg-7268baa98791ce198bda56c20826b7dc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/pbr/white_plaster_02/white_plaster_02_nor_gl_2k.jpg"
-dest_files=["res://.godot/imported/white_plaster_02_nor_gl_2k.jpg-7268baa98791ce198bda56c20826b7dc.ctex"]
+dest_files=["res://.godot/imported/white_plaster_02_nor_gl_2k.jpg-7268baa98791ce198bda56c20826b7dc.s3tc.ctex", "res://.godot/imported/white_plaster_02_nor_gl_2k.jpg-7268baa98791ce198bda56c20826b7dc.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=2
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

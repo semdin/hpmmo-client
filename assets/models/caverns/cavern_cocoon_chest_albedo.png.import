@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://desd15snep22c"
-path="res://.godot/imported/cavern_cocoon_chest_albedo.png-ba733b3831bfa6049310525585681efb.ctex"
+path.s3tc="res://.godot/imported/cavern_cocoon_chest_albedo.png-ba733b3831bfa6049310525585681efb.s3tc.ctex"
+path.etc2="res://.godot/imported/cavern_cocoon_chest_albedo.png-ba733b3831bfa6049310525585681efb.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d17cde98cee08b7dde5c16d707a530e4"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/caverns/cavern_cocoon_chest_albedo.png"
-dest_files=["res://.godot/imported/cavern_cocoon_chest_albedo.png-ba733b3831bfa6049310525585681efb.ctex"]
+dest_files=["res://.godot/imported/cavern_cocoon_chest_albedo.png-ba733b3831bfa6049310525585681efb.s3tc.ctex", "res://.godot/imported/cavern_cocoon_chest_albedo.png-ba733b3831bfa6049310525585681efb.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

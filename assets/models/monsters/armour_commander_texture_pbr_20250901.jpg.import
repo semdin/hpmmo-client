@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://47ujjiveiqqb"
-path="res://.godot/imported/armour_commander_texture_pbr_20250901.jpg-f03705d7718f8aed55738e8a499b1f43.ctex"
+path.s3tc="res://.godot/imported/armour_commander_texture_pbr_20250901.jpg-f03705d7718f8aed55738e8a499b1f43.s3tc.ctex"
+path.etc2="res://.godot/imported/armour_commander_texture_pbr_20250901.jpg-f03705d7718f8aed55738e8a499b1f43.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "385cc0e311f2a9bed7a43e8c5d3c4b50"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monsters/armour_commander_texture_pbr_20250901.jpg"
-dest_files=["res://.godot/imported/armour_commander_texture_pbr_20250901.jpg-f03705d7718f8aed55738e8a499b1f43.ctex"]
+dest_files=["res://.godot/imported/armour_commander_texture_pbr_20250901.jpg-f03705d7718f8aed55738e8a499b1f43.s3tc.ctex", "res://.godot/imported/armour_commander_texture_pbr_20250901.jpg-f03705d7718f8aed55738e8a499b1f43.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://biifcas7g5aji"
-path="res://.godot/imported/cavern_eggs_chest_normal.png-81eed9c2651d0a13ab4d20f782203fca.ctex"
+path.s3tc="res://.godot/imported/cavern_eggs_chest_normal.png-81eed9c2651d0a13ab4d20f782203fca.s3tc.ctex"
+path.etc2="res://.godot/imported/cavern_eggs_chest_normal.png-81eed9c2651d0a13ab4d20f782203fca.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "72426cae9ce36f5adcdcbf3d07ce1256"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/caverns/cavern_eggs_chest_normal.png"
-dest_files=["res://.godot/imported/cavern_eggs_chest_normal.png-81eed9c2651d0a13ab4d20f782203fca.ctex"]
+dest_files=["res://.godot/imported/cavern_eggs_chest_normal.png-81eed9c2651d0a13ab4d20f782203fca.s3tc.ctex", "res://.godot/imported/cavern_eggs_chest_normal.png-81eed9c2651d0a13ab4d20f782203fca.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=2
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

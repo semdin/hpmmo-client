@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://hk08rgi8c1vi"
-path="res://.godot/imported/broom_silverthorn_Image_1.jpg-a90bf9fe4286f3f2dfe8d089abd428be.ctex"
+path.s3tc="res://.godot/imported/broom_silverthorn_Image_1.jpg-a90bf9fe4286f3f2dfe8d089abd428be.s3tc.ctex"
+path.etc2="res://.godot/imported/broom_silverthorn_Image_1.jpg-a90bf9fe4286f3f2dfe8d089abd428be.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "fcd0a8c66a087c8346241ce589c59609"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props/brooms/broom_silverthorn_Image_1.jpg"
-dest_files=["res://.godot/imported/broom_silverthorn_Image_1.jpg-a90bf9fe4286f3f2dfe8d089abd428be.ctex"]
+dest_files=["res://.godot/imported/broom_silverthorn_Image_1.jpg-a90bf9fe4286f3f2dfe8d089abd428be.s3tc.ctex", "res://.godot/imported/broom_silverthorn_Image_1.jpg-a90bf9fe4286f3f2dfe8d089abd428be.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
