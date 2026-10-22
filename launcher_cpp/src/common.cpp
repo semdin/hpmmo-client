@@ -281,12 +281,15 @@ bool LoadConfig(const std::wstring& explicitPath) {
     // The first host (213.250.145.75) was retired on 2026-10-19; installs that
     // saved it in client_config.json follow the built-in default instead.
     if (g_config.serverIp == L"213.250.145.75") g_config.serverIp = AppConfig().serverIp;
+    if (root.has("api_url")) g_config.apiUrl = Utf8ToWide(root.str("api_url"));
     s("last_username", g_config.lastUsername);
     if (root.has("remember_me")) g_config.rememberMe = root.boolean("remember_me", true);
 
     s("release_base_url", g_config.releaseBaseUrl);
     s("status_url", g_config.statusUrl);
     if (g_config.statusUrl.find(L"213.250.145.75") != std::wstring::npos) g_config.statusUrl.clear();
+    // A saved plain-HTTP status URL of the live host follows the TLS default.
+    if (g_config.statusUrl == L"http://185.118.141.74:8081/api/status") g_config.statusUrl.clear();
     s("release_public_key", g_config.releasePublicKey);
     s("release_public_key_id", g_config.releasePublicKeyId);
     s("release_channel", g_config.releaseChannel);
@@ -310,6 +313,16 @@ bool LoadConfig(const std::wstring& explicitPath) {
     return true;
 }
 
+std::wstring ApiBaseUrl(const AppConfig& cfg) {
+    std::wstring url = cfg.apiUrl;
+    while (!url.empty() && (url.back() == L'/' || url.back() == L' ')) url.pop_back();
+    // The built-in URL belongs to the built-in host: a config that names
+    // another server (local or LAN play) talks to that server directly.
+    const bool builtIn = url == HPMMO_DEFAULT_API_URL;
+    if (!url.empty() && (!builtIn || cfg.serverIp == AppConfig().serverIp)) return url;
+    return L"http://" + cfg.serverIp + L":" + std::to_wstring(cfg.apiPort);
+}
+
 bool SaveConfig(const std::wstring& explicitPath) {
     std::wstring path = explicitPath;
     if (path.empty()) path = g_configPath;
@@ -319,6 +332,7 @@ bool SaveConfig(const std::wstring& explicitPath) {
     root.set("server_ip", JsonValue::Str(WideToUtf8(g_config.serverIp)));
     root.set("server_port", JsonValue::Int(g_config.serverPort));
     root.set("api_port", JsonValue::Int(g_config.apiPort));
+    root.set("api_url", JsonValue::Str(WideToUtf8(g_config.apiUrl)));
     root.set("last_username", JsonValue::Str(WideToUtf8(g_config.lastUsername)));
     root.set("remember_me", JsonValue::Bool(g_config.rememberMe));
     auto putStr = [&](const char* key, const std::wstring& v) {

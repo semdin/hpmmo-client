@@ -1946,8 +1946,7 @@ bool LaunchInstalledGame(const UpdaterPaths& paths, const AppConfig& cfg, bool s
             }
             FreeEnvironmentStringsW(current);
         }
-        entries.push_back(L"HPMMO_API_URL=http://" + cfg.serverIp + L":" +
-                          std::to_wstring(cfg.apiPort));
+        entries.push_back(L"HPMMO_API_URL=" + ApiBaseUrl(cfg));
         entries.push_back(L"HPMMO_USER_DIR=" + paths.userDir);
         entries.push_back(L"HPMMO_TICKET=" + ticket);
         std::sort(entries.begin(), entries.end());
@@ -1985,7 +1984,7 @@ bool LaunchInstalledGame(const UpdaterPaths& paths, const AppConfig& cfg, bool s
         args = {L"--user", username, L"--ip", cfg.serverIp, L"--port", std::to_wstring(cfg.serverPort),
                 L"--autologin"};
         drop = {"HPMMO_TICKET", "HPMMO_API_URL", "HPMMO_USER_DIR"};
-        add = {L"HPMMO_API_URL=http://" + cfg.serverIp + L":" + std::to_wstring(cfg.apiPort),
+        add = {L"HPMMO_API_URL=" + ApiBaseUrl(cfg),
                L"HPMMO_USER_DIR=" + paths.userDir, L"HPMMO_TICKET=" + ticket};
     }
     std::string err;
@@ -2019,7 +2018,7 @@ bool LaunchGameClient(const UpdaterPaths& paths, const AppConfig& cfg, const std
         }
         FreeEnvironmentStringsW(current);
     }
-    entries.push_back(L"HPMMO_API_URL=http://" + cfg.serverIp + L":" + std::to_wstring(cfg.apiPort));
+    entries.push_back(L"HPMMO_API_URL=" + ApiBaseUrl(cfg));
     entries.push_back(L"HPMMO_USER_DIR=" + paths.userDir);
     if (!clientVersion.empty()) entries.push_back(L"HPMMO_CLIENT_VERSION=" + Utf8ToWide(clientVersion));
     std::sort(entries.begin(), entries.end(), [](const std::wstring& a, const std::wstring& b) {
@@ -2099,7 +2098,7 @@ bool LaunchGameClient(const UpdaterPaths& paths, const AppConfig& cfg, const std
     MakeExecutable(paths.gameExe);
     std::vector<std::string> drop = {"HPMMO_TICKET", "HPMMO_API_URL", "HPMMO_USER_DIR", "HPMMO_CLIENT_VERSION"};
     std::vector<std::wstring> add = {
-        L"HPMMO_API_URL=http://" + cfg.serverIp + L":" + std::to_wstring(cfg.apiPort),
+        L"HPMMO_API_URL=" + ApiBaseUrl(cfg),
         L"HPMMO_USER_DIR=" + paths.userDir};
     if (!clientVersion.empty()) add.push_back(L"HPMMO_CLIENT_VERSION=" + Utf8ToWide(clientVersion));
     std::wstring workDir = paths.gameExe.substr(0, paths.gameExe.find_last_of(L'/'));

@@ -121,8 +121,13 @@ bool IsGameRunning(const std::wstring& installRoot,
 #ifndef HPMMO_DEFAULT_RELEASE_BASE
 #define HPMMO_DEFAULT_RELEASE_BASE L"https://github.com/semdin/hpmmo-client/releases/latest/download"
 #endif
+// The account service, behind TLS (Caddy + Let's Encrypt on the game host).
+// Logins and session tokens never travel in clear text.
+#ifndef HPMMO_DEFAULT_API_URL
+#define HPMMO_DEFAULT_API_URL L"https://api.agsilvery.com"
+#endif
 #ifndef HPMMO_DEFAULT_STATUS_URL
-#define HPMMO_DEFAULT_STATUS_URL L"http://185.118.141.74:8081/api/status"
+#define HPMMO_DEFAULT_STATUS_URL L"https://api.agsilvery.com/api/status"
 #endif
 // Raw 32-byte Ed25519 public key (base64) of the release signing key; its
 // private half is the HPMMO_CLIENT_SIGNING_KEY GitHub secret.
@@ -137,7 +142,8 @@ struct AppConfig {
     // Existing launcher fields (behaviour preserved).
     std::wstring serverIp = L"185.118.141.74";
     int serverPort = 7777;
-    int apiPort = 8081;
+    int apiPort = 8081;               // only used when apiUrl is empty (a LAN/dev server)
+    std::wstring apiUrl = HPMMO_DEFAULT_API_URL;
     std::wstring lastUsername;
     bool rememberMe = true;
 
@@ -158,6 +164,9 @@ struct AppConfig {
 };
 
 AppConfig& Config();
+// Base URL of the account service the game logs in through (HPMMO_API_URL):
+// `api_url`, else http://<server_ip>:<api_port> for a server without TLS.
+std::wstring ApiBaseUrl(const AppConfig& cfg);
 std::wstring DefaultConfigPath();
 bool LoadConfig(const std::wstring& explicitPath = L"");
 bool SaveConfig(const std::wstring& explicitPath = L"");
