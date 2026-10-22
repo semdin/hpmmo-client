@@ -136,7 +136,7 @@ size_flags_horizontal = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
 theme_override_font_sizes/font_size = 18
-text = "BÜYÜCÜ SEÇİMİ — YUVA 1 / 2"
+text = "SLOT 1 / 2"
 
 [node name="Spacer2" type="Control" parent="CanvasLayer/TopBar"]
 custom_minimum_size = Vector2(20, 0)
@@ -145,7 +145,7 @@ layout_mode = 2
 [node name="LogoutBtn" type="Button" parent="CanvasLayer/TopBar"]
 custom_minimum_size = Vector2(100, 36)
 layout_mode = 2
-text = "Çıkış"
+text = "Log Out"
 
 [node name="NavButtons" type="HBoxContainer" parent="CanvasLayer"]
 anchors_preset = 8
@@ -215,25 +215,25 @@ layout_mode = 2
 [node name="StatsLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
-text = "Seviye: 1  |  Can: 500  |  Mana: 300"
+text = ""
 
 [node name="WandLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 theme_override_font_sizes/font_size = 13
-text = "Asa: +0 Büyü Gücü"
+text = ""
 
 [node name="GalleonsLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 13
-text = "Servet: 500 Galleon"
+text = ""
 
 [node name="LocationLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
 theme_override_font_sizes/font_size = 12
-text = "Konum: Hogwarts Avlusu"
+text = ""
 
 [node name="BottomBar" type="HBoxContainer" parent="CanvasLayer"]
 anchors_preset = 12
@@ -253,12 +253,12 @@ alignment = 1
 custom_minimum_size = Vector2(240, 50)
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
-text = "OYUNA GİR (ENTER WORLD)"
+text = "ENTER WORLD"
 
 [node name="NewCharBtn" type="Button" parent="CanvasLayer/BottomBar"]
 custom_minimum_size = Vector2(200, 50)
 layout_mode = 2
-text = "Yeni Büyücü Oluştur"
+text = "Create New Wizard"
 
 [node name="CreateModal" type="PanelContainer" parent="CanvasLayer"]
 visible = false
@@ -290,7 +290,7 @@ theme_override_constants/separation = 12
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 20
-text = "Yeni Büyücü Oluştur (Max 2)"
+text = "New Wizard"
 horizontal_alignment = 1
 
 [node name="HSeparator" type="HSeparator" parent="CanvasLayer/CreateModal/Margin/VBox"]
@@ -303,12 +303,12 @@ theme_override_constants/separation = 10
 [node name="NameLbl" type="Label" parent="CanvasLayer/CreateModal/Margin/VBox/NameRow"]
 custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
-text = "Büyücü Adı:"
+text = "Wizard Name:"
 
 [node name="NewNameInput" type="LineEdit" parent="CanvasLayer/CreateModal/Margin/VBox/NameRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Adınızı yazın..."
+placeholder_text = "Type your name..."
 
 [node name="HouseRow" type="HBoxContainer" parent="CanvasLayer/CreateModal/Margin/VBox"]
 layout_mode = 2
@@ -339,7 +339,7 @@ text = "Hufflepuff"
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
-text = "Gryffindor - Cesaret ve Sadakat"
+text = ""
 horizontal_alignment = 1
 autowrap_mode = 2
 
@@ -357,9 +357,9 @@ alignment = 1
 [node name="ConfirmCreateBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/Buttons"]
 custom_minimum_size = Vector2(150, 40)
 layout_mode = 2
-text = "Büyücüyü Oluştur"
+text = "Create Wizard"
 
 [node name="CancelCreateBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/Buttons"]
 custom_minimum_size = Vector2(100, 40)
 layout_mode = 2
-text = "İptal"
+text = "Cancel"

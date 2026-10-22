@@ -1,0 +1,5548 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: HPMMO\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: scripts/autoload/i18n.gd
+msgid "No player called '%s' is online."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You invited %s to your party."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "%s was removed from the party."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "%s now leads the party."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "New title earned: %s!"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Elite %s"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Fluffy's %s Head"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Snare %s Vine"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Fluffy's %s head slumps!"
+msgstr ""
+
+#: scripts/autoload/i18n.gd scripts/entities/mobs/fluffy_boss.gd
+msgid "%s begins to play the harp..."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "A vine shrivels in the flames! %d left."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "%s: a wave of creatures answers its call! (Wave %d/3)"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "The %s has been shattered by %s! Riches shower the realm!"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "A new %s has manifested in the realm!"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "There is no party invitation to accept."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You joined the party."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Invitation declined."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You left the party."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You are not in a party."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You cannot invite yourself."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "That player is already in a party."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Only the party leader can do that."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "The party is full (5)."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "That player is not in your party."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "That did not work."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Unknown command. Party: /invite Name, /accept, /decline, /leave, /kick Name, /promote Name, /p text"
+msgstr ""
+
+#: scripts/entities/loot/loot_drop.gd
+msgid "Too far"
+msgstr ""
+
+#: scripts/entities/loot/loot_drop.gd scripts/ui/loot_window.gd
+msgid "Enchanted Chest"
+msgstr ""
+
+#: scripts/entities/loot/loot_drop.gd scripts/ui/loot_window.gd scenes/entities/loot/loot_drop.tscn
+msgid "Chest"
+msgstr ""
+
+#: scripts/entities/mobs/fluffy_boss.gd
+msgid "Fluffy is enraged!"
+msgstr ""
+
+#: scripts/entities/mobs/fluffy_boss.gd
+msgid "Fluffy howls in fury!"
+msgstr ""
+
+#: scripts/entities/mobs/fluffy_boss.gd
+msgid "Fluffy is frenzied - the harp holds it only briefly!"
+msgstr ""
+
+#: scripts/entities/mobs/fluffy_boss.gd
+msgid "Someone"
+msgstr ""
+
+#: scripts/entities/mobs/fluffy_boss.gd
+msgid "The music breaks off!"
+msgstr ""
+
+#: scripts/entities/mobs/fluffy_boss.gd
+msgid "The music lulls Fluffy to sleep! Its heads take more damage."
+msgstr ""
+
+#: scripts/entities/mobs/mob_base.gd
+msgid " • ENRAGED"
+msgstr ""
+
+#: scripts/entities/mobs/multipart_boss.gd
+msgid "Left"
+msgstr ""
+
+#: scripts/entities/mobs/multipart_boss.gd
+msgid "Right"
+msgstr ""
+
+#: scripts/entities/mobs/multipart_boss.gd
+msgid "Middle"
+msgstr ""
+
+#: scripts/entities/mobs/multipart_boss.gd
+msgid "Upper"
+msgstr ""
+
+#: scripts/entities/mobs/snare_boss.gd
+msgid "The vines are gone - the Snare's heart is exposed!"
+msgstr ""
+
+#: scripts/entities/monolith/dark_monolith.gd
+msgid "A brave Wizard"
+msgstr ""
+
+#: scripts/entities/monolith/dark_monolith.gd scripts/ui/hud.gd scripts/ui/mmorpg_overlay.gd addons/hpmmo_sim/data/spawn_tables.json
+msgid "Dark Monolith"
+msgstr ""
+
+#: scripts/entities/player.gd addons/hpmmo_sim/data/dungeons.json
+msgid "Forbidden Corridor Explorer"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Lv. %d  ·  %s"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "The Ancient Ward saved you!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "You are defeated!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "You have no mount - equip a broom first."
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "You are stunned!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Not while in combat!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "The map is still loading!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Take off from the ground!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "The ground is too unstable to take off!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Not enough room to take off here!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Flight is not allowed on this map!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Descend near level ground first (Ctrl)"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "No room to stand up here!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "The ceiling is too low to dismount!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Broom Flight"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Space rises · Ctrl descends · Shift dismounts on level ground."
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Not while mounted!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "%s unlocks at level %d"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Learn %s first - press V and spend a skill point"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Not enough mana"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Not enough Mana!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Protected ground!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Cast refused"
+msgstr ""
+
+#: scripts/entities/player.gd scripts/ui/hud_buff_bar.gd addons/hpmmo_sim/data/spells.json
+msgid "Protego"
+msgstr ""
+
+#: scripts/entities/player.gd scripts/ui/hud_buff_bar.gd
+msgid "Reflects projectiles; other damage reduced by 60%."
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Protego!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Defeated!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "LEVEL UP! (Lv.%d)"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "New title: %s"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "%s mastered!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "%s Lv.%d"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "+%d %s Reputation"
+msgstr ""
+
+#: scripts/entities/player.gd scripts/ui/combat_feedback.gd
+msgid "+%d EXP"
+msgstr ""
+
+#: scripts/fx/level_up_fx.gd scripts/ui/hud_action_bar.gd scripts/ui/hud_portkey.gd scripts/ui/hud_skill_window.gd
+msgid "Level %d"
+msgstr ""
+
+#: scripts/fx/level_up_fx.gd
+msgid "Level up"
+msgstr ""
+
+#: scripts/systems/quest_manager.gd
+msgid "Complete! Click to claim your reward"
+msgstr ""
+
+#: scripts/systems/quest_manager.gd
+msgid "No open quests - level up to unlock more."
+msgstr ""
+
+#: scripts/ui/character_select.gd scenes/main/character_select.tscn
+msgid "Create New Wizard"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "SLOT %d / 2"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Character Limit Reached (2/2)"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Level %d\nHealth  %d / %d\nMana  %d / %d"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Wand  +%d"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Galleons  %d"
+msgstr ""
+
+#: scripts/ui/character_select.gd scripts/ui/mmorpg_overlay.gd
+msgid "Hogwarts Valley"
+msgstr ""
+
+#: scripts/ui/character_select.gd scenes/main/character_select.tscn
+msgid "ENTER WORLD"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Empty Slot"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Create a new wizard"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Loading World..."
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Saving character, please wait…"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Error: %s"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "This character was not found or does not belong to your account."
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "This character is in another session right now."
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "This session is already bound to another character."
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "The character is still being saved from the previous session. Please try again in a few seconds."
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Could not reach the world server. Try again."
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "A character name needs at least 2 letters!"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Creating wizard..."
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Character created!"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "Could not be created"
+msgstr ""
+
+#: scripts/ui/character_select.gd scenes/main/character_select.tscn
+msgid "Log Out"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "YOUR WIZARDS"
+msgstr ""
+
+#: scripts/ui/character_select.gd scenes/main/character_select.tscn
+msgid "New Wizard"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "YOUR WIZARDS  (%d / 2)"
+msgstr ""
+
+#: scripts/ui/character_select.gd
+msgid "%s\nLevel %d  ·  %s"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Equip a wand first"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Equip a broom first"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Not enough Mana"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Out of range - move closer"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "No target selected"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "That ground is protected"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "No line of sight"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Not while mounted"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Still recovering"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd scripts/ui/hud_action_bar.gd
+msgid "You are defeated"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Unknown spell"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Your house rank is too low"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Your level is too low for that spell"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Queued behind the current cast"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Wrong area for that"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Not right now"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "The map is still loading"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "The broom cannot fly here"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Casting"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Revive Here"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Get up where you fell with half health"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Return to Town"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Wake at this map's respawn point with full health"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "%s - casting... (%s)"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Refused"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Refused (%s)"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "You were defeated."
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Back on your feet."
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Respawned"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "DEFEATED\nYou can rise in %ds"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "DEFEATED\nReturning to town in %d:%02d"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "+%d Galleons"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Protected ground - combat is disabled here%s"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Target is on protected ground - attacks will be refused"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "Safe area · Combat disabled"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "%s - casting... %.0f%%"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "%s - releasing..."
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
+msgid "%s - recovering... %.1fs"
+msgstr ""
+
+#: scripts/ui/game_settings.gd
+msgid "unknown action"
+msgstr ""
+
+#: scripts/ui/game_settings.gd
+msgid "invalid key"
+msgstr ""
+
+#: scripts/ui/hit_feedback.gd
+msgid "Critical"
+msgstr ""
+
+#: scripts/ui/hit_feedback.gd scripts/ui/hud_buff_bar.gd
+msgid "Stunned"
+msgstr ""
+
+#: scripts/ui/hit_feedback.gd
+msgid "Slowed"
+msgstr ""
+
+#: scripts/ui/hit_feedback.gd
+msgid "Ignited"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Welcome to Hogwarts! Spells on 1-4, Q, E · potions on F1-F4 · Shift mounts the broom."
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Enter to chat, start a line with ! to shout to everyone. M opens the map, Esc the menu."
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Party: /invite Name, /leave, /p text for party chat."
+msgstr ""
+
+#: scripts/ui/hud.gd scripts/ui/hud_quest_log.gd
+msgid "Quests"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[J] Quests - every open quest and reward"
+msgstr ""
+
+#: scripts/ui/hud.gd scripts/ui/hud_character_window.gd scripts/ui/settings_ui.gd
+msgid "Character"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[C] Character - stats and status points"
+msgstr ""
+
+#: scripts/ui/hud.gd scripts/ui/hud_skill_window.gd
+msgid "Skills"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[V] Skill training"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Map"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[M] World map"
+msgstr ""
+
+#: scripts/ui/hud.gd scripts/ui/hud_bestiary.gd
+msgid "Bestiary"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[B] Bestiary - where every creature lives"
+msgstr ""
+
+#: scripts/ui/hud.gd scripts/ui/hud_game_menu.gd
+msgid "Menu"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[Esc] Menu - settings, change character, quit"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Level %d   ·   %d / %d EXP   ·   %.1f%%"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "%s Rank %d · %s"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "%s · %s\n%d Galleons"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[%s] %s\n%d mana • %.1fs cooldown\n%s"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "World Boss"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Enraged"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Creature"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Pack Leader · Enraged"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Pack Leader"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "%s · Party"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Ancient Monolith"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Training Dummy"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Practice target"
+msgstr ""
+
+#: scripts/ui/hud.gd scripts/ui/hud_quest_log.gd
+msgid "Lv. %d"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[Shift] Dismount broom"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[Shift] Mount broom"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Collected %d Galleons."
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Obtained %s (x%d)."
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Your bag is full (40/40). Sell or discard something to take this."
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Someone already took that."
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Too far away to pick that up."
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "That loot belongs to someone else."
+msgstr ""
+
+#: scripts/ui/hud.gd scripts/ui/inventory_arcane.gd
+msgid "Wait until the map loads."
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "%s stirs at %s - %d seconds!"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "%s has appeared at %s (Lv %d)!"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "%s has been slain by %s!"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "%s has fallen!"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[World] "
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[I] Bag - the potions you carry"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[O] Ollivander - forge the wand higher"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[Shift] Mount or dismount the broom"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Invite to Party"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Party invitation sent to %s."
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "drop"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "Drag a potion from your bag onto %s"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "No %s left"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "Health is already full"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "Mana is already full"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "Already full"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "None left"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "Finish casting first"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "Wait until the map loads"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "Cannot use that now"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd scripts/ui/hud_skill_window.gd
+msgid "Master"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "[%s] %s  ·  %s\n%d mana · %.1fs cooldown\n%s\nDrag onto another slot to swap  ·  [V] Skills"
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "[%s] Quick slot\nDrag a potion here from your bag (I).\nDrag a slot onto another to swap, or off the bar to clear it."
+msgstr ""
+
+#: scripts/ui/hud_action_bar.gd
+msgid "[%s] %s\n%s\nDrag to move or swap; drag off the bar or right-click to clear."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Corpses bewitched to serve a dark wizard. Slow, relentless and terrified of fire."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Giant spiders of the Forbidden Forest, bred from Aragog's line. They hunt in packs."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Wizards turned bounty hunters, roaming the roads in gangs. Some cast from range."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Hulking forest trolls with crude clubs. Slow to anger, slower to fall."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "The largest trolls, grey-skinned and thick-hided, guarding the high moors."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Soul-sucking guards of Azkaban. Their cold drains your will; only a Patronus truly drives them off."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Electric-blue pests that lift wizards off their feet and hurl them about."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Suits of armour enchanted to defend the forbidden third floor."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "A cursed suit that commands the others. Its shield turns aside blows from the front."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "A creeping plant that strangles whatever struggles. Burn its vines to reach the heart."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Hagrid's three-headed dog, guarding the trapdoor. Music sends it to sleep."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Lean, long-legged hunters of the Blackweb Caverns. Their emerald venom burns for seconds after the bite."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Bone-plated giants that guard the egg caverns. Their armour turns blows from the front; their webs pin you down."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Fire (Incendio)"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Stuns"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Force (Depulso)"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Patronus"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Arcane"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/maps.json addons/hpmmo_sim/data/dungeons.json
+msgid "Trial Hall"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "beside the courtyard"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/maps.json addons/hpmmo_sim/data/dungeons.json addons/hpmmo_sim/data/quests.json
+msgid "The Forbidden Corridor"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Hogwarts Castle, third-floor east corridor"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Troll"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Undead"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Dark wizard"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/mobs.json
+msgid "Dementor"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Beast"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Pixie"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Plant"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Enchanted armour"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Hound"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Spider"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/spawn_tables.json
+msgid "Acromantula Matriarch"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/spawn_tables.json
+msgid "Dark Snatcher Commander"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "  ·  dungeon"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd scripts/ui/hud_floo.gd scripts/ui/hud_world_map.gd
+msgid "Lv %d"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd scripts/ui/hud_world_map.gd
+msgid "Lv %d–%d"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Show on map"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "+%d more"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "%s (dungeon)"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Found"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Boss"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "%s  ·  Lv %d"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Weak"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Resists"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Aggressive"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "from Lv %d"
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "You cannot act."
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Despair"
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "A dementor's cold: no natural health recovery."
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Poisoned"
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Spider venom: damage over time."
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Burning"
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Taking fire damage over time."
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Webbed"
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Sticky silk: you move at half speed."
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd addons/hpmmo_sim/data/combat.json
+msgid "Vitality"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd addons/hpmmo_sim/data/combat.json
+msgid "Intellect"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd addons/hpmmo_sim/data/combat.json
+msgid "Strength"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd addons/hpmmo_sim/data/combat.json
+msgid "Agility"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Level"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Experience"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Next level"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Status"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Health"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Mana"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Attack value"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Magic attack value"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Armour"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Critical chance"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Spell power"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Skill power"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Attributes"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Properties"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Attack speed"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Casting speed"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Movement speed"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Piercing hit"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Melee resist"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Projectile resist"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Spell resist"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Block"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Life drain"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Reflect"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Health regen"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Mana regen"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Broom speed"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Galleons found"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd scripts/ui/inventory_arcane.gd
+msgid "Galleons"
+msgstr ""
+
+#: scripts/ui/hud_character_window.gd
+msgid "Status points: %d  ·  %d per level"
+msgstr ""
+
+#: scripts/ui/hud_chat.gd
+msgid "Say something…   (start with ! to shout to everyone)"
+msgstr ""
+
+#: scripts/ui/hud_chat.gd
+msgid "%s shouts: %s"
+msgstr ""
+
+#: scripts/ui/hud_chat.gd
+msgid "[Party]"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "Floo Network"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "Destinations"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "Buy %d"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd addons/hpmmo_sim/data/items.json
+msgid "Old Boot (Portkey)"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "%s Galleons - carries your party anywhere"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "Buy"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "You stand at the hearth of %s"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "Floo Powder: %d pinch"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "Floo Powder: %d pinches"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "%s Galleons a pinch, one per journey"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "1 pinch of Floo Powder"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "Requires level %d (you are %d)"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "Travel"
+msgstr ""
+
+#: scripts/ui/hud_floo.gd scripts/ui/inventory_arcane.gd
+msgid "Not enough Galleons."
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "Your bag is full."
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "%s bought."
+msgstr ""
+
+#: scripts/ui/hud_floo.gd
+msgid "The fireplace keeper shakes his head."
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd
+msgid "Progress is saved when you leave."
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd
+msgid "Resume"
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd scripts/ui/settings_ui.gd
+msgid "Settings"
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd
+msgid "World Map  (M)"
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd
+msgid "Change Character"
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd scripts/ui/main_menu.gd
+msgid "Quit Game"
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd
+msgid "You cannot leave while defeated."
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd scripts/ui/inventory_arcane.gd scripts/ui/ollivander_ui.gd scenes/main/character_select.tscn
+msgid "Cancel"
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd
+msgid "Quitting"
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd
+msgid "Changing character"
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd
+msgid "%s in %d…  (taking damage cancels)"
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd
+msgid "Interrupted: you took damage."
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd
+msgid "Interrupted: you were defeated."
+msgstr ""
+
+#: scripts/ui/hud_game_menu.gd
+msgid "Saving…"
+msgstr ""
+
+#: scripts/ui/hud_party.gd
+msgid "%s%s  Lv %d"
+msgstr ""
+
+#: scripts/ui/hud_party.gd
+msgid "Accept"
+msgstr ""
+
+#: scripts/ui/hud_party.gd
+msgid "Decline"
+msgstr ""
+
+#: scripts/ui/hud_party.gd
+msgid "%s invites you to a party."
+msgstr ""
+
+#: scripts/ui/hud_portkey.gd
+msgid "Portkey"
+msgstr ""
+
+#: scripts/ui/hud_portkey.gd
+msgid "Set the boot down and choose where it goes. For ten seconds your party may grab hold; then everyone holding on is carried there together."
+msgstr ""
+
+#: scripts/ui/hud_portkey.gd
+msgid "Set down"
+msgstr ""
+
+#: scripts/ui/hud_quest_log.gd
+msgid "No open quests. Level up to unlock more."
+msgstr ""
+
+#: scripts/ui/hud_quest_log.gd
+msgid "Click a card to read it  ·  finished quests pay when you claim them  ·  J / Esc: close"
+msgstr ""
+
+#: scripts/ui/hud_quest_log.gd
+msgid "%d open  ·  %d ready to claim  ·  %d completed"
+msgstr ""
+
+#: scripts/ui/hud_quest_log.gd
+msgid "Ready"
+msgstr ""
+
+#: scripts/ui/hud_quest_log.gd
+msgid "New"
+msgstr ""
+
+#: scripts/ui/hud_quest_log.gd
+msgid "%d EXP  ·  %d Galleons"
+msgstr ""
+
+#: scripts/ui/hud_quest_log.gd scripts/ui/hud_quest_scroll.gd
+msgid "Claim reward"
+msgstr ""
+
+#: scripts/ui/hud_quest_scroll.gd
+msgid "Objective"
+msgstr ""
+
+#: scripts/ui/hud_quest_scroll.gd
+msgid "Reward"
+msgstr ""
+
+#: scripts/ui/hud_quest_scroll.gd scripts/ui/settings_ui.gd scripts/ui/ui_window.gd
+msgid "Close"
+msgstr ""
+
+#: scripts/ui/hud_quest_scroll.gd
+msgid "No Open Quests"
+msgstr ""
+
+#: scripts/ui/hud_quest_scroll.gd
+msgid "Every task open to you is done. Level up to unlock more, hunt the Dark Monoliths and refine your gear."
+msgstr ""
+
+#: scripts/ui/hud_quest_scroll.gd
+msgid "%d experience  ·  %d Galleons"
+msgstr ""
+
+#: scripts/ui/hud_quest_scroll.gd
+msgid "  ·  %d %s reputation"
+msgstr ""
+
+#: scripts/ui/hud_skill_pick.gd
+msgid "Choose Your First Spell"
+msgstr ""
+
+#: scripts/ui/hud_skill_pick.gd
+msgid "Every wizard starts with one spell of their own. Pick it now - every level after this earns a skill point to learn or train more (V)."
+msgstr ""
+
+#: scripts/ui/hud_skill_pick.gd
+msgid "Learn"
+msgstr ""
+
+#: scripts/ui/hud_skill_pick.gd
+msgid "You learned %s! Train it further with V."
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Spells"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Other spells"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Drag a spell onto the bar  ·  + spends a point"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "No skill points left - gain a level"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Already mastered"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Cannot train that now"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Points  %d"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Not learned"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Requires level %d"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Next level: %d"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Damage %d%%"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Effect %d%%"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Mana %d  ·  Cooldown %.1fs"
+msgstr ""
+
+#: scripts/ui/hud_tracker.gd
+msgid "More quests (J)"
+msgstr ""
+
+#: scripts/ui/hud_tracker.gd
+msgid "No open quests"
+msgstr ""
+
+#: scripts/ui/hud_tracker.gd
+msgid "Level up to unlock more"
+msgstr ""
+
+#: scripts/ui/hud_tracker.gd
+msgid "Click to claim the reward"
+msgstr ""
+
+#: scripts/ui/hud_tracker.gd
+msgid "Click to read the quest scroll"
+msgstr ""
+
+#: scripts/ui/hud_tracker.gd
+msgid "More quests (%d)  ·  J"
+msgstr ""
+
+#: scripts/ui/hud_unit_frame.gd
+msgid "Rank %d · %s"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd scripts/ui/travel_feedback.gd scripts/world/castle_interior.gd scripts/world/map_controller.gd addons/hpmmo_sim/data/maps.json
+msgid "Hogwarts Castle"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd
+msgid "Black Lake"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd
+msgid "Forbidden Forest"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "Hogsmeade"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd
+msgid "Northern Moors"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd addons/hpmmo_sim/data/travel.json addons/hpmmo_sim/data/quests.json
+msgid "Hagrid's Hut"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd
+msgid "Greenhouses"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "Courtyard"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd scripts/world/castle_interior.gd
+msgid "Dungeons"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "Ground"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "World Map"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "Right-click: set / clear waypoint  ·  Wheel: zoom  ·  Drag: move  ·  M / Esc: close"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "  ·  B: bestiary"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "Showing %s (red marks)  ·  "
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "You"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "Cursor"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "Waypoint"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "moving stairs"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "%s floor"
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd
+msgid "The Dungeons"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Head"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Robes"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Hands"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Feet"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Wand"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Focus"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Neck"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Ring I"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Ring II"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Broom"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Wait five seconds after combat."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Finish casting first."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "You are defeated."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Dismount before changing your broom."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Your level is too low for that item."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "No room for the replaced item."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "That item does not fit."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "That item is no longer available."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Inventory changed. Please try again."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Action already handled."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Missing refinement material."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Equip a wand first."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Already fully refined."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Refined!"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "The enchantment holds!"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "The weave slipped - the scroll is spent."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "You have no such scroll."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "This item cannot hold more enchantments."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "There is nothing to reweave yet."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "That item cannot be enchanted."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Equip an item in that slot first."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "That item cannot be refined."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Refinement failed."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Inventory refreshed from your saved character."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Equipment temporarily unavailable."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "That resource is already full."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "No merchant wants that."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Take it off before destroying it."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Replace left ring"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Replace right ring"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Inventory"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Merchant"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Open the merchant to sell items"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Drag an item here, or right-click it in your bag."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Sell"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Magic Attack %+.0f"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Spell Power %+.0f%%"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Health %+d"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Mana %+d"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Armour %+d"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Move %+.0f%%"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Speed %+.0f"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Sells for %s Galleons"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "%s: replace %s"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Sell this item?"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Destroy Item"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Yes"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "No"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Select an item in your bag first."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Destroy %s?\nIt is gone for good."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Sold for %s Galleons."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Item destroyed."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Unable to change equipment."
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "One-Handed Wand"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Body Armour"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Broom mount"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Consumable"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Crafting material"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Common"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Uncommon"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Rare"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Epic"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Legendary"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Level: %d"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Quantity: %d"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "[ Requires level %d ]"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "[ Wearable ]"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Restores %d Health"
+msgstr ""
+
+#: scripts/ui/item_tooltip.gd
+msgid "Restores %d Mana"
+msgstr ""
+
+#: scripts/ui/loot_window.gd
+msgid "Take all"
+msgstr ""
+
+#: scripts/ui/loot_window.gd
+msgid "Too far away."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Usernames cannot contain Turkish letters (ç, ğ, ı, İ, ö, ş, ü) or spaces: only English letters, digits, '_' and '-'."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "REALM OF WIZARDRY"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "LOG IN"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "NEW ACCOUNT"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Your username"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "USERNAME"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Your password"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Show"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "PASSWORD"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Type your password again"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "PASSWORD (AGAIN)"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Remember my username"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "ENTER GAME"
+msgstr ""
+
+#: scripts/ui/main_menu.gd scripts/ui/settings_ui.gd
+msgid "Language"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "development build"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "CREATE ACCOUNT"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "8+ characters, letters and digits"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Hide"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Server under maintenance"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "The game is being updated right now. You can log in again in a few minutes."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "The server is back online. You can log in."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Checking server status…"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Server online"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Server unreachable"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "The server went into maintenance and you were logged out. Your progress is saved; you can log in again once maintenance is over."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "You can log in once maintenance is complete."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "The connection to the server was lost. Please log in again."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "This session was closed because your account logged in from somewhere else."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Please enter your username and password."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Username must be 3-24 characters."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Password must be at least 8 characters."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "The passwords do not match."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Creating account…"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Your account was created! Logging in…"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Could not create the account."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Logging in…"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "The server is under maintenance. Please try again a little later."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Login failed."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Loading your characters…"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Could not load your characters."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Could not reach the server. It may be updating or your connection may have dropped; try again a little later."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Wrong username or password."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "This username is already taken."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Too many attempts. Wait a little and try again."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "The server cannot serve requests right now. Try again a little later."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Password is too long (at most 128 characters)."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Password must contain both letters and digits."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Connecting to the world…"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Could not connect to the game server (error %d)."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "The game server did not respond. Try again a little later."
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Verifying session…"
+msgstr ""
+
+#: scripts/ui/main_menu.gd
+msgid "Please log in."
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Maintenance"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Maintenance cancelled"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "The server stays online."
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "The server is going into maintenance: everyone will be logged out in %d seconds. Stand somewhere safe; your progress will be saved."
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Your account logged in from somewhere else"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "This session was closed; your progress is saved. Returning to the login screen…"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "You were logged out for maintenance"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Your progress is saved. Returning to the login screen…"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Connection to the server lost"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Returning to the login screen…"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Server maintenance: you will be logged out in %s"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Stand somewhere safe and finish what you are doing; your progress will be saved automatically."
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Maintenance - saving progress"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Do not close the game while your character is saved."
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Maintenance - closing connections"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Your progress is saved. You can log in again once maintenance is over."
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "The server is closed for maintenance"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "You can log in again once maintenance is over."
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "Maintenance failed"
+msgstr ""
+
+#: scripts/ui/maintenance_ui.gd
+msgid "The server is coming back online. Reconnect in a moment."
+msgstr ""
+
+#: scripts/ui/map_loading_screen.gd scripts/ui/world_loader.gd
+msgid "Tip: %s"
+msgstr ""
+
+#: scripts/ui/mmorpg_overlay.gd
+msgid "Quest"
+msgstr ""
+
+#: scripts/ui/mmorpg_overlay.gd
+msgid "Click or Esc to close"
+msgstr ""
+
+#: scripts/ui/mmorpg_overlay.gd
+msgid "WASD move · right-drag camera · wheel zoom\nLMB attack · 1–4 / Q / E skills · Tab target\nShift mount · Space rise · Ctrl descend · F talk\nZ loot · I bag · O Ollivander · J guide · F1 settings"
+msgstr ""
+
+#: scripts/ui/mmorpg_overlay.gd
+msgid "Zoom out"
+msgstr ""
+
+#: scripts/ui/mmorpg_overlay.gd
+msgid "Recentre on me"
+msgstr ""
+
+#: scripts/ui/mmorpg_overlay.gd
+msgid "Zoom in"
+msgstr ""
+
+#: scripts/ui/mmorpg_overlay.gd
+msgid "Hogwarts Courtyard"
+msgstr ""
+
+#: scripts/ui/mmorpg_overlay.gd
+msgid "Hogsmeade Village"
+msgstr ""
+
+#: scripts/ui/mmorpg_overlay.gd
+msgid "Mountain Pass"
+msgstr ""
+
+#: scripts/ui/mmorpg_overlay.gd
+msgid "Hunting grounds  ·  Lv %d-%d"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json
+msgid "Ollivander"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "OK"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "You have %d"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "Drag an item here"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "or right-click it in your bag"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "Imbue"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "Reweave"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "Cannot be refined"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "From Level: %d"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "Fully refined"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "Chance of upgrade %d%%%s"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "  (failure: +%d)"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "Cost of the upgrade: %s Galleons"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "Cannot be enchanted"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "No enchantments (0/%d)"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "Imbue %d%%  ·  %d"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "Reweave  ·  %d"
+msgstr ""
+
+#: scripts/ui/ollivander_ui.gd
+msgid "Equipment updated."
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Practice on a dummy"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Cast any spell at a training dummy in the courtyard (Tab to target one)."
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Find protected ground"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Step into the courtyard fountain area - the glow marks protected ground."
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Provoke a pack"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Hit an Acromantula or Inferi outside the safe zone and survive the pack's answer."
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Broom controls"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Shift to mount, Space to rise, then land on level ground and Shift to dismount."
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Enter the castle"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Dismount at the entrance and press F in the doorway to enter Hogwarts."
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Getting started"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Hide (J)"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Done"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Next"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Later"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "\nCONTROLS\nWASD move · Right-drag camera · Wheel zoom\nLMB attack · 1–4 / Q / E spells · F1–F4 potions · Tab target\nShift mount · Space rise · Ctrl descend\nF talk · Z loot · I bag · O forge · M map\nJ guide · Esc menu & settings · Enter chat (!text shouts)\n\nEQUIPMENT\nSelect to compare. Right-click, double-click, or drag to equip. Changes require five seconds out of combat. Dismount to change brooms."
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Training complete"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Guide (%d/%d)"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Collapse (J)"
+msgstr ""
+
+#: scripts/ui/onboarding_ui.gd
+msgid "Guide (J)"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Move forward"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Move backward"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Move left"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Move right"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Jump / rise"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Descend (broom)"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Mount / dismount broom"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Next target"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Pick up loot"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Talk / interact"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd scenes/ui/hud.tscn
+msgid "Bag"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Ollivander's forge"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Chat"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "World map"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Guide"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Spell slot 1"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Spell slot 2"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Spell slot 3"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Spell slot 4"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Spell slot Q"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Spell slot E"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Quick slot 1"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Quick slot 2"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Quick slot 3"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Quick slot 4"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Low"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Medium"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "High"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "General"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Audio"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Controls"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Display"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Graphics quality"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Auto picks Low on integrated graphics and High on a dedicated GPU"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Interface scale"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Camera & effects"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Mouse sensitivity"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Screen shake"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Screen flash"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Volume"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Key bindings"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Reset keys"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Close the settings (Esc)"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Game language"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Open windows switch language when the interface is rebuilt."
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Change character now"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Language: %s"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Effects"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Interface"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Music"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Ambience"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Auto (%s)"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Graphics: %s"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "press a key…"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Press a key for '%s' (Esc cancels)"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Key bindings reset to defaults."
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Rebinding cancelled."
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "'%s' is now %s."
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Refused: that key already drives '%s'."
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Refused: %s."
+msgstr ""
+
+#: scripts/ui/travel_feedback.gd
+msgid "Loading..."
+msgstr ""
+
+#: scripts/ui/travel_feedback.gd scripts/world/map_controller.gd addons/hpmmo_sim/data/maps.json
+msgid "Hogwarts Grounds"
+msgstr ""
+
+#: scripts/ui/travel_feedback.gd
+msgid "Travelling..."
+msgstr ""
+
+#: scripts/ui/travel_feedback.gd
+msgid "Loading %s..."
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Start a chat line with ! to shout to every wizard in the realm."
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Drag a potion from your bag onto F1-F4 to drink it with one key."
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Protego reflects projectiles back at their caster."
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Inferi fear fire: Incendio burns them for double damage."
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Hold the right mouse button to turn the camera; the wheel zooms."
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Land on level ground before you dismount your broom."
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Dark Monoliths summon waves of creatures - bring friends."
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Ollivander can refine your wand. Higher tiers glow brighter."
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Press M for the map of the valley, Esc for the menu."
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Opening the gates…"
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Raising the castle…"
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Entering the valley…"
+msgstr ""
+
+#: scripts/ui/world_loader.gd
+msgid "Preparing spells and creatures…"
+msgstr ""
+
+#: scripts/world/castle_interior.gd scripts/world/map_controller.gd
+msgid "Ground Floor"
+msgstr ""
+
+#: scripts/world/castle_interior.gd scripts/world/map_controller.gd
+msgid "First Floor"
+msgstr ""
+
+#: scripts/world/castle_interior.gd scripts/world/map_controller.gd
+msgid "Second Floor"
+msgstr ""
+
+#: scripts/world/castle_interior.gd
+msgid "Third Floor"
+msgstr ""
+
+#: scripts/world/castle_interior.gd
+msgid "Fourth Floor"
+msgstr ""
+
+#: scripts/world/castle_interior.gd
+msgid "Fifth Floor"
+msgstr ""
+
+#: scripts/world/castle_interior.gd
+msgid "Sixth Floor"
+msgstr ""
+
+#: scripts/world/castle_interior.gd
+msgid "Seventh Floor"
+msgstr ""
+
+#: scripts/world/castle_interior.gd
+msgid "%s - %s"
+msgstr ""
+
+#: scripts/world/caverns/spider_caverns.gd
+msgid "Floor 1 - Webbed Galleries"
+msgstr ""
+
+#: scripts/world/caverns/spider_caverns.gd
+msgid "Floor 2 - Egg Caverns"
+msgstr ""
+
+#: scripts/world/caverns/spider_caverns.gd
+msgid "Blackweb Caverns - %s"
+msgstr ""
+
+#: scripts/world/dungeon_director.gd
+msgid "The way back is open. Regroup and try again."
+msgstr ""
+
+#: scripts/world/encounter_director.gd
+msgid "Elite Bodyguard"
+msgstr ""
+
+#: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json data/json/quests.json
+msgid "Professor Fig"
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Ah, a new student! Hogwarts needs brave wizards."
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Acromantulas infest the Forbidden Forest to the west. Inferi haunt its edge, past Hagrid's hut."
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Break a Dark Monolith (follow the purple beams), refine your wand (O), then fly to the Quidditch Pitch (Shift to mount)."
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Wands choose the wizard... but Galleons refine them!"
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Press O anywhere to open my workshop. Bring Phoenix Ash, Heartstrings, Thestral Hair."
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "+4 glows blue, +7 crackles gold, +9 burns with phoenix fire!"
+msgstr ""
+
+#: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json
+msgid "Madam Rosmerta"
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Welcome to Hogsmeade, dearie! Rest here - the village square is safe."
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Buy Wiggenweld before heading to the Forbidden Forest. Trust me."
+msgstr ""
+
+#: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json data/json/quests.json
+msgid "Hagrid"
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Yeh shouldn' go into the forest alone... brave though!"
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Inferi fear fire - hit 'em with Incendio (2). Stupefy (1) stuns 'em cold."
+msgstr ""
+
+#: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json
+msgid "Madam Pince"
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "The library is inside, past the great doors. Mind the books."
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "The Great Hall is through the entrance hall. Charms is across the hall."
+msgstr ""
+
+#: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json
+msgid "Professor Flitwick"
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Welcome! Stupefy interrupts, Incendio burns, and Expelliarmus weakens attacks."
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Practise at the dummies east of the courtyard, then pull a pack together. Watch the boss's warning circle."
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Training dummies stand in the courtyard - practise your spells there safely."
+msgstr ""
+
+#: scripts/world/game_world.gd
+msgid "Reflected!"
+msgstr ""
+
+#: scripts/world/grounds/grounds_builder.gd
+msgid "Broom landing"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Floo Network (%s)"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "%s (to %s)"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "%s added to your Floo Network."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Press %s - Let go of the Portkey (to %s)"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Press %s - Grab hold of the Portkey (to %s)"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Press %s - %s"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Mounted - the castle door is closed to broom flight. Dismount to enter."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "No flying inside the castle!"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "The broom cannot fly inside the castle - it stays stowed until you are outside."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Dismount before entering - the broom cannot fly inside the castle."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Map transfers are unavailable: the synced map-transfer API is missing from this build."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "The transfer timed out; you are back at your last safe spot."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "That map is not available in this build."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Leaving %s…"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "The map failed to load; staying where you are."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Waiting for the server…"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Almost there…"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Lighting the torches…"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Out of bounds"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "the destination"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Enter %s"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Travel to the %s"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Entering Hogwarts Castle..."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Entering %s..."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Returning to the Grounds..."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "the castle"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "the grounds"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Dungeon Level"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Hogwarts Castle - %s"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "   |   Broom landing pad"
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "The broom cannot fly inside the castle - dismount on the landing pad first."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "There is no doorway here."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "That door does not lead there."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "The destination map is unavailable."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "The destination is full right now."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "A transfer is already in progress."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "The transfer expired; try the door again."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "The transfer was cancelled."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Stand closer to the door."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "You are not experienced enough to enter."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "You have entered this place enough times today - come back tomorrow."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "You have no Portkey boot."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Your Portkey is already waiting - grab hold of it."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "That Portkey has already gone."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "That Portkey is not yours - only its owner's party may hold on."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "A Portkey will not work in here."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "You have no Floo Powder - buy a pinch at the fireplace."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "You have never visited that fireplace."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "The flames will not take you while you are fighting."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Dismount before stepping into the fireplace."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Move closer and try again."
+msgstr ""
+
+#: scripts/world/map_controller.gd
+msgid "Transfer refused (%s)."
+msgstr ""
+
+#: scripts/world/npc.gd
+msgid "%s\n< click to talk >"
+msgstr ""
+
+#: scripts/world/portkey_views.gd
+msgid "%s set down a Portkey to %s - hold on to it! (F)"
+msgstr ""
+
+#: scripts/world/portkey_views.gd
+msgid "A party member"
+msgstr ""
+
+#: scripts/world/portkey_views.gd
+msgid "The Portkey fizzled - nobody was holding on. The boot is back in your bag."
+msgstr ""
+
+#: scripts/world/portkey_views.gd
+msgid "Portkey to %s\n%d"
+msgstr ""
+
+#: scripts/world/training_dummy.gd
+msgid "Training Dummy\n%d / %d"
+msgstr ""
+
+#: scripts/world/training_dummy.gd
+msgid "Dummy reset!"
+msgstr ""
+
+#: addons/hpmmo_sim/equipment.gd
+msgid "Attack Value %d - %d"
+msgstr ""
+
+#: addons/hpmmo_sim/equipment.gd
+msgid "Magic Attack Value %d - %d"
+msgstr ""
+
+#: addons/hpmmo_sim/equipment.gd
+msgid "Armour %d"
+msgstr ""
+
+#: addons/hpmmo_sim/equipment.gd
+msgid "Max Health +%d"
+msgstr ""
+
+#: addons/hpmmo_sim/equipment.gd
+msgid "Max Mana +%d"
+msgstr ""
+
+#: addons/hpmmo_sim/equipment.gd
+msgid "Attack Speed %+d%%"
+msgstr ""
+
+#: addons/hpmmo_sim/equipment.gd
+msgid "Movement Speed %+d%%"
+msgstr ""
+
+#: addons/hpmmo_sim/equipment.gd
+msgid "Spell Power %+d%%"
+msgstr ""
+
+#: addons/hpmmo_sim/equipment.gd
+msgid "Health Regeneration %+d/s"
+msgstr ""
+
+#: addons/hpmmo_sim/equipment.gd
+msgid "Mana Regeneration %+d/s"
+msgstr ""
+
+#: addons/hpmmo_sim/equipment.gd
+msgid "Mount Speed %.1f"
+msgstr ""
+
+#: addons/hpmmo_sim/rules.gd
+msgid "Rank %d"
+msgstr ""
+
+#: scenes/main/character_select.tscn
+msgid "HPMMO — HOGWARTS"
+msgstr ""
+
+#: scenes/main/character_select.tscn
+msgid "SLOT 1 / 2"
+msgstr ""
+
+#: scenes/main/character_select.tscn
+msgid "Harry"
+msgstr ""
+
+#: scenes/main/character_select.tscn
+msgid "[ Gryffindor ]"
+msgstr ""
+
+#: scenes/main/character_select.tscn
+msgid "Wizard Name:"
+msgstr ""
+
+#: scenes/main/character_select.tscn
+msgid "Type your name..."
+msgstr ""
+
+#: scenes/main/character_select.tscn assets/castle/castle_layout.json
+msgid "Gryffindor"
+msgstr ""
+
+#: scenes/main/character_select.tscn assets/castle/castle_layout.json
+msgid "Slytherin"
+msgstr ""
+
+#: scenes/main/character_select.tscn assets/castle/castle_layout.json
+msgid "Ravenclaw"
+msgstr ""
+
+#: scenes/main/character_select.tscn assets/castle/castle_layout.json
+msgid "Hufflepuff"
+msgstr ""
+
+#: scenes/main/character_select.tscn
+msgid "Create Wizard"
+msgstr ""
+
+#: scenes/ui/hud.tscn
+msgid "EXP: 0 / 200"
+msgstr ""
+
+#: scenes/ui/hud.tscn
+msgid "Forge"
+msgstr ""
+
+#: scenes/ui/hud.tscn
+msgid "Nimbus"
+msgstr ""
+
+#: scenes/ui/hud.tscn
+msgid "Press Enter to chat..."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Hawthorn Wand"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "10-inch Hawthorn wood with unicorn hair core. Highly suited for healing and curses."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Elder Wand Replica"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "15-inch Elder wood with thestral tail hair core. Unlocks immense raw destructive power."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Ashwood Twig"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Knotted pale ash, its handle bound in hemp twine. Every spell starts with a first wand."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Runebound Walnut Wand"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Polished walnut banded in brass; its pale runes steady the aim."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Silverthorn Wand"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Black ebony gripped by a silver thorn vine, an emerald set in its pommel."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Emberwing Wand"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Crimson lacquer and gold feathers around a glowing amber heart; its tip holds a live ember."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Moonveil Sceptre"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Moonwood threaded with starlight behind a mithril crescent, crowned with a star crystal."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Apprentice Robe"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Sturdy woolen school robes tailored with silk house linings. +50 Max HP."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Auror Battle Cloak"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Enchanted heavy dragonhide battle cloak. +150 Max HP and 15% Magic Armor."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Woolen Traveller's Cloak"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Undyed homespun wool with a stitched hem and a crude wand patch. Warm, plain and honest."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Runed Mantle"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Navy wool bordered in brass thread, its pale runes humming with a steadying ward."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Thornveil Cloak"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Black velvet wound with silver thorns and emeralds; curses catch on its vines."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Phoenix Regalia"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Crimson brocade alive with woven flame, a golden phoenix spread across the shoulders."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Moonveil Mantle"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Silver-blue silk scattered with stars and crescent moons; it shimmers like a night sky."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Nimbus 2000"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Sleek mahogany handle with tail twigs of select birch. Fly across Hogwarts Valley with speed."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Firebolt Supreme"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Ash handle with aerodynamic ash finish and goblin-forged ironwork. Supreme 22.0 speed."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Ashwood Sweeper"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A humble apprentice broom of unvarnished ash, its birch twigs tied with hemp cord. Every flyer starts somewhere."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Runebound Walnut"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Polished walnut bound in brass bands whose blue runes steady the flight."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Silverthorn Racer"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Black-lacquered ebony with silver fittings and emerald runes, its tail trimmed into a racer's dart."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Emberwing"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Crimson lacquer and gold filigree crowned by a phoenix head; its feathered tail smoulders like live embers."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Moonveil Seraph"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Pale moonwood threaded with starlight, a crystal tip and bristles spun from moonlight itself."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Wiggenweld Potion"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Restores 150 HP."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Mana Draught"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Refreshing cerulean elixir. Restores 120 Mana instantly."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Phoenix Ash"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Smoldering fiery ash gathered from a burning day. Used to refine wands from +0 to +4 at Ollivander."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Dragon Heartstring"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Vibrant magical core tissue from an Antipodean Opaleye. Needed to refine wands to +5 - +7."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Thestral Tail Hair"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Spectral invisible hair of rare thestrals. Required for legendary +8 and +9 wand transmutations."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Elder Wood Core"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A catalyst for masterwork refinement."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Rune of Imbuing"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A scroll that weaves one new enchantment into a wand, robe or broom at Ollivander's. The more an item already holds, the likelier the weave slips."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Rune of Reweaving"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Unravels every enchantment on a wand, robe or broom and weaves the same number anew at Ollivander's."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Apprentice Hat"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Enchanted apprentice gear. +0 maximum HP, +20 maximum mana."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Apprentice Gloves"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Enchanted apprentice gear. +0 maximum HP, +15 maximum mana."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Apprentice Boots"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Enchanted apprentice gear. +25 maximum HP, +0 maximum mana."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Apprentice Focus"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Enchanted apprentice gear. +0 maximum HP, +25 maximum mana."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Apprentice Pendant"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Apprentice Ring"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Enchanted apprentice gear. +0 maximum HP, +10 maximum mana."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Adept Ring"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Runebound Hat"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Navy felt banded in brass, pale runes stitched round the brim to steady the mind."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Silverthorn Hat"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Black velvet wound with a silver thorn circlet, an emerald at its brow."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Emberwing Hat"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Crimson brocade crowned with golden feathers, its tip smouldering like an ember."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Moonveil Hat"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Silver-blue silk scattered with stars, a mithril crescent at its peak."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Runebound Gloves"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Walnut-brown leather with brass-capped knuckles; faint runes warm the palms."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Silverthorn Gloves"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Ebony leather gauntlets laced with silver thorn vines and small emeralds."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Emberwing Gloves"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Crimson dragonhide edged in gold filigree; the fingertips glow like coals."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Moonveil Gloves"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Moonlit silk gloves threaded with starlight and mithril crescents."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Runebound Boots"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Oiled walnut leather laced with brass eyelets, runes worked into the soles."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Silverthorn Boots"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Tall black boots bound in silver thorns; curses catch on the briars."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Emberwing Boots"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Lacquered crimson boots with golden phoenix wings at the heel."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Moonveil Boots"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Silver-blue boots that leave no print; stars drift in their weave."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Runebound Focus"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A brass-caged rune stone that hums softly when a spell is gathered."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Silverthorn Focus"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "An emerald orb held in a cage of silver thorns, cold to the touch."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Emberwing Focus"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A glowing amber heart cradled in golden phoenix feathers, warm as a hearth."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Moonveil Focus"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A star crystal suspended inside a mithril crescent, shining like the night sky."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Runebound Pendant"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A brass disc inscribed with a ring of warding runes, worn on a leather cord."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Silverthorn Pendant"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A silver thorn wreath around a polished emerald, sharp at every edge."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Emberwing Pendant"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A golden phoenix spreading its wings around a burning amber stone."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Moonveil Pendant"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A mithril crescent moon cradling a radiant star crystal."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Runebound Ring"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A brass band etched with pale runes that glow faintly at the wearer's will."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Silverthorn Ring"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Twin silver thorn vines coiled around a deep green emerald."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Emberwing Ring"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A gold band shaped like a phoenix, an ember-bright amber in its beak."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Moonveil Ring"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A mithril band set with a star crystal that shimmers like moonlight."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Acromantula Silk"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Pearly, rope-strong silk spun in the Blackweb Caverns. Weavers and robe-makers pay well for it."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Acromantula Venom"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Emerald venom milked from a Venomfang's glands - worth a fortune to potioneers."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Queen's Seal"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "An obsidian seal wrapped in old silk. It answers the sealed web gate deep in the Egg Caverns, where the brood's queen waits."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Floo Powder"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A pinch thrown into a Floo Network fireplace carries you to any hearth you have visited. Sold at every Floo fireplace."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A battered boot enchanted as a Portkey. Right-click to set it down and choose where it goes: for ten seconds your party may grab hold, then everyone holding on is carried there together."
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Inferi Ghoul"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Acromantula"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Venomfang Acromantula"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Broodguard"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Dark Snatcher"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Forest Troll"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Mountain Troll"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Cornish Pixie"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Enchanted Armour"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Cursed Armour Commander"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Devil's Snare"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Snare Vine"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json addons/hpmmo_sim/data/spawn_tables.json
+msgid "Fluffy"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Fluffy's Head"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Elite "
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Village Outskirts"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Forest Edge"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Snatcher Woods"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Acromantula Thicket"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Crypt Hollow"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Spider Hollow"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Smugglers' Camp"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Troll Hollow"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Highland Moor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Misty Shore"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Greenhouse Meadow"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Pitch Outskirts"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Eastern Road"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Hogsmeade Road"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Pitch Woods"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Lakeside Glade"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Dark Thicket"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Spider Woods"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Southern Barrows"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Ridge Path"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Crypt Gate"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Western Moor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Eastern Moor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Hogsmeade Heights"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Station Mist"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Fog Barrens"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Grey Marsh"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Stone Circle Summit"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Warden's Barrow"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json
+msgid "Webbed Galleries"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json
+msgid "Egg Caverns"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json
+msgid "Grak, Mountain Troll Chieftain"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "The Azkaban Warden"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json
+msgid "The Trial Warden"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json
+msgid "The Cursed Armour Commander"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json
+msgid "Webbound Seal Stone"
+msgstr ""
+
+#: addons/hpmmo_sim/data/maps.json
+msgid "Blackweb Caverns"
+msgstr ""
+
+#: addons/hpmmo_sim/data/maps.json
+msgid "Hogwarts Entrance"
+msgstr ""
+
+#: addons/hpmmo_sim/data/maps.json
+msgid "Grounds"
+msgstr ""
+
+#: addons/hpmmo_sim/data/maps.json
+msgid "the Trial Hall"
+msgstr ""
+
+#: addons/hpmmo_sim/data/maps.json
+msgid "the Forbidden Corridor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Basic Cast"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Quick wand flick releasing a sparkling bolt of magic."
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Stupefy"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Stunning spell. Hits target, deals high damage and stuns for up to 1.8 seconds."
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Incendio"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Roaring cone of magical fire. Blast damage to everything in the cone, then burns over 3 seconds. Extra damage against Inferi."
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Bombarda"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Detonates a violent concussive shockwave. Heavy AOE damage with knockback."
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Expelliarmus"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Disarming charm. Knocks back the target, interrupts casting and reduces its attack power by 35% for 5 seconds."
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Shimmering forcefield. Projectiles that strike it are reflected at their caster; all other damage is reduced by 60%."
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Avada Arcana"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Ultimate forbidden sorcery. Calls forth blinding emerald lightning that disintegrates targets in a wide blast radius."
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json addons/hpmmo_sim/data/quests.json
+msgid "Expecto Patronum"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Conjures a silver stag that charges through a wide cone. Dementors take triple damage and the stag breaks a dementor's attack, kiss included. Requires level 40."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The hall stirs - clear the corridor."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The iron gate grinds open."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The Trial Warden rises!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The trial is complete. Claim your reward."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The third-floor corridor is out of bounds... something is buzzing."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The gallery door creaks open."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The Cursed Armour Commander raises its shield - strike from behind!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Armours step down from the walls!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "More armours awaken!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The commander falls. A damp stair leads down."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Devil's Snare! Burn its vines - Incendio!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The Snare withers. Music drifts from below..."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Pixies swarm the stair!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Fluffy wakes! Play the harp to lull it to sleep."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Fluffy collapses. The trapdoor swings open - claim your reward."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Fluffy's sleeping breath rolls down the stair - brace yourself!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/travel.json
+msgid "Castle Courtyard"
+msgstr ""
+
+#: addons/hpmmo_sim/data/travel.json
+msgid "Hogsmeade Square"
+msgstr ""
+
+#: addons/hpmmo_sim/data/travel.json
+msgid "The Great Hall"
+msgstr ""
+
+#: addons/hpmmo_sim/data/travel.json
+msgid "Blackweb Camp"
+msgstr ""
+
+#: addons/hpmmo_sim/data/travel.json
+msgid "the Room of Requirement"
+msgstr ""
+
+#: addons/hpmmo_sim/data/travel.json
+msgid "Step into the Vanishing Cabinet"
+msgstr ""
+
+#: addons/hpmmo_sim/data/travel.json
+msgid "the Egg Caverns"
+msgstr ""
+
+#: addons/hpmmo_sim/data/travel.json
+msgid "the One-Eyed Witch"
+msgstr ""
+
+#: addons/hpmmo_sim/data/travel.json
+msgid "Tap the witch's hump - Dissendium!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/travel.json
+msgid "Honeydukes' cellar, Hogsmeade"
+msgstr ""
+
+#: addons/hpmmo_sim/data/travel.json
+msgid "Climb down the cellar trapdoor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "First Year"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Settle in at Hogwarts: your cloak, your first spells, your first broom."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Forest Edge"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The creatures at the forest edge grow bolder; learn the forge and the trial."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Roads to Hogsmeade"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Snatchers prowl the roads; the village needs a wand it can trust."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Crypts and Trolls"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Something stirs in the crypts and the trolls come down from their hollow."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Barrows and Webs"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The dead rise in the barrows and the Matriarch spins in her hollow."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Moors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Trolls and dark wizards hold the moors above Hogsmeade."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The third-floor corridor is out of bounds - and something guards it."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Stone and Storm"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Mountain trolls gather under Grak at the Stone Circle Summit."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Long Mist"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Dementors drift in from the shore; only a Patronus will hold them back."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "First-Year Orientation"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Speak with Professor Fig by the fountain"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Professor Fig waits beside the courtyard fountain (gold ! marker). Walk up and click to talk."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Dressed for the Grounds"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Wear the Woolen Traveller's Cloak"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Open your bag with I and right-click the cloak Professor Fig gave you. It costs a little speed and buys a lot of armour."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Wand Drills"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Hit a training dummy 5 times"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The dummies in the courtyard never hit back. Left-click to cast; your spells hurt nothing inside the safe ground."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Spiders at the Gate"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 6 Acromantulas"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Leave the courtyard for the Village Outskirts or the Pitch Outskirts. Hit one spider and its pack answers - keep moving."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Restless Dead"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 6 Inferi"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Inferi stalk the Forest Edge past Hagrid's hut. Fire (Incendio) hurts them twice as much."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Report to Hagrid at his hut"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Hagrid keeps watch over the forest from his hut west of the castle."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Thinning the Brood"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 10 Acromantulas"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The spiders breed faster than anyone can count. Greenhouse Meadow is crawling with them."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Through the Great Doors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Enter Hogwarts Castle"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Walk up the castle approach and press F in the doorway to go inside."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Your First Broom"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Collect your broom from Professor Flitwick"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "At level 5 every student gets a broom. Professor Flitwick waits at the castle approach."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Quidditch Tryouts"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Fly to the Quidditch Pitch on your broom"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Equip the broom, press Shift to mount, Space to rise and Ctrl to descend. Land on level ground and press Shift to dismount."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Ash and Bone"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 12 Inferi"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Inferi gather again at the Forest Edge and in Greenhouse Meadow."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Ollivander's Forge"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Speak with Ollivander"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Ollivander works his anvil in the courtyard. He can make a wand stronger, at a price."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "A Stronger Wand"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Refine your wand once at Ollivander"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Press O near Ollivander, drag your wand onto the anvil and refine it with Phoenix Ash and Galleons."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Eastern Road"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 12 Acromantulas"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Merchants on the Eastern Road are turning back. Clear the spiders from the verges."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Woven Magic"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Enchant an item at Ollivander"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Put any piece of gear on the anvil and use an Imbue Scroll. A failed weave still spends the scroll."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Long Road Home"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 14 Inferi"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Inferi wander onto the Eastern Road at dusk. Keep the road open."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 16 Acromantulas"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "West of the forest edge the spiders grow to the size of carts. Bring potions."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Shatter the Darkness"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Help destroy a Dark Monolith"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "A purple beam marks a Dark Monolith. Join others and break it before its waves overrun you."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Trial Hall"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Complete the Trial Hall"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Enter the Trial Hall from the courtyard portal, clear the corridor and defeat the Trial Warden."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "A Wand Worth Keeping"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Equip the Runebound Walnut Wand"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Your new wand rolls a far higher Attack and Magic Attack Value. Equip it from your bag."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Snatchers on the Road"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 10 Snatchers"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Snatchers waylay travellers on the Hogsmeade Road. They cast back - keep your distance."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Three Broomsticks"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Speak with Madam Rosmerta in Hogsmeade"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Fly east along the Hogsmeade Road. Madam Rosmerta knows every rumour in the valley."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 15 Acromantulas"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The woods behind the Quidditch Pitch are thick with webs."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 15 Inferi"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Inferi crawl out of the Black Lake at the Lakeside Glade."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 14 Snatchers"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The snatchers have a camp in the woods south of the castle. Drive them out."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Survey the Lake"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Visit the Lakeside Glade"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Hagrid wants to know how far the Inferi have spread along the shore."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Webs in the Glade"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 18 Acromantulas"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Spiders and dead share the Lakeside Glade now. Clear the spiders first."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Steel for the Road"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Refine any item twice"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Ollivander can refine cloaks, accessories and brooms as well as wands."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Breaking the Ring"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 18 Snatchers"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Rosmerta has heard the snatchers answer to a captain. Weaken them before he moves."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 18 Inferi"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Deeper in the forest an old crypt has opened. The Inferi pour out of Crypt Hollow."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Records of the Crypt"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Speak with Madam Pince"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Madam Pince keeps the records of every grave on the grounds. She waits at the castle approach."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 6 Forest Trolls"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Forest trolls hit hard and slowly. Watch for the slam and step out of it."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Sealing the Crypt"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 20 Inferi"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Keep the Inferi in Crypt Hollow from reaching the forest paths."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 16 Snatchers"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The snatchers fell back into the Dark Thicket, far to the west."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Hollow Drums"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 10 Forest Trolls"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The trolls beat drums every night. Silence them."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 20 Acromantulas"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Larger spiders hunt in the Spider Woods; something is feeding them."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Southern Barrows"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 22 Inferi"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The barrows south of the lake have broken open."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Smugglers' Camp"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Scout the Smugglers' Camp"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Find the snatcher captain's camp deep in the southern woods. Do not engage alone."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Snatcher Captain"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat the captain at the Smugglers' Camp"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Gather friends and defeat the Snatcher Captain in his camp."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Last of the Hollow"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Without the snatchers' coin the trolls of the hollow will scatter. Finish them."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 20 Snatchers"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The captain's men fled up the Ridge Path. Hunt them down."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Barrow Watch"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 24 Inferi"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Hold the Southern Barrows while Madam Pince searches her records."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Brood of the Woods"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 22 Acromantulas"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Every spider in the Spider Woods answers to one mother."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Crypt Gate to the west is the source. Thin the dead around it."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Weaving for War"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Enchant items twice"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Ollivander says no one should face the Matriarch with bare robes."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Ridge Ambush"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 22 Snatchers"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The snatchers ambush anyone who climbs the Ridge Path."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Matriarch's Guard"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 26 Acromantulas"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Clear the spiders that guard the way to Spider Hollow."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Find Spider Hollow"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Matriarch nests in Spider Hollow in the far north-west."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Matriarch"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat the Acromantula Matriarch"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Bring a party. The Matriarch's bite poisons and her brood answers her call."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Gate of Bones"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 26 Inferi"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "With the Matriarch gone, Madam Pince can finally seal the Crypt Gate."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Forge's Fire"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Refine any item three times"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The moors are harder still. Ollivander will not let you go up there half-made."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 12 Forest Trolls"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Forest trolls have climbed onto the Western Moor."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Moorland Orders"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Speak with Professor Flitwick"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Flitwick is organising the students who go up to the moors."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Trolls on the Heath"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Push the forest trolls off the Western Moor."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The heights above Hogsmeade are crawling with dark wizards."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Watchers on the Heights"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 24 Snatchers"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "They are watching the village. Make them stop."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Clearing the Heights"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 26 Snatchers"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "One last push and Hogsmeade can sleep again."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Highland Moor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Reach the Highland Moor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Mountain trolls have been seen on the Highland Moor, north of the pitch."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Mountain Trolls"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 8 Mountain Trolls"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Mountain trolls throw boulders as well as fists. Keep moving."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Boulder Throwers"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 10 Mountain Trolls"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Every troll you fell is one less marching on the castle."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Out of Bounds"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Speak with Madam Pince about the third floor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Madam Pince has found a note: the third-floor corridor is out of bounds - and guarded."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Pests of the Third Floor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 12 Cornish Pixies"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Enter the Forbidden Corridor from the castle. The pixies swarm and lift you off your feet."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Living Armour"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 8 Suits of Armour"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Enchanted suits of armour guard the corridor. Force spells shake them apart."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Cursed Commander"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat the Cursed Commander"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The commander of the armour stands at the corridor's first gate."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Burn the root of the Devil's Snare"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Fire is the answer. Burn the vines, then the root."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "More Pixies"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 16 Cornish Pixies"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The pixies on the stairs beyond the snare are worse than the first lot."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Three-Headed Dog"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat Fluffy"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Use the harp to lull the heads to sleep, then strike while they doze."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Corridor Cleared"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Complete the Forbidden Corridor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Run the corridor from the pixies to the trapdoor in one go."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "A Wand for the Storm"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Ollivander has finished a wand worthy of what comes next."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 12 Mountain Trolls"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Grak's trolls hold the Eastern Moor."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Grak's Allies"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Dark wizards march with the trolls on the Eastern Moor."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Troll Muster"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 14 Mountain Trolls"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Break the muster before it reaches the summit."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Storm Riders"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 28 Snatchers"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The dark wizards ride the storm clouds over the moor."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Phoenix Weave"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Enchant items three times"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "A Phoenix Regalia deserves its weave. Make the most of it."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Climb to the Stone Circle Summit"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Grak, the Mountain Troll Chieftain, waits at the summit."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Grak the Chieftain"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat Grak, Mountain Troll Chieftain"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Grak only appears every so often. Gather a party and be ready."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Scattering the Clans"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 16 Mountain Trolls"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Without their chieftain the clans fight among themselves. Finish them."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Deserters"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The dark wizards who marched with Grak are fleeing across the Eastern Moor."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Monolith on the Moor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "A Dark Monolith has risen where Grak fell. Break it with others."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Masterwork"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Dementors are coming. Ollivander wants every piece you own at its best."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Speak with Professor Fig about the Patronus"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Professor Fig can teach you the Patronus Charm (level 40). Dementors fear nothing else."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Misty Shore"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 10 Dementors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Dementors drift in from the Misty Shore. Their aura stops your health from recovering."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 12 Dementors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The old station is lost in the mist."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Cold Platform"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 12 more Dementors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Hold the platform until the mist lifts."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Shoreline Vigil"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 14 Dementors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Keep the Misty Shore clear for the boats."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Warmth Against the Cold"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Ollivander has a theory about weaves that resist despair."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "South of the castle the Fog Barrens have swallowed the road."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Into the Fog"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Reach the Fog Barrens"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Mark the edge of the fog so the others can follow."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Shades of the Barrens"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 16 Dementors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The deeper you go, the colder it gets."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Lights in the Fog"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 16 more Dementors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Every Patronus you cast lights the way for someone else."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Grey Marsh is where the mist begins."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Last Polish"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Ollivander wants one more look at your gear before the end."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Marsh Wardens"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 18 Dementors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Dementors circle a barrow at the far end of the marsh."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Breaking the Circle"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 18 more Dementors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Break their circle and the barrow is exposed."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Cold Heart"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 20 Dementors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Something at the heart of the marsh calls them."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Find Warden's Barrow"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The Azkaban Warden sleeps in a barrow in the marsh."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Before the Storm"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat 22 Dementors"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Clear the way to the barrow for your party."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Final Preparations"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Speak with Professor Fig"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Professor Fig has one last piece of advice before you face the Warden."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Defeat the Azkaban Warden"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Gather your strongest friends. The Warden drains hope itself."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Graduation"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Report your victory to Professor Fig"
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "The valley is safe - for now. Professor Fig is waiting to congratulate you."
+msgstr ""
+
+#: addons/hpmmo_sim/data/quests.json
+msgid "Quidditch Pitch"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Spell Power"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Critical Chance"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Piercing Hit Chance"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Strong against Dark Wizards"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Strong against Dark Creatures"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Strong against Beasts"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Strong against Enchanted Constructs"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Attack Speed"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Casting Speed"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Chance to Stun"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Chance to Slow"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Chance to Ignite"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Max Health"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Max Mana"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Melee Resistance"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Projectile Resistance"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Spell Resistance"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Block Chance"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Deflect Projectiles"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Reflect Damage"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Life Drain"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Mana Steal Chance"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Stun Immunity"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Slow Immunity"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Health Regeneration"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Mana Regeneration"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Movement Speed"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Experience Gained"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Galleons Found"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Item Drop Chance"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Mount Speed"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Magic Armour"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Damage against creatures"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Resist creatures"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "+12 Max Health per point"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "+8 Max Mana and +1 Magic Attack Value per point"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "+1 Attack Value and +3 Max Health per point"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "+0.4% Attack Speed and +0.1% Critical Chance per point"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Initiate"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Novice"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Adept"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Prefect"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Head Prefect"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Champion"
+msgstr ""
+
+#: addons/hpmmo_sim/data/combat.json
+msgid "Legend"
+msgstr ""
+
+#: data/json/houses.json
+msgid "Bravery: +15% Fire Spell Damage & +10% Critical Strike Chance"
+msgstr ""
+
+#: data/json/houses.json
+msgid "Ambition: +20% Dark Magic Damage & 10% Life Leech on Hit"
+msgstr ""
+
+#: data/json/houses.json
+msgid "Wisdom: -20% Spell Cooldowns & +25% Max Mana Pool"
+msgstr ""
+
+#: data/json/houses.json
+msgid "Loyalty: +25% Max Health & +15% Damage Reduction"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Entrance Hall"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Great Hall"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Dueling Club"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Grand Staircase"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Service Stair"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "East Corridor"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Transfiguration"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Defence Against the Dark Arts"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Charms"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Seventh-floor Corridor"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Room of Requirement"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Library"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Owlery"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Dungeon Stair"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Dungeon Crossing"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Dungeon West"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Dungeon East"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Potions"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Kitchens"
+msgstr ""
+
+#: data/json/quests.json
+msgid "Wand Awakening"
+msgstr ""
+
+#: data/json/quests.json
+msgid "Speak with Ollivander in the courtyard and practice casting your Basic Cast and Stupefy on the Training Dummies."
+msgstr ""
+
+#: data/json/quests.json
+msgid "The Whispering Woods"
+msgstr ""
+
+#: data/json/quests.json
+msgid "The Forbidden Forest is crawling with venomous Acromantulas. Defeat 5 Acromantulas to protect the castle grounds."
+msgstr ""
+
+#: data/json/quests.json
+msgid "Shatter the Dark Monolith"
+msgstr ""
+
+#: data/json/quests.json
+msgid "A corrupted Dark Monolith has emerged near the Black Lake. Gather other wizards, shatter its obsidian core, and collect the ancient drops."
+msgstr ""

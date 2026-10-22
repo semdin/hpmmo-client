@@ -1,7 +1,7 @@
 {
  "generated": "2026-10-22",
  "source_repository": "hpmmo-server",
- "source_revision": "653c2133496b293ffff15b5584590e118633340b",
+ "source_revision": "6d660221add9b061a407e4be2a472e5cb1913715",
  "note": "Generated from server/world/addons/hpmmo_sim by dev.ps1 sync-sim. Never edit these files in the client repository.",
  "files": {
   "admin.gd": "8605e27d706abc3eeafd3a7cce41de451734ff9d56652998b973fb4eacb7257c",
@@ -19,7 +19,7 @@
   "data/spawn_tables.json": "14b4ecc042fc3f5074bb8305b5008c7e326a5fba439dfa7e5b3630202a6460ff",
   "data/spells.json": "89f9b44ceffe6e1abc5c9611e2cdbec58a72e2904e5cf7e57dd8c25c0821f3ce",
   "data/travel.json": "61b4d97d35e3aed3c1d7493a587beb006d399abb28fb4dfc4566ecf3df423f35",
-  "equipment.gd": "47f7fbab0fd05e39c4dd8c9e47d329315697bb8f6638c798bab9c7ce9f150a50",
+  "equipment.gd": "1024aa50f223567dba439d28698f548e5bd4e0d519f8d03056ac686342d11c25",
   "equipment.gd.uid": "765445bf42c1853a758d612d2a279a8fd03e85ff99384e6652f69dce02ffc4b1",
   "maps.gd": "6213b3cfec27d8c3e0a1dbb80bb00507c0bb1294de779dae6178b1017921dee1",
   "maps.gd.uid": "1b4f9df15a20c39f1260abd49a6be28bd92c53929dcb06f54a683b058d56d071",
@@ -31,7 +31,7 @@
   "persistence.gd.uid": "31e56826a6ef795fcabda9561a364dccdc5155ab64e3052980230faeaaab6247",
   "protocol.gd": "4da0b862e645e78021e6aa0f14d7a3ca4b0142ec6fd8cc63de4a5d3c251573e1",
   "protocol.gd.uid": "a70d9ec3949b461eab839119233ada2d8d04e78dc04957eac0331779a7765ef3",
-  "rules.gd": "005e0407caa9d6caf0526695fde48a497ec5f5e4c2bb2d2975aec924d2740f0b",
+  "rules.gd": "7ce71f5ab1672b6cf356b619fcafa2f02ebef529704bc4cb3fc483308bb04b85",
   "rules.gd.uid": "134b46a58d7033f250bd6c8ca999b72838f72833f27d3cbc77039939361326f5",
   "snapshots.gd": "c15d459fb3ac23ea08bb6647042ecedcfc372c472cad3465d99ba42be8c2202b",
   "snapshots.gd.uid": "31a3aaa68eca08224dcfbaadcb73cff29d5b07a5bb998df20adb178d5e0eb776",

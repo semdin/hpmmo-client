@@ -105,6 +105,11 @@ def build(client):
             for n in sorted(names):
                 if n.endswith(exts):
                     files.append(os.path.relpath(os.path.join(root, n), client).replace("\\", "/"))
+    # The language catalogues project.godot lists (the world itself runs in
+    # English, but the engine loads every listed catalogue at boot).
+    for n in sorted(os.listdir(os.path.join(client, "locale"))) if os.path.isdir(os.path.join(client, "locale")) else []:
+        if n.endswith(".po"):
+            files.append("locale/" + n)
     files.append("assets/terrain/grounds_material.tres")
     files.append("assets/terrain/grounds_server_assets.tres")
     files.append("assets/textures/masonry.gdshader")

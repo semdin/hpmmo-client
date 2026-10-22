@@ -455,6 +455,7 @@ assets/vfx/tex/soft_glow_512.png
 assets/vfx/tex/star_flare_256.png
 data/json/houses.json
 data/json/quests.json
+locale/tr.po
 project.godot
 scenes/entities/loot/loot_drop.tscn
 scenes/entities/mobs/mob_acromantula.tscn
@@ -506,6 +507,7 @@ scripts/assets/pbr_kit.gd
 scripts/assets/spider_rig.gd
 scripts/assets/static_batch.gd
 scripts/autoload/game_data.gd
+scripts/autoload/i18n.gd
 scripts/autoload/network_manager.gd
 scripts/entities/broom_flight.gd
 scripts/entities/broom_grip_modifier.gd
