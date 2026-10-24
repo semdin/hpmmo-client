@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bi5731lt4m5as"
-path.s3tc="res://.godot/imported/hagrid_Hagrid_Albedo.png-81845a68f431c64174d817f934ef2279.s3tc.ctex"
-path.etc2="res://.godot/imported/hagrid_Hagrid_Albedo.png-81845a68f431c64174d817f934ef2279.etc2.ctex"
+uid="uid://cf8qrwty21jfr"
+path.s3tc="res://.godot/imported/borin_borin_normal.png-2dd2cdb780624a2e9963ee7dd53b10a7.s3tc.ctex"
+path.etc2="res://.godot/imported/borin_borin_normal.png-2dd2cdb780624a2e9963ee7dd53b10a7.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "5378ff90cd0f015fc46b74e8ea09c7bc"
+"md5": "4c32e8a5f66faa76f832625fca5e8468"
 }
 
 [deps]
 
-source_file="res://assets/models/characters/hagrid_Hagrid_Albedo.png"
-dest_files=["res://.godot/imported/hagrid_Hagrid_Albedo.png-81845a68f431c64174d817f934ef2279.s3tc.ctex", "res://.godot/imported/hagrid_Hagrid_Albedo.png-81845a68f431c64174d817f934ef2279.etc2.ctex"]
+source_file="res://assets/models/characters/borin_borin_normal.png"
+dest_files=["res://.godot/imported/borin_borin_normal.png-2dd2cdb780624a2e9963ee7dd53b10a7.s3tc.ctex", "res://.godot/imported/borin_borin_normal.png-2dd2cdb780624a2e9963ee7dd53b10a7.etc2.ctex"]
 
 [params]
 
@@ -26,7 +26,7 @@ compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

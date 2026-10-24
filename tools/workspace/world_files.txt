@@ -9,10 +9,12 @@ assets/castle/props/owl_lectern.glb
 assets/maps/spider_caverns/cavern_height.res
 assets/maps/spider_caverns/cavern_layout.json
 assets/models/characters/barbarian_texture.png
+assets/models/characters/borin.glb
+assets/models/characters/borin_borin_albedo.png
+assets/models/characters/borin_borin_eye.png
+assets/models/characters/borin_borin_normal.png
 assets/models/characters/dark_wizard.glb
 assets/models/characters/dark_wizard_rogue_texture.png
-assets/models/characters/hagrid.glb
-assets/models/characters/hagrid_Hagrid_Albedo.png
 assets/models/characters/hero_wizard.glb
 assets/models/characters/hero_wizard_hero_albedo.png
 assets/models/characters/hero_wizard_hero_normal.png

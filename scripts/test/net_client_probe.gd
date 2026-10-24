@@ -428,7 +428,7 @@ func _party_tick() -> void:
 
 # ------------------------------------------------------------------ portkey
 # Manual group-travel check (not part of multiplayer_sim): Lead invites Mate,
-# sets a Portkey down for Hagrid's hut once the party stands, Mate grabs hold;
+# sets a Portkey down for Borin's hut once the party stands, Mate grabs hold;
 # both acknowledge their transfers and record where they were set down.
 # Run with the world server's HPMMO_DEV_ITEMS=portkey_boot:1.
 
@@ -2708,7 +2708,7 @@ func _retreat_from_pack() -> void:
 # ------------------------------------------------------------------ quests
 
 ## Quest mode: the client spawns beside Professor Fig (HPMMO_DEV_SPAWN) and can
-## only ASK to talk. It asks Hagrid (across the map: must be refused), then Fig
+## only ASK to talk. It asks Borin (across the map: must be refused), then Fig
 ## (in range: the server finishes the quest - it waits to be claimed), claims
 ## it (the server pays), then talks to Fig again (nothing more may be paid).
 ## Progress is read from what the server sent back.
@@ -2743,7 +2743,7 @@ func _quest_tick() -> void:
 		0:
 			_quest_start = _quest_snapshot()
 			_record("quest_start", _quest_start.duplicate())
-			SimNet.submit_talk(player, "Hagrid")
+			SimNet.submit_talk(player, "Borin")
 		1:
 			_record("after_far_talk", _quest_snapshot())
 			SimNet.submit_talk(player, "Professor Fig")

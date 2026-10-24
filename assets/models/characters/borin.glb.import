@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dyfrnpmit3w22"
-path="res://.godot/imported/hagrid.glb-3e4266d52d79121b5b9e58fae548ca15.scn"
+uid="uid://cmpd6ueq0ukix"
+path="res://.godot/imported/borin.glb-c4972efa5f051e1cb7e9528f7c9d6998.scn"
 
 [deps]
 
-source_file="res://assets/models/characters/hagrid.glb"
-dest_files=["res://.godot/imported/hagrid.glb-3e4266d52d79121b5b9e58fae548ca15.scn"]
+source_file="res://assets/models/characters/borin.glb"
+dest_files=["res://.godot/imported/borin.glb-c4972efa5f051e1cb7e9528f7c9d6998.scn"]
 
 [params]
 

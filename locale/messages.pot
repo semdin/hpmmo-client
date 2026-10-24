@@ -904,7 +904,7 @@ msgid "A creeping plant that strangles whatever struggles. Burn its vines to rea
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
-msgid "Hagrid's three-headed dog, guarding the trapdoor. Music sends it to sleep."
+msgid "Borin's three-headed dog, guarding the trapdoor. Music sends it to sleep."
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -1560,7 +1560,7 @@ msgid "Northern Moors"
 msgstr ""
 
 #: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd addons/hpmmo_sim/data/travel.json addons/hpmmo_sim/data/quests.json
-msgid "Hagrid's Hut"
+msgid "Borin's Hut"
 msgstr ""
 
 #: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd
@@ -2800,7 +2800,7 @@ msgid "Ah, a new student! Hogwarts needs brave wizards."
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Acromantulas infest the Forbidden Forest to the west. Inferi haunt its edge, past Hagrid's hut."
+msgid "Acromantulas infest the Forbidden Forest to the west. Inferi haunt its edge, past Borin's hut."
 msgstr ""
 
 #: scripts/world/game_world.gd
@@ -2832,11 +2832,11 @@ msgid "Buy Wiggenweld before heading to the Forbidden Forest. Trust me."
 msgstr ""
 
 #: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json data/json/quests.json
-msgid "Hagrid"
+msgid "Borin"
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Yeh shouldn' go into the forest alone... brave though!"
+msgid "Don't go into that forest alone, friend... brave, though!"
 msgstr ""
 
 #: scripts/world/game_world.gd
@@ -3907,11 +3907,11 @@ msgstr ""
 msgid "Warden's Barrow"
 msgstr ""
 
-#: addons/hpmmo_sim/data/spawn_tables.json
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
 msgid "Webbed Galleries"
 msgstr ""
 
-#: addons/hpmmo_sim/data/spawn_tables.json
+#: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
 msgid "Egg Caverns"
 msgstr ""
 
@@ -4248,15 +4248,15 @@ msgid "Defeat 6 Inferi"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Inferi stalk the Forest Edge past Hagrid's hut. Fire (Incendio) hurts them twice as much."
+msgid "Inferi stalk the Forest Edge past Borin's hut. Fire (Incendio) hurts them twice as much."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Report to Hagrid at his hut"
+msgid "Report to Borin at his hut"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Hagrid keeps watch over the forest from his hut west of the castle."
+msgid "Borin Ashgrove, the forest warden, keeps watch from his hut west of the castle."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -4480,7 +4480,7 @@ msgid "Visit the Lakeside Glade"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Hagrid wants to know how far the Inferi have spread along the shore."
+msgid "Borin wants to know how far the Inferi have spread along the shore."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json

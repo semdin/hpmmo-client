@@ -2,7 +2,8 @@ extends Node
 
 ## Ad-hoc visual review of the live game world, outside a login.
 ##   godot --path . tools/capture/world_shots.tscn -- --views=<views.json> --out=<dir> [--interior] [--quality=low]
-## views.json: [["name", [x, y, z], [tx, ty, tz]], ...] in world coordinates.
+## views.json: [["name", [x, y, z], [tx, ty, tz]], ...] in world coordinates
+## (relative to an NPC's feet with a 5th element {"npc": "<name>"}).
 ## --interior builds the castle interior in place (its L0 floor is y 200).
 ## --map=<id> loads a scene map (e.g. spider_caverns) through the map controller.
 
@@ -66,13 +67,19 @@ func _ready() -> void:
 		var p: Array = v[1]
 		var t: Array = v[2]
 		var opts: Dictionary = v[4] if v.size() > 4 else {}
-		camera.global_position = Vector3(p[0], p[1], p[2])
-		camera.look_at(Vector3(t[0], t[1], t[2]))
+		# "npc": camera and target are offsets from that NPC's feet.
+		var base := Vector3.ZERO
+		if opts.has("npc"):
+			for npc in get_tree().get_nodes_in_group("npcs"):
+				if String(npc.get("npc_name")) == String(opts["npc"]):
+					base = (npc as Node3D).global_position
+		camera.global_position = base + Vector3(p[0], p[1], p[2])
+		camera.look_at(base + Vector3(t[0], t[1], t[2]))
 		var player = world.get("local_player")
 		if player != null and is_instance_valid(player):
 			if opts.has("player"):
 				var at: Array = opts["player"]
-				player.global_position = Vector3(at[0], at[1], at[2])
+				player.global_position = base + Vector3(at[0], at[1], at[2])
 				player.visible = true
 			else:
 				player.global_position = camera.global_position + Vector3(0, -1.5, 0)
