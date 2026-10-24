@@ -315,6 +315,10 @@ msgstr ""
 msgid "+%d EXP"
 msgstr ""
 
+#: scripts/entities/player.gd
+msgid "Come closer to talk."
+msgstr ""
+
 #: scripts/fx/level_up_fx.gd scripts/ui/hud_action_bar.gd scripts/ui/hud_portkey.gd scripts/ui/hud_skill_window.gd
 msgid "Level %d"
 msgstr ""
@@ -4200,7 +4204,7 @@ msgid "Speak with Professor Fig by the fountain"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Professor Fig waits beside the courtyard fountain (gold ! marker). Walk up and click to talk."
+msgid "Professor Fig waits beside the courtyard fountain (the bobbing gold arrow). Walk up and click him or press F to talk."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
