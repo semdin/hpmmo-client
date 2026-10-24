@@ -376,7 +376,7 @@
    "colour": true,
    "blend": "add",
    "blend_default": "add",
-   "purpose": "Emerald lightning explosion (Avada Arcana impact)",
+   "purpose": "Emerald lightning explosion (Dark Monolith shatter)",
    "sheet_px": [
     2048,
     2048
@@ -1004,6 +1004,62 @@
    "colour_space": "sRGB (RGB), linear (A)",
    "generator": "client/tools/vfx/build_spell_vfx.py",
    "source": "fal.ai alibaba/wan-3.0/text-to-video -> art/vfx/source/toxic_mist.mp4",
+   "method": "generated video, packed",
+   "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. Loop: the tail crossfades into the head."
+  },
+  {
+   "id": "vfx_burst_starfall",
+   "file": "atlases/burst_starfall_8x8_2k.png",
+   "path": "atlases/burst_starfall_8x8_2k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 256,
+   "frames": 64,
+   "fps": 17,
+   "loop": false,
+   "colour": true,
+   "blend": "add",
+   "blend_default": "add",
+   "purpose": "White-gold flash, violet star ring breaking into stardust (Stella Ruina impact; Wan 3.0 first/last frame)",
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "cell_px": 256,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "generator": "client/tools/vfx/build_spell_vfx.py",
+   "source": "fal.ai alibaba/wan-3.0/text-to-video -> art/vfx/source/starfall_impact.mp4",
+   "method": "generated video, packed",
+   "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. One-shot: ends on an empty frame."
+  },
+  {
+   "id": "vfx_starfall_orb",
+   "file": "atlases/starfall_orb_8x8_1k.png",
+   "path": "atlases/starfall_orb_8x8_1k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 128,
+   "frames": 64,
+   "fps": 22,
+   "loop": true,
+   "colour": true,
+   "blend": "add",
+   "blend_default": "add",
+   "purpose": "Pulsing white-gold star core in a violet aura, seamless loop (Stella Ruina bolt core)",
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "cell_px": 128,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "generator": "client/tools/vfx/build_spell_vfx.py",
+   "source": "fal.ai alibaba/wan-3.0/text-to-video -> art/vfx/source/starfall_orb.mp4",
    "method": "generated video, packed",
    "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. Loop: the tail crossfades into the head."
   }

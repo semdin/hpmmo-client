@@ -4004,11 +4004,11 @@ msgid "Shimmering forcefield. Projectiles that strike it are reflected at their 
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Avada Arcana"
+msgid "Stella Ruina"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Ultimate forbidden sorcery. Calls forth blinding emerald lightning that disintegrates targets in a wide blast radius."
+msgid "Ultimate star sorcery. Calls down a falling star that bursts into a violet ring of starlight, scorching everything in a wide blast radius."
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json addons/hpmmo_sim/data/quests.json

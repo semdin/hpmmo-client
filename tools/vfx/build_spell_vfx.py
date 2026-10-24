@@ -42,7 +42,13 @@ ATLASES = [
     ("vfx_burst_crimson", "crimson_burst.mp4", "atlases/burst_crimson_8x8_1k.png", {"cell": 128, "inner": 0.62}, "add",
      "Magenta spiral vortex (Expelliarmus impact)"),
     ("vfx_burst_green", "green_burst.mp4", "atlases/burst_green_8x8_2k.png", {"cell": 256, "inner": 0.62}, "add",
-     "Emerald lightning explosion (Avada Arcana impact)"),
+     "Emerald lightning explosion (Dark Monolith shatter)"),
+    # start 14: skip the spark's swell so the first frame is already the flash
+    # (the damage numbers land on the impact frame).
+    ("vfx_burst_starfall", "starfall_impact.mp4", "atlases/burst_starfall_8x8_2k.png", {"cell": 256, "inner": 0.9, "start": 14}, "add",
+     "White-gold flash, violet star ring breaking into stardust (Stella Ruina impact; Wan 3.0 first/last frame)"),
+    ("vfx_starfall_orb", "starfall_orb.mp4", "atlases/starfall_orb_8x8_1k.png", {"cell": 128, "loop": True, "start": 0, "end": 88}, "add",
+     "Pulsing white-gold star core in a violet aura, seamless loop (Stella Ruina bolt core)"),
     ("vfx_ripple_blue", "blue_ripple.mp4", "atlases/ripple_blue_8x8_1k.png", {"cell": 128, "inner": 0.7}, "add",
      "Blue force-field ripple ring (Protego cast and deflection)"),
     ("vfx_shockwave", "shockwave.mp4", "atlases/shockwave_8x8_1k.png", {"cell": 128, "mono": True, "inner": 0.85}, "add",

@@ -416,6 +416,7 @@ assets/vfx/atlases/burst_crimson_8x8_1k.png
 assets/vfx/atlases/burst_gold_8x8_1k.png
 assets/vfx/atlases/burst_green_8x8_2k.png
 assets/vfx/atlases/burst_red_8x8_1k.png
+assets/vfx/atlases/burst_starfall_8x8_2k.png
 assets/vfx/atlases/cabinet_smoke_8x8_1k.png
 assets/vfx/atlases/cave_spores_8x8_1k.png
 assets/vfx/atlases/energy_orb_8x8_1k.png
@@ -435,6 +436,7 @@ assets/vfx/atlases/rune_masks_2x2_1k.png
 assets/vfx/atlases/shockwave_8x8_1k.png
 assets/vfx/atlases/smoke_puff_8x8_1k.png
 assets/vfx/atlases/spark_burst_8x8_1k.png
+assets/vfx/atlases/starfall_orb_8x8_1k.png
 assets/vfx/atlases/toxic_mist_8x8_1k.png
 assets/vfx/atlases/wand_flash_8x8_1k.png
 assets/vfx/flame_01.png
