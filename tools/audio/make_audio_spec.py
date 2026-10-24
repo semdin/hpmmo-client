@@ -179,6 +179,7 @@ MON = {
     "inferi": ("an undead drowned corpse creature", "hollow wet moan", "grasping lunge with a rotten gurgle", "long wet collapsing exhale"),
     "snatcher": ("a hooded dark wizard bandit", "rasping snarl as he spots prey", "lunging curse with a nasty grunt", "choked rasp and body collapse"),
     "spider": ("a giant spider", "agitated hiss and chitin clicking", "fast venomous bite snap with a hiss", "chitin crunch and expiring hiss, legs twitching"),
+    "goblin": ("a small sly goblin bank guard", "sharp nasal hiss of outrage, no words", "quick claw swipe with a vicious little snarl", "strangled shriek and a jingle of spilled gold coins"),
 }
 for name, (who, alert, attack, death) in MON.items():
     gain = -6.0
@@ -190,6 +191,7 @@ MOVES = {
     "inferi": ["slow shuffling wet footsteps with a low moan", "a gurgling groan while dragging its feet", "a raspy breath and wet shuffle"],
     "snatcher": ["rasping breath and quick boot steps", "a low mutter-less growl and cloak swish", "heavy breathing while running"],
     "spider": ["many legs skittering fast on the ground", "chitin legs clicking while crawling", "quick hairy legs scuttling"],
+    "goblin": ["quick light footsteps and jingling keys", "a wordless muttering hiss and soft footsteps", "fast pattering little feet with coins clinking"],
 }
 for name, lines in MOVES.items():
     for i, t in enumerate(lines, 1):

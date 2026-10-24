@@ -1269,6 +1269,39 @@
    "pv": 0.06,
    "text": "Fantasy game monster death: a giant spider, chitin crunch and expiring hiss, legs twitching, no music, no voice"
   },
+  "goblin_alert": {
+   "kind": "sfx",
+   "path": "assets/audio/monsters/goblin_alert.wav",
+   "seconds": 1.5,
+   "loop": false,
+   "bus": "sfx",
+   "gain_db": -6.0,
+   "spatial": true,
+   "pv": 0.06,
+   "text": "Fantasy game monster: a small sly goblin bank guard, sharp nasal hiss of outrage, no words, no music, no voice"
+  },
+  "goblin_attack": {
+   "kind": "sfx",
+   "path": "assets/audio/monsters/goblin_attack.wav",
+   "seconds": 0.8,
+   "loop": false,
+   "bus": "sfx",
+   "gain_db": -6.0,
+   "spatial": true,
+   "pv": 0.06,
+   "text": "Fantasy game monster: a small sly goblin bank guard, quick claw swipe with a vicious little snarl, short, no music, no voice"
+  },
+  "goblin_death": {
+   "kind": "sfx",
+   "path": "assets/audio/monsters/goblin_death.wav",
+   "seconds": 2.0,
+   "loop": false,
+   "bus": "sfx",
+   "gain_db": -6.0,
+   "spatial": true,
+   "pv": 0.06,
+   "text": "Fantasy game monster death: a small sly goblin bank guard, strangled shriek and a jingle of spilled gold coins, no music, no voice"
+  },
   "inferi_move_1": {
    "kind": "sfx",
    "path": "assets/audio/monsters/inferi_move_01.wav",
@@ -1367,6 +1400,39 @@
    "spatial": true,
    "pv": 0.08,
    "text": "Fantasy game monster: a giant spider, quick hairy legs scuttling, very short, no music, no voice"
+  },
+  "goblin_move_1": {
+   "kind": "sfx",
+   "path": "assets/audio/monsters/goblin_move_01.wav",
+   "seconds": 0.8,
+   "loop": false,
+   "bus": "sfx",
+   "gain_db": -14.0,
+   "spatial": true,
+   "pv": 0.08,
+   "text": "Fantasy game monster: a small sly goblin bank guard, quick light footsteps and jingling keys, very short, no music, no voice"
+  },
+  "goblin_move_2": {
+   "kind": "sfx",
+   "path": "assets/audio/monsters/goblin_move_02.wav",
+   "seconds": 0.8,
+   "loop": false,
+   "bus": "sfx",
+   "gain_db": -14.0,
+   "spatial": true,
+   "pv": 0.08,
+   "text": "Fantasy game monster: a small sly goblin bank guard, a wordless muttering hiss and soft footsteps, very short, no music, no voice"
+  },
+  "goblin_move_3": {
+   "kind": "sfx",
+   "path": "assets/audio/monsters/goblin_move_03.wav",
+   "seconds": 0.8,
+   "loop": false,
+   "bus": "sfx",
+   "gain_db": -14.0,
+   "spatial": true,
+   "pv": 0.08,
+   "text": "Fantasy game monster: a small sly goblin bank guard, fast pattering little feet with coins clinking, very short, no music, no voice"
   },
   "boss_alert": {
    "kind": "sfx",

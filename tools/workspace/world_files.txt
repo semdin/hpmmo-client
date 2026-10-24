@@ -197,6 +197,10 @@ assets/models/monsters/dementor.glb
 assets/models/monsters/dementor_warden.glb
 assets/models/monsters/devils_snare.glb
 assets/models/monsters/fluffy.glb
+assets/models/monsters/goblin_guard.glb
+assets/models/monsters/goblin_teller.glb
+assets/models/monsters/inferius.glb
+assets/models/monsters/inferius_warden.glb
 assets/models/monsters/troll_forest.glb
 assets/models/monsters/troll_mountain.glb
 assets/models/props/broom_flight.glb
@@ -475,7 +479,10 @@ scenes/entities/mobs/mob_dementor.tscn
 scenes/entities/mobs/mob_devils_snare.tscn
 scenes/entities/mobs/mob_fluffy.tscn
 scenes/entities/mobs/mob_fluffy_head.tscn
+scenes/entities/mobs/mob_goblin_guard.tscn
+scenes/entities/mobs/mob_goblin_teller.tscn
 scenes/entities/mobs/mob_inferi.tscn
+scenes/entities/mobs/mob_inferi_warden.tscn
 scenes/entities/mobs/mob_snare_vine.tscn
 scenes/entities/mobs/mob_troll_forest.tscn
 scenes/entities/mobs/mob_troll_mountain.tscn

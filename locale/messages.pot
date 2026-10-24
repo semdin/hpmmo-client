@@ -868,7 +868,19 @@ msgid "[%s] %s\n%s\nDrag to move or swap; drag off the bar or right-click to cle
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
-msgid "Corpses bewitched to serve a dark wizard. Slow, relentless and terrified of fire."
+msgid "Drowned corpses bewitched to serve a dark wizard. Slow, relentless and terrified of fire."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Inferi raised from a cursed lake to guard what lies beneath. Their cold grip drags you down; fire still breaks them."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Goblin clerks of the wizarding bank, out collecting debts. They count every Knut and carry a heavy purse."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Vault guards in goblin-wrought silver. Shoving, stubborn and well paid; what they carry is rarely ordinary."
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -993,6 +1005,10 @@ msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
 msgid "Spider"
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
+msgid "Goblin"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/spawn_tables.json
@@ -3748,7 +3764,7 @@ msgid "A battered boot enchanted as a Portkey. Right-click to set it down and ch
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
-msgid "Inferi Ghoul"
+msgid "Drowned Inferius"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
@@ -3801,6 +3817,18 @@ msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
 msgid "Fluffy's Head"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Inferius Lake Warden"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Goblin Teller"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Goblin Vault Guard"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
