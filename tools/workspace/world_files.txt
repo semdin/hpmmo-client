@@ -413,6 +413,7 @@ assets/textures/pbr/wooden_planks/wooden_planks_rough_2k.jpg
 assets/vfx/atlases/broom_mist_8x8_1k.png
 assets/vfx/atlases/broom_motes_8x8_1k.png
 assets/vfx/atlases/burst_crimson_8x8_1k.png
+assets/vfx/atlases/burst_glacius_8x8_2k.png
 assets/vfx/atlases/burst_gold_8x8_1k.png
 assets/vfx/atlases/burst_green_8x8_2k.png
 assets/vfx/atlases/burst_red_8x8_1k.png
@@ -426,6 +427,7 @@ assets/vfx/atlases/fire_orb_8x8_1k.png
 assets/vfx/atlases/flame_loop_8x8_1k.png
 assets/vfx/atlases/floo_column_8x8_2k.png
 assets/vfx/atlases/floo_powder_8x8_1k.png
+assets/vfx/atlases/glacius_orb_8x8_1k.png
 assets/vfx/atlases/ground_marks_2x2_1k.png
 assets/vfx/atlases/levelup_pillar_8x8_1k.png
 assets/vfx/atlases/levelup_spiral_8x8_1k.png

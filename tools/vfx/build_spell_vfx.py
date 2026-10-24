@@ -47,6 +47,10 @@ ATLASES = [
     # (the damage numbers land on the impact frame).
     ("vfx_burst_starfall", "starfall_impact.mp4", "atlases/burst_starfall_8x8_2k.png", {"cell": 256, "inner": 0.9, "start": 14}, "add",
      "White-gold flash, violet star ring breaking into stardust (Stella Ruina impact; Wan 3.0 first/last frame)"),
+    ("vfx_burst_glacius", "glacius_impact.mp4", "atlases/burst_glacius_8x8_2k.png", {"cell": 256, "inner": 0.88}, "add",
+     "Frost nova: ice shards shatter and melt into frost dust (Glacius impact; Wan 3.0 peak -> black, starts at the peak)"),
+    ("vfx_glacius_orb", "glacius_orb.mp4", "atlases/glacius_orb_8x8_1k.png", {"cell": 128, "loop": True, "start": 0, "end": 88}, "add",
+     "Spinning ice crystal with orbiting shards, seamless loop (Glacius bolt core)"),
     ("vfx_starfall_orb", "starfall_orb.mp4", "atlases/starfall_orb_8x8_1k.png", {"cell": 128, "loop": True, "start": 0, "end": 88}, "add",
      "Pulsing white-gold star core in a violet aura, seamless loop (Stella Ruina bolt core)"),
     ("vfx_ripple_blue", "blue_ripple.mp4", "atlases/ripple_blue_8x8_1k.png", {"cell": 128, "inner": 0.7}, "add",

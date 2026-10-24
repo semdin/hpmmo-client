@@ -113,3 +113,6 @@ template as the 2026-10-13 menu set, text prompt only (no input image).
 * `icon_ultimate.png` (2026-10-24, Stella Ruina; replaces the fire-lion House Ultimate art) - `fal-ai/nano-banana-2.1`
   full-bleed icon template (white-gold falling star over a violet spiral ring of starlight), 512 px.
   Source `art/vfx/stella_ruina/icon_b.png`.
+* `icon_glacius.png` (2026-10-24, Glacius) - `openai/gpt-image-2.5/sunburst/edit` with `icon_stupefy.png` and
+  `icon_ultimate.png` as style references (pale-blue ice crystal bursting into a ring of frost shards
+  on deep blue), resized from 1024 to 512 px. Source `art/vfx/glacius/icon_a.png`.

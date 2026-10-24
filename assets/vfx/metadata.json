@@ -1062,6 +1062,62 @@
    "source": "fal.ai alibaba/wan-3.0/text-to-video -> art/vfx/source/starfall_orb.mp4",
    "method": "generated video, packed",
    "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. Loop: the tail crossfades into the head."
+  },
+  {
+   "id": "vfx_burst_glacius",
+   "file": "atlases/burst_glacius_8x8_2k.png",
+   "path": "atlases/burst_glacius_8x8_2k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 256,
+   "frames": 64,
+   "fps": 22,
+   "loop": false,
+   "colour": true,
+   "blend": "add",
+   "blend_default": "add",
+   "purpose": "Frost nova: ice shards shatter and melt into frost dust (Glacius impact; Wan 3.0 peak -> black, starts at the peak)",
+   "sheet_px": [
+    2048,
+    2048
+   ],
+   "cell_px": 256,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "generator": "client/tools/vfx/build_spell_vfx.py",
+   "source": "fal.ai alibaba/wan-3.0/text-to-video -> art/vfx/source/glacius_impact.mp4",
+   "method": "generated video, packed",
+   "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. One-shot: ends on an empty frame."
+  },
+  {
+   "id": "vfx_glacius_orb",
+   "file": "atlases/glacius_orb_8x8_1k.png",
+   "path": "atlases/glacius_orb_8x8_1k.png",
+   "cols": 8,
+   "rows": 8,
+   "cell": 128,
+   "frames": 64,
+   "fps": 22,
+   "loop": true,
+   "colour": true,
+   "blend": "add",
+   "blend_default": "add",
+   "purpose": "Spinning ice crystal with orbiting shards, seamless loop (Glacius bolt core)",
+   "sheet_px": [
+    1024,
+    1024
+   ],
+   "cell_px": 128,
+   "padding_px": 4,
+   "frame_order": "row-major, frame 0 at the top-left cell",
+   "alpha": "straight (non-premultiplied); coverage in A, linear",
+   "colour_space": "sRGB (RGB), linear (A)",
+   "generator": "client/tools/vfx/build_spell_vfx.py",
+   "source": "fal.ai alibaba/wan-3.0/text-to-video -> art/vfx/source/glacius_orb.mp4",
+   "method": "generated video, packed",
+   "note": "Generated on a pure black background; luminance is the coverage, colour is un-premultiplied. Loop: the tail crossfades into the head."
   }
  ]
 }

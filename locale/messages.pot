@@ -1484,6 +1484,10 @@ msgid "Already mastered"
 msgstr ""
 
 #: scripts/ui/hud_skill_window.gd
+msgid "Your level is too low for this spell"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
 msgid "Cannot train that now"
 msgstr ""
 
@@ -2513,6 +2517,14 @@ msgstr ""
 
 #: scripts/ui/settings_ui.gd
 msgid "Spell slot E"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Spell slot 5"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Spell slot 6"
 msgstr ""
 
 #: scripts/ui/settings_ui.gd
@@ -4017,6 +4029,14 @@ msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
 msgid "Conjures a silver stag that charges through a wide cone. Dementors take triple damage and the stag breaks a dementor's attack, kiss included. Requires level 40."
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Glacius"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spells.json
+msgid "Frost nova. Hurls a spinning ice crystal that bursts into shards and freezing mist, freezing every enemy in the blast for up to 1.6 seconds. Requires level 20."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
