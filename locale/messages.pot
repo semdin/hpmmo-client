@@ -211,7 +211,7 @@ msgstr ""
 msgid "A brave Wizard"
 msgstr ""
 
-#: scripts/entities/monolith/dark_monolith.gd scripts/ui/hud.gd scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd addons/hpmmo_sim/data/spawn_tables.json
+#: scripts/entities/monolith/dark_monolith.gd scripts/ui/hud.gd scripts/ui/mmorpg_overlay.gd addons/hpmmo_sim/data/spawn_tables.json
 msgid "Dark Monolith"
 msgstr ""
 
@@ -833,6 +833,10 @@ msgstr ""
 
 #: scripts/ui/hud.gd scripts/ui/inventory_arcane.gd
 msgid "Wait until the map loads."
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "Your bag is full: the rest of the quest reward waits in a chest at your feet."
 msgstr ""
 
 #: scripts/ui/hud.gd
@@ -1733,6 +1737,10 @@ msgstr ""
 
 #: scripts/ui/hud_world_map.gd
 msgid "Showing %s (red marks)  ·  "
+msgstr ""
+
+#: scripts/ui/hud_world_map.gd addons/hpmmo_sim/data/maps.json
+msgid "Blackweb Caverns"
 msgstr ""
 
 #: scripts/ui/hud_world_map.gd
@@ -2984,7 +2992,7 @@ msgid "Acromantulas infest the Forbidden Forest to the west. Inferi haunt its ed
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Dark Monoliths fall in the western forests: follow the tall green light, or find them on your map (M)."
+msgid "Dark Monoliths fall in the western forests, from the Forest Edge past Borin's hut to Snatcher Woods in the north-west. Close by, you will see their green light."
 msgstr ""
 
 #: scripts/world/game_world.gd
@@ -4140,10 +4148,6 @@ msgid "Webbound Seal Stone"
 msgstr ""
 
 #: addons/hpmmo_sim/data/maps.json
-msgid "Blackweb Caverns"
-msgstr ""
-
-#: addons/hpmmo_sim/data/maps.json
 msgid "Hogwarts Entrance"
 msgstr ""
 
@@ -4608,7 +4612,7 @@ msgid "Help destroy a Dark Monolith"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Dark Monoliths fall in the western forests (Forest Edge, Acromantula Thicket, Snatcher Woods, Crypt Hollow). Follow the tall green light or find them on your map (M), then break one with others before its waves overrun you."
+msgid "Dark Monoliths fall in the western forests: at the Forest Edge past Borin's hut, in the Acromantula Thicket beyond it, in Snatcher Woods to the north-west and in Crypt Hollow far to the west. Close by, a green light rises over the trees. Break one with others before its waves overrun you."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
