@@ -2944,11 +2944,23 @@ msgid "Server time (GMT+3)"
 msgstr ""
 
 #: scripts/world/day_night.gd
-msgid "Always day"
+msgid "Always dawn (Sabah)"
 msgstr ""
 
 #: scripts/world/day_night.gd
-msgid "Always night"
+msgid "Always noon (Öğle)"
+msgstr ""
+
+#: scripts/world/day_night.gd
+msgid "Always afternoon (İkindi)"
+msgstr ""
+
+#: scripts/world/day_night.gd
+msgid "Always sunset (Akşam)"
+msgstr ""
+
+#: scripts/world/day_night.gd
+msgid "Always night (Yatsı)"
 msgstr ""
 
 #: scripts/world/dungeon_director.gd
