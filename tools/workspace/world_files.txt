@@ -198,6 +198,7 @@ assets/models/monsters/dementor_warden.glb
 assets/models/monsters/devils_snare.glb
 assets/models/monsters/fluffy.glb
 assets/models/monsters/goblin_guard.glb
+assets/models/monsters/goblin_hexer.glb
 assets/models/monsters/goblin_teller.glb
 assets/models/monsters/inferius.glb
 assets/models/monsters/inferius_warden.glb
@@ -480,6 +481,7 @@ scenes/entities/mobs/mob_devils_snare.tscn
 scenes/entities/mobs/mob_fluffy.tscn
 scenes/entities/mobs/mob_fluffy_head.tscn
 scenes/entities/mobs/mob_goblin_guard.tscn
+scenes/entities/mobs/mob_goblin_hexer.tscn
 scenes/entities/mobs/mob_goblin_teller.tscn
 scenes/entities/mobs/mob_inferi.tscn
 scenes/entities/mobs/mob_inferi_warden.tscn

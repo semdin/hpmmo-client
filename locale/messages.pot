@@ -884,6 +884,10 @@ msgid "Vault guards in goblin-wrought silver. Shoving, stubborn and well paid; w
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
+msgid "Goblin magic needs no wand. Hexers walk with the tellers and the guards and blast debtors off their feet with bare hands."
+msgstr ""
+
+#: scripts/ui/hud_bestiary.gd
 msgid "Giant spiders of the Forbidden Forest, bred from Aragog's line. They hunt in packs."
 msgstr ""
 
@@ -3829,6 +3833,10 @@ msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
 msgid "Goblin Vault Guard"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Goblin Hexer"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
