@@ -8,6 +8,18 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: scripts/autoload/i18n.gd
+msgid "%s is now a GA."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "%s is no longer a GA."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "GAs: %s"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
 msgid "No player called '%s' is online."
 msgstr ""
 
@@ -61,6 +73,30 @@ msgstr ""
 
 #: scripts/autoload/i18n.gd
 msgid "A new %s has manifested in the realm!"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Rain started."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Rain stopped."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Only a GA can use /ga."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Usage: /ga add Name"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Usage: /ga remove Name"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "GA: /ga rain on|off, /ga add Name, /ga remove Name, /ga list"
 msgstr ""
 
 #: scripts/autoload/i18n.gd

@@ -251,6 +251,7 @@ assets/shaders/loot/chest_beam.gdshader
 assets/shaders/loot/chest_pool.gdshader
 assets/shaders/loot/chest_rim.gdshader
 assets/shaders/safe_ward.gdshader
+assets/shaders/sky_day_night.gdshader
 assets/shaders/slime_pool.gdshader
 assets/shaders/spell_layer.gdshader
 assets/shaders/spell_layer_add.gdshader
