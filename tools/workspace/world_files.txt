@@ -549,6 +549,7 @@ scripts/fx/fire_card.gd
 scripts/fx/flipbook_fx.gd
 scripts/fx/level_up_fx.gd
 scripts/fx/monolith_shatter.gd
+scripts/fx/status_fx.gd
 scripts/server/db_manager.gd
 scripts/server/dedicated_server.gd
 scripts/server/test_character.gd

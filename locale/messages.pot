@@ -248,6 +248,14 @@ msgid "Space rises · Ctrl descends · Shift dismounts on level ground."
 msgstr ""
 
 #: scripts/entities/player.gd
+msgid "You were knocked off your feet!"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "You are frozen!"
+msgstr ""
+
+#: scripts/entities/player.gd
 msgid "Not while mounted!"
 msgstr ""
 
@@ -325,6 +333,38 @@ msgstr ""
 
 #: scripts/fx/level_up_fx.gd
 msgid "Level up"
+msgstr ""
+
+#: scripts/fx/status_fx.gd
+msgid "Stunned!"
+msgstr ""
+
+#: scripts/fx/status_fx.gd
+msgid "Frozen!"
+msgstr ""
+
+#: scripts/fx/status_fx.gd
+msgid "Slowed"
+msgstr ""
+
+#: scripts/fx/status_fx.gd scripts/ui/hud_buff_bar.gd
+msgid "Bleeding"
+msgstr ""
+
+#: scripts/fx/status_fx.gd scripts/ui/hud_buff_bar.gd
+msgid "Burning"
+msgstr ""
+
+#: scripts/fx/status_fx.gd scripts/ui/hud_buff_bar.gd
+msgid "Poisoned"
+msgstr ""
+
+#: scripts/fx/status_fx.gd
+msgid "Knocked back!"
+msgstr ""
+
+#: scripts/fx/status_fx.gd
+msgid "Disarmed"
 msgstr ""
 
 #: scripts/systems/quest_manager.gd
@@ -605,18 +645,6 @@ msgstr ""
 
 #: scripts/ui/hit_feedback.gd
 msgid "Critical"
-msgstr ""
-
-#: scripts/ui/hit_feedback.gd scripts/ui/hud_buff_bar.gd
-msgid "Stunned"
-msgstr ""
-
-#: scripts/ui/hit_feedback.gd
-msgid "Slowed"
-msgstr ""
-
-#: scripts/ui/hit_feedback.gd
-msgid "Ignited"
 msgstr ""
 
 #: scripts/ui/hud.gd
@@ -1076,7 +1104,31 @@ msgid "from Lv %d"
 msgstr ""
 
 #: scripts/ui/hud_buff_bar.gd
-msgid "You cannot act."
+msgid "Stunned"
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "You cannot cast or move."
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Knocked back"
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Thrown off your feet: no casting until you land."
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Frozen"
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Encased in ice: you cannot cast or move."
+msgstr ""
+
+#: scripts/ui/hud_buff_bar.gd
+msgid "Losing health over time."
 msgstr ""
 
 #: scripts/ui/hud_buff_bar.gd
@@ -1088,15 +1140,7 @@ msgid "A dementor's cold: no natural health recovery."
 msgstr ""
 
 #: scripts/ui/hud_buff_bar.gd
-msgid "Poisoned"
-msgstr ""
-
-#: scripts/ui/hud_buff_bar.gd
 msgid "Spider venom: damage over time."
-msgstr ""
-
-#: scripts/ui/hud_buff_bar.gd
-msgid "Burning"
 msgstr ""
 
 #: scripts/ui/hud_buff_bar.gd
@@ -1537,6 +1581,38 @@ msgstr ""
 
 #: scripts/ui/hud_skill_window.gd
 msgid "Mana %d  ·  Cooldown %.1fs"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Stun %.1fs"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Throws enemies, knocked down %.1fs"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Knocks enemies back"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Freeze %.1fs"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Slow %d%% for %.1fs"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Bleed %d x %d"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Burn %d x %d"
+msgstr ""
+
+#: scripts/ui/hud_skill_window.gd
+msgid "Disarm %.1fs"
 msgstr ""
 
 #: scripts/ui/hud_tracker.gd
@@ -4036,7 +4112,7 @@ msgid "Bombarda"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Detonates a violent concussive shockwave. Heavy AOE damage with knockback."
+msgid "Detonates a violent concussive shockwave. Heavy AOE damage; enemies in the blast are thrown through the air and lie stunned for a moment where they land."
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
@@ -4056,7 +4132,7 @@ msgid "Stella Ruina"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Ultimate star sorcery. Calls down a falling star that bursts into a violet ring of starlight, scorching everything in a wide blast radius."
+msgid "Ultimate star sorcery. Calls down a falling star that bursts into a violet ring of starlight, scorching everything in a wide blast radius; its shards leave every enemy hit bleeding for 4 seconds."
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json addons/hpmmo_sim/data/quests.json
@@ -4064,7 +4140,7 @@ msgid "Expecto Patronum"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Conjures a silver stag that charges through a wide cone. Dementors take triple damage and the stag breaks a dementor's attack, kiss included. Requires level 40."
+msgid "Conjures a silver stag that charges through a wide cone. Dementors take triple damage and the stag breaks a dementor's attack, kiss included; everything it charges through is slowed by 40% for 3 seconds. Requires level 40."
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
@@ -4072,7 +4148,7 @@ msgid "Glacius"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Frost nova. Hurls a spinning ice crystal that bursts into shards and freezing mist, freezing every enemy in the blast for up to 1.6 seconds. Requires level 20."
+msgid "Frost nova. Hurls a spinning ice crystal that bursts into shards and freezing mist, freezing every enemy in the blast solid for up to 1.6 seconds; thawed enemies stay chilled and slowed for 2.5 seconds. Requires level 20."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
