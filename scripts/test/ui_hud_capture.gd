@@ -8,8 +8,10 @@ extends Node
 ##
 ## Shoots the HUD in combat (target frame, cast bar, status icons, toasts),
 ## in the castle (indoor floor label, staircase warning, travel UI), during a
-## maintenance countdown, and in the onboarding flow; plus the settings screen.
-## Every shot is written to res://tools/downloads/ui-<subject>.png.
+## maintenance countdown, and in the onboarding flow; plus the settings screen
+## and the social layer (invitation cards, player menu, duel countdown, plaque
+## and result). Every shot is written to res://tools/downloads/ui-<subject>.png.
+## `-- --only=social` shoots just the social layer.
 ##
 ## The gameplay state each shot shows is staged through the same authoritative
 ## payloads the server sends (`SimAuthority.stats_changed`,
@@ -29,12 +31,19 @@ func _ready() -> void:
 	_camera.fov = 65.0
 	world.add_child(_camera)
 	# The game camera keeps rendering; this one is only used to frame shots.
+	if OS.get_cmdline_user_args().has("--only=social"):
+		await _capture_social()
+		world.queue_free()
+		await get_tree().process_frame
+		get_tree().quit()
+		return
 	await _capture_combat()
 	await _capture_castle()
 	await _capture_maintenance()
 	await _capture_onboarding()
 	await _capture_mounted()
 	await _capture_settings()
+	await _capture_social()
 	_report_layout()
 	world.queue_free()
 	await get_tree().process_frame
@@ -204,6 +213,76 @@ func _capture_settings() -> void:
 	_save("ui-settings.png")
 	print("UI CAPTURE settings: open=%s" % hud.settings.is_open())
 	hud.settings.close()
+
+## ---------------------------------------------------------------- social
+
+## Invitation cards, the right-click player menu and a duel (countdown, group
+## plaque with a beaten duelist, result), staged through the same signals the
+## server's v27 messages raise.
+func _capture_social() -> void:
+	var hud = world.hud
+	var player = world.local_player
+	var uid: int = hud.binder.local_uid()
+	player.global_position = Vector3(-70, 0.15, 25)
+	player.velocity = Vector3.ZERO
+	await get_tree().create_timer(5.0).timeout   # the zone banner of the arrival fades
+	player.global_position = Vector3(-70, 0.15, 25)
+	_frame(player.global_position + Vector3(0, 1.2, 0), player.global_position + Vector3(-4.0, 3.2, 8.0))
+	SimAuthority.party_invited.emit(uid, "Hermione")
+	SimAuthority.duel_invited.emit(uid, "Draco", false, 1)
+	SimAuthority.duel_invited.emit(uid, "Cedric", true, 4)
+	var foe := FakeWizard.new()
+	world.add_child(foe)
+	foe.global_position = player.global_position + Vector3(2, 0, -3)
+	if hud.skill_pick != null:
+		hud.skill_pick.visible = false   # a fresh character's first-spell pick
+	get_viewport().warp_mouse(get_viewport().get_visible_rect().size * Vector2(0.62, 0.5))
+	hud.player_menu.open(foe)
+	await get_tree().create_timer(0.6).timeout
+	await RenderingServer.frame_post_draw
+	_save("ui-social-invites.png")
+	print("UI CAPTURE social invites: %s menu=%s" % [hud.invites.pending(), hud.player_menu.is_open()])
+	print("UI CAPTURE social layout: invites size=%s stack=%s/%s vp=%s card0=%s" % [hud.invites.size, hud.invites._stack.position, hud.invites._stack.size, hud.invites.get_viewport_rect().size, hud.invites._stack.get_child(0).size])
+	hud.player_menu.close()
+	for card in hud.invites._stack.get_children():
+		card.queue_free()
+	var center: Vector3 = player.global_position + Vector3(0, 0, -6)
+	var base := {"duel_id": 7, "group": true, "center": center, "radius": 40.0,
+		"allies": [{"uid": uid, "name": String(player.player_name)}, {"uid": 9001, "name": "Luna"}],
+		"foes": [{"uid": 9002, "name": "Draco"}, {"uid": 9003, "name": "Goyle"}], "out": []}
+	var countdown := base.duplicate()
+	countdown["phase"] = "countdown"
+	countdown["fight_in_ms"] = 2600
+	countdown["ends_in_ms"] = 302600
+	SimAuthority.duel_state.emit(uid, countdown)
+	await get_tree().create_timer(0.25).timeout
+	_frame(player.global_position + Vector3(0, 1.2, -4), player.global_position + Vector3(-9.0, 6.0, 14.0))
+	await RenderingServer.frame_post_draw
+	_save("ui-social-duel-countdown.png")
+	var fight := base.duplicate()
+	fight["phase"] = "fight"
+	fight["fight_in_ms"] = 0
+	fight["ends_in_ms"] = 271000
+	fight["out"] = [9003]
+	SimAuthority.duel_state.emit(uid, fight)
+	await get_tree().create_timer(1.6).timeout
+	await RenderingServer.frame_post_draw
+	_save("ui-social-duel-fight.png")
+	print("UI CAPTURE social duel: active=%s" % hud.duel_view.active())
+	SimAuthority.duel_state.emit(uid, {"duel_id": 0, "ended": 7, "group": true, "result": "won", "reason": "defeat",
+		"last": "Draco", "by": String(player.player_name), "allies": base["allies"], "foes": base["foes"]})
+	await get_tree().create_timer(0.5).timeout
+	await RenderingServer.frame_post_draw
+	_save("ui-social-duel-result.png")
+	foe.queue_free()
+
+
+## Stands in for another player's body in the player menu.
+class FakeWizard extends Node3D:
+	var player_name := "Draco"
+	var level := 24
+	var house := "Slytherin"
+
 
 ## ---------------------------------------------------------------- helpers
 

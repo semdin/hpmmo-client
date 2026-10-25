@@ -211,6 +211,8 @@ func _ready() -> void:
 		_setup_party()
 	if mode == "portkey":
 		_setup_portkey()
+	if mode == "duel":
+		_setup_duel()
 	if mode == "encounter":
 		_setup_encounter()
 	SimAuthority.entity_health.connect(_on_health)
@@ -372,6 +374,9 @@ func _physics_process(delta: float) -> void:
 	if mode == "portkey":
 		_portkey_tick()
 		return
+	if mode == "duel":
+		_duel_tick()
+		return
 	_update_target()
 	if mode == "agree":
 		if _pack_wiped() and _target_respawn_tick < 0:
@@ -473,6 +478,71 @@ func _portkey_tick() -> void:
 		_done = true
 		_record("final", {"pos": [player.global_position.x, player.global_position.y, player.global_position.z] if player != null else [],
 			"party": _party_size()})
+		_finish(0)
+
+# ------------------------------------------------------------------ duel
+# Manual duel check (not part of multiplayer_sim): "Lead" challenges "Mate" by
+# chat command, Mate accepts from the challenge event, and once the fight is on
+# Lead shoots Mate (who stands still) until the duel ends. Mate must end on
+# 1 HP, never dead; both must see the result; hits after it must not land.
+
+var _duel_states: Array = []
+var _duel_challenge_sent := false
+var _duel_foe := 0
+var _duel_min_hp := 1 << 30
+var _duel_hp_after_end := -1
+var _duel_ended_at := -1.0
+var _duel_died := false
+
+func _setup_duel() -> void:
+	SimAuthority.duel_state.connect(func(uid: int, state: Dictionary):
+		if uid != SimAuthority.local_uid:
+			return
+		_duel_states.append(state)
+		_record("duel_state", {"id": int(state.get("duel_id", 0)), "phase": String(state.get("phase", "")),
+			"result": String(state.get("result", "")), "reason": String(state.get("reason", "")),
+			"foes": (state.get("foes", []) as Array).size(), "foes_rule": HPRules.duel_foes.size()})
+		for foe in state.get("foes", []):
+			_duel_foe = int((foe as Dictionary).get("uid", _duel_foe))
+		if state.has("result") and _duel_ended_at < 0.0:
+			_duel_ended_at = _t)
+	SimAuthority.duel_invited.connect(func(uid: int, from_name: String, group: bool, _size: int):
+		if uid == SimAuthority.local_uid:
+			_record("duel_invite", {"from": from_name, "group": group})
+			NetworkManager.send_chat("/daccept"))
+	SimAuthority.entity_health.connect(func(uid: int, hp: int, _max_hp: int, _flags: int):
+		if probe_name == "Mate" and uid == SimAuthority.local_uid:
+			_duel_min_hp = mini(_duel_min_hp, hp)
+			if _duel_ended_at >= 0.0 and _t > _duel_ended_at + 1.0:
+				_duel_hp_after_end = hp)
+	SimAuthority.entity_died.connect(func(uid: int, _killer: int):
+		if uid == SimAuthority.local_uid:
+			_duel_died = true)
+
+func _duel_tick() -> void:
+	if probe_name == "Lead" and not _duel_challenge_sent and _t > 3.0:
+		_duel_challenge_sent = true
+		NetworkManager.send_chat("/duel Mate")
+	SimNet.forced_intent = {}
+	var fighting := not _duel_states.is_empty() and String(_duel_states[-1].get("phase", "")) == "fight"
+	# Lead keeps shooting after the end too: those bolts must not land.
+	var after_end := _duel_ended_at >= 0.0 and _t < _duel_ended_at + 4.0
+	if probe_name == "Lead" and _duel_foe != 0 and (fighting or after_end) \
+			and int(SimAuthority.sim_tick) - _last_cast_tick >= 12:
+		var foe: Dictionary = SimAuthority.entities.get(_duel_foe, {})
+		var node = foe.get("node")
+		var pos: Vector3 = (node as Node3D).global_position if node is Node3D and is_instance_valid(node) else foe.get("pos", Vector3.ZERO)
+		_last_cast_tick = int(SimAuthority.sim_tick)
+		_casts_sent += 1
+		SimNet.submit_cast(player, "basic_cast", pos + Vector3.UP * 1.15, _casts_sent)
+	if _t >= duration:
+		_done = true
+		var last: Dictionary = _duel_states[-1] if not _duel_states.is_empty() else {}
+		_record("final", {"uid": SimAuthority.local_uid, "states": _duel_states.size(),
+			"result": String(last.get("result", "")), "reason": String(last.get("reason", "")),
+			"min_hp": _duel_min_hp, "hp_after_end": _duel_hp_after_end, "died": _duel_died,
+			"hp_end": int(player.current_hp) if player != null else -1,
+			"casts_sent": _casts_sent, "casts_accepted": _casts_accepted, "rules_left": HPRules.duel_foes.size()})
 		_finish(0)
 
 func _party_size() -> int:

@@ -582,11 +582,14 @@ scripts/ui/hud_bestiary.gd
 scripts/ui/hud_buff_bar.gd
 scripts/ui/hud_character_window.gd
 scripts/ui/hud_chat.gd
+scripts/ui/hud_duel.gd
 scripts/ui/hud_floo.gd
 scripts/ui/hud_game_menu.gd
+scripts/ui/hud_invites.gd
 scripts/ui/hud_kit.gd
 scripts/ui/hud_notices.gd
 scripts/ui/hud_party.gd
+scripts/ui/hud_player_menu.gd
 scripts/ui/hud_portkey.gd
 scripts/ui/hud_quest_log.gd
 scripts/ui/hud_quest_scroll.gd

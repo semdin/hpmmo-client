@@ -36,6 +36,26 @@ msgid "%s now leads the party."
 msgstr ""
 
 #: scripts/autoload/i18n.gd
+msgid "%s is already in a duel."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "%s is not in a party."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "%s is too far away to duel."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You challenged %s's party to a group duel."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You challenged %s to a duel."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
 msgid "New title earned: %s!"
 msgstr ""
 
@@ -144,7 +164,67 @@ msgid "That did not work."
 msgstr ""
 
 #: scripts/autoload/i18n.gd
-msgid "Unknown command. Party: /invite Name, /accept, /decline, /leave, /kick Name, /promote Name, /p text"
+msgid "Unknown command. Party: /invite Name, /accept, /decline, /leave, /kick Name, /promote Name, /p text. Duel: /duel Name, /gduel Name, /daccept, /ddecline, /yield"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Usage: /duel Name"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Usage: /gduel Name"
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You cannot duel yourself."
+msgstr ""
+
+#: scripts/autoload/i18n.gd scripts/ui/hud_player_menu.gd
+msgid "You are already in a duel."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Both duelists must be alive."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You need a party for a group duel."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Only the party leader can call a group duel."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You cannot duel your own party."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "There is no duel challenge to accept."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "The challenger is no longer here."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "One of you is already in a duel."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You are too far apart to duel."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "The parties changed - challenge again."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "Duel declined."
+msgstr ""
+
+#: scripts/autoload/i18n.gd
+msgid "You are not in a duel."
 msgstr ""
 
 #: scripts/entities/loot/loot_drop.gd
@@ -219,7 +299,7 @@ msgstr ""
 msgid "Forbidden Corridor Explorer"
 msgstr ""
 
-#: scripts/entities/player.gd
+#: scripts/entities/player.gd scripts/ui/hud_player_menu.gd
 msgid "Lv. %d  ·  %s"
 msgstr ""
 
@@ -695,6 +775,10 @@ msgstr ""
 msgid "Party: /invite Name, /leave, /p text for party chat."
 msgstr ""
 
+#: scripts/ui/hud.gd
+msgid "Duel: right-click a player, or /duel Name (/gduel Name for parties, /yield to give up)."
+msgstr ""
+
 #: scripts/ui/hud.gd scripts/ui/hud_quest_log.gd
 msgid "Quests"
 msgstr ""
@@ -784,6 +868,10 @@ msgid "%s · Party"
 msgstr ""
 
 #: scripts/ui/hud.gd
+msgid "%s · Duel opponent"
+msgstr ""
+
+#: scripts/ui/hud.gd
 msgid "Ancient Monolith"
 msgstr ""
 
@@ -795,7 +883,7 @@ msgstr ""
 msgid "Practice target"
 msgstr ""
 
-#: scripts/ui/hud.gd scripts/ui/hud_quest_log.gd
+#: scripts/ui/hud.gd scripts/ui/hud_player_menu.gd scripts/ui/hud_quest_log.gd
 msgid "Lv. %d"
 msgstr ""
 
@@ -871,7 +959,7 @@ msgstr ""
 msgid "[Shift] Mount or dismount the broom"
 msgstr ""
 
-#: scripts/ui/hud.gd
+#: scripts/ui/hud.gd scripts/ui/hud_player_menu.gd
 msgid "Invite to Party"
 msgstr ""
 
@@ -1343,6 +1431,114 @@ msgstr ""
 msgid "[Party]"
 msgstr ""
 
+#: scripts/ui/hud_duel.gd
+msgid "%s declined your duel."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Duel accepted - the fight begins in %d seconds. Leaving the circle loses the duel."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "You are out of the duel - your side fights on."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Victory"
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Defeat"
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Draw"
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Duel won"
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Duel lost"
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Duel drawn"
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Your party won the group duel."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Your party lost the group duel."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "You defeated %s."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "%s defeated you."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "You left the duel circle."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "%s left the duel circle."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "%s left the game."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "You yielded."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "%s yielded."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "You died."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "%s died."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Time ran out."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "The duel is over."
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Fight!"
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Stay inside the duel circle - leaving it loses the duel!"
+msgstr ""
+
+#: scripts/ui/hud_duel.gd scripts/ui/hud_player_menu.gd
+msgid "Group Duel"
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "Duel"
+msgstr ""
+
+#: scripts/ui/hud_duel.gd
+msgid "vs"
+msgstr ""
+
 #: scripts/ui/hud_floo.gd
 msgid "Floo Network"
 msgstr ""
@@ -1467,20 +1663,60 @@ msgstr ""
 msgid "Saving…"
 msgstr ""
 
+#: scripts/ui/hud_invites.gd
+msgid "Accept"
+msgstr ""
+
+#: scripts/ui/hud_invites.gd
+msgid "Decline"
+msgstr ""
+
+#: scripts/ui/hud_invites.gd
+msgid "Duel Challenge"
+msgstr ""
+
+#: scripts/ui/hud_invites.gd
+msgid "Group Duel Challenge"
+msgstr ""
+
+#: scripts/ui/hud_invites.gd
+msgid "Party Invitation"
+msgstr ""
+
+#: scripts/ui/hud_invites.gd
+msgid "%s challenges you to a duel."
+msgstr ""
+
+#: scripts/ui/hud_invites.gd
+msgid "%s challenges your party to a group duel (%d players)."
+msgstr ""
+
+#: scripts/ui/hud_invites.gd
+msgid "%s invites you to join their party."
+msgstr ""
+
 #: scripts/ui/hud_party.gd
 msgid "%s%s  Lv %d"
 msgstr ""
 
-#: scripts/ui/hud_party.gd
-msgid "Accept"
+#: scripts/ui/hud_player_menu.gd
+msgid "Already in your party."
 msgstr ""
 
-#: scripts/ui/hud_party.gd
-msgid "Decline"
+#: scripts/ui/hud_player_menu.gd
+msgid "Challenge to Duel"
 msgstr ""
 
-#: scripts/ui/hud_party.gd
-msgid "%s invites you to a party."
+#: scripts/ui/hud_player_menu.gd
+msgid "You need a party."
+msgstr ""
+
+#: scripts/ui/hud_player_menu.gd
+msgid "Only the party leader can call it."
+msgstr ""
+
+#: scripts/ui/hud_player_menu.gd
+msgid "They are in your party."
 msgstr ""
 
 #: scripts/ui/hud_portkey.gd
