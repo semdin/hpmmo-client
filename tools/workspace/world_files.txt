@@ -245,6 +245,7 @@ assets/shaders/cloak.gdshader
 assets/shaders/cobweb.gdshader
 assets/shaders/fire_flipbook.gdshader
 assets/shaders/footprint.gdshader
+assets/shaders/fountain_water.gdshader
 assets/shaders/lake_water.gdshader
 assets/shaders/loot/chest_beam.gdshader
 assets/shaders/loot/chest_pool.gdshader
@@ -625,6 +626,7 @@ scripts/world/castle_interior.gd
 scripts/world/caverns/cavern_atmosphere.gd
 scripts/world/caverns/cavern_colliders.gd
 scripts/world/caverns/spider_caverns.gd
+scripts/world/day_night.gd
 scripts/world/dungeon_director.gd
 scripts/world/dungeons/dungeon_forbidden_corridor.gd
 scripts/world/dungeons/dungeon_greybox.gd
@@ -633,6 +635,7 @@ scripts/world/encounter_director.gd
 scripts/world/game_world.gd
 scripts/world/grounds/arch_kit.gd
 scripts/world/grounds/castle_exterior.gd
+scripts/world/grounds/fountain_water.gd
 scripts/world/grounds/grounds_builder.gd
 scripts/world/grounds/grounds_courtyard.gd
 scripts/world/grounds/grounds_horizon.gd

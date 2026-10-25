@@ -2676,6 +2676,14 @@ msgid "Auto picks Low on integrated graphics and High on a dedicated GPU"
 msgstr ""
 
 #: scripts/ui/settings_ui.gd
+msgid "Time of day"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Server time follows the clock in GMT+3: day, dusk and night on the grounds"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
 msgid "Interface scale"
 msgstr ""
 
@@ -2893,6 +2901,18 @@ msgstr ""
 
 #: scripts/world/caverns/spider_caverns.gd
 msgid "Blackweb Caverns - %s"
+msgstr ""
+
+#: scripts/world/day_night.gd
+msgid "Server time (GMT+3)"
+msgstr ""
+
+#: scripts/world/day_night.gd
+msgid "Always day"
+msgstr ""
+
+#: scripts/world/day_night.gd
+msgid "Always night"
 msgstr ""
 
 #: scripts/world/dungeon_director.gd

@@ -1,12 +1,12 @@
 {
  "generated": "2026-10-25",
  "source_repository": "hpmmo-server",
- "source_revision": "dcac6c1c3ace3c2961baa55d73aa8e35a5bf622e",
+ "source_revision": "dbd5264d303d980bc1a86b6b17b68b7064fa8b8c",
  "note": "Generated from server/world/addons/hpmmo_sim by dev.ps1 sync-sim. Never edit these files in the client repository.",
  "files": {
   "admin.gd": "b6ec730a859e7e35f205a0b36cc4513c5d7220cfb0c828729a33d49d6459c76d",
   "admin.gd.uid": "24f7c90288473ecc7fc5b60d2297064b566af1f7cb466a6dfa15da52c1d0fda7",
-  "authority.gd": "eb355e4d04a241bc2f9dbd6ccc12a2c6cacf88bdbbbdfb1d0f96420f4df00af2",
+  "authority.gd": "f8bf3a8873894f152759f9421ec3df8435b2e7543db87faa37a7d693c3577b79",
   "authority.gd.uid": "7a0e9dcb17566e2f6c5c2fa8067b1a57a8a7cd14c568c6dab087475a8628bb0e",
   "data/combat.json": "9f5ed2c1b86f023569e4a4c41a3a627b276304c50dd60064b99f64bf03a7d284",
   "data/dungeons.json": "16b4426dbcb7f5a90d7a96e48e75bdc154180772615e65179a0f6f460be171f5",
@@ -23,7 +23,7 @@
   "equipment.gd.uid": "765445bf42c1853a758d612d2a279a8fd03e85ff99384e6652f69dce02ffc4b1",
   "maps.gd": "6213b3cfec27d8c3e0a1dbb80bb00507c0bb1294de779dae6178b1017921dee1",
   "maps.gd.uid": "1b4f9df15a20c39f1260abd49a6be28bd92c53929dcb06f54a683b058d56d071",
-  "net.gd": "13c01c843b75fda41f8862ce01097db0b926dc574d310fc9d22f8c3045da18a3",
+  "net.gd": "dbe9a0db3647fa72b14fb47d8c70085964d4bd5549411903d564a694b9f8ea24",
   "net.gd.uid": "ff80510fc3b2fa320c34ddd81f5be5cbfc1201dc7d1a557f25c607ff6e5826d5",
   "party.gd": "2908c5c9178335eeb3b692a219c3d77826c617111b874453ae0ddb7d76ddcbf8",
   "party.gd.uid": "eb47a7537b221573a07d3d53f46c5751f94771e1d22117bd903d90128262df70",
