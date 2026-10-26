@@ -129,3 +129,33 @@ project-original geometry (`scripts/world/grounds/`).
   (6-28), `combo2_b` (6-34, spine x0.5 in the upper clip). Source FBX files, prompts
   and the per-clip retarget reports (release frame, reach/lift/side curves) live in
   `art/hero/motion_fal/`.
+
+# Castle feast and kitchen tables (2026-10-26)
+
+- `models/feast/feast.glb` (+ the extracted `feast_feast_{alb,nor,orm}.webp` atlas):
+  food, tableware and kitchen tools from **NVIDIA SimReady Assets**
+  (https://huggingface.co/datasets/nvidia/simready-assets), © NVIDIA Corporation,
+  licensed under **CC BY 4.0** (https://creativecommons.org/licenses/by/4.0/).
+  **Changes made:** decimated to 70-1600 triangles each, normals re-baked from the
+  scans, textures shrunk into one shared atlas, and the items arranged into table
+  settings (`art/feast/scripts/`, local). Packages used: food_dairy_cheese_i01,
+  food_egg_chicken_a01, food_egg_chicken_b11, food_fish_rainbowTrout_a01,
+  food_fish_steelheadSalmon_a01, food_prepared_bread_brioche_a01,
+  food_prepared_bread_darkRye_a01, food_prepared_bread_farmerSourdough_a01,
+  food_prepared_bread_raisinRoll_a01, food_prepared_bread_scoredSpiral_a01,
+  food_prepared_bread_sesameBreadRoll_a01, food_prepared_bread_sourdoughBatard_a01,
+  food_prepared_cake_c01, food_prepared_steak_c01, food_prepared_steak_h01,
+  food_produce_apple_c01, food_produce_apple_grannySmith_a01,
+  food_produce_apple_redDelicous_a01, food_produce_freshCarrot_a04,
+  food_produce_garlic_bulb_a01, food_produce_grape_a01, food_produce_mushroom_d01,
+  food_produce_mushroom_f01, food_produce_onion_a01, food_produce_onion_b01,
+  food_produce_orange_e01, food_produce_peach_a01, food_produce_pear_a01,
+  food_produce_pear_h01, food_produce_potato_a01, food_produce_potato_g01,
+  food_produce_potato_k01, food_produce_squash_a01, food_produce_squash_f01,
+  kitchenware_bowl_c01, kitchenware_bowl_i01, kitchenware_bowl_j01,
+  kitchenware_bowl_k01, kitchenware_cuttingBoard_c01, kitchenware_cuttingBoard_e01,
+  kitchenware_fork_f01, kitchenware_jug_c01, kitchenware_jug_f01, kitchenware_jug_h01,
+  kitchenware_knife_b01, kitchenware_pan_g01, kitchenware_rollingPin_a01,
+  kitchenware_spoon_k01, utensil_spoon_wooden_a01. Licence notice:
+  `models/feast/LICENSE.txt`.
+- The gold plates, platters and goblets in the same glb are original lathed geometry.

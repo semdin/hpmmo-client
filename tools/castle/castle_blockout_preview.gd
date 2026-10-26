@@ -36,6 +36,8 @@ const SHOTS := [
 	["great_hall_from_door", Vector3(-23, 1.7, 56), Vector3(-105, 9, 56)],
 	["hourglasses", Vector3(15.0, 2.2, 53), Vector3(16.8, 3.2, 40)],
 	["staff_table", Vector3(-86, 2.4, 50), Vector3(-101, 2.0, 57)],
+	["feast_house_table", Vector3(-58, 1.9, 50.0), Vector3(-63, 0.85, 47.0)],
+	["feast_staff_table", Vector3(-98.2, 2.9, 53.5), Vector3(-100.6, 1.9, 56.5)],
 	["banners", Vector3(-30, 3.0, 56), Vector3(-66, 15, 50)],
 	["owl_lectern", Vector3(-90.5, 2.6, 58.5), Vector3(-96.2, 1.8, 56)],
 	["corridor_portraits", Vector3(53, 21.7, -5), Vector3(47, 23.2, -12)],
@@ -53,6 +55,7 @@ const SHOTS := [
 	["dungeon_west", Vector3(-19, -8.3, -7), Vector3(-90, -8, -7)],
 	["potions", Vector3(-38, -7.6, -15.5), Vector3(-38, -9.2, -36)],
 	["kitchens", Vector3(26, -8.0, -15.5), Vector3(31, -8.5, -39)],
+	["feast_kitchen_table", Vector3(27.4, -8.1, -22.0), Vector3(25.5, -9.1, -25.5)],
 	["library_aisle", Vector3(-55, 31.7, -13.5), Vector3(-55, 32.5, -40)],
 	["library_mezzanine", Vector3(-28.5, 41.7, -6.5), Vector3(-72, 38, -32)],
 	["tower_chandelier", Vector3(14, 61.7, 9), Vector3(0, 75, -6)],
@@ -427,7 +430,7 @@ func _measure_perf() -> void:
 	get_viewport().get_window().size = Vector2i(1600, 900)
 	for i in 30:
 		await get_tree().process_frame
-	# Ablations for finding the cost: --perf-off=fill,decor_lights,shadows,moon,fog
+	# Ablations for finding the cost: --perf-off=fill,decor_lights,shadows,moon,fog,feast
 	var off: PackedStringArray = []
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--perf-off="):
@@ -450,11 +453,17 @@ func _measure_perf() -> void:
 		RenderingServer.viewport_set_anisotropic_filtering_level(get_viewport().get_viewport_rid(), RenderingServer.VIEWPORT_ANISOTROPY_DISABLED)
 	if off.has("fog"):
 		(get_node("WorldEnvironment") as WorldEnvironment).environment.volumetric_fog_enabled = false
+	if off.has("feast"):
+		for n in find_children("Feast", "Node3D", true, false):
+			(n as Node3D).visible = false
 	var only: PackedStringArray = []
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--perf-only="):
 			only = arg.trim_prefix("--perf-only=").split(",")
 	print("PERF quality=%s adapter=%s off=%s" % [QualityPreset.current(), RenderingServer.get_video_adapter_name(), off])
+	# vsync caps the frame rate: the main viewport's GPU time tells the cost
+	var vp := get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(vp, true)
 	for s in SHOTS:
 		if not only.is_empty() and not only.has(s[0]):
 			continue
@@ -463,12 +472,14 @@ func _measure_perf() -> void:
 		while Time.get_ticks_msec() - t0 < 2000:
 			await get_tree().process_frame
 		var frames := 0
+		var gpu := 0.0
 		t0 = Time.get_ticks_usec()
 		while Time.get_ticks_usec() - t0 < 3000000:
 			await get_tree().process_frame
+			gpu += RenderingServer.viewport_get_measured_render_time_gpu(vp)
 			frames += 1
 		var ms := float(Time.get_ticks_usec() - t0) / 1000.0 / frames
-		print("PERF %-24s %6.1f fps  %5.1f ms  draws=%d prims=%d" % [s[0], 1000.0 / ms, ms,
+		print("PERF %-24s %6.1f fps  %5.1f ms  gpu %5.2f ms  draws=%d prims=%d" % [s[0], 1000.0 / ms, ms, gpu / frames,
 			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)])
 	get_tree().quit()

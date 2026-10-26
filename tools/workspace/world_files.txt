@@ -676,6 +676,7 @@ scripts/ui/world_loader.gd
 scripts/world/castle/castle_atmosphere.gd
 scripts/world/castle/castle_blockout.gd
 scripts/world/castle/castle_decor.gd
+scripts/world/castle/castle_feast.gd
 scripts/world/castle/magical_staircase.gd
 scripts/world/castle_interior.gd
 scripts/world/caverns/cavern_atmosphere.gd
