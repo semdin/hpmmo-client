@@ -286,7 +286,9 @@ func _on_reward(_uid: int, character_id: int, exp: int, _galleons: int, _items: 
 	if _reward_ops.has(op_id):
 		return
 	_reward_ops[op_id] = true
-	_rewards.append({"character_id": character_id, "exp": exp, "op_id": op_id})
+	# The server tick it arrived on: each probe stops on its own clock, so the
+	# caller compares kills only inside the window both were listening.
+	_rewards.append({"character_id": character_id, "exp": exp, "op_id": op_id, "tick": SimAuthority.sim_tick})
 
 # ------------------------------------------------------------------ agreement
 
@@ -818,6 +820,7 @@ func _finish_agree() -> void:
 		"level_end": int(player.level) if player != null else _level_start,
 		"exp_seen": _exp_seen,
 		"rewards": _rewards,
+		"final_tick": SimAuthority.sim_tick,
 		"visible_mobs": _mob_summary(),
 		"player_pos": [player.global_position.x, player.global_position.y, player.global_position.z],
 		"intent_frames": SimNet.input_frames_sent,

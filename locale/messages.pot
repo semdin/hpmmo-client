@@ -740,6 +740,10 @@ msgid "Safe area · Combat disabled"
 msgstr ""
 
 #: scripts/ui/combat_feedback.gd
+msgid "Safe area · Duel in progress"
+msgstr ""
+
+#: scripts/ui/combat_feedback.gd
 msgid "%s - casting... %.0f%%"
 msgstr ""
 
@@ -749,6 +753,102 @@ msgstr ""
 
 #: scripts/ui/combat_feedback.gd
 msgid "%s - recovering... %.1fs"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Licensed assets"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Food, tableware and kitchen tools on the castle tables. Changed for this game: simplified, re-textured and arranged into table settings."
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Terrain of the castle grounds"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Game engine. Its licence and third-party notices are at the end of this page."
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Fonts"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Titles"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Body text"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Interface lettering"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Free assets (CC0)"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Stone, wood, roof and cave textures; trees, ferns and rocks"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Grass and rock textures of the terrain"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Character animations"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "The robed wizard"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Flame and spark sprites"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Made with"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Modelling, rigging and baking"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Generated 3D models of characters, creatures and items"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Generated concept art, icons and spell effects"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Generated spell-casting motion"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Generated sound effects and music"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "HPMMO is built on the work of the people and tools below. Thank you."
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Godot Engine licence"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Third-party components of Godot Engine"
+msgstr ""
+
+#: scripts/ui/game_credits.gd
+msgid "Licence texts"
 msgstr ""
 
 #: scripts/ui/game_settings.gd
@@ -2941,6 +3041,10 @@ msgstr ""
 
 #: scripts/ui/settings_ui.gd
 msgid "Controls"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Credits"
 msgstr ""
 
 #: scripts/ui/settings_ui.gd

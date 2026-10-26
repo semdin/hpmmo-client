@@ -225,6 +225,14 @@ func _capture_settings() -> void:
 	await get_tree().create_timer(0.3).timeout
 	_save("ui-settings.png")
 	print("UI CAPTURE settings: open=%s" % hud.settings.is_open())
+	hud.settings._show_page("credits")
+	await get_tree().create_timer(0.3).timeout
+	_save("ui-settings-credits.png")
+	var credits := hud.settings.panel.find_child("Credits", true, false) as RichTextLabel
+	credits.scroll_to_line(credits.get_line_count() - 1)
+	await get_tree().create_timer(0.3).timeout
+	_save("ui-settings-credits-end.png")
+	print("UI CAPTURE credits: lines=%d" % credits.get_line_count())
 	hud.settings.close()
 
 ## ---------------------------------------------------------------- social

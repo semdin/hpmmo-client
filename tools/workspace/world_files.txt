@@ -623,6 +623,7 @@ scripts/ui/character_select.gd
 scripts/ui/combat_feedback.gd
 scripts/ui/cursor_kit.gd
 scripts/ui/floating_text.gd
+scripts/ui/game_credits.gd
 scripts/ui/game_settings.gd
 scripts/ui/gauge_flow.gd
 scripts/ui/hit_feedback.gd
