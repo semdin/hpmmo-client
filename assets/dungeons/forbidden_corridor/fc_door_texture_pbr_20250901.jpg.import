@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cahq36pj73wwi"
-path="res://.godot/imported/fc_door_texture_pbr_20250901.jpg-6e42564a68b4d10f70825d4e13e1b31e.ctex"
+path.s3tc="res://.godot/imported/fc_door_texture_pbr_20250901.jpg-6e42564a68b4d10f70825d4e13e1b31e.s3tc.ctex"
+path.etc2="res://.godot/imported/fc_door_texture_pbr_20250901.jpg-6e42564a68b4d10f70825d4e13e1b31e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "12cfb1874bb5546a2576c92a35d979b7"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/dungeons/forbidden_corridor/fc_door_texture_pbr_20250901.jpg"
-dest_files=["res://.godot/imported/fc_door_texture_pbr_20250901.jpg-6e42564a68b4d10f70825d4e13e1b31e.ctex"]
+dest_files=["res://.godot/imported/fc_door_texture_pbr_20250901.jpg-6e42564a68b4d10f70825d4e13e1b31e.s3tc.ctex", "res://.godot/imported/fc_door_texture_pbr_20250901.jpg-6e42564a68b4d10f70825d4e13e1b31e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

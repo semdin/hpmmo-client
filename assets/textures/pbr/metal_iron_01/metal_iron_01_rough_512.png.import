@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d2qnkhbvovpil"
-path="res://.godot/imported/metal_iron_01_rough_512.png-e3f69a8433f7c973a301039afa7f3519.ctex"
+path.s3tc="res://.godot/imported/metal_iron_01_rough_512.png-e3f69a8433f7c973a301039afa7f3519.s3tc.ctex"
+path.etc2="res://.godot/imported/metal_iron_01_rough_512.png-e3f69a8433f7c973a301039afa7f3519.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/pbr/metal_iron_01/metal_iron_01_rough_512.png"
-dest_files=["res://.godot/imported/metal_iron_01_rough_512.png-e3f69a8433f7c973a301039afa7f3519.ctex"]
+dest_files=["res://.godot/imported/metal_iron_01_rough_512.png-e3f69a8433f7c973a301039afa7f3519.s3tc.ctex", "res://.godot/imported/metal_iron_01_rough_512.png-e3f69a8433f7c973a301039afa7f3519.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -23,7 +25,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

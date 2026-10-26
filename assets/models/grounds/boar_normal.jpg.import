@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b7yx8w2cw37kg"
-path="res://.godot/imported/boar_normal.jpg-357b09c131015949a2970998ae6429d6.ctex"
+path.s3tc="res://.godot/imported/boar_normal.jpg-357b09c131015949a2970998ae6429d6.s3tc.ctex"
+path.etc2="res://.godot/imported/boar_normal.jpg-357b09c131015949a2970998ae6429d6.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "7e95f908213611a1b14237421fafefe9"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/grounds/boar_normal.jpg"
-dest_files=["res://.godot/imported/boar_normal.jpg-357b09c131015949a2970998ae6429d6.ctex"]
+dest_files=["res://.godot/imported/boar_normal.jpg-357b09c131015949a2970998ae6429d6.s3tc.ctex", "res://.godot/imported/boar_normal.jpg-357b09c131015949a2970998ae6429d6.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=2
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

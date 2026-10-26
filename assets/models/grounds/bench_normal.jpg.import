@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dwy77pcu33ckp"
-path="res://.godot/imported/bench_normal.jpg-49c158e851a77e72e4463eb6841326bd.ctex"
+path.s3tc="res://.godot/imported/bench_normal.jpg-49c158e851a77e72e4463eb6841326bd.s3tc.ctex"
+path.etc2="res://.godot/imported/bench_normal.jpg-49c158e851a77e72e4463eb6841326bd.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "83c79b67cd5fb7596e8aa51a9f13a504"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/grounds/bench_normal.jpg"
-dest_files=["res://.godot/imported/bench_normal.jpg-49c158e851a77e72e4463eb6841326bd.ctex"]
+dest_files=["res://.godot/imported/bench_normal.jpg-49c158e851a77e72e4463eb6841326bd.s3tc.ctex", "res://.godot/imported/bench_normal.jpg-49c158e851a77e72e4463eb6841326bd.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=2
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

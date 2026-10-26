@@ -6,6 +6,10 @@ extends Node3D
 ##   godot --path . res://scenes/test/bestiary_capture.tscn
 
 const SIZE := 320
+## The frame is rendered this much larger, then cropped to the drawn body.
+const OVERSHOOT := 2.5
+## Empty border kept round the body after the crop (fraction of the side).
+const MARGIN := 0.06
 ## Hand framing for bodies the collision proxy does not describe (a pixie
 ## flits above a tall proxy, a dementor floats above its own): AABB override.
 const FRAME := {
@@ -19,7 +23,7 @@ const FRAME := {
 
 func _ready() -> void:
 	var vp := SubViewport.new()
-	vp.size = Vector2i(SIZE, SIZE)
+	vp.size = Vector2i(SIZE, SIZE) * 2
 	vp.transparent_bg = true
 	vp.own_world_3d = true
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
@@ -78,20 +82,36 @@ func _ready() -> void:
 				anim.pause()
 		for i in 3:
 			await get_tree().process_frame
+		# A wide shot that surely holds the whole body (neither the collision
+		# proxy nor a skinned mesh's bounds describe a long body like Fluffy's),
+		# then the portrait is cropped to what was actually drawn.
 		var centre := box.get_center()
 		var radius := maxf(box.size.y, box.size.x) * 0.5
-		var dist := radius / tan(deg_to_rad(cam.fov * 0.5)) * 1.25
+		var dist := radius / tan(deg_to_rad(cam.fov * 0.5)) * 1.25 * OVERSHOOT
 		cam.position = centre + Vector3(0, box.size.y * 0.08, dist)
 		cam.look_at(centre + Vector3(0, box.size.y * 0.04, 0))
 		for i in 4:
 			await get_tree().process_frame
 		await RenderingServer.frame_post_draw
-		var img := vp.get_texture().get_image()
+		var img := _crop_to_body(vp.get_texture().get_image())
 		img.save_png("res://assets/ui/bestiary/%s.png" % species)
 		print("BESTIARY %s %s" % [species, box])
 		visuals.queue_free()
 		await get_tree().process_frame
 	get_tree().quit()
+
+## The drawn body (non-transparent pixels) centred in a square with MARGIN
+## round it, scaled to SIZE.
+static func _crop_to_body(img: Image) -> Image:
+	var used := img.get_used_rect()
+	if used.size.x <= 0 or used.size.y <= 0:
+		return img
+	var side := int(ceil(maxf(used.size.x, used.size.y) / (1.0 - 2.0 * MARGIN)))
+	var square := Image.create_empty(side, side, false, Image.FORMAT_RGBA8)
+	img.convert(Image.FORMAT_RGBA8)
+	square.blit_rect(img, used, Vector2i((side - used.size.x) / 2, (side - used.size.y) / 2))
+	square.resize(SIZE, SIZE, Image.INTERPOLATE_LANCZOS)
+	return square
 
 ## The body's own collision proxy (the boss proxy when there is one is the
 ## bigger body; an ordinary creature uses CollisionShape3D).

@@ -4,7 +4,7 @@ One command takes a change from "edited" to "ready to commit":
 
 ```powershell
 .\dev.ps1 ready          # every change (~5 min)
-.\dev.ps1 ready -Full    # gameplay, map, castle or network changes, and before a release (~25 min)
+.\dev.ps1 local          # two game windows on a local dev server (party, duel checks) - see test-tools.md
 ```
 
 Run it from the workspace folder (`game/`). It does not open the Godot editor:
@@ -34,13 +34,13 @@ and names the files. Move those edits to the source side, then run it again.
 3. **World export, client -> `server/world`** (`export_world.py`).
 4. **Import + tests** (`dev.ps1 test`):
    - client headless import, which writes the `.import` / `.uid` files for new assets
-   - client check harness
-   - C++ service build and PostgreSQL integration
-   - world import, multiplayer agreement and world boot
+     (a parse error in any script fails here)
+   - C++ service build
+   - world import, `multiplayer_sim.py` (agreement, forged input, protection,
+     quests, party) and world boot
 
-   With `-Full` it also runs `maps_sim`, `staircase_sim`, `encounters_sim`,
-   `maintenance_sim` and `journey_e2e`. `journey_e2e` needs PostgreSQL and the built service; a skip
-   counts as a failure.
+   The other suites were retired on 2026-10-17; the screenshot and preview
+   tools are listed in `test-tools.md`.
 5. **Commit summary**: what changed in each repository.
 
 ## Committing

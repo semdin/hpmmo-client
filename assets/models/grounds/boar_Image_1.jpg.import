@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://euuxaklqibrp"
-path="res://.godot/imported/boar_Image_1.jpg-0f1880d31ebe0e634325ee8d40702a9f.ctex"
+path.s3tc="res://.godot/imported/boar_Image_1.jpg-0f1880d31ebe0e634325ee8d40702a9f.s3tc.ctex"
+path.etc2="res://.godot/imported/boar_Image_1.jpg-0f1880d31ebe0e634325ee8d40702a9f.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "13ebb66cbdba112f4aaa67b0fb0f4991"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/grounds/boar_Image_1.jpg"
-dest_files=["res://.godot/imported/boar_Image_1.jpg-0f1880d31ebe0e634325ee8d40702a9f.ctex"]
+dest_files=["res://.godot/imported/boar_Image_1.jpg-0f1880d31ebe0e634325ee8d40702a9f.s3tc.ctex", "res://.godot/imported/boar_Image_1.jpg-0f1880d31ebe0e634325ee8d40702a9f.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://8uoke8t4s3e6"
-path="res://.godot/imported/lamp_normal.jpg-9563e046467b132da382917232cd324d.ctex"
+path.s3tc="res://.godot/imported/lamp_normal.jpg-9563e046467b132da382917232cd324d.s3tc.ctex"
+path.etc2="res://.godot/imported/lamp_normal.jpg-9563e046467b132da382917232cd324d.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6b0e2dfa3fea84b4d564e8d62d0f4518"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/grounds/lamp_normal.jpg"
-dest_files=["res://.godot/imported/lamp_normal.jpg-9563e046467b132da382917232cd324d.ctex"]
+dest_files=["res://.godot/imported/lamp_normal.jpg-9563e046467b132da382917232cd324d.s3tc.ctex", "res://.godot/imported/lamp_normal.jpg-9563e046467b132da382917232cd324d.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=2
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

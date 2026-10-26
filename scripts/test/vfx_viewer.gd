@@ -2,7 +2,7 @@ extends Node
 
 ## Skill animation viewer - the live preview used while tuning spell VFX.
 ##
-## `vfx_capture.gd` shoots fixed evidence frames; this is the interactive loop.
+## The interactive loop for tuning a spell's look on the real world.
 ## It plays a spell's real stage sequence - cast, travel, impact, sustain, end -
 ## on the real world, from the real caster, then beats and moves on to the next
 ## spell. Slow motion, a free orbit camera and a human-sized reference at the
@@ -64,10 +64,12 @@ var shot_at := -1.0
 var _shot_done := {}
 var _finished := false
 
-var origin := Vector3(0.0, 0.15, -12.0)
+## The caster's spot: the paved courtyard north of the fountain, casting west (set in _ready,
+## on the terrain).
+var origin := Vector3.ZERO
 ## Into the open courtyard, away from the castle gate: the capture harness aims
 ## the same way, and nothing occludes the beam.
-var aim := Vector3(0.0, 0.0, 1.0)
+var aim := Vector3(-1.0, 0.0, 0.0)
 var flight_distance := 9.0
 
 var _camera: Camera3D
@@ -88,6 +90,10 @@ var _hint: Label
 var _bar: ColorRect
 var _bar_bg: ColorRect
 
+
+## Before the world's _ready: a geared test wizard (no first-spell pick).
+func _enter_tree() -> void:
+	TestGround.use_test_character()
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -117,6 +123,7 @@ func _ready() -> void:
 			spell_index = found
 	# The world builds its castle, mobs and HUD over the first beat; wait it out.
 	await get_tree().create_timer(1.4).timeout
+	origin = TestGround.at(14, 0.15, -13)
 	_hide_world_ui()
 	_setup_camera()
 	_setup_dummy()

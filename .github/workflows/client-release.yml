@@ -82,7 +82,12 @@ jobs:
     env:
       GIT_LFS_SKIP_SMUDGE: '1'
     steps:
-      - uses: actions/checkout@v4
+      # A fresh hosted runner has no init.defaultBranch: checkout's `git init`
+      # printed git's "Using 'master' as the name for the initial branch" hint.
+      - name: Git default branch
+        run: git config --global init.defaultBranch main
+
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0          # the launcher version is the last launcher_cpp commit time
           lfs: false
@@ -118,7 +123,7 @@ jobs:
             --gui-launcher "$RUNNER_TEMP/mac/HPMMO_Launcher-macos" | tee "$RUNNER_TEMP/updater-tests.log"
           grep -q "UPDATER RESULT: .*, 0 failures" "$RUNNER_TEMP/updater-tests.log"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: launcher-macos
           path: |
@@ -151,7 +156,7 @@ jobs:
       # .godot import cache: Godot re-imports only changed sources, so unchanged
       # models/textures keep byte-identical output and players do not
       # re-download their chunks (imports are not bit-reproducible).
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           clean: false
@@ -232,7 +237,7 @@ jobs:
           cp launcher_cpp/build-mingw/HPMMO_Launcher.exe dist/HPMMO_Launcher.exe
 
       - name: Fetch the macOS launcher built by launcher-macos
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: launcher-macos
           path: dist

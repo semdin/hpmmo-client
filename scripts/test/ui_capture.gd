@@ -20,6 +20,11 @@ const OUT_DIR := "res://tools/downloads"
 var _camera: Camera3D
 
 
+## Before the world's _ready: a geared test wizard, not a fresh level-1 one.
+func _enter_tree() -> void:
+	TestGround.use_test_character()
+
+
 func _ready() -> void:
 	await get_tree().create_timer(1.8).timeout
 	_camera = Camera3D.new()
@@ -43,7 +48,7 @@ func _ready() -> void:
 ## Put the player somewhere photogenic and stock a full bag.
 func _stage_player() -> Node3D:
 	var player = world.local_player
-	player.global_position = Vector3(0, 0.15, -30)
+	player.global_position = TestGround.at(0, 0.15, 5)
 	player.camera_rot_y = 0
 	player.camera.current = true
 	_stock_inventory(player)

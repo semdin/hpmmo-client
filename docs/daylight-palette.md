@@ -19,8 +19,5 @@ overwrite them. Low retains two shadow cascades to 45 m; high uses four to
 110 m. Low still disables SSAO, glow and MSAA and reduces vegetation/particles.
 Nearby shadows now have an intentional GPU cost on low quality.
 
-Visual review: run `art_capture.tscn` with `-- --mode=after-lighting --quality=high`
-or `--quality=low`. Captures include exterior, meadow and interior views.
-Run `lighting_regression.tscn` graphically to measure whether diffuse lighting
-stays stable as the camera circles a matte floor. `art_regression.tscn` verifies
-the live quality settings and material contracts headlessly.
+Visual review: `ui_hud_capture.tscn` shoots the HUD over the real grounds and the
+castle interior (the old `art_capture` / `*_regression` scenes were retired).

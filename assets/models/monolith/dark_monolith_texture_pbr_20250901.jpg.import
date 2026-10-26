@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bwrqf436jtbx2"
-path="res://.godot/imported/dark_monolith_texture_pbr_20250901.jpg-7cb9c0d73fed8a56b316c76aa3723dec.ctex"
+path.s3tc="res://.godot/imported/dark_monolith_texture_pbr_20250901.jpg-7cb9c0d73fed8a56b316c76aa3723dec.s3tc.ctex"
+path.etc2="res://.godot/imported/dark_monolith_texture_pbr_20250901.jpg-7cb9c0d73fed8a56b316c76aa3723dec.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "46f343c5bcc5374394bfc7d2bd432386"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/monolith/dark_monolith_texture_pbr_20250901.jpg"
-dest_files=["res://.godot/imported/dark_monolith_texture_pbr_20250901.jpg-7cb9c0d73fed8a56b316c76aa3723dec.ctex"]
+dest_files=["res://.godot/imported/dark_monolith_texture_pbr_20250901.jpg-7cb9c0d73fed8a56b316c76aa3723dec.s3tc.ctex", "res://.godot/imported/dark_monolith_texture_pbr_20250901.jpg-7cb9c0d73fed8a56b316c76aa3723dec.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

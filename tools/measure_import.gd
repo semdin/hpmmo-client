@@ -5,6 +5,11 @@ extends SceneTree
 ## Run: godot --headless --path . --script res://tools/measure_import.gd
 
 func _init() -> void:
+	# The root's children are only inside the tree once the loop runs: measured
+	# in _init, every global_transform failed ("!is_inside_tree()").
+	process_frame.connect(_measure, CONNECT_ONE_SHOT)
+
+func _measure() -> void:
 	for path in ["res://assets/models/characters/hero_wizard.glb",
 			"res://assets/models/props/broom_flight.glb"]:
 		var packed: PackedScene = load(path)

@@ -31,7 +31,12 @@ func _ready() -> void:
 			interior = true
 		elif arg.begins_with("--map="):
 			scene_map = arg.trim_prefix("--map=")
-	var views: Array = JSON.parse_string(FileAccess.get_file_as_string(views_path))
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string(views_path)) if views_path != "" else null
+	if not parsed is Array:
+		printerr("world_shots: --views=<views.json> must name a JSON array of views (see the header)")
+		get_tree().quit(1)
+		return
+	var views: Array = parsed
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	await get_tree().create_timer(1.5).timeout
 	for node in world.find_children("*", "CanvasLayer", true, false):

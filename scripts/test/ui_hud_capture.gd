@@ -11,7 +11,8 @@ extends Node
 ## maintenance countdown, and in the onboarding flow; plus the settings screen
 ## and the social layer (invitation cards, player menu, duel countdown, plaque
 ## and result). Every shot is written to res://tools/downloads/ui-<subject>.png.
-## `-- --only=social` shoots just the social layer.
+## `-- --only=<combat|castle|maintenance|onboarding|mounted|settings|social>`
+## shoots just that subject.
 ##
 ## The gameplay state each shot shows is staged through the same authoritative
 ## payloads the server sends (`SimAuthority.stats_changed`,
@@ -25,26 +26,29 @@ const OUT_DIR := "res://tools/downloads"
 
 var _camera: Camera3D
 
+
+## Before the world's _ready: a geared test wizard, not a fresh level-1 one.
+func _enter_tree() -> void:
+	TestGround.use_test_character()
+
 func _ready() -> void:
 	await get_tree().create_timer(1.6).timeout
 	_camera = Camera3D.new()
 	_camera.fov = 65.0
 	world.add_child(_camera)
 	# The game camera keeps rendering; this one is only used to frame shots.
-	if OS.get_cmdline_user_args().has("--only=social"):
-		await _capture_social()
-		world.queue_free()
-		await get_tree().process_frame
-		get_tree().quit()
-		return
-	await _capture_combat()
-	await _capture_castle()
-	await _capture_maintenance()
-	await _capture_onboarding()
-	await _capture_mounted()
-	await _capture_settings()
-	await _capture_social()
-	_report_layout()
+	var shots := {"combat": _capture_combat, "castle": _capture_castle, "maintenance": _capture_maintenance,
+		"onboarding": _capture_onboarding, "mounted": _capture_mounted, "settings": _capture_settings,
+		"social": _capture_social}
+	var only := ""
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--only="):
+			only = arg.substr("--only=".length())
+	for shot in shots:
+		if only == "" or only == shot:
+			await (shots[shot] as Callable).call()
+	if only == "":
+		_report_layout()
 	world.queue_free()
 	await get_tree().process_frame
 	get_tree().quit()
@@ -54,7 +58,7 @@ func _ready() -> void:
 func _capture_combat() -> void:
 	var player = world.local_player
 	var hud = world.hud
-	var spot := Vector3(-70, 0.15, 20)
+	var spot := TestGround.pack_spot()
 	# Stage a real pack around the player, exactly as a fight finds them.
 	var staged := 0
 	var first: Node3D = null
@@ -89,7 +93,8 @@ func _capture_combat() -> void:
 	SimAuthority.cast_started.emit(hud.binder.local_uid(), 9001, "incendio", Vector3.ZERO, int(SimAuthority.sim_tick) + 40)
 	SimAuthority.reward_granted.emit(hud.binder.local_uid(), 1, 340, 65, [{"id": "mat_phoenix_ash", "amount": 1}], "capture:kill:1")
 	await get_tree().create_timer(0.35).timeout
-	_frame(spot + Vector3(0, 1.2, 0), Vector3(-4.5, 2.6, 8.5))
+	_frame(spot + Vector3(0, 1.2, 0), spot + Vector3(-4.5, 2.6, 8.5))
+	await RenderingServer.frame_post_draw
 	_save("ui-hud-combat.png")
 	print("UI CAPTURE combat: hp=%s cast=%s" % [hud.hp_bar.value, hud.feedback.cast_spell])
 
@@ -104,11 +109,12 @@ func _capture_castle() -> void:
 		waited += get_process_delta_time()
 	await get_tree().create_timer(0.6).timeout
 	var player = world.local_player
-	player.global_position = Vector3(-30, 201.35, 4)
+	# The castle's own arrival point, seen through the game camera.
+	player.global_position = HPMaps.spawn_point("castle_interior", "vestibule")
 	player.velocity = Vector3.ZERO
+	var stairs = hud.travel._find_staircase()
 	# Wait for the staircase's own cycle to leave the docked state: the warning
 	# the shot must show is the authority's real transition, not a staged flag.
-	var stairs = hud.travel._find_staircase()
 	if stairs != null:
 		var waited_stairs := 0.0
 		while String(stairs.get("state")) == "docked" and waited_stairs < 14.0:
@@ -116,10 +122,17 @@ func _capture_castle() -> void:
 			waited_stairs += get_process_delta_time()
 		print("UI CAPTURE staircase state=%s after %.1fs" % [stairs.get("state"), waited_stairs])
 	await get_tree().create_timer(0.4).timeout
-	_frame(Vector3(-30, 201.6, 4), Vector3(-16, 202.4, 12))
+	player.camera.current = true
 	await RenderingServer.frame_post_draw
 	_save("ui-hud-castle.png")
 	print("UI CAPTURE castle: location=%s" % hud.travel.location_text())
+	# Back out to the grounds: the shots after this one stand there.
+	world.map_controller._start_transfer("grounds", "courtyard", 0)
+	waited = 0.0
+	while world.map_controller.busy and waited < 8.0:
+		await get_tree().process_frame
+		waited += get_process_delta_time()
+	await get_tree().create_timer(0.6).timeout
 
 ## ---------------------------------------------------------------- maintenance
 
@@ -174,7 +187,7 @@ func _capture_onboarding() -> void:
 func _capture_mounted() -> void:
 	var hud = world.hud
 	var player = world.local_player
-	player.global_position = Vector3(0, 0.2, 18)
+	player.global_position = TestGround.at(0, 0.2, 18)
 	player.velocity = Vector3.ZERO
 	await get_tree().physics_frame
 	if not player.is_mounted:
@@ -183,7 +196,7 @@ func _capture_mounted() -> void:
 		player.toggle_broom_mount()
 	await get_tree().create_timer(0.3).timeout
 	# High above the courtyard: the landing gate refuses, so the badge must say so.
-	player.global_position = Vector3(0, 12.0, 18)
+	player.global_position = TestGround.at(0, 12.0, 18)
 	await get_tree().physics_frame
 	await get_tree().create_timer(0.7).timeout
 	_frame(player.global_position, player.global_position + Vector3(2.6, 1.4, 4.2))
@@ -192,7 +205,7 @@ func _capture_mounted() -> void:
 	print("UI CAPTURE mounted blocked: reason=%s panel=%s" % [
 		hud.travel.last_landing_reason, hud.travel._mounted_panel.get_rect()])
 	# Down on the ground: the gate accepts and the badge flips to ready.
-	player.global_position = Vector3(0, 0.2, 18)
+	player.global_position = TestGround.at(0, 0.2, 18)
 	player.velocity = Vector3.ZERO
 	await get_tree().physics_frame
 	await get_tree().create_timer(0.7).timeout
@@ -223,10 +236,9 @@ func _capture_social() -> void:
 	var hud = world.hud
 	var player = world.local_player
 	var uid: int = hud.binder.local_uid()
-	player.global_position = Vector3(-70, 0.15, 25)
+	player.global_position = TestGround.at(0, 0.15, 5)
 	player.velocity = Vector3.ZERO
-	await get_tree().create_timer(5.0).timeout   # the zone banner of the arrival fades
-	player.global_position = Vector3(-70, 0.15, 25)
+	await get_tree().create_timer(4.0).timeout   # the zone banner of the arrival fades
 	_frame(player.global_position + Vector3(0, 1.2, 0), player.global_position + Vector3(-4.0, 3.2, 8.0))
 	SimAuthority.party_invited.emit(uid, "Hermione")
 	SimAuthority.duel_invited.emit(uid, "Draco", false, 1)
@@ -234,15 +246,12 @@ func _capture_social() -> void:
 	var foe := FakeWizard.new()
 	world.add_child(foe)
 	foe.global_position = player.global_position + Vector3(2, 0, -3)
-	if hud.skill_pick != null:
-		hud.skill_pick.visible = false   # a fresh character's first-spell pick
 	get_viewport().warp_mouse(get_viewport().get_visible_rect().size * Vector2(0.62, 0.5))
 	hud.player_menu.open(foe)
 	await get_tree().create_timer(0.6).timeout
 	await RenderingServer.frame_post_draw
 	_save("ui-social-invites.png")
 	print("UI CAPTURE social invites: %s menu=%s" % [hud.invites.pending(), hud.player_menu.is_open()])
-	print("UI CAPTURE social layout: invites size=%s stack=%s/%s vp=%s card0=%s" % [hud.invites.size, hud.invites._stack.position, hud.invites._stack.size, hud.invites.get_viewport_rect().size, hud.invites._stack.get_child(0).size])
 	hud.player_menu.close()
 	for card in hud.invites._stack.get_children():
 		card.queue_free()
@@ -291,8 +300,7 @@ class FakeWizard extends Node3D:
 func _report_layout() -> void:
 	var size := get_viewport().get_visible_rect().size
 	print("UI CAPTURE viewport: %s" % size)
-	print("UI CAPTURE hud size=%s feedback size=%s onboarding size=%s" % [
-		world.hud.size, world.hud.feedback.size, world.hud.onboarding.size])
+	print("UI CAPTURE hud size=%s feedback size=%s" % [world.hud.size, world.hud.feedback.size])
 	print("UI CAPTURE feedback anchors=(%.2f,%.2f,%.2f,%.2f) offsets=(%.1f,%.1f,%.1f,%.1f) parent=%s" % [
 		world.hud.feedback.anchor_left, world.hud.feedback.anchor_top,
 		world.hud.feedback.anchor_right, world.hud.feedback.anchor_bottom,

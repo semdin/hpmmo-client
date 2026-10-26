@@ -39,15 +39,12 @@ All button states share the same source geometry. Gold frames, inset surfaces, s
 From the workspace root, using the installed Python and Godot console executables:
 
 ```powershell
-client/tools/run_ui_checks.ps1
-client/tools/run_game_checks.ps1
-python server/tests/integration_api.py
-python server/tests/equipment_sim.py
-python server/tests/maps_sim.py
-python server/tests/maintenance_sim.py
-godot --path client res://scenes/test/arcane_showcase.tscn
-godot --path client res://scenes/test/arcane_capture.tscn
+.\dev.ps1 ready
+godot --path client res://scenes/test/ui_capture.tscn
 ```
+
+The old check suites were retired (2026-10-17); `dev.ps1 ready` (client import, world boot,
+`multiplayer_sim.py`) is the test cycle - see `dev-cycle.md` and `test-tools.md`.
 
 The game-check wrapper now also runs the equipment suite. Use `--fixed-fps 60` for direct headless regression scene runs. Run project imports sequentially. Capture runs require a real renderer.
 

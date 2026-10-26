@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bu0xuxwi2t7fw"
-path="res://.godot/imported/fc_harp_texture_pbr_20250901_metallic-texture_pbr_20250901_roughness.jpg-e7fdd76d9e9d0ca2eea0effcf7bf0742.ctex"
+path.s3tc="res://.godot/imported/fc_harp_texture_pbr_20250901_metallic-texture_pbr_20250901_roughness.jpg-e7fdd76d9e9d0ca2eea0effcf7bf0742.s3tc.ctex"
+path.etc2="res://.godot/imported/fc_harp_texture_pbr_20250901_metallic-texture_pbr_20250901_roughness.jpg-e7fdd76d9e9d0ca2eea0effcf7bf0742.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "055fce6e58436d1e3423c4ee3b3e2a40"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/dungeons/forbidden_corridor/fc_harp_texture_pbr_20250901_metallic-texture_pbr_20250901_roughness.jpg"
-dest_files=["res://.godot/imported/fc_harp_texture_pbr_20250901_metallic-texture_pbr_20250901_roughness.jpg-e7fdd76d9e9d0ca2eea0effcf7bf0742.ctex"]
+dest_files=["res://.godot/imported/fc_harp_texture_pbr_20250901_metallic-texture_pbr_20250901_roughness.jpg-e7fdd76d9e9d0ca2eea0effcf7bf0742.s3tc.ctex", "res://.godot/imported/fc_harp_texture_pbr_20250901_metallic-texture_pbr_20250901_roughness.jpg-e7fdd76d9e9d0ca2eea0effcf7bf0742.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

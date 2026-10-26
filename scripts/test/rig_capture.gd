@@ -13,8 +13,11 @@ const OUT_DIR := "res://tools/downloads"
 
 @onready var world = $GameWorld
 
+## Before the world's _ready: a test wizard (it owns a broom for the mount
+## shots) without its cloak, which would cover the grip close-ups.
 func _enter_tree() -> void:
-	NetworkManager.local_character_data = {}
+	TestGround.use_test_character()
+	(NetworkManager.local_character_data.get("equipment", {}) as Dictionary).erase("chest")
 	NetworkManager.is_server = false
 	QuestManager.persistence_enabled = false
 
@@ -49,7 +52,7 @@ func _ready() -> void:
 	# ---- casting at a target dead ahead
 	var dummy := Node3D.new()
 	world.add_child(dummy)
-	dummy.global_position = Vector3(0, 1.2, 16)
+	dummy.global_position = TestGround.at(0, 1.2, 16)
 	player.set_target(dummy)
 	player.current_mana = player.max_mana
 	player._cast_lock = 0.0
@@ -73,7 +76,7 @@ func _ready() -> void:
 	player._cast_lock = 0.0
 	player._combat_until = 0.0
 	player.toggle_broom_mount()
-	player.global_position = Vector3(0, 3.2, 20)
+	player.global_position = TestGround.at(0, 3.2, 20)
 	player.velocity = Vector3.ZERO
 	# The grip yields while the get-on one-shot plays; wait for it to engage so the
 	# capture shows the ride pose, not the transition.
@@ -122,8 +125,8 @@ func _ready() -> void:
 	Input.action_release("move_left")
 	await get_tree().create_timer(0.5).timeout
 
-	# ---- walking: the feet
-	player.global_position = Vector3(0, 1.0, 20)
+	# ---- walking: the feet (dismount on the ground: the landing gate refuses mid-air)
+	player.global_position = TestGround.at(0, 0.3, 5)
 	player.velocity = Vector3.ZERO
 	player._mount_lock = 0.0
 	player.toggle_broom_mount()

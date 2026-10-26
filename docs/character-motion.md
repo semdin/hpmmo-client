@@ -46,8 +46,10 @@ PNG frames go to `tools/downloads/motion-preview/`. The first review GIF is
 
 ## Validation
 
-`tools/run_rig_checks.ps1` runs the 132 rig checks and the new 26 motion
-checks. The motion suite measures actual foot/hip pose changes, planted idle,
+The old check suites were retired (2026-10-17); `dev.ps1 ready` (client import, world boot,
+`multiplayer_sim.py`) is the test cycle - see `dev-cycle.md` and `test-tools.md`.
+The rig and motion suites described below no longer exist; `motion_preview.tscn`
+and `clip_preview.tscn` are the review tools. The motion suite measures actual foot/hip pose changes, planted idle,
 cadence, repeated hits, playback speed, jump/fall selection, cast sampling,
 release events with a full history, and remote cast lifecycle. The 93-check
 gameplay suite also passes after the changes.

@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bnocgtqwqvc1k"
-path="res://.godot/imported/tapestry_knight.jpg-bbeb78768d55f63654ba85dcca573699.ctex"
+path.s3tc="res://.godot/imported/tapestry_knight.jpg-bbeb78768d55f63654ba85dcca573699.s3tc.ctex"
+path.etc2="res://.godot/imported/tapestry_knight.jpg-bbeb78768d55f63654ba85dcca573699.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/dungeons/forbidden_corridor/tapestry_knight.jpg"
-dest_files=["res://.godot/imported/tapestry_knight.jpg-bbeb78768d55f63654ba85dcca573699.ctex"]
+dest_files=["res://.godot/imported/tapestry_knight.jpg-bbeb78768d55f63654ba85dcca573699.s3tc.ctex", "res://.godot/imported/tapestry_knight.jpg-bbeb78768d55f63654ba85dcca573699.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -23,7 +25,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

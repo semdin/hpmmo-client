@@ -353,20 +353,8 @@ def main():
             "acceptance": "",
         })
 
-    # texture families
-    castle_tex = [t["path"] for t in audit["textures"] if t["path"].startswith("assets/textures/") and t["path"].endswith(".png")]
-    if castle_tex:
-        assets.append({
-            "id": "family-castle-baked-textures", "purpose": "castle colour textures (256px)",
-            "status": "placeholder", "author": "original (tools/generate_assets.gd)", "source_url": "tools/generate_assets.gd",
-            "license": "original work", "license_url": "assets/ASSET_CREDITS.md", "license_file": "",
-            "attribution_required": False, "local_paths": castle_tex,
-            "sha256": {t["path"]: t.get("sha256", "") for t in audit["textures"] if t["path"] in castle_tex},
-            "scale_m": "n/a", "triangles": "n/a", "material_slots": "n/a",
-            "textures": {"channels": ["albedo"], "note": "256x256; referenced by no code (dead); replaced in the art pass"},
-            "rig": {"skinned": False, "joints": 0, "clips": []}, "collision": "n/a", "lods": "n/a",
-            "acceptance": " (current look)",
-        })
+    # texture families (the 256 px baked placeholders of tools/generate_assets.gd
+    # were dead and were removed with their generator on 2026-10-25)
     env_palette = [t["path"] for t in audit["textures"] if "models/environment" in t["path"]]
     if env_palette:
         assets.append({

@@ -2,7 +2,7 @@
 """Generate world_files.txt - the declared server-world file set.
 
 The rules below define which client-project files the authoritative Godot world
-needs to boot `scenes/server/dedicated_server.tscn`. Regenerating is
+needs to boot `server/world_server.tscn`. Regenerating is
 deterministic; the export tool copies exactly this list and hash-pins it into
 server/world/WORLD_EXPORT.json.
 
@@ -115,7 +115,30 @@ def build(client):
     files.append("assets/textures/masonry.gdshader")
     files.append("assets/vfx/flame_01.png")
     files.append("assets/vfx/spark_01.png")
+    files += extracted_textures(client, files)
     return sorted(set(files))
+
+
+EXTRACTED_EXTS = (".png", ".jpg", ".jpeg", ".webp")
+
+
+def extracted_textures(client, files):
+    """The images Godot extracted next to every exported model on import
+    (`<model>_<image>.<ext>`: `armour_0.webp`, `broom_ashwood_Image_0.jpg`,
+    `troll_forest_texture_pbr_..._normal.jpg`). They are committed in both
+    repositories; leaving them out made every export delete them from
+    server/world until the next Godot import put them back."""
+    out = []
+    for rel in files:
+        if not rel.endswith((".glb", ".gltf")):
+            continue
+        folder, name = os.path.split(rel)
+        stem = os.path.splitext(name)[0] + "_"
+        directory = os.path.join(client, folder)
+        for n in sorted(os.listdir(directory)):
+            if n.startswith(stem) and n.lower().endswith(EXTRACTED_EXTS):
+                out.append(folder + "/" + n)
+    return out
 
 
 def main():

@@ -91,8 +91,10 @@ def main():
                 "server/world has hand edits the export would overwrite (the world is a\n"
                 "generated copy - make these changes in client/ instead):\n  "
                 + "\n  ".join(edited))
-    # Deterministic export: wipe previous contents (including Godot import
-    # artifacts extracted next to models) so removed sources never linger.
+    # Deterministic export: wipe previous contents so removed sources never
+    # linger. The textures Godot extracts next to models are part of the
+    # declared list (gen_world_files.extracted_textures), so they come back
+    # in the copy below instead of vanishing until the next import.
     # Server-authored trees (the simulation package and the world-server entry)
     # are preserved - they are not generated from the client.
     def protected(rel):

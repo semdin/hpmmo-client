@@ -45,7 +45,5 @@ shield. It inserts a short pose-settle delay only in this isolated review stage.
 Incendio's target hit/burn and Protego's impact are staged for visual inspection.
 Captured frames are saved under `client/tools/downloads/<spell>-preview/`.
 
-Regression scenes: `vfx_regression.tscn`, `rig_regression.tscn`,
-`test_scenario.tscn` in `scenes/test`. They cover resource loading, low/high
-signatures, reflected aim, trail lifetime, configured area bounds, shield
-surface hits, wand grip/aim and existing combat behavior.
+The regression scenes this section described (`vfx_regression`, `rig_regression`,
+`test_scenario`) were retired; `vfx_viewer.tscn` and `vfx_capture.tscn` remain.

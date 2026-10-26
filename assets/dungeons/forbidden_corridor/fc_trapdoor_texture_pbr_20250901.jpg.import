@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://6smj50ficr21"
-path="res://.godot/imported/fc_trapdoor_texture_pbr_20250901.jpg-c99cdf9a95c485ce97d9d90695592c04.ctex"
+path.s3tc="res://.godot/imported/fc_trapdoor_texture_pbr_20250901.jpg-c99cdf9a95c485ce97d9d90695592c04.s3tc.ctex"
+path.etc2="res://.godot/imported/fc_trapdoor_texture_pbr_20250901.jpg-c99cdf9a95c485ce97d9d90695592c04.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "52ee4089da9acb45e3f194faa80d24d9"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/dungeons/forbidden_corridor/fc_trapdoor_texture_pbr_20250901.jpg"
-dest_files=["res://.godot/imported/fc_trapdoor_texture_pbr_20250901.jpg-c99cdf9a95c485ce97d9d90695592c04.ctex"]
+dest_files=["res://.godot/imported/fc_trapdoor_texture_pbr_20250901.jpg-c99cdf9a95c485ce97d9d90695592c04.s3tc.ctex", "res://.godot/imported/fc_trapdoor_texture_pbr_20250901.jpg-c99cdf9a95c485ce97d9d90695592c04.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://icro1dgirwtk"
-path="res://.godot/imported/wand_runebound_wand_runebound_paint.png-18fc3263614572ca3fcaae785f400cf6.ctex"
+path.bptc="res://.godot/imported/wand_runebound_wand_runebound_paint.png-18fc3263614572ca3fcaae785f400cf6.bptc.ctex"
+path.astc="res://.godot/imported/wand_runebound_wand_runebound_paint.png-18fc3263614572ca3fcaae785f400cf6.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "3d2ccca400d6ab17e5d723534a0e7b2a"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props/wands/wand_runebound_wand_runebound_paint.png"
-dest_files=["res://.godot/imported/wand_runebound_wand_runebound_paint.png-18fc3263614572ca3fcaae785f400cf6.ctex"]
+dest_files=["res://.godot/imported/wand_runebound_wand_runebound_paint.png-18fc3263614572ca3fcaae785f400cf6.bptc.ctex", "res://.godot/imported/wand_runebound_wand_runebound_paint.png-18fc3263614572ca3fcaae785f400cf6.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

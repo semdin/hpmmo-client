@@ -47,7 +47,6 @@ python scripts/control.py layout.json out
 python scripts/scatter.py layout.json out
 cd ../../client
 godot --headless --path . -s tools/terrain/build_grounds.gd -- --src ../art/map/out
-godot --headless --path . res://scenes/test/grounds_regression.tscn
 ```
 
 ## Texture slots

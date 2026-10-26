@@ -14,15 +14,22 @@ Commands:
   .\dev.ps1 build              server deployable package into server\dist (client export = the release pipeline)
   .\dev.ps1 start -Client      launch the game
   .\dev.ps1 start -Server      launch the dedicated server world (headless)
+  .\dev.ps1 local             local multiplayer: a dev world server (no accounts, nothing saved) and
+                               two game windows joined as test characters (-Names Harry,Draco
+                               -Char fluffy: any --test-char preset or a level). Closing the windows
+                               stops the server.
   .\dev.ps1 sync-world         re-export server\world from the client project + refresh workspace.lock.json
   .\dev.ps1 verify-contracts   fail if contract files drift from workspace.lock.json
 #>
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('status', 'ready', 'test', 'build', 'start', 'sync-world', 'sync-sim', 'verify-contracts')]
+    [ValidateSet('status', 'ready', 'test', 'build', 'start', 'local', 'sync-world', 'sync-sim', 'verify-contracts')]
     [string]$Command = 'status',
     [switch]$Client,
-    [switch]$Server
+    [switch]$Server,
+    [string]$Names = 'Harry,Draco',
+    [string]$Char = 'fluffy',
+    [int]$Port = 7777
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -225,12 +232,56 @@ switch ($Command) {
     'start' {
         if ($Server) {
             $godot = Get-Godot
-            & $godot --path (Join-Path $serverRepo 'world') res://scenes/server/dedicated_server.tscn
+            $world = Join-Path $serverRepo 'world'
+            # The class cache must match the exported files (a sync-world leaves
+            # it stale until the world is imported).
+            Invoke-GodotText @('--headless', '--path', $world, '--import') | Out-Null
+            & $godot --path $world res://server/world_server.tscn
         }
         else {
             $bat = Join-Path $clientRepo 'Launcher.bat'
             if (Test-Path $bat) { & $bat } else { & (Get-Godot) --path $clientRepo }
         }
+    }
+    'local' {
+        # A dev world server: dev joins take the join token as the name, every
+        # joiner gets the -Char test character, and nothing is persisted.
+        $godot = Get-Godot
+        $world = Join-Path $serverRepo 'world'
+        $log = Join-Path $env:TEMP 'hpmmo-local-server.log'
+        $env:HPMMO_ALLOW_DEV_JOIN = '1'
+        $env:HPMMO_DEV_TEST_CHAR = $Char
+        $env:HPMMO_WORLD_PORT = "$Port"
+        Remove-Item Env:HPMMO_API_URL, Env:HPMMO_SERVICE_TOKEN -ErrorAction SilentlyContinue
+        # Both projects' class caches must match the files (a sync leaves the
+        # world's stale until it is imported).
+        Write-Host '[local] importing the world and the client'
+        Invoke-GodotText @('--headless', '--path', $world, '--import') | Out-Null
+        Invoke-GodotText @('--headless', '--path', $clientRepo, '--import') | Out-Null
+        Write-Host "[local] starting the dev world server on :$Port (log: $log)"
+        $worldProc = Start-Process $godot -ArgumentList @('--headless', '--path', "`"$world`"", 'res://server/world_server.tscn') `
+            -RedirectStandardOutput $log -RedirectStandardError "$log.err" -PassThru -WindowStyle Hidden
+        $ready = $false
+        for ($i = 0; $i -lt 240 -and -not $worldProc.HasExited; $i++) {
+            Start-Sleep -Milliseconds 500
+            if ((Test-Path $log) -and (Select-String -Path $log -Pattern "listening on :$Port" -Quiet)) { $ready = $true; break }
+        }
+        if (-not $ready) {
+            if (-not $worldProc.HasExited) { Stop-Process -Id $worldProc.Id -Force }
+            throw "the dev world server did not start (see $log)"
+        }
+        $clients = @()
+        $list = @($Names -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+        for ($i = 0; $i -lt $list.Count; $i++) {
+            Write-Host "[local] joining as $($list[$i]) ($Char)"
+            # Each window takes its column of the screen (main_menu --dev-window).
+            $clients += Start-Process $godot -PassThru -ArgumentList @('--path', "`"$clientRepo`"", 'res://scenes/main/main_menu.tscn',
+                "--dev-join=$($list[$i])", '--port', "$Port", "--dev-window=$i/$($list.Count)")
+        }
+        Write-Host '[local] close every game window to stop the server'
+        $clients | Wait-Process
+        if (-not $worldProc.HasExited) { Stop-Process -Id $worldProc.Id -Force }
+        Write-Host '[local] server stopped'
     }
     'sync-sim' {
         Write-Host '[workspace] syncing the simulation package server -> client'

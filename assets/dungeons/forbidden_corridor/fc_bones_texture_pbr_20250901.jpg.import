@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgulwgusbnvc4"
-path="res://.godot/imported/fc_bones_texture_pbr_20250901.jpg-86fc7758c452e4f0873a4a7155df0cf5.ctex"
+path.s3tc="res://.godot/imported/fc_bones_texture_pbr_20250901.jpg-86fc7758c452e4f0873a4a7155df0cf5.s3tc.ctex"
+path.etc2="res://.godot/imported/fc_bones_texture_pbr_20250901.jpg-86fc7758c452e4f0873a4a7155df0cf5.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "688fdd9f5e091aca163fe2fc65371388"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/dungeons/forbidden_corridor/fc_bones_texture_pbr_20250901.jpg"
-dest_files=["res://.godot/imported/fc_bones_texture_pbr_20250901.jpg-86fc7758c452e4f0873a4a7155df0cf5.ctex"]
+dest_files=["res://.godot/imported/fc_bones_texture_pbr_20250901.jpg-86fc7758c452e4f0873a4a7155df0cf5.s3tc.ctex", "res://.godot/imported/fc_bones_texture_pbr_20250901.jpg-86fc7758c452e4f0873a4a7155df0cf5.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

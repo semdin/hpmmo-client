@@ -67,6 +67,4 @@ Manual maintenance: create `/opt/hpmmo/state/maintenance.flag` (any content) and
 ## Tests
 
 - `python tools/release/test_updater.py` - launcher updater incl. delta updates (113 checks; build `launcher_cpp/build` first).
-- `python server/tests/login_screen_e2e.py` - the login screen against the real stack, incl. the maintenance gate.
-- `python server/tests/integration_api.py` - service, incl. `/api/status` and the gate.
 - `godot --path client res://scenes/test/ui_menu_capture.tscn` - login screen screenshots in `tools/downloads/`.

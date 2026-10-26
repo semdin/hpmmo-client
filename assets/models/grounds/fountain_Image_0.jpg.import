@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b8q7sp4yvf2g"
-path="res://.godot/imported/fountain_Image_0.jpg-9df2b3eacf0658a9c0e02a8f61d571f5.ctex"
+path.s3tc="res://.godot/imported/fountain_Image_0.jpg-9df2b3eacf0658a9c0e02a8f61d571f5.s3tc.ctex"
+path.etc2="res://.godot/imported/fountain_Image_0.jpg-9df2b3eacf0658a9c0e02a8f61d571f5.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f1951b0a88857a7e547eea24c894026d"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/grounds/fountain_Image_0.jpg"
-dest_files=["res://.godot/imported/fountain_Image_0.jpg-9df2b3eacf0658a9c0e02a8f61d571f5.ctex"]
+dest_files=["res://.godot/imported/fountain_Image_0.jpg-9df2b3eacf0658a9c0e02a8f61d571f5.s3tc.ctex", "res://.godot/imported/fountain_Image_0.jpg-9df2b3eacf0658a9c0e02a8f61d571f5.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
