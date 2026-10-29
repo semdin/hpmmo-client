@@ -2524,7 +2524,79 @@ msgid "Height"
 msgstr ""
 
 #: scripts/ui/look_editor.gd
+msgid "Jaw"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Chin"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Chin Length"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Cheekbones"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Cheeks"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Nose Length"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Nose Width"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Nose Bridge"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Lips"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Brow Ridge"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Classic Face"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Oval Face"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Round Face"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Square Face"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Triangular Face"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Diamond Face"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
 msgid "APPEARANCE"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Look"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Face"
 msgstr ""
 
 #: scripts/ui/look_editor.gd
@@ -2549,6 +2621,10 @@ msgstr ""
 
 #: scripts/ui/look_editor.gd
 msgid "Skin tone"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Face type"
 msgstr ""
 
 #: scripts/ui/look_editor.gd

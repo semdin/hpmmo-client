@@ -32,9 +32,31 @@ func _ready() -> void:
 	await _shot("charselect-create")
 	# the appearance editor drives the podium wizard live
 	var editor: LookEditor = select.get("_look_editor")
-	editor.set_look({"hair": 1, "hair_color": 5, "eyes": 2, "skin": 3, "outfit": 1, "beard": 3, "height": 0.6}, true)
+	editor.set_look({"hair": 1, "hair_color": 5, "eyes": 2, "skin": 3, "outfit": 1, "beard": 3, "height": 0.6, "jaw": 0.7}, true)
 	await get_tree().create_timer(0.6).timeout
 	await _shot("charselect-look")
+	editor.call("_show_tab", "face")
+	editor.set_look({"hair": 5, "face": 3, "jaw": 0.6, "nose_length": -0.4}, true)
+	# the face tab frames the face: let the camera arrive
+	await get_tree().create_timer(0.8).timeout
+	await _shot("charselect-face")
+	# right-drag on the stage: turn the wizard and swing the camera over it
+	editor.call("_show_tab", "look")
+	var centre := get_viewport().get_visible_rect().size * Vector2(0.5, 0.45)
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_RIGHT
+	press.pressed = true
+	press.position = centre
+	select.call("_input", press)
+	for i in 10:
+		var move := InputEventMouseMotion.new()
+		move.position = centre
+		move.relative = Vector2(14, 9)
+		select.call("_input", move)
+	press.pressed = false
+	select.call("_input", press)
+	await get_tree().create_timer(0.8).timeout
+	await _shot("charselect-orbit")
 	get_tree().quit()
 
 func _shot(subject: String) -> void:
