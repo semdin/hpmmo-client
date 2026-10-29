@@ -599,6 +599,10 @@ msgstr ""
 msgid "%s\nLevel %d  ·  %s"
 msgstr ""
 
+#: scripts/ui/character_select.gd
+msgid "Edit Appearance"
+msgstr ""
+
 #: scripts/ui/combat_feedback.gd
 msgid "Equip a wand first"
 msgstr ""
@@ -1735,7 +1739,7 @@ msgstr ""
 msgid "You cannot leave while defeated."
 msgstr ""
 
-#: scripts/ui/hud_game_menu.gd scripts/ui/inventory_arcane.gd scripts/ui/ollivander_ui.gd scenes/main/character_select.tscn
+#: scripts/ui/hud_game_menu.gd scripts/ui/inventory_arcane.gd scripts/ui/look_editor.gd scripts/ui/ollivander_ui.gd scenes/main/character_select.tscn
 msgid "Cancel"
 msgstr ""
 
@@ -2417,6 +2421,78 @@ msgstr ""
 
 #: scripts/ui/item_tooltip.gd
 msgid "Restores %d Mana"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Side Part"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Buzzed"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Long"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Shaved"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Tunic"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Travel Tunic"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Ranger"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Scout"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Height"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "APPEARANCE"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Outfit"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Hairstyle"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Hair colour"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Eye colour"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Skin tone"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Random"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Reset"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Save"
 msgstr ""
 
 #: scripts/ui/loot_window.gd

@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bmwpnmja4dkcd"
-path.s3tc="res://.godot/imported/hero_wizard_hero_orm.png-cb310491d6d30057a8e542a34bda4851.s3tc.ctex"
-path.etc2="res://.godot/imported/hero_wizard_hero_orm.png-cb310491d6d30057a8e542a34bda4851.etc2.ctex"
+uid="uid://824btjew8526"
+path.s3tc="res://.godot/imported/hero_wizard_T_Regular_Male_Roughness.png-cf252cd5fc7c88cf1fb5d0c7b0dcd950.s3tc.ctex"
+path.etc2="res://.godot/imported/hero_wizard_T_Regular_Male_Roughness.png-cf252cd5fc7c88cf1fb5d0c7b0dcd950.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "e8fe3829a805b525e7a8bc90c09e48ee"
+"md5": "a7966eb2bb9bf39a39350a651ff9804f"
 }
 
 [deps]
 
-source_file="res://assets/models/characters/hero_wizard_hero_orm.png"
-dest_files=["res://.godot/imported/hero_wizard_hero_orm.png-cb310491d6d30057a8e542a34bda4851.s3tc.ctex", "res://.godot/imported/hero_wizard_hero_orm.png-cb310491d6d30057a8e542a34bda4851.etc2.ctex"]
+source_file="res://assets/models/characters/hero_wizard_T_Regular_Male_Roughness.png"
+dest_files=["res://.godot/imported/hero_wizard_T_Regular_Male_Roughness.png-cf252cd5fc7c88cf1fb5d0c7b0dcd950.s3tc.ctex", "res://.godot/imported/hero_wizard_T_Regular_Male_Roughness.png-cf252cd5fc7c88cf1fb5d0c7b0dcd950.etc2.ctex"]
 
 [params]
 

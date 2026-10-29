@@ -30,6 +30,11 @@ func _ready() -> void:
 	select.call("_on_new_char_pressed")
 	await get_tree().create_timer(0.4).timeout
 	await _shot("charselect-create")
+	# the appearance editor drives the podium wizard live
+	var editor: LookEditor = select.get("_look_editor")
+	editor.set_look({"hair": 1, "hair_color": 5, "eyes": 2, "skin": 3, "outfit": 1, "height": 0.6}, true)
+	await get_tree().create_timer(0.6).timeout
+	await _shot("charselect-look")
 	get_tree().quit()
 
 func _shot(subject: String) -> void:

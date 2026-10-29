@@ -21,7 +21,11 @@ lengths never stretch however different the proportions are.
 
 Run:
   blender --background --python retarget_clip.py -- <clip.fbx> <out.glb> <ClipName>
-          [--hand Right|Left] [--trim START END] [--hips-ref FRAME] [--release FRAME] [--spine-scale K] [--render <dir>]
+          [--hand Right|Left] [--trim START END] [--hips-ref FRAME] [--release FRAME] [--spine-scale K] [--loop] [--render <dir>]
+
+--loop: a locomotion cycle (trim it with find_loop.py): the drift between the
+last frame and the first is spread linearly over the clip, so the frame after
+the last one is the first one and the loop never pops.
 
 Writes <out>.json: frame range, length, release frame/fraction (the frame the
 wand hand is furthest in front of the chest) and the per-frame reach.
@@ -39,6 +43,7 @@ HIPS_REF = None
 RENDER = None
 RELEASE = None
 SPINE_SCALE = 1.0
+LOOP = False
 i = 3
 while i < len(argv):
     if argv[i] == "--hand":
@@ -51,6 +56,8 @@ while i < len(argv):
         SPINE_SCALE = float(argv[i + 1]); i += 2
     elif argv[i] == "--release":
         RELEASE = int(argv[i + 1]); i += 2
+    elif argv[i] == "--loop":
+        LOOP = True; i += 1
     elif argv[i] == "--render":
         RENDER = os.path.abspath(argv[i + 1]); i += 2
     else:
@@ -65,15 +72,19 @@ PROFILES = {
     "smpl": {
         "detect": "L_Hip",
         "map": {
-            "Pelvis": "Hips", "Spine1": "Spine", "Spine2": "Chest", "Spine3": "UpperChest", "Neck": "Neck",
+            "Pelvis": "Hips", "Spine1": "Spine", "Spine2": "Chest", "Spine3": "UpperChest", "Neck": "Neck", "Head": "Head",
             "L_Collar": "LeftShoulder", "L_Shoulder": "LeftUpperArm", "L_Elbow": "LeftLowerArm", "L_Wrist": "LeftHand",
             "R_Collar": "RightShoulder", "R_Shoulder": "RightUpperArm", "R_Elbow": "RightLowerArm", "R_Wrist": "RightHand",
             "L_Hip": "LeftUpperLeg", "L_Knee": "LeftLowerLeg", "L_Ankle": "LeftFoot",
             "R_Hip": "RightUpperLeg", "R_Knee": "RightLowerLeg", "R_Ankle": "RightFoot",
         },
         # (source bone, source child) whose head-to-head direction defines the
-        # limb; the hero side uses the mapped pair.
+        # limb; the hero side uses the mapped pair. The spine and neck are
+        # aligned too: SMPL rests bolt upright, the hero in a natural stance,
+        # so an unaligned chain adds the clip's own head-forward posture on top
+        # of the hero's (a slumped, head-down character).
         "aim": {
+            "Spine1": "Spine2", "Spine2": "Spine3", "Spine3": "Neck", "Neck": "Head",
             "L_Collar": "L_Shoulder", "L_Shoulder": "L_Elbow", "L_Elbow": "L_Wrist", "L_Wrist": "L_Middle1",
             "R_Collar": "R_Shoulder", "R_Shoulder": "R_Elbow", "R_Elbow": "R_Wrist", "R_Wrist": "R_Middle1",
             "L_Hip": "L_Knee", "L_Knee": "L_Ankle", "R_Hip": "R_Knee", "R_Knee": "R_Ankle",
@@ -117,7 +128,9 @@ print("[clip] hero %s (%d bones)" % (hero.name, len(hero.data.bones)))
 
 # ---------------------------------------------------------------- source
 known = set(bpy.data.objects)
-bpy.ops.import_scene.fbx(filepath=FBX, ignore_leaf_bones=True)
+# Leaf bones kept: SMPL's Head is a leaf (dropping it loses the head's own
+# motion and the neck's alignment)
+bpy.ops.import_scene.fbx(filepath=FBX, ignore_leaf_bones=False)
 src = next(ob for ob in bpy.data.objects if ob.type == "ARMATURE" and ob not in known)
 for ob in list(bpy.data.objects):
     if ob not in known and ob != src:
@@ -157,6 +170,10 @@ for s, d in bone_map.items():
     v_src = head_world(src, child_s) - head_world(src, s)
     v_dst = head_world(hero, child_d) - head_world(hero, d)
     align[d] = v_dst.normalized().rotation_difference(v_src.normalized())
+# Both rigs rest with the face looking ahead, so the head keeps its own rest
+# (inheriting the neck's swing would tip the face up)
+if "Head" in dst_of:
+    align["Head"] = Quaternion()
 src_rest_rot = {s: rest_rot_world(src, s) for s in bone_map}
 dst_rest_rot = {d: rest_rot_world(hero, d) for d in bone_map.values()}
 src_root = profile["root"]
@@ -180,6 +197,16 @@ def walk(bone):
 for b in hero.data.bones:
     if b.parent is None:
         walk(b)
+
+def fcurves_of(act):
+    if hasattr(act, "fcurves"):
+        return list(act.fcurves)
+    out = []
+    for layer in act.layers:
+        for strip in layer.strips:
+            for bag in strip.channelbags:
+                out.extend(bag.fcurves)
+    return out
 
 # ---------------------------------------------------------------- bake
 src.animation_data.action = action
@@ -234,6 +261,34 @@ src.animation_data.action = None
 n = f1 - f0
 print("[clip] baked %s: %d frames" % (CLIP, n + 1))
 
+if LOOP:
+    # quaternion keys can flip hemisphere between frames; align them first so
+    # the per-channel drift correction stays a small rotation
+    for bone in hero.pose.bones:
+        path = 'pose.bones["%s"].rotation_quaternion' % bone.name
+        curves = {fc.array_index: fc for fc in fcurves_of(clip) if fc.data_path == path}
+        if len(curves) != 4:
+            continue
+        prev = None
+        for k in range(len(curves[0].keyframe_points)):
+            q = Quaternion([curves[c].keyframe_points[k].co[1] for c in range(4)])
+            if prev is not None and q.dot(prev) < 0:
+                q.negate()
+                for c in range(4):
+                    curves[c].keyframe_points[k].co[1] = q[c]
+            prev = q
+    for fc in fcurves_of(clip):
+        pts = fc.keyframe_points
+        if len(pts) < 3:
+            continue
+        delta = pts[0].co[1] - (2 * pts[-1].co[1] - pts[-2].co[1])
+        for k, kp in enumerate(pts):
+            kp.co[1] += delta * k / len(pts)
+            kp.handle_left[1] = kp.co[1]
+            kp.handle_right[1] = kp.co[1]
+        fc.update()
+    print("[clip] %s: loop drift spread over %d frames" % (CLIP, n + 1))
+
 # ---------------------------------------------------------------- release beat
 hand = HAND + "Hand"
 best, best_frame, reach, lift, side = -1e9, 0, [], [], []
@@ -262,16 +317,6 @@ upper.name = CLIP + "_Upper"
 upper.use_fake_user = True
 LOWER = ("Root", "Hips", "LeftUpperLeg", "LeftLowerLeg", "LeftFoot", "LeftToes",
          "RightUpperLeg", "RightLowerLeg", "RightFoot", "RightToes")
-
-def fcurves_of(act):
-    if hasattr(act, "fcurves"):
-        return list(act.fcurves)
-    out = []
-    for layer in act.layers:
-        for strip in layer.strips:
-            for bag in strip.channelbags:
-                out.extend(bag.fcurves)
-    return out
 
 def remove_fcurve(act, fc):
     if hasattr(act, "fcurves"):

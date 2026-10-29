@@ -28,7 +28,7 @@ ASSET_FAMILIES = (
     ("assets/models/props", (".glb", ".gltf", ".bin", ".png")),
     # The Dark Monolith (Metin stone) the authority spawns and registers.
     ("assets/models/monolith", (".glb", ".jpg", ".png")),
-    ("assets/shaders", (".gdshader",)),
+    ("assets/shaders", (".gdshader", ".gdshaderinc")),
     ("assets/textures/pbr", (".png", ".jpg", ".exr")),
     # The effect atlases AND their authored meshes - the world
     # instantiates shield/projectile/trail layers too.

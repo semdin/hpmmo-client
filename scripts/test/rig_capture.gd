@@ -44,6 +44,12 @@ func _ready() -> void:
 	await get_tree().create_timer(0.6).timeout
 	var wrist: Vector3 = _bone(player, HeroBones.hand("R"))
 	print("CAPTURE idle wrist.R=%s" % wrist)
+	var space: PhysicsDirectSpaceState3D = player.get_world_3d().direct_space_state
+	var ray := PhysicsRayQueryParameters3D.create(player.global_position + Vector3.UP, player.global_position + Vector3.DOWN * 2.0)
+	ray.exclude = [player.get_rid()]
+	var hit: Dictionary = space.intersect_ray(ray)
+	print("CAPTURE ground origin_y=%.3f floor_y=%s toes_y=%.3f foot_y=%.3f visuals_y=%.3f" % [player.global_position.y,
+		str(hit.get("position", Vector3.ZERO).y), _bone(player, "LeftToes").y, _bone(player, "LeftFoot").y, player.visuals.global_position.y])
 	var chest: Vector3 = _bone(player, HeroBones.UPPER_CHEST)
 	await _shot(camera, "rig-0-body-front", chest + Vector3(0.0, 0.15, 3.4), chest)
 	await _shot(camera, "rig-1-wand-idle", wrist + Vector3(-1.15, 0.35, 1.45), wrist)
@@ -78,6 +84,17 @@ func _ready() -> void:
 	player.toggle_broom_mount()
 	player.global_position = TestGround.at(0, 3.2, 20)
 	player.velocity = Vector3.ZERO
+	# The get-on: how far each hand is from the wood every tenth of a second
+	# (the hands must take the shaft as the leg swings over, not after the clip)
+	var t0 := Time.get_ticks_msec()
+	for k in range(9):
+		await get_tree().create_timer(0.1).timeout
+		var err: float = player.broom_grip.hand_error() if player.broom_grip else -1.0
+		var w: float = player.broom_grip.weight if player.broom_grip else 0.0
+		print("CAPTURE mount t=%.2f grip_w=%.2f hand_err=%.3f clip=%s" % [(Time.get_ticks_msec() - t0) / 1000.0, w, err, player.hero_anim.oneshot_clip])
+		if k == 2 or k == 5:
+			var h: Vector3 = player.socket("Socket_Hips").global_position
+			await _shot(camera, "rig-3-mounting-%d" % k, h + Vector3(3.2, 0.5, 1.2), h + Vector3(0, 0.1, 0))
 	# The grip yields while the get-on one-shot plays; wait for it to engage so the
 	# capture shows the ride pose, not the transition.
 	for _i in range(240):
@@ -134,8 +151,22 @@ func _ready() -> void:
 	Input.action_press("move_forward")
 	await get_tree().create_timer(0.7).timeout
 	var foot: Vector3 = _bone(player, HeroBones.foot("L"))
-	print("CAPTURE walk clip=%s foot=%s origin=%s" % [
-		player.hero_anim.current_clip, foot, player.global_position])
+	var hips_lo := 9.0
+	var hips_hi := -9.0
+	var foot_lo := 9.0
+	for _f in range(40):
+		await get_tree().process_frame
+		var sk: Skeleton3D = player._find_skeleton()
+		var hy: float = (sk.global_transform * sk.get_bone_global_pose(sk.find_bone("Hips"))).origin.y - player.global_position.y
+		var fy: float = minf((sk.global_transform * sk.get_bone_global_pose(sk.find_bone("LeftFoot"))).origin.y,
+			(sk.global_transform * sk.get_bone_global_pose(sk.find_bone("RightFoot"))).origin.y) - player.global_position.y
+		hips_lo = minf(hips_lo, hy)
+		hips_hi = maxf(hips_hi, hy)
+		foot_lo = minf(foot_lo, fy)
+	print("CAPTURE walk hips %.3f..%.3f lowest ankle %.3f blend=%s rate=%.2f visuals_y=%.3f os=%.2f" % [hips_lo, hips_hi, foot_lo,
+		player.hero_anim.get("_ground_blend"), player.hero_anim.get("_ground_rate"), player.visuals.position.y, player.hero_anim.oneshot_weight()])
+	print("CAPTURE walk clip=%s oneshot=%s left=%.2f foot=%s origin=%s" % [
+		player.hero_anim.current_clip, player.hero_anim.oneshot_clip, player.hero_anim.oneshot_left, foot, player.global_position])
 	# Follow the runner: the camera re-aims every frame, so the body stays framed.
 	await _follow(camera, player, "rig-4-walk-side", Vector3(3.0, 0.75, 0.0))
 	await get_tree().create_timer(0.22).timeout

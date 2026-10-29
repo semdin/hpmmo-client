@@ -97,6 +97,11 @@ func _ready() -> void:
 		get_tree().quit()
 		return
 	print("CLIP has %s_Upper=%s raw=%s" % [clip, player.hero_anim.has_clip(clip + "_Upper"), player.hero_anim.has_clip(clip)])
+	for mi in player.visuals.find_children("Hero_Peasant_Arms", "MeshInstance3D", true, false):
+		for si in range(mi.mesh.get_surface_count()):
+			var src = mi.mesh.surface_get_material(si)
+			var ov = mi.get_surface_override_material(si)
+			print("ARMS surf %d src=%s ov=%s shader=%s" % [si, src.resource_name if src else "-", ov, (ov as ShaderMaterial).shader.resource_path if ov is ShaderMaterial else "-"])
 	await _pass("cast", func(): player._play_cast_animation("Spellcast_Shoot",
 		player.global_position + player.visuals.global_basis.z * 12.0 + Vector3.UP * 1.2, spell, combo), CAST_TIMES)
 	await get_tree().create_timer(1.0).timeout
@@ -183,6 +188,11 @@ func _on_fx_release(event: String) -> void:
 		return
 	var dir := (_fx_aim - (player.global_position + Vector3.UP * 1.3)).normalized()
 	var origin := SFX.emission_origin(player, player.global_position + Vector3.UP * 1.3, dir)
+	var sk: Skeleton3D = player.hero_anim.skeleton
+	var head := (sk.global_transform * sk.get_bone_global_pose(sk.find_bone("Head"))).origin
+	var hand := (sk.global_transform * sk.get_bone_global_pose(sk.find_bone("RightHand"))).origin
+	print("RELEASE origin=%s head_dist=%.2f hand_dist=%.2f tip_ahead=%.2f" % [origin, origin.distance_to(head), origin.distance_to(hand),
+		(origin - player.global_position).dot(player.visuals.global_basis.z)])
 	if spell == "incendio":
 		SFX.play_cast(self, player, spell, origin, dir)
 		await get_tree().create_timer(0.25).timeout
