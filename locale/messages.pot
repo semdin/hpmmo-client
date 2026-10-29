@@ -2436,7 +2436,71 @@ msgid "Long"
 msgstr ""
 
 #: scripts/ui/look_editor.gd
+msgid "Wavy"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Tousled"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Neat Comb"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Ponytail"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Curly"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
 msgid "Shaved"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Clean-shaven"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Stubble"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Short Beard"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Full Beard"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Natural Brows"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Bushy Brows"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Arched Brows"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Thin Brows"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Sharp Brows"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Classic Brows"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Classic Straight Brows"
 msgstr ""
 
 #: scripts/ui/look_editor.gd
@@ -2469,6 +2533,10 @@ msgstr ""
 
 #: scripts/ui/look_editor.gd
 msgid "Hairstyle"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Facial hair"
 msgstr ""
 
 #: scripts/ui/look_editor.gd
