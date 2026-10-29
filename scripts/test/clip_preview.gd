@@ -8,7 +8,7 @@ extends Node3D
 ##
 ##   godot --path . res://scenes/test/clip_preview.tscn -- --spell stupefy [--clip Cast_Stupefy]
 ##   godot --path . res://scenes/test/clip_preview.tscn -- --variants <dir>
-##   godot --path . res://scenes/test/clip_preview.tscn -- --fx --spell bombarda [--combo N]
+##   godot --path . res://scenes/test/clip_preview.tscn -- --fx --spell bombarda [--combo N] [--house Slytherin]
 ##
 ## `--fx` fires the real spell: the cast animation, the wand-release cast flash,
 ## a visual-only bolt into a wall 10 m ahead (or Incendio's cone / Protego's
@@ -31,6 +31,7 @@ var fx_mode := false
 const FX_TIMES := [0.05, 0.12, 0.2, 0.28, 0.36, 0.45, 0.55, 0.68, 0.82, 1.0, 1.25, 1.6]
 const SFX = preload("res://scripts/spells/skill_fx.gd")
 var combo := 0
+var house := ""
 
 func _ready() -> void:
 	QuestManager.persistence_enabled = false
@@ -42,6 +43,8 @@ func _ready() -> void:
 			clip = args[i + 1]
 		elif args[i] == "--combo":
 			combo = int(args[i + 1])
+		elif args[i] == "--house":
+			house = args[i + 1]
 	if clip == "":
 		var key := "basic_cast:%d" % combo if spell == "basic_cast" else spell
 		clip = String(preload("res://scripts/entities/player.gd").SPELL_CLIPS.get(key, {}).get("clip", "Spellcast_Shoot"))
@@ -80,6 +83,8 @@ func _ready() -> void:
 	player.is_local_player = false
 	player.sim_server_controlled = true
 	add_child(player)
+	if house != "":
+		player.house = house
 	player.nameplate.hide()
 	player.sim_input = {"move": Vector2.ZERO, "yaw": 0.0, "jump": false}
 	camera = Camera3D.new()
@@ -177,7 +182,7 @@ func _fx_pass() -> void:
 	_fx_aim = aim
 	_fx_forward = forward
 	player.animation_event.connect(_on_fx_release)
-	await _pass_to("%s/fx-%s%s.png" % [OUT, spell, ("-%d" % combo) if spell == "basic_cast" else ""],
+	await _pass_to("%s/fx-%s%s%s.png" % [OUT, spell, ("-%d" % combo) if spell == "basic_cast" else "", ("-" + house) if house != "" else ""],
 		func(): player._play_cast_animation("Spellcast_Shoot", aim, spell, combo), FX_TIMES)
 
 var _fx_aim := Vector3.ZERO
@@ -211,14 +216,15 @@ func _on_fx_release(event: String) -> void:
 		add_child(bolt)
 		bolt.global_position = origin
 		bolt.visual_only = true
-		bolt.setup(player, spell, dir)
+		bolt.setup(player, spell, dir, null, 1.0, _fx_aim)
 
 func _process(_delta: float) -> void:
 	if camera != null and player != null and fx_mode:
 		# wide side shot that holds the caster and the wall
 		var fwd: Vector3 = player.visuals.global_basis.z
 		var side: Vector3 = player.visuals.global_basis.x
-		var mid := player.global_position + fwd * 4.6 + Vector3.UP * 1.3
+		# centred a little past halfway, so the impact at the wall stays in frame
+		var mid := player.global_position + fwd * 5.4 + Vector3.UP * 1.3
 		camera.fov = 50.0
 		camera.global_position = mid - side * 6.0 + Vector3.UP * 0.9 - fwd * 0.5
 		camera.look_at(mid)
