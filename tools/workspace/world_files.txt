@@ -326,6 +326,7 @@ assets/models/props/wands/wand_runebound.glb
 assets/models/props/wands/wand_runebound_wand_runebound_paint.png
 assets/models/props/wands/wand_silverthorn.glb
 assets/models/props/wands/wand_silverthorn_wand_silverthorn_paint.png
+assets/shaders/body_flame.gdshader
 assets/shaders/castle/candle_flame.gdshader
 assets/shaders/castle/enchanted_sky.gdshader
 assets/shaders/castle/floating_candle.gdshader
@@ -345,6 +346,7 @@ assets/shaders/hero_eye.gdshader
 assets/shaders/hero_hair.gdshader
 assets/shaders/hero_instance.gdshaderinc
 assets/shaders/hero_skin.gdshader
+assets/shaders/hit_flash.gdshader
 assets/shaders/lake_water.gdshader
 assets/shaders/loot/chest_beam.gdshader
 assets/shaders/loot/chest_pool.gdshader
@@ -357,6 +359,7 @@ assets/shaders/spell_layer_add.gdshader
 assets/shaders/spell_ribbon.gdshader
 assets/shaders/stair_threshold.gdshader
 assets/shaders/stair_ward.gdshader
+assets/shaders/status_skin.gdshader
 assets/shaders/target_ring.gdshader
 assets/shaders/triplanar_pbr.gdshader
 assets/shaders/wand_energy.gdshader
@@ -655,6 +658,7 @@ scripts/fx/fire_card.gd
 scripts/fx/flipbook_fx.gd
 scripts/fx/level_up_fx.gd
 scripts/fx/monolith_shatter.gd
+scripts/fx/spark_ember.gd
 scripts/fx/status_fx.gd
 scripts/server/db_manager.gd
 scripts/server/dedicated_server.gd
