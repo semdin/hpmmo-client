@@ -1064,6 +1064,10 @@ msgid "%s won Legendary gold in %s!"
 msgstr ""
 
 #: scripts/ui/hud.gd
+msgid "An update is on its way: the realm restarts in about %d minutes."
+msgstr ""
+
+#: scripts/ui/hud.gd
 msgid "[World] "
 msgstr ""
 
@@ -3737,6 +3741,18 @@ msgstr ""
 
 #: scripts/ui/settings_ui.gd
 msgid "Auto picks Low on integrated graphics and High on a dedicated GPU"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "Frame rate limit"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "%d FPS"
+msgstr ""
+
+#: scripts/ui/settings_ui.gd
+msgid "60 is smooth; 30 keeps a laptop cooler and quieter"
 msgstr ""
 
 #: scripts/ui/settings_ui.gd

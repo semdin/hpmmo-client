@@ -18,18 +18,23 @@ Commands:
                                two game windows joined as test characters (-Names Harry,Draco
                                -Char fluffy: any --test-char preset or a level). Closing the windows
                                stops the server.
+  .\dev.ps1 perf              performance probe: a dev world server, -Bots walking headless bots
+                               (default 8) and one measuring game window beside a creature pack
+                               (tools/capture/perf_probe.gd: idle, camera turn, run, combat). Prints
+                               PERF lines; JSON and logs in %TEMP%\hpmmo-perf. -Char: test preset (30).
   .\dev.ps1 sync-world         re-export server\world from the client project + refresh workspace.lock.json
   .\dev.ps1 verify-contracts   fail if contract files drift from workspace.lock.json
 #>
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('status', 'ready', 'test', 'build', 'start', 'local', 'sync-world', 'sync-sim', 'verify-contracts')]
+    [ValidateSet('status', 'ready', 'test', 'build', 'start', 'local', 'perf', 'sync-world', 'sync-sim', 'verify-contracts')]
     [string]$Command = 'status',
     [switch]$Client,
     [switch]$Server,
     [string]$Names = 'Harry,Draco',
     [string]$Char = 'fluffy',
-    [int]$Port = 7777
+    [int]$Port = 7777,
+    [int]$Bots = 8
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -288,6 +293,61 @@ switch ($Command) {
         $clients | Wait-Process
         if (-not $worldProc.HasExited) { Stop-Process -Id $worldProc.Id -Force }
         Write-Host '[local] server stopped'
+    }
+    'perf' {
+        # Same dev world as `local`, plus walking bots and the measuring probe.
+        $godot = Get-Godot
+        $world = Join-Path $serverRepo 'world'
+        $out = Join-Path $env:TEMP 'hpmmo-perf'
+        New-Item -ItemType Directory -Force $out | Out-Null
+        $perfChar = if ($PSBoundParameters.ContainsKey('Char')) { $Char } else { '30' }
+        $perfPort = if ($PSBoundParameters.ContainsKey('Port')) { $Port } else { 7793 }
+        $env:HPMMO_ALLOW_DEV_JOIN = '1'
+        $env:HPMMO_DEV_TEST_CHAR = $perfChar
+        $env:HPMMO_DEV_SPAWN = 'pack'
+        $env:HPMMO_DEV_FAST_RESPAWN = '3000'
+        $env:HPMMO_WORLD_PORT = "$perfPort"
+        Remove-Item Env:HPMMO_API_URL, Env:HPMMO_SERVICE_TOKEN -ErrorAction SilentlyContinue
+        Write-Host '[perf] importing the world and the client'
+        Invoke-GodotText @('--headless', '--path', $world, '--import') | Out-Null
+        Invoke-GodotText @('--headless', '--path', $clientRepo, '--import') | Out-Null
+        $log = Join-Path $out 'server.log'
+        Write-Host "[perf] starting the dev world server on :$perfPort (log: $log)"
+        $worldProc = Start-Process $godot -ArgumentList @('--headless', '--path', "`"$world`"", 'res://server/world_server.tscn') `
+            -RedirectStandardOutput $log -RedirectStandardError "$log.err" -PassThru -WindowStyle Hidden
+        $ready = $false
+        for ($i = 0; $i -lt 240 -and -not $worldProc.HasExited; $i++) {
+            Start-Sleep -Milliseconds 500
+            if ((Test-Path $log) -and (Select-String -Path $log -Pattern "listening on :$perfPort" -Quiet)) { $ready = $true; break }
+        }
+        if (-not $ready) {
+            if (-not $worldProc.HasExited) { Stop-Process -Id $worldProc.Id -Force }
+            throw "the dev world server did not start (see $log)"
+        }
+        $probe = 'res://tools/capture/perf_probe.gd'
+        $botProcs = @()
+        for ($i = 1; $i -le $Bots; $i++) {
+            $botProcs += Start-Process $godot -PassThru -WindowStyle Hidden -RedirectStandardOutput (Join-Path $out "bot$i.log") -RedirectStandardError (Join-Path $out "bot$i.err.log") `
+                -ArgumentList @('--headless', '--path', "`"$clientRepo`"", '-s', $probe, "--dev-join=Bot$i", '--port', "$perfPort", '--walker', '--seconds=170')
+        }
+        # The bots load the world headless; give them time to be walking.
+        if ($Bots -gt 0) { Write-Host "[perf] $Bots bots joining"; Start-Sleep -Seconds 25 }
+        $json = Join-Path $out 'perf.json'
+        Write-Host '[perf] measuring (about 2 minutes)'
+        # Its own log file, not a pipe: a stderr line in a pipe is a terminating
+        # error here, and a pipe nobody reads blocks the game on its next print.
+        $probeLog = Join-Path $out 'probe.log'
+        $probeProc = Start-Process $godot -PassThru -RedirectStandardOutput $probeLog -RedirectStandardError "$probeLog.err" `
+            -ArgumentList @('--path', "`"$clientRepo`"", '-s', $probe, '--dev-join=Probe', '--port', "$perfPort", "`"--out=$json`"")
+        $probeProc | Wait-Process
+        Select-String -Path $probeLog -Pattern '^PERF' | ForEach-Object { $_.Line }
+        $botProcs | Where-Object { -not $_.HasExited } | ForEach-Object { Stop-Process -Id $_.Id -Force }
+        if (-not $worldProc.HasExited) { Stop-Process -Id $worldProc.Id -Force }
+        Write-Host '[perf] server status lines (prof = ms per second / slowest call):'
+        Select-String -Path $log -Pattern 'players=([1-9])' | Select-Object -Last 6 | ForEach-Object {
+            ($_.Line -split ' \| ')[0] }
+        Select-String -Path $log -Pattern 'join peer' | ForEach-Object { $_.Line }
+        Write-Host "[perf] results: $json"
     }
     'sync-sim' {
         Write-Host '[workspace] syncing the simulation package server -> client'

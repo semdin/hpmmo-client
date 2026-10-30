@@ -669,6 +669,7 @@ scripts/spells/spell_effect.gd
 scripts/spells/spell_projectile.gd
 scripts/spells/vfx_library.gd
 scripts/systems/audio_manager.gd
+scripts/systems/perf_reporter.gd
 scripts/systems/quest_manager.gd
 scripts/ui/arcane_skin.gd
 scripts/ui/character_preview.gd
