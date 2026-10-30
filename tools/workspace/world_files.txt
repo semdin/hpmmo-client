@@ -579,6 +579,7 @@ scenes/entities/mobs/mob_cornish_pixie.tscn
 scenes/entities/mobs/mob_darksnatcher.tscn
 scenes/entities/mobs/mob_dementor.tscn
 scenes/entities/mobs/mob_devils_snare.tscn
+scenes/entities/mobs/mob_egg_sac.tscn
 scenes/entities/mobs/mob_fluffy.tscn
 scenes/entities/mobs/mob_fluffy_head.tscn
 scenes/entities/mobs/mob_goblin_guard.tscn
@@ -589,6 +590,7 @@ scenes/entities/mobs/mob_inferi_warden.tscn
 scenes/entities/mobs/mob_snare_vine.tscn
 scenes/entities/mobs/mob_troll_forest.tscn
 scenes/entities/mobs/mob_troll_mountain.tscn
+scenes/entities/mobs/mob_web_cocoon.tscn
 scenes/entities/monolith/dark_monolith.tscn
 scenes/entities/monolith/spider_stone.tscn
 scenes/entities/player/player.tscn
@@ -613,6 +615,7 @@ scenes/world/castle/staircase.tscn
 scenes/world/castle_interior.tscn
 scenes/world/caverns/spider_caverns.tscn
 scenes/world/dungeons/dng_forbidden_corridor.tscn
+scenes/world/dungeons/dng_spider_lair.tscn
 scenes/world/dungeons/dng_trial.tscn
 scenes/world/game_world.tscn
 scenes/world/grounds_terrain.tscn
@@ -639,6 +642,7 @@ scripts/entities/mobs/mob_base.gd
 scripts/entities/mobs/multipart_boss.gd
 scripts/entities/mobs/part_droop.gd
 scripts/entities/mobs/snare_boss.gd
+scripts/entities/mobs/web_object.gd
 scripts/entities/monolith/dark_monolith.gd
 scripts/entities/monolith/monolith_beacons.gd
 scripts/entities/player.gd
@@ -683,6 +687,10 @@ scripts/ui/hud_buff_bar.gd
 scripts/ui/hud_character_window.gd
 scripts/ui/hud_chat.gd
 scripts/ui/hud_duel.gd
+scripts/ui/hud_dungeon.gd
+scripts/ui/hud_dungeon_guide.gd
+scripts/ui/hud_dungeon_result.gd
+scripts/ui/hud_dungeon_run.gd
 scripts/ui/hud_floo.gd
 scripts/ui/hud_game_menu.gd
 scripts/ui/hud_invites.gd
@@ -735,8 +743,10 @@ scripts/world/caverns/cavern_colliders.gd
 scripts/world/caverns/spider_caverns.gd
 scripts/world/day_night.gd
 scripts/world/dungeon_director.gd
+scripts/world/dungeon_hazards.gd
 scripts/world/dungeons/dungeon_forbidden_corridor.gd
 scripts/world/dungeons/dungeon_greybox.gd
+scripts/world/dungeons/dungeon_spider_lair.gd
 scripts/world/dungeons/dungeon_trial.gd
 scripts/world/encounter_director.gd
 scripts/world/game_world.gd

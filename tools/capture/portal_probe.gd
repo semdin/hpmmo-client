@@ -27,6 +27,9 @@ func _ready() -> void:
 		elif arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
 	SimAuthority.transfer_refused.connect(func(_peer: int, reason: String): _refused = reason)
+	SimAuthority.dungeon_event.connect(func(_uid: int, event: Dictionary):
+		if String(event.get("kind", "")) in ["refused", "cancelled"]:
+			_refused = String(event.get("reason", "")))
 	await get_tree().create_timer(2.0).timeout
 	var ok := not route.is_empty()
 	for portal_id in route:
@@ -55,7 +58,11 @@ func _walk(portal_id: String, out_dir: String) -> bool:
 	await get_tree().create_timer(0.6).timeout
 	var from_map: String = mc.current_map
 	print("PROBE %s: from %s at %s (portal %s)" % [portal_id, from_map, player.global_position, at])
-	mc.call("_begin_transfer", portal)
+	# A dungeon door is a gate (v30): a lone tester starts a Normal run there.
+	if HPMaps.is_instanced(String(portal.get("to_map", ""))) and not HPMaps.is_instanced(from_map):
+		SimNet.dungeon_start(player, portal_id, "normal")
+	else:
+		mc.call("_begin_transfer", portal)
 	var t := 0.0
 	while (mc.busy or mc.current_map == from_map) and t < 40.0 and _refused == "":
 		await get_tree().create_timer(0.25).timeout

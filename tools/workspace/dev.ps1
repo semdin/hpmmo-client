@@ -143,9 +143,13 @@ function Invoke-ServerSmoke {
         # Import before anything boots the world: an asset that is new to the
         # export (e.g. a glb) is not loadable until its import exists.
         Write-Host '[server] world import pass'
-        Invoke-GodotText @('--headless', '--path', $world, '--editor', '--import', '--quit') |
-            Select-String -Pattern 'SCRIPT ERROR|ERROR:' | Select-Object -First 10
+        $lines = Invoke-GodotText @('--headless', '--path', $world, '--editor', '--import', '--quit') |
+            Select-String -Pattern 'SCRIPT ERROR|ERROR:'
+        $lines | Select-Object -First 10
         if ($LASTEXITCODE -ne 0) { throw 'world import failed' }
+        # A script that does not parse never fails the import itself: it only
+        # prints, and the world then boots without it.
+        if ($lines | Where-Object { $_ -match 'SCRIPT ERROR|Parse Error' }) { throw 'world import reported script errors' }
         Test-SimSync
     }
     $multiplayer = Join-Path $serverRepo 'tests\multiplayer_sim.py'
@@ -156,9 +160,11 @@ function Invoke-ServerSmoke {
     }
     if (Test-Path (Join-Path $world 'project.godot')) {
         Write-Host '[server] world boot smoke (headless, 300 frames)'
-        Invoke-GodotText @('--headless', '--path', $world, 'res://server/world_server.tscn', '--quit-after', '300') |
-            Select-String -Pattern 'WorldServer|ERROR|SCRIPT' | Select-Object -First 20
+        $lines = Invoke-GodotText @('--headless', '--path', $world, 'res://server/world_server.tscn', '--quit-after', '300') |
+            Select-String -Pattern 'WorldServer|ERROR|SCRIPT'
+        $lines | Select-Object -First 20
         if ($LASTEXITCODE -ne 0) { throw 'world boot smoke failed' }
+        if ($lines | Where-Object { $_ -match 'SCRIPT ERROR|Parse Error' }) { throw 'world boot reported script errors' }
     }
 }
 

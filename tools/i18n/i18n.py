@@ -56,7 +56,7 @@ DATA_RULES = [
     ("addons/hpmmo_sim/data/spawn_tables.json", ("display", "name")),
     ("addons/hpmmo_sim/data/maps.json", ("display", "label")),
     ("addons/hpmmo_sim/data/spells.json", ("name", "desc")),
-    ("addons/hpmmo_sim/data/dungeons.json", ("display", "message", "name")),
+    ("addons/hpmmo_sim/data/dungeons.json", ("display", "message", "name", "desc")),
     ("addons/hpmmo_sim/data/travel.json", ("label", "prompt")),
     ("addons/hpmmo_sim/data/quests.json", ("title", "name", "desc", "chapter", "giver")),
     ("addons/hpmmo_sim/data/quests.json#places", ("@keys",)),

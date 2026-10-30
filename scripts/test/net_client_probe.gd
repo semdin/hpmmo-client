@@ -209,8 +209,11 @@ func _ready() -> void:
 		_setup_transfer()
 	if mode == "party" or mode == "portkey":
 		_setup_party()
-	if mode == "portkey":
+	if mode == "portkey" or mode == "dungeon":
 		_setup_portkey()
+	if mode == "dungeon":
+		_setup_party()
+		_setup_dungeon()
 	if mode == "duel":
 		_setup_duel()
 	if mode == "encounter":
@@ -376,6 +379,9 @@ func _physics_process(delta: float) -> void:
 	if mode == "portkey":
 		_portkey_tick()
 		return
+	if mode == "dungeon":
+		_dungeon_tick()
+		return
 	if mode == "duel":
 		_duel_tick()
 		return
@@ -452,7 +458,10 @@ func _setup_portkey() -> void:
 	SimAuthority.transfer_granted.connect(func(peer_id: int, token: int, map_id: String, spawn_id: String):
 		if peer_id == SimNet.local_peer_id:
 			_record("transfer_granted", {"token": token, "map": map_id, "spawn": spawn_id})
-			SimNet.mark_transfer_ready(token))
+			# The world's map controller loads the map and acknowledges; a
+			# second acknowledgement would be refused as a stale token.
+			if world == null or not world.has_node("MapController"):
+				SimNet.mark_transfer_ready(token))
 	SimAuthority.transfer_committed.connect(func(peer_id: int, _token: int, map_id: String, pos: Vector3, spawn_id: String):
 		if peer_id == SimNet.local_peer_id:
 			if player != null:
@@ -480,6 +489,46 @@ func _portkey_tick() -> void:
 		_done = true
 		_record("final", {"pos": [player.global_position.x, player.global_position.y, player.global_position.z] if player != null else [],
 			"party": _party_size()})
+		_finish(0)
+
+# ------------------------------------------------------------------ dungeon
+# Manual dungeon gate check (not part of multiplayer_sim, protocol v30): both
+# join at the Trial Hall gate (world server HPMMO_DEV_SPAWN at the trial_entry
+# portal). Lead asks for Very Hard alone (refused: party size), invites Mate,
+# then starts Normal; Mate says yes on the ready check; both are sent into the
+# same copy and record the run's phases.
+
+var _dungeon_tried_alone := false
+var _dungeon_started := false
+var _dungeon_answered := false
+
+func _setup_dungeon() -> void:
+	SimAuthority.dungeon_event.connect(func(uid: int, event: Dictionary):
+		if uid != SimAuthority.local_uid:
+			return
+		_record("dungeon_event", {"kind": String(event.get("kind", "")), "reason": String(event.get("reason", "")),
+			"id": int(event.get("id", 0)), "map": String(event.get("map", ""))})
+		if probe_name == "Mate" and String(event.get("kind", "")) == "ready" and not _dungeon_answered:
+			_dungeon_answered = true
+			SimNet.dungeon_ready(player, int(event.get("id", 0)), true))
+	SimAuthority.dungeon_state.connect(func(map_id: String, state: Dictionary):
+		_record("dungeon_state", {"map": map_id, "phase": String(state.get("phase", "")),
+			"difficulty": String(state.get("difficulty", "")), "ref_level": int(state.get("ref_level", 0)),
+			"open": state.get("open", [])}))
+
+func _dungeon_tick() -> void:
+	if probe_name == "Lead" and not _dungeon_tried_alone and _t > 2.0:
+		_dungeon_tried_alone = true
+		SimNet.dungeon_start(player, "trial_entry", "very_hard")
+	if probe_name == "Lead" and not _party_invite_sent and _t > 3.0:
+		_party_invite_sent = true
+		NetworkManager.send_chat("/invite Mate")
+	if probe_name == "Lead" and not _dungeon_started and _party_size() >= 2 and _t > 6.0:
+		_dungeon_started = true
+		SimNet.dungeon_start(player, "trial_entry", "normal")
+	if _t >= duration:
+		_done = true
+		_record("final", {"party": _party_size(), "map": SimAuthority.record_by_uid(SimAuthority.local_uid).get("map_id", "")})
 		_finish(0)
 
 # ------------------------------------------------------------------ duel

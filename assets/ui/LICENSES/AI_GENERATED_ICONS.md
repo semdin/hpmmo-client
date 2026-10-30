@@ -116,3 +116,7 @@ template as the 2026-10-13 menu set, text prompt only (no input image).
 * `icon_glacius.png` (2026-10-24, Glacius) - `openai/gpt-image-2.5/sunburst/edit` with `icon_stupefy.png` and
   `icon_ultimate.png` as style references (pale-blue ice crystal bursting into a ring of frost shards
   on deep blue), resized from 1024 to 512 px. Source `art/vfx/glacius/icon_a.png`.
+* `icon_dungeon_seal.png`, `icon_key_trial.png`, `icon_key_forbidden_corridor.png` (2026-10-30, dungeon
+  rewards Z3) - `openai/gpt-image-2.5/sunburst/edit` with `icon_queen_seal.png` as the style reference
+  (red wax seal with a portcullis on stone; iron key with an hourglass bow on flagstone; brass key with a
+  three-headed-dog bow on red carpet), resized from 1024 to 512 px. Sources `art/dungeons/icons/`.

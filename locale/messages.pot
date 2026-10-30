@@ -299,6 +299,14 @@ msgstr ""
 msgid "Forbidden Corridor Explorer"
 msgstr ""
 
+#: scripts/entities/player.gd addons/hpmmo_sim/data/dungeons.json
+msgid "Queen's Bane"
+msgstr ""
+
+#: scripts/entities/player.gd
+msgid "Record Breaker"
+msgstr ""
+
 #: scripts/entities/player.gd scripts/ui/hud_player_menu.gd
 msgid "Lv. %d  ·  %s"
 msgstr ""
@@ -435,7 +443,7 @@ msgstr ""
 msgid "+%d %s Reputation"
 msgstr ""
 
-#: scripts/entities/player.gd scripts/ui/combat_feedback.gd
+#: scripts/entities/player.gd scripts/ui/combat_feedback.gd scripts/ui/hud_dungeon_result.gd
 msgid "+%d EXP"
 msgstr ""
 
@@ -727,7 +735,7 @@ msgstr ""
 msgid "DEFEATED\nReturning to town in %d:%02d"
 msgstr ""
 
-#: scripts/ui/combat_feedback.gd
+#: scripts/ui/combat_feedback.gd scripts/ui/hud_dungeon_result.gd
 msgid "+%d Galleons"
 msgstr ""
 
@@ -1048,6 +1056,14 @@ msgid "%s has fallen!"
 msgstr ""
 
 #: scripts/ui/hud.gd
+msgid "New weekly record in %s (%s): %s - %s!"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "%s won Legendary gold in %s!"
+msgstr ""
+
+#: scripts/ui/hud.gd
 msgid "[World] "
 msgstr ""
 
@@ -1287,7 +1303,7 @@ msgstr ""
 msgid "  ·  dungeon"
 msgstr ""
 
-#: scripts/ui/hud_bestiary.gd scripts/ui/hud_floo.gd scripts/ui/hud_world_map.gd
+#: scripts/ui/hud_bestiary.gd scripts/ui/hud_dungeon.gd scripts/ui/hud_floo.gd scripts/ui/hud_world_map.gd
 msgid "Lv %d"
 msgstr ""
 
@@ -1643,6 +1659,458 @@ msgstr ""
 msgid "vs"
 msgstr ""
 
+#: scripts/ui/hud_dungeon.gd
+msgid "Dungeon"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Seal Shop"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Party at the gate"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Ready check"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Return to your run"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Every finished run pays seals; a medal pays more."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%d seals"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_floo.gd
+msgid "Buy"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Dungeon Seals: %d"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Bought."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Not enough Dungeon Seals."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_floo.gd
+msgid "Your bag is full."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "The seal shop is at the dungeon gates."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "The gate keeper shakes his head."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Ready check cancelled: %s"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/world/portkey_views.gd
+msgid "A party member"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Only the party leader can start the dungeon."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "This difficulty needs a party of at least %d."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Party levels may differ by at most %d (now %d)."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%s needs level %d for this difficulty."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%s is not at the gate."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%s is dead."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%s is on a broom."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%s is in a duel."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%s is fighting."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%s is travelling."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%s is in another dungeon run."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%s has not unlocked this difficulty yet."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%s needs %d key(s) to open this difficulty."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "A ready check is already under way."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%s is not ready."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "No answer from %s."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "The party changed."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Every copy of this dungeon is taken - try again shortly."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Stand at the gate."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/world/map_controller.gd
+msgid "Start the dungeon at its gate."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "The gate stays shut."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
+msgid "Levels %d-%d · 1-%d players"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "For your party"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "reference level %d - creatures level %d-%d"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Power"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "health x%.2f, damage x%.2f"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Needs"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%d+ players, level %d+"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
+msgid "Gold medal"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
+msgid "full clear within %s"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
+msgid "Curse"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Key"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "the leader spends %d (you have %d)"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
+msgid "Final chest"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
+msgid "unlimited"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
+msgid "%d left today"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "none left today - you would go in as a helper"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
+msgid "Your best"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "at the gate"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "ready"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "answering..."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "locked"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "helper (no chest)"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "away"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "dead"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "on a broom"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "duelling"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "fighting"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "travelling"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "in another run"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "busy"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Asking the gate..."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Ready check under way: %d / %d ready"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "The party leader starts the dungeon."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_world_map.gd
+msgid "You"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Everyone is ready at the gate."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "The gate is open to you."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Enter"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd scripts/ui/hud_dungeon_result.gd scripts/ui/hud_dungeon_run.gd
+msgid "Gold"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd scripts/ui/hud_dungeon_result.gd scripts/ui/hud_dungeon_run.gd
+msgid "Silver"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd scripts/ui/hud_dungeon_result.gd scripts/ui/hud_dungeon_run.gd
+msgid "Bronze"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "Cleared"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "Dungeon Guide"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "Levels %d-%d"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "This week's fastest"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "Curses and boards turn every Monday at 06:00."
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "Locked"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "clear %s with a %s medal first"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "clear %s first"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "Your clear"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "Not yet"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "No full clear this week yet - the first one sets the record."
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "%d deaths"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "Dungeon Complete"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "Run it again"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd scripts/ui/hud_quest_scroll.gd scripts/ui/settings_ui.gd scripts/ui/ui_window.gd
+msgid "Close"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "No medal"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "Time"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "%s (gold %s, silver %s, bronze %s)"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "Clear"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "%d%%"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "Deaths"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "The run was too slow for a medal."
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "A medal needs every creature cleared, side rooms included."
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "The party's lives ran out."
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "Your rewards"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "You came as a helper: no final chest today."
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "(%d enchantments)"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "In your chest: %s"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "Unlocked: %s"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_run.gd
+msgid "Waiting for the party to arrive..."
+msgstr ""
+
+#: scripts/ui/hud_dungeon_run.gd
+msgid "Go!"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_run.gd
+msgid "no medal"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_run.gd
+msgid "Clear %d%% (%d / %d)"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_run.gd
+msgid "Deaths %d"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_run.gd
+msgid "(+%d s)"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_run.gd
+msgid "Lives %d / %d"
+msgstr ""
+
 #: scripts/ui/hud_floo.gd
 msgid "Floo Network"
 msgstr ""
@@ -1661,10 +2129,6 @@ msgstr ""
 
 #: scripts/ui/hud_floo.gd
 msgid "%s Galleons - carries your party anywhere"
-msgstr ""
-
-#: scripts/ui/hud_floo.gd
-msgid "Buy"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
@@ -1697,10 +2161,6 @@ msgstr ""
 
 #: scripts/ui/hud_floo.gd scripts/ui/inventory_arcane.gd
 msgid "Not enough Galleons."
-msgstr ""
-
-#: scripts/ui/hud_floo.gd
-msgid "Your bag is full."
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
@@ -1784,6 +2244,10 @@ msgid "Group Duel Challenge"
 msgstr ""
 
 #: scripts/ui/hud_invites.gd
+msgid "Ready Check"
+msgstr ""
+
+#: scripts/ui/hud_invites.gd
 msgid "Party Invitation"
 msgstr ""
 
@@ -1793,6 +2257,10 @@ msgstr ""
 
 #: scripts/ui/hud_invites.gd
 msgid "%s challenges your party to a group duel (%d players)."
+msgstr ""
+
+#: scripts/ui/hud_invites.gd
+msgid "%s wants to enter the dungeon with the party (%d players). Ready?"
 msgstr ""
 
 #: scripts/ui/hud_invites.gd
@@ -1869,10 +2337,6 @@ msgstr ""
 
 #: scripts/ui/hud_quest_scroll.gd
 msgid "Reward"
-msgstr ""
-
-#: scripts/ui/hud_quest_scroll.gd scripts/ui/settings_ui.gd scripts/ui/ui_window.gd
-msgid "Close"
 msgstr ""
 
 #: scripts/ui/hud_quest_scroll.gd
@@ -2081,10 +2545,6 @@ msgstr ""
 
 #: scripts/ui/hud_world_map.gd addons/hpmmo_sim/data/maps.json
 msgid "Blackweb Caverns"
-msgstr ""
-
-#: scripts/ui/hud_world_map.gd
-msgid "You"
 msgstr ""
 
 #: scripts/ui/hud_world_map.gd
@@ -2395,7 +2855,7 @@ msgstr ""
 msgid "Epic"
 msgstr ""
 
-#: scripts/ui/item_tooltip.gd
+#: scripts/ui/item_tooltip.gd addons/hpmmo_sim/data/dungeons.json
 msgid "Legendary"
 msgstr ""
 
@@ -3535,6 +3995,22 @@ msgstr ""
 msgid "The way back is open. Regroup and try again."
 msgstr ""
 
+#: scripts/world/dungeon_director.gd
+msgid "A dementor's chill sweeps the halls - nobody recovers for a while."
+msgstr ""
+
+#: scripts/world/dungeon_director.gd
+msgid "The guardian of this place flies into a rage - finish it now!"
+msgstr ""
+
+#: scripts/world/dungeon_director.gd
+msgid "An egg sac splits open!"
+msgstr ""
+
+#: scripts/world/dungeon_director.gd
+msgid "The party's lives are spent - no medal this run."
+msgstr ""
+
 #: scripts/world/encounter_director.gd
 msgid "Elite Bodyguard"
 msgstr ""
@@ -3849,10 +4325,6 @@ msgstr ""
 
 #: scripts/world/portkey_views.gd
 msgid "%s set down a Portkey to %s - hold on to it! (F)"
-msgstr ""
-
-#: scripts/world/portkey_views.gd
-msgid "A party member"
 msgstr ""
 
 #: scripts/world/portkey_views.gd
@@ -4487,6 +4959,30 @@ msgstr ""
 msgid "A battered boot enchanted as a Portkey. Right-click to set it down and choose where it goes: for ten seconds your party may grab hold, then everyone holding on is carried there together."
 msgstr ""
 
+#: addons/hpmmo_sim/data/items.json
+msgid "Dungeon Seal"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A wax seal stamped at a dungeon's end for every run. Spend seals at any dungeon gate on keys, runes and potions."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Trial Hall Key"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "An iron key to the Trial Hall. The party leader spends keys at the gate to open its Very Hard (1 key) and Legendary (3 keys) runs. Found in Hard runs, sold for seals."
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "Forbidden Corridor Key"
+msgstr ""
+
+#: addons/hpmmo_sim/data/items.json
+msgid "A brass key that fits the locked third-floor door. The party leader spends keys at the gate to open its Very Hard (1 key) and Legendary (3 keys) runs. Found in Hard runs, sold for seals."
+msgstr ""
+
 #: addons/hpmmo_sim/data/mobs.json
 msgid "Drowned Inferius"
 msgstr ""
@@ -4557,6 +5053,14 @@ msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
 msgid "Goblin Hexer"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Egg Sac"
+msgstr ""
+
+#: addons/hpmmo_sim/data/mobs.json
+msgid "Web Cocoon"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
@@ -4704,7 +5208,19 @@ msgid "The Cursed Armour Commander"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json
+msgid "Brood Guardian"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json
+msgid "Blackweb Queen"
+msgstr ""
+
+#: addons/hpmmo_sim/data/spawn_tables.json
 msgid "Webbound Seal Stone"
+msgstr ""
+
+#: addons/hpmmo_sim/data/maps.json addons/hpmmo_sim/data/dungeons.json
+msgid "The Queen's Lair"
 msgstr ""
 
 #: addons/hpmmo_sim/data/maps.json
@@ -4721,6 +5237,10 @@ msgstr ""
 
 #: addons/hpmmo_sim/data/maps.json
 msgid "the Forbidden Corridor"
+msgstr ""
+
+#: addons/hpmmo_sim/data/maps.json
+msgid "the Queen's Lair"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
@@ -4792,6 +5312,86 @@ msgid "Frost nova. Hurls a spinning ice crystal that bursts into shards and free
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
+msgid "Easy"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Normal"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Hard"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Very Hard"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Rage"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Creatures below 30% health hit 50% harder and move faster."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Protego Horribilis"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "A creature that dies strengthens the creatures around it (+15% health and damage, stacking)."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Bursting Dead"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Slain creatures burst two seconds after death - step out of the ring."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Dementor's Chill"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Every 45 seconds a deathly cold stops everyone's regeneration for 6 seconds."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Storm Rain"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "While the party fights, lightning strikes where someone stands - keep moving."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Sticky Ground"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Slain creatures leave a patch that slows whoever stands in it."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Teeming"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "A quarter more ordinary creatures in every pack."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Bleeding Curse"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Elite creatures' blows make you bleed."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
 msgid "The hall stirs - clear the corridor."
 msgstr ""
 
@@ -4801,6 +5401,10 @@ msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
 msgid "The Trial Warden rises!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The dead answer the Warden's roar!"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
@@ -4836,6 +5440,10 @@ msgid "Devil's Snare! Burn its vines - Incendio!"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
+msgid "Pixies pour out of the Snare's roots!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
 msgid "The Snare withers. Music drifts from below..."
 msgstr ""
 
@@ -4853,6 +5461,54 @@ msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
 msgid "Fluffy's sleeping breath rolls down the stair - brace yourself!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Silk trembles down the tunnel - something knows you are here."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Egg sacs swell along the walls - burn them before they hatch!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The last sac withers. A web curtain parts to the south."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The Brood Guardian drops from the ceiling!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The Guardian shrieks for the brood!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The guardian falls. The Queen's lair lies open below."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The Blackweb Queen rises from her nest!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Thick webs cover the nest floor - they will slow you!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The Queen spins one of you into a cocoon - burn it free!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The brood answers its Queen!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Venom wells up from the floor - and the Queen spins again!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The Queen curls up and is still. Her hoard waits in the nest."
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json
