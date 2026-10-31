@@ -636,6 +636,7 @@ scripts/assets/static_batch.gd
 scripts/autoload/game_data.gd
 scripts/autoload/i18n.gd
 scripts/autoload/network_manager.gd
+scripts/autoload/render_compat.gd
 scripts/entities/broom_flight.gd
 scripts/entities/broom_grip_modifier.gd
 scripts/entities/cast_layer_modifier.gd
