@@ -98,6 +98,8 @@ public:
     void FillDiamond(float cx, float cy, float rx, float ry, Color c);
     // Scales `img` to cover the canvas, anchored at (ax, ay) in [0,1].
     void DrawCover(const Image& img, float ax, float ay);
+    // Scales `img` into `dst` and blends it by its alpha (respects the clip).
+    void DrawImage(const Image& img, const RectF& dst);
 
     float MeasureText(const std::wstring& text, const Font& font, float px) const;
     void DrawText(const std::wstring& text, const RectF& box, const TextStyle& st, const Fill& fill);

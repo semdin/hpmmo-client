@@ -28,12 +28,10 @@ sed "s/@VERSION@/$version/g" "$src/packaging/macos/Info.plist.in" > "$app/Conten
 
 iconset="$build/hpmmo.iconset"
 mkdir -p "$iconset"
-for size in 16 32 128 256; do
-    sips -z "$size" "$size" "$src/assets/hpmmo_256.png" --out "$iconset/icon_${size}x${size}.png" >/dev/null
+for size in 16 32 128 256 512; do
+    sips -z "$size" "$size" "$src/assets/hpmmo_1024.png" --out "$iconset/icon_${size}x${size}.png" >/dev/null
     double=$((size * 2))
-    if [ "$double" -le 256 ]; then
-        sips -z "$double" "$double" "$src/assets/hpmmo_256.png" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
-    fi
+    sips -z "$double" "$double" "$src/assets/hpmmo_1024.png" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
 done
 iconutil -c icns "$iconset" -o "$app/Contents/Resources/hpmmo.icns"
 

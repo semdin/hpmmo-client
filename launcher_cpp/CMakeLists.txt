@@ -114,7 +114,8 @@ if(NOT WIN32)
         Background ${CMAKE_CURRENT_SOURCE_DIR}/assets/launcher_bg.jpg
         FontTitle ${CMAKE_CURRENT_SOURCE_DIR}/assets/CinzelDecorative-Bold.ttf
         FontBody ${CMAKE_CURRENT_SOURCE_DIR}/assets/Marcellus-Regular.ttf
-        IconPng ${CMAKE_CURRENT_SOURCE_DIR}/assets/hpmmo_256.png)
+        IconPng ${CMAKE_CURRENT_SOURCE_DIR}/assets/hpmmo_256.png
+        LogoPng ${CMAKE_CURRENT_SOURCE_DIR}/assets/thousand_realms_logo.png)
 
     add_executable(HPMMO_Launcher
         src/main_sdl.cpp

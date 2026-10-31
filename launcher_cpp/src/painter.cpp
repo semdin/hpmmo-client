@@ -261,6 +261,54 @@ void Canvas::DrawCover(const Image& img, float ax, float ay) {
     }
 }
 
+void Canvas::DrawImage(const Image& img, const RectF& dst) {
+    if (img.w <= 0 || img.h <= 0 || dst.w <= 0 || dst.h <= 0) return;
+    float scale = dst.w / img.w;
+    int taps = scale < 0.75f ? 3 : 1;
+    int x0 = std::max(0, (int)std::floor(dst.x)), x1 = std::min(w_, (int)std::ceil(dst.x + dst.w));
+    int y0 = std::max(0, (int)std::floor(dst.y)), y1 = std::min(h_, (int)std::ceil(dst.y + dst.h));
+    if (clip_) {
+        x0 = std::max(x0, (int)clipRect_.x);
+        y0 = std::max(y0, (int)clipRect_.y);
+        x1 = std::min(x1, (int)(clipRect_.x + clipRect_.w));
+        y1 = std::min(y1, (int)(clipRect_.y + clipRect_.h));
+    }
+    // Bilinear taps in premultiplied colour, so transparent texels add no fringe.
+    auto sample = [&](float sx, float sy, float out[4]) {
+        sx = std::min(std::max(sx, 0.0f), (float)img.w - 1.001f);
+        sy = std::min(std::max(sy, 0.0f), (float)img.h - 1.001f);
+        int x = (int)sx, y = (int)sy;
+        float fx = sx - x, fy = sy - y;
+        const uint8_t* p[4] = {&img.rgba[((size_t)y * img.w + x) * 4], nullptr, nullptr, nullptr};
+        p[1] = p[0] + 4;
+        p[2] = p[0] + (size_t)img.w * 4;
+        p[3] = p[2] + 4;
+        float wgt[4] = {(1 - fx) * (1 - fy), fx * (1 - fy), (1 - fx) * fy, fx * fy};
+        for (int i = 0; i < 4; i++) {
+            float a = p[i][3] * wgt[i];
+            out[0] += p[i][0] * a;
+            out[1] += p[i][1] * a;
+            out[2] += p[i][2] * a;
+            out[3] += a;
+        }
+    };
+    for (int y = y0; y < y1; y++) {
+        for (int x = x0; x < x1; x++) {
+            float acc[4] = {0, 0, 0, 0};
+            for (int ty = 0; ty < taps; ty++)
+                for (int tx = 0; tx < taps; tx++) {
+                    float px = x + (tx + 0.5f) / taps, py = y + (ty + 0.5f) / taps;
+                    sample((px - dst.x) / scale - 0.5f, (py - dst.y) / scale - 0.5f, acc);
+                }
+            if (acc[3] <= 0.0f) continue;
+            float n = (float)(taps * taps);
+            Color c((uint8_t)std::min(255.0f, acc[3] / n + 0.5f), (uint8_t)std::min(255.0f, acc[0] / acc[3] + 0.5f),
+                    (uint8_t)std::min(255.0f, acc[1] / acc[3] + 0.5f), (uint8_t)std::min(255.0f, acc[2] / acc[3] + 0.5f));
+            Blend(x, y, c, 1.0f);
+        }
+    }
+}
+
 // ------------------------------------------------------------------- text
 float Canvas::MeasureText(const std::wstring& text, const Font& font, float px) const {
     float w = 0;

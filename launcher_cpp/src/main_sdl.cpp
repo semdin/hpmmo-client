@@ -41,12 +41,15 @@ extern const unsigned char kFontBody[];
 extern const size_t kFontBodySize;
 extern const unsigned char kIconPng[];
 extern const size_t kIconPngSize;
+extern const unsigned char kLogoPng[];
+extern const size_t kLogoPngSize;
 }  // namespace assets
 }  // namespace hpmmo
 
 namespace {
 
 using hpmmo::app::Phase;
+using hpmmo::app::kGameTitle;
 using hpmmo::paint::Align;
 using hpmmo::paint::Canvas;
 using hpmmo::paint::Color;
@@ -91,6 +94,7 @@ struct View {
 
 hpmmo::paint::Font g_TitleFont, g_BodyFont;
 hpmmo::paint::Image g_Background;
+hpmmo::paint::Image g_Logo;   // the crest: horizontal game logo
 Canvas g_Base;          // background + static decoration, rebuilt on resize
 Canvas g_Frame;
 
@@ -168,22 +172,28 @@ void BuildBase(const View& v, int cw, int ch) {
                     Linear(0, 0, 0, SF(v, 70), {{0.0f, Color(170, 0, 0, 0)}, {1.0f, Color(0, 0, 0, 0)}}));
 
     // Top bar caption.
-    g_Base.DrawText(L"HPMMO  ·  LAUNCHER", RectF(SF(v, 22), SF(v, 12), SF(v, 300), SF(v, 22)),
+    g_Base.DrawText(L"THOUSAND REALMS  ·  LAUNCHER", RectF(SF(v, 22), SF(v, 12), SF(v, 300), SF(v, 22)),
                     Style(g_BodyFont, SF(v, 13)), Solid(Pal::GoldLt.WithAlpha(220)));
 
     // Crest.
-    TextStyle title = Style(g_TitleFont, SF(v, 74));
-    RectF titleBox(SF(v, 44), SF(v, 108), SF(v, 520), SF(v, 100));
-    for (int i = 6; i >= 1; i--) {
-        float o = SF(v, (float)i * 1.2f);
-        for (float ox : {-o, o})
-            g_Base.DrawText(L"HPMMO", RectF(titleBox.x + ox, titleBox.y, titleBox.w, titleBox.h), title,
-                            Solid(Color((uint8_t)(10 + i * 4), 255, 140, 40)));
+    if (g_Logo.w > 0) {
+        float lw = SF(v, 384), lh = lw * g_Logo.h / g_Logo.w;
+        g_Base.DrawImage(g_Logo, RectF(SF(v, 40), SF(v, 202) - lh, lw, lh));
+    } else {
+        // Without the logo: the name in gold, with a warm glow under it.
+        TextStyle title = Style(g_TitleFont, SF(v, 48));
+        RectF titleBox(SF(v, 44), SF(v, 130), SF(v, 560), SF(v, 74));
+        for (int i = 6; i >= 1; i--) {
+            float o = SF(v, (float)i * 1.2f);
+            for (float ox : {-o, o})
+                g_Base.DrawText(kGameTitle, RectF(titleBox.x + ox, titleBox.y, titleBox.w, titleBox.h), title,
+                                Solid(Color((uint8_t)(10 + i * 4), 255, 140, 40)));
+        }
+        g_Base.DrawText(kGameTitle, RectF(titleBox.x + SF(v, 2), titleBox.y + SF(v, 3), titleBox.w, titleBox.h),
+                        title, Solid(Color(200, 20, 8, 2)));
+        g_Base.DrawText(kGameTitle, titleBox, title,
+                        Linear(0, titleBox.y + SF(v, 10), 0, titleBox.y + SF(v, 60), {{0.0f, Pal::GoldHi}, {1.0f, Pal::GoldLt}}));
     }
-    g_Base.DrawText(L"HPMMO", RectF(titleBox.x + SF(v, 2), titleBox.y + SF(v, 3), titleBox.w, titleBox.h), title,
-                    Solid(Color(200, 20, 8, 2)));
-    g_Base.DrawText(L"HPMMO", titleBox, title,
-                    Linear(0, titleBox.y + SF(v, 14), 0, titleBox.y + SF(v, 88), {{0.0f, Pal::GoldHi}, {1.0f, Pal::GoldLt}}));
     DrawStrHalo(g_Base, v, L"B Ü Y Ü C Ü L Ü K   D İ Y A R I", RectF(SF(v, 54), SF(v, 204), SF(v, 520), SF(v, 26)),
                 Style(g_TitleFont, SF(v, 15)), Pal::GoldLt);
     float y = SF(v, 242);
@@ -363,6 +373,8 @@ bool LoadAssets() {
     ok = g_BodyFont.Load(hpmmo::assets::kFontBody, hpmmo::assets::kFontBodySize) && ok;
     if (!g_Background.Decode(hpmmo::assets::kBackground, hpmmo::assets::kBackgroundSize))
         hpmmo::LogMsg("[Launcher] background art could not be decoded");
+    if (!g_Logo.Decode(hpmmo::assets::kLogoPng, hpmmo::assets::kLogoPngSize))
+        hpmmo::LogMsg("[Launcher] logo could not be decoded");
     return ok;
 }
 
@@ -457,7 +469,7 @@ bool ConfirmCloseDuringUpdate() {
     SDL_MessageBoxData data = {};
     data.flags = SDL_MESSAGEBOX_INFORMATION;
     data.window = g_Window;
-    data.title = "HPMMO Launcher";
+    data.title = "Thousand Realms";
     data.message = "Güncelleme sürüyor. Şimdi kapatırsan indirme bir sonraki açılışta kaldığı yerden devam eder.\n\nKapatılsın mı?";
     data.numbuttons = 2;
     data.buttons = buttons;
@@ -501,7 +513,7 @@ int main(int argc, char** argv) {
     g_EvRefresh = SDL_RegisterEvents(2);
     g_EvExit = g_EvRefresh + 1;
 
-    g_Window = SDL_CreateWindow("HPMMO Launcher", kBaseW, kBaseH,
+    g_Window = SDL_CreateWindow("Thousand Realms", kBaseW, kBaseH,
                                 SDL_WINDOW_BORDERLESS | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_HIDDEN);
     if (!g_Window) {
         fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());

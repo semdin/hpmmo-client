@@ -4,6 +4,7 @@
 #define IDR_BACKGROUND 201
 #define IDR_FONT_TITLE 202
 #define IDR_FONT_BODY 203
+#define IDR_LOGO 204
 
 // Application + window icon (multi-size ICO generated from assets/branding).
 IDI_MAIN ICON "assets/hpmmo.ico"
@@ -13,6 +14,8 @@ IDI_MAIN ICON "assets/hpmmo.ico"
 IDR_BACKGROUND RCDATA "assets/launcher_bg.jpg"
 IDR_FONT_TITLE RCDATA "assets/CinzelDecorative-Bold.ttf"
 IDR_FONT_BODY  RCDATA "assets/Marcellus-Regular.ttf"
+// The horizontal Thousand Realms logo drawn as the crest.
+IDR_LOGO       RCDATA "assets/thousand_realms_logo.png"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION     3,0,0,0
@@ -27,12 +30,12 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "CompanyName",      "HPMMO"
-            VALUE "FileDescription",  "HPMMO Launcher"
+            VALUE "CompanyName",      "Thousand Realms"
+            VALUE "FileDescription",  "Thousand Realms Launcher"
             VALUE "FileVersion",      "3.0.0"
             VALUE "InternalName",     "HPMMO_Launcher"
             VALUE "OriginalFilename", "HPMMO_Launcher.exe"
-            VALUE "ProductName",      "HPMMO Launcher"
+            VALUE "ProductName",      "Thousand Realms Launcher"
             VALUE "ProductVersion",   "3.0.0"
         END
     END

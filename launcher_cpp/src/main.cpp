@@ -40,6 +40,7 @@ using namespace Gdiplus;
 #define IDR_BACKGROUND 201
 #define IDR_FONT_TITLE 202
 #define IDR_FONT_BODY 203
+#define IDR_LOGO 204
 
 #define WM_APP_REFRESH (WM_APP + 1)   // worker -> UI: state changed, repaint
 #define WM_APP_EXIT (WM_APP + 2)      // worker -> UI: self-update handed off, quit
@@ -47,6 +48,7 @@ using namespace Gdiplus;
 namespace {
 
 using hpmmo::app::Phase;
+using hpmmo::app::kGameTitle;
 using hpmmo::app::Snapshot;
 using hpmmo::app::TakeSnapshot;
 using hpmmo::app::PlayLabel;
@@ -102,6 +104,7 @@ FontFamily* g_TitleFamily = nullptr;
 FontFamily* g_BodyFamily = nullptr;
 Bitmap* g_Background = nullptr;
 Bitmap* g_BackgroundScaled = nullptr;   // cover-scaled to the client size
+Bitmap* g_Logo = nullptr;               // the crest: horizontal game logo
 int g_ScaledW = 0, g_ScaledH = 0;
 
 
@@ -129,6 +132,22 @@ FontFamily* FamilyOrFallback(const wchar_t* name, const wchar_t* fallback) {
     return FontFamily::GenericSerif()->Clone();
 }
 
+// An embedded image, decoded and copied out of its stream (nullptr on failure).
+Bitmap* LoadResourceBitmap(int id) {
+    const void* data = nullptr;
+    DWORD size = 0;
+    if (!LoadResourceBytes(id, &data, &size)) return nullptr;
+    IStream* stream = SHCreateMemStream((const BYTE*)data, (UINT)size);
+    if (!stream) return nullptr;
+    Bitmap* copy = nullptr;
+    Bitmap* decoded = Bitmap::FromStream(stream);
+    if (decoded && decoded->GetLastStatus() == Ok)
+        copy = decoded->Clone(0, 0, decoded->GetWidth(), decoded->GetHeight(), PixelFormat32bppPARGB);
+    delete decoded;
+    stream->Release();
+    return copy;
+}
+
 void LoadAssets() {
     g_Fonts = new PrivateFontCollection();
     const void* data = nullptr;
@@ -138,24 +157,15 @@ void LoadAssets() {
     g_TitleFamily = FamilyOrFallback(L"Cinzel Decorative", L"Georgia");
     g_BodyFamily = FamilyOrFallback(L"Marcellus", L"Georgia");
 
-    if (LoadResourceBytes(IDR_BACKGROUND, &data, &size)) {
-        IStream* stream = SHCreateMemStream((const BYTE*)data, (UINT)size);
-        if (stream) {
-            Bitmap* decoded = Bitmap::FromStream(stream);
-            if (decoded && decoded->GetLastStatus() == Ok) {
-                // Copy out of the stream so the stream can be released.
-                g_Background = decoded->Clone(0, 0, decoded->GetWidth(), decoded->GetHeight(),
-                                              PixelFormat32bppPARGB);
-            }
-            delete decoded;
-            stream->Release();
-        }
-    }
+    g_Background = LoadResourceBitmap(IDR_BACKGROUND);
+    g_Logo = LoadResourceBitmap(IDR_LOGO);
 }
 
 void FreeAssets() {
     delete g_BackgroundScaled;
     delete g_Background;
+    delete g_Logo;
+    g_Logo = nullptr;
     delete g_TitleFamily;
     delete g_BodyFamily;
     delete g_Fonts;
@@ -318,7 +328,7 @@ void Paint(HDC hdc, int cw, int ch) {
     // --- top bar
     Font* small = MakeFont(g_BodyFamily, 13);
     Font* tiny = MakeFont(g_BodyFamily, 12);
-    DrawStr(g, L"HPMMO  ·  LAUNCHER", small, RectF(SF(22), SF(12), SF(300), SF(22)), WithAlpha(Pal::GoldLt, 220));
+    DrawStr(g, L"THOUSAND REALMS  ·  LAUNCHER", small, RectF(SF(22), SF(12), SF(300), SF(22)), WithAlpha(Pal::GoldLt, 220));
     for (Hit which : {Hit::Minimize, Hit::Close}) {
         const RectF& r = which == Hit::Close ? L.close : L.minimize;
         if (g_Hover == which) {
@@ -336,23 +346,27 @@ void Paint(HDC hdc, int cw, int ch) {
     }
 
     // --- crest
-    Font* title = MakeFont(g_TitleFamily, 74, FontStyleBold);
-    RectF titleBox(SF(44), SF(108), SF(520), SF(100));
-    {
-        // Warm glow under the title.
+    Font* title = MakeFont(g_TitleFamily, 48, FontStyleBold);
+    RectF titleBox(SF(44), SF(130), SF(560), SF(74));
+    if (g_Logo) {
+        g.SetInterpolationMode(InterpolationModeHighQualityBicubic);
+        float lw = SF(384), lh = lw * g_Logo->GetHeight() / g_Logo->GetWidth();
+        g.DrawImage(g_Logo, RectF(SF(40), SF(202) - lh, lw, lh));
+    } else {
+        // Without the logo: the name in gold, with a warm glow under it.
         for (int i = 6; i >= 1; i--) {
             float o = SF((float)i * 1.2f);
             for (float ox : {-o, o}) {
-                DrawStr(g, L"HPMMO", title, RectF(titleBox.X + ox, titleBox.Y, titleBox.Width, titleBox.Height),
+                DrawStr(g, kGameTitle, title, RectF(titleBox.X + ox, titleBox.Y, titleBox.Width, titleBox.Height),
                          Color((BYTE)(10 + i * 4), 255, 140, 40));
             }
         }
-        DrawStr(g, L"HPMMO", title, RectF(titleBox.X + SF(2), titleBox.Y + SF(3), titleBox.Width, titleBox.Height),
+        DrawStr(g, kGameTitle, title, RectF(titleBox.X + SF(2), titleBox.Y + SF(3), titleBox.Width, titleBox.Height),
                  Color(200, 20, 8, 2));
-        LinearGradientBrush gold(PointF(0, titleBox.Y + SF(14)), PointF(0, titleBox.Y + SF(88)), Pal::GoldHi,
+        LinearGradientBrush gold(PointF(0, titleBox.Y + SF(10)), PointF(0, titleBox.Y + SF(60)), Pal::GoldHi,
                                  Pal::GoldLt);
         StringFormat fmt;
-        g.DrawString(L"HPMMO", 5, title, titleBox, &fmt, &gold);
+        g.DrawString(kGameTitle, -1, title, titleBox, &fmt, &gold);
     }
     Font* subtitle = MakeFont(g_TitleFamily, 15, FontStyleBold);
     DrawStrHalo(g, L"B Ü Y Ü C Ü L Ü K   D İ Y A R I", subtitle, RectF(SF(54), SF(204), SF(520), SF(26)),
@@ -677,7 +691,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             Phase p = CurrentPhase();
             if (p == Phase::Downloading || p == Phase::Installing) {
                 int answer = MessageBoxW(hWnd, L"Güncelleme sürüyor. Şimdi kapatırsan indirme bir sonraki açılışta kaldığı yerden devam eder.\n\nKapatılsın mı?",
-                                         L"HPMMO Launcher", MB_YESNO | MB_ICONQUESTION);
+                                         L"Thousand Realms", MB_YESNO | MB_ICONQUESTION);
                 if (answer != IDYES) return 0;
                 hpmmo::app::Cancel();
             }
@@ -833,7 +847,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     int posX = work.left + ((work.right - work.left) - winW) / 2;
     int posY = work.top + ((work.bottom - work.top) - winH) / 2;
 
-    HWND hWnd = CreateWindowExW(WS_EX_APPWINDOW, L"HPMMO_Launcher_Class", L"HPMMO Launcher",
+    HWND hWnd = CreateWindowExW(WS_EX_APPWINDOW, L"HPMMO_Launcher_Class", L"Thousand Realms",
                                 WS_POPUP | WS_SYSMENU | WS_MINIMIZEBOX | WS_CLIPCHILDREN, posX, posY, winW, winH,
                                 NULL, NULL, hInstance, NULL);
     if (!hWnd) return 1;

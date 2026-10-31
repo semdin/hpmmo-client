@@ -848,7 +848,7 @@ msgid "Generated sound effects and music"
 msgstr ""
 
 #: scripts/ui/game_credits.gd
-msgid "HPMMO is built on the work of the people and tools below. Thank you."
+msgid "%s is built on the work of the people and tools below. Thank you."
 msgstr ""
 
 #: scripts/ui/game_credits.gd
@@ -4440,7 +4440,7 @@ msgid "Rank %d"
 msgstr ""
 
 #: scenes/main/character_select.tscn
-msgid "HPMMO — HOGWARTS"
+msgid "Thousand Realms"
 msgstr ""
 
 #: scenes/main/character_select.tscn

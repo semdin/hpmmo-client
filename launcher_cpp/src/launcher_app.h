@@ -36,6 +36,10 @@ struct Hooks {
     std::function<void()> exitForSelfUpdate;   // the update helper took over: quit
 };
 
+// The game's name as the shells draw it (crest, window title). Files, folders
+// and executables keep the HPMMO name: installs and self-updates depend on it.
+inline constexpr const wchar_t* kGameTitle = L"Thousand Realms";
+
 // How often the shells poll the server status and look for a new release.
 constexpr unsigned kStatusPollMs = 30000;
 constexpr unsigned kRecheckMs = 10 * 60 * 1000;
