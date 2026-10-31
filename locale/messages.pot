@@ -931,6 +931,14 @@ msgstr ""
 msgid "[B] Bestiary - where every creature lives"
 msgstr ""
 
+#: scripts/ui/hud.gd scripts/ui/hud_world_map.gd scripts/world/castle_interior.gd
+msgid "Dungeons"
+msgstr ""
+
+#: scripts/ui/hud.gd
+msgid "[K] Dungeons - difficulties, records and the way to each gate"
+msgstr ""
+
 #: scripts/ui/hud.gd scripts/ui/hud_game_menu.gd
 msgid "Menu"
 msgstr ""
@@ -1984,6 +1992,10 @@ msgid "Levels %d-%d"
 msgstr ""
 
 #: scripts/ui/hud_dungeon_guide.gd
+msgid "Show the way to the gate"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
 msgid "This week's fastest"
 msgstr ""
 
@@ -2032,6 +2044,10 @@ msgid "Close"
 msgstr ""
 
 #: scripts/ui/hud_dungeon_result.gd
+msgid "Time Is Up"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
 msgid "No medal"
 msgstr ""
 
@@ -2057,6 +2073,10 @@ msgstr ""
 
 #: scripts/ui/hud_dungeon_result.gd
 msgid "The run was too slow for a medal."
+msgstr ""
+
+#: scripts/ui/hud_dungeon_result.gd
+msgid "Time ran out (%s) - the run ended where it stood."
 msgstr ""
 
 #: scripts/ui/hud_dungeon_result.gd
@@ -2101,6 +2121,10 @@ msgstr ""
 
 #: scripts/ui/hud_dungeon_run.gd
 msgid "Clear %d%% (%d / %d)"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_run.gd
+msgid "%d creature(s) left"
 msgstr ""
 
 #: scripts/ui/hud_dungeon_run.gd
@@ -2521,10 +2545,6 @@ msgstr ""
 
 #: scripts/ui/hud_world_map.gd
 msgid "Courtyard"
-msgstr ""
-
-#: scripts/ui/hud_world_map.gd scripts/world/castle_interior.gd
-msgid "Dungeons"
 msgstr ""
 
 #: scripts/ui/hud_world_map.gd
@@ -4012,6 +4032,18 @@ msgid "The way back is open. Regroup and try again."
 msgstr ""
 
 #: scripts/world/dungeon_director.gd
+msgid "Creatures still stand - clear them all to finish the run."
+msgstr ""
+
+#: scripts/world/dungeon_director.gd
+msgid "Time is up - the guardians fell, but not every creature did."
+msgstr ""
+
+#: scripts/world/dungeon_director.gd
+msgid "Time is up - the run is over."
+msgstr ""
+
+#: scripts/world/dungeon_director.gd
 msgid "A dementor's chill sweeps the halls - nobody recovers for a while."
 msgstr ""
 
@@ -5356,7 +5388,7 @@ msgid "Protego Horribilis"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "A creature that dies strengthens the creatures around it (+15% health and damage, stacking)."
+msgid "A creature that dies strengthens the creatures around it (+15% health and damage, up to 5 times)."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
@@ -5412,7 +5444,11 @@ msgid "The hall stirs - clear the corridor."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "The iron gate grinds open."
+msgid "The iron gate grinds open - the great hall waits."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The arena gate rises. The Warden waits beyond."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
@@ -5421,6 +5457,14 @@ msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
 msgid "The dead answer the Warden's roar!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "More dead claw out of the arena floor!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The Warden falls. Clear every creature left in the hall to finish the trial."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
@@ -5472,7 +5516,15 @@ msgid "Fluffy wakes! Play the harp to lull it to sleep."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "Fluffy collapses. The trapdoor swings open - claim your reward."
+msgid "Pixies stream out from under Fluffy's paws!"
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "Fluffy collapses. Clear every creature left in the corridor to open the trapdoor."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The corridor is silent. The trapdoor swings open - claim your reward."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
@@ -5524,7 +5576,11 @@ msgid "Venom wells up from the floor - and the Queen spins again!"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "The Queen curls up and is still. Her hoard waits in the nest."
+msgid "The Queen curls up and is still. Clear the last of her brood to reach the hoard."
+msgstr ""
+
+#: addons/hpmmo_sim/data/dungeons.json
+msgid "The lair falls silent. Her hoard waits in the nest."
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json

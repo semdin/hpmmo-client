@@ -646,6 +646,7 @@ scripts/entities/mobs/multipart_boss.gd
 scripts/entities/mobs/part_droop.gd
 scripts/entities/mobs/snare_boss.gd
 scripts/entities/mobs/web_object.gd
+scripts/entities/mobs/wing_flap.gd
 scripts/entities/monolith/dark_monolith.gd
 scripts/entities/monolith/monolith_beacons.gd
 scripts/entities/player.gd
