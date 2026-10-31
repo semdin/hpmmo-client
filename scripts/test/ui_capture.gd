@@ -154,12 +154,19 @@ func _capture_skills() -> void:
 	world.inventory_ui.hide()
 	var player = world.local_player
 	var record: Dictionary = SimAuthority.record_for(player)
-	record["level"] = 22
+	record["level"] = 30
 	record["skill_levels"] = {"stupefy": 10, "incendio": 6, "bombarda": 3, "protego": 2}
 	SimAuthority._push_stats(record)
 	world.hud.skill_window.open()
 	await get_tree().create_timer(0.6).timeout
 	await _shot("skills")
+	# The window's own tooltip, opened by a pointer resting on a card.
+	var card: Control = world.hud.skill_window._cards["bombarda"]
+	var motion := InputEventMouseMotion.new()
+	motion.position = get_viewport().get_final_transform() * card.get_global_transform_with_canvas() * (card.size * 0.5)
+	get_viewport().push_input(motion)
+	await get_tree().create_timer(0.4).timeout
+	await _shot("skills-tooltip")
 
 
 ## Two loot chests beside the player (plain gold glow, enchanted violet) and
@@ -196,19 +203,27 @@ func _capture_windows() -> void:
 	await _shot("map")
 	world.hud.world_map.close()
 	world.hud.character_window.open()
-	await get_tree().create_timer(0.6).timeout
-	await _shot("character")
+	for page in ["status", "attrs", "props"]:
+		world.hud.character_window._show_page(page)
+		await get_tree().create_timer(0.4).timeout
+		await _shot("character" if page == "status" else "character-" + page)
+	world.hud.character_window._show_page("status")
 	world.hud.character_window.close()
 	world.hud.floo.open_at(world.local_player, "floo_hagrid")
 	await get_tree().create_timer(0.6).timeout
 	await _shot("floo")
 	world.hud.floo.close()
 	world.ollivander_ui.open_for_player(world.local_player)
+	await get_tree().create_timer(0.6).timeout
+	await _shot("ollivander-empty")
 	for entry in world.local_player.inventory:
 		if not (entry.get("bonuses", []) as Array).is_empty():
 			world.ollivander_ui.set_target(int(entry.get("uid", 0)))
-	await get_tree().create_timer(0.6).timeout
+	await get_tree().create_timer(0.4).timeout
 	await _shot("ollivander")
+	world.ollivander_ui._show_page("enchant")
+	await get_tree().create_timer(0.4).timeout
+	await _shot("ollivander-enchant")
 	world.ollivander_ui.hide()
 	world.inventory_ui.hide()
 	var fig: Node = null
@@ -216,10 +231,15 @@ func _capture_windows() -> void:
 		if String(npc.get("npc_name")) == "Professor Fig":
 			fig = npc
 	if fig != null:
-		world.overlay.show_dialogue(fig.npc_name, fig.talk(world.local_player))
+		# Beside him: the card closes when the player walks away.
+		var back: Vector3 = world.local_player.global_position
+		world.local_player.global_position = fig.global_position + Vector3(0, 0, 3)
+		world.overlay.show_dialogue(fig.npc_name, fig.talk(world.local_player), fig)
+		world.overlay.advance_dialogue()   # finish typing the first page
 		await get_tree().create_timer(0.6).timeout
 		await _shot("dialogue")
 		world.overlay._dialog_panel.hide()
+		world.local_player.global_position = back
 	# The target ring under the nearest targetable thing, moved in front of us.
 	var player = world.local_player
 	var best: Node3D = null

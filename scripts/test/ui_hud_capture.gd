@@ -39,7 +39,7 @@ func _ready() -> void:
 	# The game camera keeps rendering; this one is only used to frame shots.
 	var shots := {"combat": _capture_combat, "castle": _capture_castle, "maintenance": _capture_maintenance,
 		"onboarding": _capture_onboarding, "mounted": _capture_mounted, "settings": _capture_settings,
-		"social": _capture_social}
+		"social": _capture_social, "taskbar": _capture_taskbar}
 	var only := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--only="):
@@ -52,6 +52,20 @@ func _ready() -> void:
 	world.queue_free()
 	await get_tree().process_frame
 	get_tree().quit()
+
+## --------------------------------------------------------------- taskbar
+
+## The bottom taskbar (action bar, bag, window buttons) and the chat beside it
+## at three interface scales: the larger the scale, the narrower the canvas.
+func _capture_taskbar() -> void:
+	var window := get_tree().root
+	var before := window.content_scale_factor
+	for scale in [1.0, 1.2, 1.4]:
+		window.content_scale_factor = scale * GameSettings.UI_SCALE_BASE
+		await get_tree().create_timer(0.4).timeout
+		await RenderingServer.frame_post_draw
+		_save("ui-hud-taskbar-%d.png" % roundi(scale * 100.0))
+	window.content_scale_factor = before
 
 ## ---------------------------------------------------------------- combat
 

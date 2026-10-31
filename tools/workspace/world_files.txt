@@ -730,6 +730,7 @@ scripts/ui/maintenance_ui.gd
 scripts/ui/map_loading_screen.gd
 scripts/ui/map_marker.gd
 scripts/ui/mmorpg_overlay.gd
+scripts/ui/npc_dialogue.gd
 scripts/ui/ollivander_ui.gd
 scripts/ui/onboarding_ui.gd
 scripts/ui/settings_ui.gd
