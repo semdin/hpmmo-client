@@ -144,12 +144,16 @@ def main():
             "purpose": item["text"].split(", no music")[0].split(", seamless loop")[0],
             "source": "fal.ai %s; tools/audio/audio_spec.json" % (spec["music_model"] if ext == ".mp3" else spec["sfx_model"]),
         }
+        if old is not None and old.get("variants"):
+            sounds[key]["variants"] = old["variants"]
         done.append(key)
     retired = []
     if args.retire:
         # ui_levelup / ui_quest / ui_quest_complete are ElevenLabs takes kept
         # outside sfx_spec.json (art/audio_fal/*.wav).
         known = set(spec["sounds"].keys()) | fal_keys | {"ui_levelup", "ui_quest", "ui_quest_complete"}
+        # Variant takes (import_music_variants.py, basic-cast takes) belong to their base key.
+        known |= {v for entry in sounds.values() for v in entry.get("variants", [])}
         for key in list(sounds.keys()):
             if key not in known:
                 remove_asset(args.client, sounds[key]["path"])
@@ -157,11 +161,12 @@ def main():
                 retired.append(key)
     library["generator"] = "client/tools/audio/import_audio_spec.py + import_fal_sfx.py"
     library["generated"] = "2026-10-19"
-    library["provenance"] = ("All sounds generated on fal.ai: spell, basic-attack and creature cues with ElevenLabs Sound Effects v2 "
+    # Only a fresh library gets the base text: notes appended since (Stable Audio 3) stay.
+    library.setdefault("provenance", ("All sounds generated on fal.ai: spell, basic-attack and creature cues with ElevenLabs Sound Effects v2 "
         "(prompts art/audio_fal/sfx_spec.json, import_fal_sfx.py); ambience, footsteps, interface, broom and remaining creature "
         "cues with ElevenLabs Sound Effects v2 and the soundtrack with ElevenLabs Music v2.5 (prompts tools/audio/audio_spec.json, "
-        "import_audio_spec.py).")
-    library["license"] = "generated output, commercial use permitted under the ElevenLabs / fal.ai terms of the generating account"
+        "import_audio_spec.py)."))
+    library.setdefault("license", "generated output, commercial use permitted under the ElevenLabs / fal.ai terms of the generating account")
     library["sounds"] = dict(sorted(sounds.items()))
     with open(lib_path, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(library, fh, indent=1, ensure_ascii=False)

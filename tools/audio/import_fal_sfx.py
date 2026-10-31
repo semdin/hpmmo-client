@@ -14,7 +14,12 @@ Processing, per file:
   * RMS-match to the library's existing targets (one-shots -17 dBFS, beds -20)
     with a -1 dBFS peak ceiling, so the authored per-entry gain_db still mixes.
 
-Usage: python import_fal_sfx.py --art ../art/audio_fal --client .
+A spec (or one of its sounds) may name its own `source` (with %s for the key) and a `note` appended
+to the library's provenance and licence, for sounds made elsewhere (Stupefy:
+Stable Audio 3, art/audio_sa3). The library's own provenance and licence text
+is left as it is otherwise.
+
+Usage: python import_fal_sfx.py --art ../art/audio_fal --client . [--keys k1 k2]
 """
 import argparse, json, os, wave
 import numpy as np
@@ -79,6 +84,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--art", required=True)
     ap.add_argument("--client", required=True)
+    ap.add_argument("--keys", nargs="*", help="import only these sounds")
     args = ap.parse_args()
     spec = json.load(open(os.path.join(args.art, "sfx_spec.json"), encoding="utf-8"))
     lib_path = os.path.join(args.client, "assets", "audio", "sound_library.json")
@@ -86,6 +92,8 @@ def main():
     sounds = library["sounds"]
     done = []
     for key, item in spec["sounds"].items():
+        if args.keys and key not in args.keys:
+            continue
         src = os.path.join(args.art, key + ".wav")
         if not os.path.exists(src):
             print("missing source", src)
@@ -103,18 +111,17 @@ def main():
         entry["sample_rate"] = sr
         entry["loop"] = loop
         entry["loop_mode"] = "forward" if loop else "disabled"
-        entry["purpose"] = item["text"].split(", no music")[0]
-        entry["source"] = "fal.ai %s (ElevenLabs Sound Effects v2); art/audio_fal/%s.wav" % (spec["model"], key)
+        entry["purpose"] = item["text"].split(", no music")[0].split(", game sound effect")[0]
+        source = item.get("source", spec.get("source"))
+        if not source:
+            source = "fal.ai %s (ElevenLabs Sound Effects v2); art/audio_fal/%%s.wav" % spec["model"]
+        entry["source"] = source % key if "%s" in source else source
         done.append(key)
-    library["generated"] = "2026-10-16"
-    library["provenance"] = ("spell effects (spell_*) and creature cues (troll_*, dementor_*, hound_*, pixie_*, armour_*, snare_*): generated with ElevenLabs Sound Effects v2 via fal.ai "
-        "(fal-ai/elevenlabs/sound-effects/v2), prompts in art/audio_fal/sfx_spec.json, imported by "
-        "client/tools/audio/import_fal_sfx.py. Everything else: project-original synthesis "
-        "(client/tools/audio/synth_spell_sfx.py, deterministic seeded DSP); the music beds are original "
-        "synthesised arrangements of public-domain classical works (Grieg, Pachelbel, Bach, Beethoven, Satie - "
-        "all d. 1925 or earlier).")
-    library["license"] = ("spell_* and creature (troll_*, dementor_*, hound_*, pixie_*, armour_*, snare_*) files: generated output, commercial use permitted under the ElevenLabs / fal.ai "
-        "terms of the generating account; everything else project-original (CC0-equivalent dedication by the project)")
+    note = spec.get("note")
+    if note:
+        for field in ["provenance", "license"]:
+            if note not in library[field]:
+                library[field] = library[field].rstrip(".") + ". " + note
     with open(lib_path, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(library, fh, indent=1, ensure_ascii=False)
         fh.write("\n")

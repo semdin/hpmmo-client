@@ -21,7 +21,7 @@
    "seconds": 22.0,
    "loop": true,
    "bus": "ambience",
-   "gain_db": -20.0,
+   "gain_db": -26.0,
    "spatial": false,
    "pv": 0.0,
    "text": "Sheltered old stone castle courtyard: a small fountain trickling softly, light breeze, faraway birds, calm and safe, seamless loop, no music, no voice"
@@ -626,7 +626,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on soft grass, one step only, variation 1, no music, no voice"
@@ -637,7 +637,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on soft grass, one step only, variation 2, no music, no voice"
@@ -648,7 +648,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on soft grass, one step only, variation 3, no music, no voice"
@@ -659,7 +659,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on soft grass, one step only, variation 4, no music, no voice"
@@ -670,7 +670,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on a dry dirt path, one step only, variation 1, no music, no voice"
@@ -681,7 +681,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on a dry dirt path, one step only, variation 2, no music, no voice"
@@ -692,7 +692,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on a dry dirt path, one step only, variation 3, no music, no voice"
@@ -703,7 +703,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on a dry dirt path, one step only, variation 4, no music, no voice"
@@ -714,7 +714,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on hard stone floor, slight castle echo, one step only, variation 1, no music, no voice"
@@ -725,7 +725,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on hard stone floor, slight castle echo, one step only, variation 2, no music, no voice"
@@ -736,7 +736,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on hard stone floor, slight castle echo, one step only, variation 3, no music, no voice"
@@ -747,7 +747,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on hard stone floor, slight castle echo, one step only, variation 4, no music, no voice"
@@ -758,7 +758,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on old wooden floorboards, one step only, variation 1, no music, no voice"
@@ -769,7 +769,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on old wooden floorboards, one step only, variation 2, no music, no voice"
@@ -780,7 +780,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on old wooden floorboards, one step only, variation 3, no music, no voice"
@@ -791,7 +791,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots on old wooden floorboards, one step only, variation 4, no music, no voice"
@@ -802,7 +802,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots splashing in shallow water, one step only, variation 1, no music, no voice"
@@ -813,7 +813,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots splashing in shallow water, one step only, variation 2, no music, no voice"
@@ -824,7 +824,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots splashing in shallow water, one step only, variation 3, no music, no voice"
@@ -835,7 +835,7 @@
    "seconds": 0.5,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -13.0,
+   "gain_db": -20.0,
    "spatial": true,
    "pv": 0.07,
    "text": "A single light footstep of a person in soft leather boots splashing in shallow water, one step only, variation 4, no music, no voice"
@@ -846,7 +846,7 @@
    "seconds": 0.6,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -18.0,
+   "gain_db": -26.0,
    "spatial": true,
    "pv": 0.08,
    "text": "Heavy wool robe fabric swishing as someone turns, no music, no voice"
@@ -857,7 +857,7 @@
    "seconds": 0.6,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -18.0,
+   "gain_db": -26.0,
    "spatial": true,
    "pv": 0.08,
    "text": "Cloak cloth rustling briefly with movement, no music, no voice"
@@ -868,7 +868,7 @@
    "seconds": 0.6,
    "loop": false,
    "bus": "sfx",
-   "gain_db": -18.0,
+   "gain_db": -26.0,
    "spatial": true,
    "pv": 0.08,
    "text": "A long robe flapping softly once, no music, no voice"

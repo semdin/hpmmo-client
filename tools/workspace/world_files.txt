@@ -336,6 +336,9 @@ assets/shaders/castle/window_view.gdshader
 assets/shaders/cavern_ground.gdshader
 assets/shaders/cloak.gdshader
 assets/shaders/cobweb.gdshader
+assets/shaders/ember_particles.gdshader
+assets/shaders/ember_spark.gdshader
+assets/shaders/energy_trail.gdshader
 assets/shaders/fire_flipbook.gdshader
 assets/shaders/footprint.gdshader
 assets/shaders/fountain_water.gdshader
@@ -354,6 +357,7 @@ assets/shaders/loot/chest_rim.gdshader
 assets/shaders/safe_ward.gdshader
 assets/shaders/sky_day_night.gdshader
 assets/shaders/slime_pool.gdshader
+assets/shaders/spell_arc.gdshader
 assets/shaders/spell_layer.gdshader
 assets/shaders/spell_layer_add.gdshader
 assets/shaders/spell_ribbon.gdshader
@@ -534,6 +538,7 @@ assets/vfx/atlases/explosion_8x8_2k.png
 assets/vfx/atlases/fire_burst_8x8_2k.png
 assets/vfx/atlases/fire_orb_8x8_1k.png
 assets/vfx/atlases/flame_loop_8x8_1k.png
+assets/vfx/atlases/flight_orb_8x8_2k.png
 assets/vfx/atlases/floo_column_8x8_2k.png
 assets/vfx/atlases/floo_powder_8x8_1k.png
 assets/vfx/atlases/glacius_orb_8x8_1k.png

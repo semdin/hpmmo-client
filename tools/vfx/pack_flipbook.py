@@ -14,8 +14,11 @@ packer then honours the atlas contract the runtime and vfx_regression check:
   * one-shot atlases end on an empty frame; a looping atlas crossfades its tail
     into its head so frame N-1 blends into frame 0.
 
+Rendered sequences (Blender, art/vfx/blender_flight) pack the same way: pass
+a directory of PNG frames (sorted by name) in place of the clip.
+
 Usage:
-  python pack_flipbook.py video <clip.mp4> <out.png> --grid 8 8 --cell 256 [--loop]
+  python pack_flipbook.py video <clip.mp4 | frames_dir> <out.png> --grid 8 8 --cell 256 [--loop]
          [--start S] [--end E] [--gain G] [--floor F] [--mono]
   python pack_flipbook.py still <image.png> <out.png> --size 512 [--gain G] [--floor F] [--tile]
 
@@ -87,8 +90,16 @@ def read_video(path):
     return frames, fps
 
 
+def read_frames(path, fps=24.0):
+    names = sorted(n for n in os.listdir(path) if n.lower().endswith(".png"))
+    if not names:
+        raise SystemExit("no PNG frames in %s" % path)
+    frames = [np.asarray(Image.open(os.path.join(path, n)).convert("RGB")).astype(np.float32) / 255.0 for n in names]
+    return frames, fps
+
+
 def pack_video(args):
-    frames, fps = read_video(args.src)
+    frames, fps = read_frames(args.src) if os.path.isdir(args.src) else read_video(args.src)
     cols, rows = args.grid
     count = cols * rows
     inner = args.cell - 2 * PAD
