@@ -78,7 +78,9 @@ jobs:
   # launcher is reused and the ~9 min build + updater tests are skipped.
   launcher-macos:
     name: macOS launcher (universal, ad-hoc signed) + updater tests
-    runs-on: macos-14
+    # macos-14 images retire on 2026-11-02 (brownouts cancel runs before that);
+    # the bundle still targets macOS 11 (CMAKE_OSX_DEPLOYMENT_TARGET in build_app.sh).
+    runs-on: macos-15
     env:
       GIT_LFS_SKIP_SMUDGE: '1'
     steps:
@@ -518,7 +520,7 @@ jobs:
   verify-macos:
     name: macOS install + boot check
     needs: [release]
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - name: Install the release with the published launcher and boot the game
         run: |
