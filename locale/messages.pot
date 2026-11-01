@@ -1307,7 +1307,7 @@ msgstr ""
 msgid "Lv %d"
 msgstr ""
 
-#: scripts/ui/hud_bestiary.gd scripts/ui/hud_world_map.gd
+#: scripts/ui/hud_bestiary.gd scripts/ui/hud_dungeon.gd scripts/ui/hud_world_map.gd
 msgid "Lv %d–%d"
 msgstr ""
 
@@ -1543,7 +1543,7 @@ msgstr ""
 msgid "Skill power"
 msgstr ""
 
-#: scripts/ui/hud_character_window.gd scripts/ui/inventory_arcane.gd
+#: scripts/ui/hud_character_window.gd scripts/ui/hud_quest_scroll.gd scripts/ui/inventory_arcane.gd
 msgid "Galleons"
 msgstr ""
 
@@ -1704,11 +1704,7 @@ msgid "vs"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
-msgid "Dungeon"
-msgstr ""
-
-#: scripts/ui/hud_dungeon.gd
-msgid "Seal Shop"
+msgid "Dungeon Gate"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
@@ -1724,7 +1720,15 @@ msgid "Return to your run"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
-msgid "Every finished run pays seals; a medal pays more."
+msgid "Dungeon"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Seal Shop"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Dungeon Seals  ·  every finished run pays seals; a medal pays more"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
@@ -1733,10 +1737,6 @@ msgstr ""
 
 #: scripts/ui/hud_dungeon.gd scripts/ui/hud_floo.gd
 msgid "Buy"
-msgstr ""
-
-#: scripts/ui/hud_dungeon.gd
-msgid "Dungeon Seals: %d"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
@@ -1856,19 +1856,11 @@ msgid "Levels %d-%d · 1-%d players"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
-msgid "For your party"
+msgid "Creatures"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
-msgid "reference level %d - creatures level %d-%d"
-msgstr ""
-
-#: scripts/ui/hud_dungeon.gd
-msgid "Power"
-msgstr ""
-
-#: scripts/ui/hud_dungeon.gd
-msgid "health x%.2f, damage x%.2f"
+msgid "Health · damage"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
@@ -1876,7 +1868,7 @@ msgid "Needs"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
-msgid "%d+ players, level %d+"
+msgid "%d+ players · Lv %d+"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
@@ -1885,18 +1877,6 @@ msgstr ""
 
 #: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
 msgid "full clear within %s"
-msgstr ""
-
-#: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
-msgid "Curse"
-msgstr ""
-
-#: scripts/ui/hud_dungeon.gd
-msgid "Key"
-msgstr ""
-
-#: scripts/ui/hud_dungeon.gd
-msgid "the leader spends %d (you have %d)"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
@@ -1912,11 +1892,27 @@ msgid "%d left today"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
-msgid "none left today - you would go in as a helper"
+msgid "none left - helper"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Key"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "%d needed · you have %d"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd scripts/ui/hud_dungeon_guide.gd
 msgid "Your best"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "No curses on this difficulty."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "This week's curses:"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
@@ -1932,11 +1928,19 @@ msgid "answering..."
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
+msgid "level too low"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
 msgid "locked"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
 msgid "helper (no chest)"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "empty place"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
@@ -2053,6 +2057,10 @@ msgstr ""
 
 #: scripts/ui/hud_dungeon_guide.gd
 msgid "Not yet"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_guide.gd
+msgid "Curse"
 msgstr ""
 
 #: scripts/ui/hud_dungeon_guide.gd
@@ -2408,11 +2416,11 @@ msgid "Every task open to you is done. Level up to unlock more, hunt the Dark Mo
 msgstr ""
 
 #: scripts/ui/hud_quest_scroll.gd
-msgid "%d experience  ·  %d Galleons"
+msgid "experience"
 msgstr ""
 
 #: scripts/ui/hud_quest_scroll.gd
-msgid "  ·  %d %s reputation"
+msgid "%s reputation"
 msgstr ""
 
 #: scripts/ui/hud_skill_pick.gd
@@ -2832,11 +2840,39 @@ msgid "Open the merchant to sell items"
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
-msgid "Drag an item here, or right-click it in your bag."
+msgid "Travelling Merchant"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Turns your items into Galleons"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Drag the item you want to sell here, or right-click it in your bag."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Worn items cannot be sold."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Each"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Total"
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
 msgid "Sell"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Sold this session"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Nothing sold yet."
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
@@ -2876,7 +2912,19 @@ msgid "%s: replace %s"
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
-msgid "Sell this item?"
+msgid "%d enchantments"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "This item is %s. It cannot be bought back once sold."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "A %s item. It cannot be bought back once sold."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "%s Galleons × %d"
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
@@ -2909,6 +2957,14 @@ msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
 msgid "Unable to change equipment."
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Page %s  ·  %d/%d"
+msgstr ""
+
+#: scripts/ui/inventory_arcane.gd
+msgid "Page %s  ·  opens soon"
 msgstr ""
 
 #: scripts/ui/item_tooltip.gd

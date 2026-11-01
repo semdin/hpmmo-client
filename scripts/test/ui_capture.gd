@@ -36,6 +36,8 @@ func _ready() -> void:
 	await _capture_tooltip("robe_apprentice", "tooltip-cloak")
 	await _capture_tooltip("focus_emberwing", "tooltip-focus-t4")
 	await _capture_tooltip("ring_moonveil", "tooltip-ring-t5")
+	await _capture_quest_scroll()
+	await _capture_dungeon_gate()
 	await _capture_skills()
 	await _capture_chest()
 	await _capture_windows()
@@ -97,7 +99,10 @@ func _capture_inventory() -> void:
 	world.inventory_ui.open_for_player(player)
 	await get_tree().create_timer(0.8).timeout
 	await _shot("inventory")
-	# The merchant beside it, pricing an enchanted wand.
+	# The merchant beside it: empty (its first open), then pricing an enchanted wand.
+	world.inventory_ui._set_merchant_open(true)
+	await get_tree().create_timer(0.4).timeout
+	await _shot("merchant-empty")
 	ui_merchant_offer(player)
 	await get_tree().create_timer(0.5).timeout
 	await _shot("merchant")
@@ -146,6 +151,34 @@ func _capture_tooltip(item_id := "wand_elder", subject := "tooltip") -> void:
 	ui._tooltip.offset_bottom += delta.y
 	await get_tree().create_timer(0.5).timeout
 	await _shot(subject)
+
+
+## The Trial Hall gate: Normal for the tester alone, Very Hard (key, curses),
+## then the seal shop tab.
+func _capture_dungeon_gate() -> void:
+	var gate = world.hud.dungeon
+	gate.open_at(world.local_player, "trial_entry")
+	await get_tree().create_timer(0.8).timeout
+	await _shot("dungeon-gate")
+	gate._pick("very_hard")
+	await get_tree().create_timer(0.4).timeout
+	await _shot("dungeon-gate-veryhard")
+	gate._show_page("shop")
+	await get_tree().create_timer(0.4).timeout
+	await _shot("dungeon-gate-shop")
+	gate._show_page("run")
+	gate._pick("normal")
+	gate.close()
+
+
+## The quest scroll on the first quest of the log (a finished one shows the
+## gold claim seal).
+func _capture_quest_scroll() -> void:
+	world.inventory_ui.hide()
+	world.hud.open_quest_scroll()
+	await get_tree().create_timer(0.8).timeout
+	await _shot("quest-scroll")
+	world.hud.quest_scroll.close()
 
 
 ## The skill window (V) and the action-bar level badges, with a Master skill,
