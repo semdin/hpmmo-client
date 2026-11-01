@@ -1716,7 +1716,15 @@ msgid "Ready check"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
-msgid "Return to your run"
+msgid "Return to the dungeon"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "Start a new dungeon"
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd scripts/ui/hud_game_menu.gd scripts/ui/inventory_arcane.gd scripts/ui/look_editor.gd scenes/main/character_select.tscn
+msgid "Cancel"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
@@ -1808,7 +1816,7 @@ msgid "%s is travelling."
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
-msgid "%s is in another dungeon run."
+msgid "%s is still inside another dungeon."
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
@@ -1845,6 +1853,10 @@ msgstr ""
 
 #: scripts/ui/hud_dungeon.gd scripts/world/map_controller.gd
 msgid "Start the dungeon at its gate."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "The dungeon could not be prepared - try again in a moment."
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
@@ -2003,6 +2015,18 @@ msgstr ""
 msgid "Enter"
 msgstr ""
 
+#: scripts/ui/hud_dungeon.gd
+msgid "You still have an open dungeon here: %s, %d%% cleared."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "It stays open for %s more."
+msgstr ""
+
+#: scripts/ui/hud_dungeon.gd
+msgid "A new dungeon closes that one for good."
+msgstr ""
+
 #: scripts/ui/hud_dungeon_guide.gd scripts/ui/hud_dungeon_result.gd scripts/ui/hud_dungeon_run.gd
 msgid "Gold"
 msgstr ""
@@ -2027,7 +2051,7 @@ msgstr ""
 msgid "Levels %d-%d"
 msgstr ""
 
-#: scripts/ui/hud_dungeon_guide.gd
+#: scripts/ui/hud_dungeon_guide.gd scripts/ui/hud_dungeon_run.gd
 msgid "Show the way to the gate"
 msgstr ""
 
@@ -2148,11 +2172,23 @@ msgid "Unlocked: %s"
 msgstr ""
 
 #: scripts/ui/hud_dungeon_run.gd
+msgid "Your dungeon is finished - its chests wait inside."
+msgstr ""
+
+#: scripts/ui/hud_dungeon_run.gd
+msgid "Your dungeon is still open (%d%% cleared). Go back in through its gate."
+msgstr ""
+
+#: scripts/ui/hud_dungeon_run.gd
 msgid "Waiting for the party to arrive..."
 msgstr ""
 
 #: scripts/ui/hud_dungeon_run.gd
 msgid "Go!"
+msgstr ""
+
+#: scripts/ui/hud_dungeon_run.gd
+msgid "Open for %s more"
 msgstr ""
 
 #: scripts/ui/hud_dungeon_run.gd
@@ -2265,10 +2301,6 @@ msgstr ""
 
 #: scripts/ui/hud_game_menu.gd
 msgid "You cannot leave while defeated."
-msgstr ""
-
-#: scripts/ui/hud_game_menu.gd scripts/ui/inventory_arcane.gd scripts/ui/look_editor.gd scenes/main/character_select.tscn
-msgid "Cancel"
 msgstr ""
 
 #: scripts/ui/hud_game_menu.gd
