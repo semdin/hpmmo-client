@@ -3204,6 +3204,66 @@ msgid "Brow Ridge"
 msgstr ""
 
 #: scripts/ui/look_editor.gd
+msgid "Eye Size"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Eye Spacing"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Eye Height"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Eye Tilt"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Eyelids"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Under-Eyes"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Nose Tip"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Nostrils"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Nose Curve"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Mouth Width"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Mouth Corners"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Jaw Angle"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Age"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Ear Size"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Ear Angle"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
 msgid "Classic Face"
 msgstr ""
 
@@ -3225,6 +3285,66 @@ msgstr ""
 
 #: scripts/ui/look_editor.gd
 msgid "Diamond Face"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Shape"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Eyes"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Nose"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Mouth"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Ears"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Classic"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Noble"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Stern"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Youthful"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Sage"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Sharp"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Gentle"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Warrior"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Cunning"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Highlander"
 msgstr ""
 
 #: scripts/ui/look_editor.gd
@@ -3264,6 +3384,10 @@ msgid "Skin tone"
 msgstr ""
 
 #: scripts/ui/look_editor.gd
+msgid "Preset face"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
 msgid "Face type"
 msgstr ""
 
@@ -3272,11 +3396,23 @@ msgid "Random"
 msgstr ""
 
 #: scripts/ui/look_editor.gd
+msgid "Reset Section"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
 msgid "Reset"
 msgstr ""
 
 #: scripts/ui/look_editor.gd
 msgid "Save"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Custom"
+msgstr ""
+
+#: scripts/ui/look_editor.gd
+msgid "Changed from %s"
 msgstr ""
 
 #: scripts/ui/loot_window.gd

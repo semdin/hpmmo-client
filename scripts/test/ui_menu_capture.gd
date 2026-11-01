@@ -40,6 +40,12 @@ func _ready() -> void:
 	# the face tab frames the face: let the camera arrive
 	await get_tree().create_timer(0.8).timeout
 	await _shot("charselect-face")
+	# a preset face, then the eyes part with one slider moved (Custom)
+	editor.call("apply_preset", 7)
+	editor.call("_show_part", 1)
+	editor.call("_set_value", "eye_size", 0.5)
+	await get_tree().create_timer(0.6).timeout
+	await _shot("charselect-face-eyes")
 	# right-drag on the stage: turn the wizard and swing the camera over it
 	editor.call("_show_tab", "look")
 	var centre := get_viewport().get_visible_rect().size * Vector2(0.5, 0.45)

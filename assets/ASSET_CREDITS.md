@@ -159,3 +159,13 @@ project-original geometry (`scripts/world/grounds/`).
   kitchenware_spoon_k01, utensil_spoon_wooden_a01. Licence notice:
   `models/feast/LICENSE.txt`.
 - The gold plates, platters and goblets in the same glb are original lathed geometry.
+
+# Hero skin and eye detail (2026-11-02)
+
+- `models/characters/skin_micro.png` (tiling pore normal + cavity) and
+  `models/characters/eye_iris.png` (iris photo): from **Human Shaders** by
+  MatMADNESS, https://github.com/matmadness/HumanShaders, `HumanShaders/Resources`,
+  licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Unchanged.
+- The skin light model in `shaders/hero_skin.gdshader` (per-channel wrapped diffuse,
+  two GGX lobes) follows the same collection's skin shader, MIT licence,
+  Copyright (c) 2025 MatMADNESS.
