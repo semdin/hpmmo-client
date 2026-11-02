@@ -644,7 +644,7 @@ msgid "Not while mounted"
 msgstr ""
 
 #: scripts/ui/combat_feedback.gd
-msgid "Still recovering"
+msgid "Not ready yet"
 msgstr ""
 
 #: scripts/ui/combat_feedback.gd scripts/ui/hud_action_bar.gd
@@ -1736,7 +1736,7 @@ msgid "Seal Shop"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
-msgid "Dungeon Seals  ·  every finished run pays seals; a medal pays more"
+msgid "Dungeon Seals  ·  Normal and harder clears pay seals; a gold medal adds one"
 msgstr ""
 
 #: scripts/ui/hud_dungeon.gd
@@ -5856,7 +5856,7 @@ msgid "The Warden falls. Clear every creature left in the hall to finish the tri
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "The trial is complete. Claim your reward."
+msgid "The trial is complete. Claim your reward - the way out opens behind the arena."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
