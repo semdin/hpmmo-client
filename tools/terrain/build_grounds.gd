@@ -102,7 +102,7 @@ func _build() -> void:
 		"hogsmeade": Vector3(680, 0, -140), "lake_middle": Vector3(0, 0, 330), "highlands": Vector3(280, 0, -760)}
 	var report := []
 	for k in probes:
-		report.append("%s=%.1f" % [k, terrain.data.get_height(probes[k])])
+		report.append("%s=%.1f" % [k, terrain.data.get_surface_height(probes[k])])
 	print("BUILD_GROUNDS ok regions=%d instances=%d ms=%d  %s" % [terrain.data.get_region_count(), instances, Time.get_ticks_msec() - t0, "  ".join(report)])
 	quit(0)
 
@@ -127,7 +127,7 @@ func _make_assets() -> Terrain3DAssets:
 		ta.normal_depth = s[5]
 		ta.roughness = s[6]
 		ta.ao_strength = 1.5
-		assets.set_texture(i, ta)
+		assets.set_texture_asset(i, ta)
 	return assets
 
 
