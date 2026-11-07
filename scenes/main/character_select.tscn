@@ -207,7 +207,7 @@ text = "Harry"
 [node name="HouseLabel" type="Label" parent="CanvasLayer/InfoCard/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 15
-text = "[ Gryffindor ]"
+text = "[ Velkar ]"
 
 [node name="HSeparator" type="HSeparator" parent="CanvasLayer/InfoCard/Margin/VBox"]
 layout_mode = 2
@@ -318,22 +318,22 @@ alignment = 1
 [node name="GryfBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
 custom_minimum_size = Vector2(112, 34)
 layout_mode = 2
-text = "Gryffindor"
+text = "Velkar"
 
 [node name="SlythBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
 custom_minimum_size = Vector2(112, 34)
 layout_mode = 2
-text = "Slytherin"
+text = "Nisera"
 
 [node name="RavenBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
 custom_minimum_size = Vector2(112, 34)
 layout_mode = 2
-text = "Ravenclaw"
+text = "Ilvane"
 
 [node name="HuffBtn" type="Button" parent="CanvasLayer/CreateModal/Margin/VBox/HouseRow"]
 custom_minimum_size = Vector2(112, 34)
 layout_mode = 2
-text = "Hufflepuff"
+text = "Torvan"
 
 [node name="HouseDescLabel" type="Label" parent="CanvasLayer/CreateModal/Margin/VBox"]
 custom_minimum_size = Vector2(0, 40)

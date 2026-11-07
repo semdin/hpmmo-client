@@ -2829,7 +2829,7 @@ func _retreat_from_pack() -> void:
 
 # ------------------------------------------------------------------ quests
 
-## Quest mode: the client spawns beside Professor Fig (HPMMO_DEV_SPAWN) and can
+## Quest mode: the client spawns beside Master Teral Venn (HPMMO_DEV_SPAWN) and can
 ## only ASK to talk. It asks Borin (across the map: must be refused), then Fig
 ## (in range: the server finishes the quest - it waits to be claimed), claims
 ## it (the server pays), then talks to Fig again (nothing more may be paid).
@@ -2868,13 +2868,13 @@ func _quest_tick() -> void:
 			SimNet.submit_talk(player, "Borin")
 		1:
 			_record("after_far_talk", _quest_snapshot())
-			SimNet.submit_talk(player, "Professor Fig")
+			SimNet.submit_talk(player, "Master Teral Venn")
 		2:
 			_record("after_near_talk", _quest_snapshot())
 			SimNet.submit_quest_claim(player, "q001")
 		3:
 			_record("after_claim", _quest_snapshot())
-			SimNet.submit_talk(player, "Professor Fig")
+			SimNet.submit_talk(player, "Master Teral Venn")
 		_:
 			_done = true
 			var end := _quest_snapshot()
@@ -2884,7 +2884,7 @@ func _quest_tick() -> void:
 				"notices": _quest_notices,
 				"completed": _quest_completed,
 				"rewards": _rewards,
-				"distance_to_fig": _distance_to_npc("Professor Fig"),
+				"distance_to_fig": _distance_to_npc("Master Teral Venn"),
 			})
 			_record("final", end)
 			_finish(0)

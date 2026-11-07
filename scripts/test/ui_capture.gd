@@ -261,7 +261,7 @@ func _capture_windows() -> void:
 	world.inventory_ui.hide()
 	var fig: Node = null
 	for npc in get_tree().get_nodes_in_group("npcs"):
-		if String(npc.get("npc_name")) == "Professor Fig":
+		if String(npc.get("npc_name")) == "Master Teral Venn":
 			fig = npc
 	if fig != null:
 		# Beside him: the card closes when the player walks away.

@@ -64,7 +64,7 @@ msgid "Elite %s"
 msgstr ""
 
 #: scripts/autoload/i18n.gd
-msgid "Fluffy's %s Head"
+msgid "Threehead's %s Head"
 msgstr ""
 
 #: scripts/autoload/i18n.gd
@@ -72,11 +72,11 @@ msgid "Snare %s Vine"
 msgstr ""
 
 #: scripts/autoload/i18n.gd
-msgid "Fluffy's %s head slumps!"
+msgid "Threehead's %s head slumps!"
 msgstr ""
 
 #: scripts/autoload/i18n.gd scripts/entities/mobs/fluffy_boss.gd
-msgid "%s begins to play the harp..."
+msgid "%s begins to ring the sleep chime..."
 msgstr ""
 
 #: scripts/autoload/i18n.gd
@@ -240,15 +240,15 @@ msgid "Chest"
 msgstr ""
 
 #: scripts/entities/mobs/fluffy_boss.gd
-msgid "Fluffy is enraged!"
+msgid "Threehead is enraged!"
 msgstr ""
 
 #: scripts/entities/mobs/fluffy_boss.gd
-msgid "Fluffy howls in fury!"
+msgid "Threehead howls in fury!"
 msgstr ""
 
 #: scripts/entities/mobs/fluffy_boss.gd
-msgid "Fluffy is frenzied - the harp holds it only briefly!"
+msgid "Threehead is frenzied - the chime holds it only briefly!"
 msgstr ""
 
 #: scripts/entities/mobs/fluffy_boss.gd
@@ -260,7 +260,7 @@ msgid "The music breaks off!"
 msgstr ""
 
 #: scripts/entities/mobs/fluffy_boss.gd
-msgid "The music lulls Fluffy to sleep! Its heads take more damage."
+msgid "The music lulls Threehead to sleep! Its heads take more damage."
 msgstr ""
 
 #: scripts/entities/mobs/mob_base.gd
@@ -292,11 +292,11 @@ msgid "A brave Wizard"
 msgstr ""
 
 #: scripts/entities/monolith/dark_monolith.gd scripts/ui/hud.gd scripts/ui/mmorpg_overlay.gd addons/hpmmo_sim/data/spawn_tables.json
-msgid "Dark Monolith"
+msgid "Dark Shard"
 msgstr ""
 
 #: scripts/entities/player.gd addons/hpmmo_sim/data/dungeons.json
-msgid "Forbidden Corridor Explorer"
+msgid "Sealed Wing Explorer"
 msgstr ""
 
 #: scripts/entities/player.gd addons/hpmmo_sim/data/dungeons.json
@@ -408,7 +408,7 @@ msgid "Cast refused"
 msgstr ""
 
 #: scripts/entities/player.gd scripts/ui/hud_buff_bar.gd addons/hpmmo_sim/data/spells.json
-msgid "Protego"
+msgid "Ward Shield"
 msgstr ""
 
 #: scripts/entities/player.gd scripts/ui/hud_buff_bar.gd
@@ -416,7 +416,7 @@ msgid "Reflects projectiles; other damage reduced by 60%."
 msgstr ""
 
 #: scripts/entities/player.gd
-msgid "Protego!"
+msgid "Ward Shield!"
 msgstr ""
 
 #: scripts/entities/player.gd
@@ -520,11 +520,11 @@ msgid "Wand  +%d"
 msgstr ""
 
 #: scripts/ui/character_select.gd
-msgid "Galleons  %d"
+msgid "Oril  %d"
 msgstr ""
 
-#: scripts/ui/character_select.gd scripts/ui/mmorpg_overlay.gd
-msgid "Hogwarts Valley"
+#: scripts/ui/character_select.gd scripts/ui/mmorpg_overlay.gd scripts/ui/travel_feedback.gd scripts/world/map_controller.gd addons/hpmmo_sim/data/maps.json
+msgid "Kaf Valley"
 msgstr ""
 
 #: scripts/ui/character_select.gd scenes/main/character_select.tscn
@@ -736,7 +736,7 @@ msgid "DEFEATED\nReturning to town in %d:%02d"
 msgstr ""
 
 #: scripts/ui/combat_feedback.gd scripts/ui/hud_dungeon_result.gd
-msgid "+%d Galleons"
+msgid "+%d Oril"
 msgstr ""
 
 #: scripts/ui/combat_feedback.gd
@@ -876,7 +876,7 @@ msgid "Critical"
 msgstr ""
 
 #: scripts/ui/hud.gd
-msgid "Welcome to Hogwarts! Spells on 1-4, Q, E · potions on F1-F4 · Shift mounts the broom."
+msgid "Welcome to Kaf Castle! Spells on 1-4, Q, E · potions on F1-F4 · Shift mounts the broom."
 msgstr ""
 
 #: scripts/ui/hud.gd
@@ -956,7 +956,7 @@ msgid "%s Rank %d · %s"
 msgstr ""
 
 #: scripts/ui/hud.gd
-msgid "%s · %s\n%d Galleons"
+msgid "%s · %s\n%d Oril"
 msgstr ""
 
 #: scripts/ui/hud.gd
@@ -992,7 +992,7 @@ msgid "%s · Duel opponent"
 msgstr ""
 
 #: scripts/ui/hud.gd
-msgid "Ancient Monolith"
+msgid "Fallen Star Shard"
 msgstr ""
 
 #: scripts/ui/hud.gd
@@ -1008,7 +1008,7 @@ msgid "Lv. %d"
 msgstr ""
 
 #: scripts/ui/hud.gd
-msgid "Collected %d Galleons."
+msgid "Collected %d Oril."
 msgstr ""
 
 #: scripts/ui/hud.gd
@@ -1076,7 +1076,7 @@ msgid "[I] Bag - the potions you carry"
 msgstr ""
 
 #: scripts/ui/hud.gd
-msgid "[O] Ollivander - forge the wand higher"
+msgid "[O] Kestrin - forge the wand higher"
 msgstr ""
 
 #: scripts/ui/hud.gd scripts/ui/hud_player_menu.gd
@@ -1148,11 +1148,11 @@ msgid "Drowned corpses bewitched to serve a dark wizard. Slow, relentless and te
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
-msgid "Inferi raised from a cursed lake to guard what lies beneath. Their cold grip drags you down; fire still breaks them."
+msgid "Drowned Ones raised from a cursed lake to guard what lies beneath. Their cold grip drags you down; fire still breaks them."
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
-msgid "Goblin clerks of the wizarding bank, out collecting debts. They count every Knut and carry a heavy purse."
+msgid "Goblin moneylenders from Orvell's vaults, out collecting debts. They count every coin and carry a heavy purse."
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -1164,7 +1164,7 @@ msgid "Goblin magic needs no wand. Hexers walk with the tellers and the guards a
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
-msgid "Giant spiders of the Forbidden Forest, bred from Aragog's line. They hunt in packs."
+msgid "Giant spiders of the Raven Woods, bred from an ancient brood-mother. They hunt in packs."
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -1180,7 +1180,7 @@ msgid "The largest trolls, grey-skinned and thick-hided, guarding the high moors
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
-msgid "Soul-sucking guards of Azkaban. Their cold drains your will; only a Patronus truly drives them off."
+msgid "Soul-sucking wardens of Morhal. Their cold drains your will; only the Light of Ithrel truly drives them off."
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -1188,7 +1188,7 @@ msgid "Electric-blue pests that lift wizards off their feet and hurl them about.
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
-msgid "Suits of armour enchanted to defend the forbidden third floor."
+msgid "Suits of armour enchanted to defend the castle's sealed wing."
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -1200,7 +1200,7 @@ msgid "A creeping plant that strangles whatever struggles. Burn its vines to rea
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
-msgid "Borin's three-headed dog, guarding the trapdoor. Music sends it to sleep."
+msgid "A three-headed hound bound to guard the sealed wing's stone hatch. The sleep chime lulls it."
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -1212,7 +1212,7 @@ msgid "Bone-plated giants that guard the egg caverns. Their armour turns blows f
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
-msgid "Fire (Incendio)"
+msgid "Fire (Flame Wave)"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -1220,11 +1220,11 @@ msgid "Stuns"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
-msgid "Force (Depulso)"
+msgid "Force (Repel)"
 msgstr ""
 
-#: scripts/ui/hud_bestiary.gd
-msgid "Patronus"
+#: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/spells.json addons/hpmmo_sim/data/quests.json
+msgid "Light of Ithrel"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -1240,11 +1240,11 @@ msgid "beside the courtyard"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/maps.json addons/hpmmo_sim/data/dungeons.json addons/hpmmo_sim/data/quests.json
-msgid "The Forbidden Corridor"
+msgid "The Sealed Wing"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
-msgid "Hogwarts Castle, third-floor east corridor"
+msgid "Kaf Castle, the sealed east wing"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -1260,15 +1260,15 @@ msgid "Dark wizard"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/mobs.json
-msgid "Dementor"
+msgid "Pallid"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
 msgid "Beast"
 msgstr ""
 
-#: scripts/ui/hud_bestiary.gd
-msgid "Pixie"
+#: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/mobs.json
+msgid "Fidgetling"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -1292,11 +1292,11 @@ msgid "Goblin"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/spawn_tables.json
-msgid "Acromantula Matriarch"
+msgid "Black Widow"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd addons/hpmmo_sim/data/spawn_tables.json
-msgid "Dark Snatcher Commander"
+msgid "Bandit Chief"
 msgstr ""
 
 #: scripts/ui/hud_bestiary.gd
@@ -1504,7 +1504,7 @@ msgid "Experience"
 msgstr ""
 
 #: scripts/ui/hud_character_window.gd
-msgid "Galleons found"
+msgid "Oril found"
 msgstr ""
 
 #: scripts/ui/hud_character_window.gd
@@ -1544,7 +1544,7 @@ msgid "Skill power"
 msgstr ""
 
 #: scripts/ui/hud_character_window.gd scripts/ui/hud_quest_scroll.gd scripts/ui/inventory_arcane.gd
-msgid "Galleons"
+msgid "Oril"
 msgstr ""
 
 #: scripts/ui/hud_character_window.gd
@@ -2216,7 +2216,7 @@ msgid "Lives %d / %d"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
-msgid "Floo Network"
+msgid "Hearthway"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
@@ -2228,11 +2228,11 @@ msgid "Buy %d"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd addons/hpmmo_sim/data/items.json
-msgid "Old Boot (Portkey)"
+msgid "Old Boot (Waylink)"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
-msgid "%s Galleons - carries your party anywhere"
+msgid "%s Oril - carries your party anywhere"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
@@ -2240,19 +2240,19 @@ msgid "You stand at the hearth of %s"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
-msgid "Floo Powder: %d pinch"
+msgid "Hearth Dust: %d pinch"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
-msgid "Floo Powder: %d pinches"
+msgid "Hearth Dust: %d pinches"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
-msgid "%s Galleons a pinch, one per journey"
+msgid "%s Oril a pinch, one per journey"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
-msgid "1 pinch of Floo Powder"
+msgid "1 pinch of Hearth Dust"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
@@ -2264,7 +2264,7 @@ msgid "Travel"
 msgstr ""
 
 #: scripts/ui/hud_floo.gd scripts/ui/inventory_arcane.gd
-msgid "Not enough Galleons."
+msgid "Not enough Oril."
 msgstr ""
 
 #: scripts/ui/hud_floo.gd
@@ -2392,7 +2392,7 @@ msgid "They are in your party."
 msgstr ""
 
 #: scripts/ui/hud_portkey.gd
-msgid "Portkey"
+msgid "Waylink"
 msgstr ""
 
 #: scripts/ui/hud_portkey.gd
@@ -2424,7 +2424,7 @@ msgid "New"
 msgstr ""
 
 #: scripts/ui/hud_quest_log.gd
-msgid "%d EXP  ·  %d Galleons"
+msgid "%d EXP  ·  %d Oril"
 msgstr ""
 
 #: scripts/ui/hud_quest_log.gd scripts/ui/hud_quest_scroll.gd
@@ -2444,7 +2444,7 @@ msgid "No Open Quests"
 msgstr ""
 
 #: scripts/ui/hud_quest_scroll.gd
-msgid "Every task open to you is done. Level up to unlock more, hunt the Dark Monoliths and refine your gear."
+msgid "Every task open to you is done. Level up to unlock more, hunt the Dark Shards and refine your gear."
 msgstr ""
 
 #: scripts/ui/hud_quest_scroll.gd
@@ -2624,19 +2624,19 @@ msgid "Rank %d · %s"
 msgstr ""
 
 #: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd scripts/ui/travel_feedback.gd scripts/world/castle_interior.gd scripts/world/map_controller.gd addons/hpmmo_sim/data/maps.json
-msgid "Hogwarts Castle"
+msgid "Kaf Castle"
 msgstr ""
 
 #: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd
-msgid "Black Lake"
+msgid "Lake Lunra"
 msgstr ""
 
 #: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd
-msgid "Forbidden Forest"
+msgid "Raven Woods"
 msgstr ""
 
-#: scripts/ui/hud_world_map.gd
-msgid "Hogsmeade"
+#: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd
+msgid "Orvell"
 msgstr ""
 
 #: scripts/ui/hud_world_map.gd scripts/ui/mmorpg_overlay.gd
@@ -2876,7 +2876,7 @@ msgid "Travelling Merchant"
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
-msgid "Turns your items into Galleons"
+msgid "Turns your items into Oril"
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
@@ -2936,7 +2936,7 @@ msgid "Speed %+.0f"
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
-msgid "Sells for %s Galleons"
+msgid "Sells for %s Oril"
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
@@ -2956,7 +2956,7 @@ msgid "A %s item. It cannot be bought back once sold."
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
-msgid "%s Galleons × %d"
+msgid "%s Oril × %d"
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
@@ -2980,7 +2980,7 @@ msgid "Destroy %s?\nIt is gone for good."
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
-msgid "Sold for %s Galleons."
+msgid "Sold for %s Oril."
 msgstr ""
 
 #: scripts/ui/inventory_arcane.gd
@@ -3428,7 +3428,7 @@ msgid "Usernames cannot contain Turkish letters (ç, ğ, ı, İ, ö, ş, ü) or 
 msgstr ""
 
 #: scripts/ui/main_menu.gd
-msgid "REALM OF WIZARDRY"
+msgid "REALM OF KAF"
 msgstr ""
 
 #: scripts/ui/main_menu.gd
@@ -3720,7 +3720,7 @@ msgid "Quest"
 msgstr ""
 
 #: scripts/ui/mmorpg_overlay.gd
-msgid "WASD move · right-drag camera · wheel zoom\nLMB attack · 1–4 / Q / E skills · Tab target\nShift mount · Space rise · Ctrl descend · F talk\nZ loot · I bag · O Ollivander · J guide · F1 settings"
+msgid "WASD move · right-drag camera · wheel zoom\nLMB attack · 1–4 / Q / E skills · Tab target\nShift mount · Space rise · Ctrl descend · F talk\nZ loot · I bag · O Kestrin · J guide · F1 settings"
 msgstr ""
 
 #: scripts/ui/mmorpg_overlay.gd
@@ -3735,12 +3735,8 @@ msgstr ""
 msgid "Zoom in"
 msgstr ""
 
-#: scripts/ui/mmorpg_overlay.gd
-msgid "Hogwarts Courtyard"
-msgstr ""
-
-#: scripts/ui/mmorpg_overlay.gd
-msgid "Hogsmeade Village"
+#: scripts/ui/mmorpg_overlay.gd addons/hpmmo_sim/data/travel.json
+msgid "Castle Courtyard"
 msgstr ""
 
 #: scripts/ui/mmorpg_overlay.gd
@@ -3752,7 +3748,7 @@ msgid "Hunting grounds  ·  Lv %d-%d"
 msgstr ""
 
 #: scripts/ui/npc_dialogue.gd
-msgid "Hogwarts Professor"
+msgid "Master of Kaf Castle"
 msgstr ""
 
 #: scripts/ui/npc_dialogue.gd
@@ -3760,7 +3756,7 @@ msgid "Wandmaker"
 msgstr ""
 
 #: scripts/ui/npc_dialogue.gd
-msgid "Landlady of the Three Broomsticks"
+msgid "Landlady of the Red Lantern"
 msgstr ""
 
 #: scripts/ui/npc_dialogue.gd
@@ -3772,7 +3768,7 @@ msgid "Librarian"
 msgstr ""
 
 #: scripts/ui/npc_dialogue.gd
-msgid "Charms Professor"
+msgid "Flight & Duelling Master"
 msgstr ""
 
 #: scripts/ui/npc_dialogue.gd
@@ -3812,7 +3808,7 @@ msgid "new quest"
 msgstr ""
 
 #: scripts/ui/ollivander_ui.gd scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json
-msgid "Ollivander"
+msgid "Kestrin"
 msgstr ""
 
 #: scripts/ui/ollivander_ui.gd
@@ -3948,7 +3944,7 @@ msgid "Provoke a pack"
 msgstr ""
 
 #: scripts/ui/onboarding_ui.gd
-msgid "Hit an Acromantula or Inferi outside the safe zone and survive the pack's answer."
+msgid "Hit an Black Weaver or Drowned Ones outside the safe zone and survive the pack's answer."
 msgstr ""
 
 #: scripts/ui/onboarding_ui.gd
@@ -3964,7 +3960,7 @@ msgid "Enter the castle"
 msgstr ""
 
 #: scripts/ui/onboarding_ui.gd
-msgid "Dismount at the entrance and press F in the doorway to enter Hogwarts."
+msgid "Dismount at the entrance and press F in the doorway to enter Kaf Castle."
 msgstr ""
 
 #: scripts/ui/onboarding_ui.gd
@@ -4052,7 +4048,7 @@ msgid "Bag"
 msgstr ""
 
 #: scripts/ui/settings_ui.gd
-msgid "Ollivander's forge"
+msgid "Kestrin's forge"
 msgstr ""
 
 #: scripts/ui/settings_ui.gd
@@ -4283,10 +4279,6 @@ msgstr ""
 msgid "Loading..."
 msgstr ""
 
-#: scripts/ui/travel_feedback.gd scripts/world/map_controller.gd addons/hpmmo_sim/data/maps.json
-msgid "Hogwarts Grounds"
-msgstr ""
-
 #: scripts/ui/travel_feedback.gd
 msgid "Travelling..."
 msgstr ""
@@ -4304,11 +4296,11 @@ msgid "Drag a potion from your bag onto F1-F4 to drink it with one key."
 msgstr ""
 
 #: scripts/ui/world_loader.gd
-msgid "Protego reflects projectiles back at their caster."
+msgid "Ward Shield reflects projectiles back at their caster."
 msgstr ""
 
 #: scripts/ui/world_loader.gd
-msgid "Inferi fear fire: Incendio burns them for double damage."
+msgid "Drowned Ones fear fire: Flame Wave burns them for double damage."
 msgstr ""
 
 #: scripts/ui/world_loader.gd
@@ -4320,11 +4312,11 @@ msgid "Land on level ground before you dismount your broom."
 msgstr ""
 
 #: scripts/ui/world_loader.gd
-msgid "Dark Monoliths summon waves of creatures - bring friends."
+msgid "Dark Shards summon waves of creatures - bring friends."
 msgstr ""
 
 #: scripts/ui/world_loader.gd
-msgid "Ollivander can refine your wand. Higher tiers glow brighter."
+msgid "Kestrin can refine your wand. Higher tiers glow brighter."
 msgstr ""
 
 #: scripts/ui/world_loader.gd
@@ -4456,19 +4448,19 @@ msgid "Elite Bodyguard"
 msgstr ""
 
 #: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json data/json/quests.json
-msgid "Professor Fig"
+msgid "Master Teral Venn"
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Ah, a new student! Hogwarts needs brave wizards."
+msgid "Ah, a new student! Beneath the lake lies Kaf's shard of the World-Star Ithrel - this castle was raised to guard it."
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Acromantulas infest the Forbidden Forest to the west. Inferi haunt its edge, past Borin's hut."
+msgid "Black Weavers infest the Raven Woods to the west. Drowned Ones haunt its edge, past Borin's hut."
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Dark Monoliths fall in the western forests, from the Forest Edge past Borin's hut to Snatcher Woods in the north-west. Close by, you will see their green light."
+msgid "Someone - the old records say the Ash Priest - drags darkened shards out of the Void. They fall in the western forests, from the Forest Edge past Borin's hut to Bandit Woods in the north-west. Close by, you will see their green light."
 msgstr ""
 
 #: scripts/world/game_world.gd
@@ -4476,27 +4468,27 @@ msgid "From level 5 the Trial Hall is open: step into the glowing arch on the co
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Wands choose the wizard... but Galleons refine them!"
+msgid "A wand is only as good as its maker... and the Oril behind it!"
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Press O anywhere to open my workshop. Bring Phoenix Ash, Heartstrings, Thestral Hair."
+msgid "Press O anywhere to open my workshop. Bring Velkar Ash, Dragon Sinew, Night Steed Hair."
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "+4 glows blue, +7 crackles gold, +9 burns with phoenix fire!"
+msgid "+4 glows blue, +7 crackles gold, +9 burns with starfire!"
 msgstr ""
 
 #: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json
-msgid "Madam Rosmerta"
+msgid "Bessa Tull"
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Welcome to Hogsmeade, dearie! Rest here - the village square is safe."
+msgid "Welcome to Orvell, dearie! Rest here - the village square is safe."
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Buy Wiggenweld before heading to the Forbidden Forest. Trust me."
+msgid "Buy Healing Draughts before heading to the Raven Woods. Trust me."
 msgstr ""
 
 #: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json data/json/quests.json
@@ -4508,11 +4500,11 @@ msgid "Don't go into that forest alone, friend... brave, though!"
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Inferi fear fire - burn 'em with Incendio. Stupefy stuns 'em cold."
+msgid "Drowned Ones fear fire - burn 'em with Flame Wave. Stun Bolt stuns 'em cold."
 msgstr ""
 
 #: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json
-msgid "Madam Pince"
+msgid "Archivist Emrel Sav"
 msgstr ""
 
 #: scripts/world/game_world.gd
@@ -4524,11 +4516,11 @@ msgid "The Great Hall is through the entrance hall. Charms is across the hall."
 msgstr ""
 
 #: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json
-msgid "Professor Flitwick"
+msgid "Flight Master Kaelen Rook"
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "Welcome! Stupefy interrupts, Incendio burns, and Expelliarmus weakens attacks."
+msgid "Welcome! Stun Bolt interrupts, Flame Wave burns, and Disarm weakens attacks."
 msgstr ""
 
 #: scripts/world/game_world.gd
@@ -4552,7 +4544,7 @@ msgid "Press F inside the arch"
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "Floo Network (%s)"
+msgid "Hearthway (%s)"
 msgstr ""
 
 #: scripts/world/map_controller.gd
@@ -4560,15 +4552,15 @@ msgid "%s (to %s)"
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "%s added to your Floo Network."
+msgid "%s added to your Hearthway."
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "Press %s - Let go of the Portkey (to %s)"
+msgid "Press %s - Let go of the Waylink (to %s)"
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "Press %s - Grab hold of the Portkey (to %s)"
+msgid "Press %s - Grab hold of the Waylink (to %s)"
 msgstr ""
 
 #: scripts/world/map_controller.gd
@@ -4640,7 +4632,7 @@ msgid "Travel to the %s"
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "Entering Hogwarts Castle..."
+msgid "Entering Kaf Castle..."
 msgstr ""
 
 #: scripts/world/map_controller.gd
@@ -4664,7 +4656,7 @@ msgid "Dungeon Level"
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "Hogwarts Castle - %s"
+msgid "Kaf Castle - %s"
 msgstr ""
 
 #: scripts/world/map_controller.gd
@@ -4716,27 +4708,27 @@ msgid "You have entered this place enough times today - come back tomorrow."
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "You have no Portkey boot."
+msgid "You have no Waylink boot."
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "Your Portkey is already waiting - grab hold of it."
+msgid "Your Waylink is already waiting - grab hold of it."
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "That Portkey has already gone."
+msgid "That Waylink has already gone."
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "That Portkey is not yours - only its owner's party may hold on."
+msgid "That Waylink is not yours - only its owner's party may hold on."
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "A Portkey will not work in here."
+msgid "A Waylink will not work in here."
 msgstr ""
 
 #: scripts/world/map_controller.gd
-msgid "You have no Floo Powder - buy a pinch at the fireplace."
+msgid "You have no Hearth Dust - buy a pinch at the fireplace."
 msgstr ""
 
 #: scripts/world/map_controller.gd
@@ -4764,15 +4756,15 @@ msgid "%s\n< click to talk >"
 msgstr ""
 
 #: scripts/world/portkey_views.gd
-msgid "%s set down a Portkey to %s - hold on to it! (F)"
+msgid "%s set down a Waylink to %s - hold on to it! (F)"
 msgstr ""
 
 #: scripts/world/portkey_views.gd
-msgid "The Portkey fizzled - nobody was holding on. The boot is back in your bag."
+msgid "The Waylink fizzled - nobody was holding on. The boot is back in your bag."
 msgstr ""
 
 #: scripts/world/portkey_views.gd
-msgid "Portkey to %s\n%d"
+msgid "Waylink to %s\n%d"
 msgstr ""
 
 #: scripts/world/training_dummy.gd
@@ -4844,7 +4836,7 @@ msgid "Harry"
 msgstr ""
 
 #: scenes/main/character_select.tscn
-msgid "[ Gryffindor ]"
+msgid "[ Velkar ]"
 msgstr ""
 
 #: scenes/main/character_select.tscn
@@ -4855,20 +4847,20 @@ msgstr ""
 msgid "Type your name..."
 msgstr ""
 
-#: scenes/main/character_select.tscn assets/castle/castle_layout.json
-msgid "Gryffindor"
+#: scenes/main/character_select.tscn
+msgid "Velkar"
 msgstr ""
 
-#: scenes/main/character_select.tscn assets/castle/castle_layout.json
-msgid "Slytherin"
+#: scenes/main/character_select.tscn
+msgid "Nisera"
 msgstr ""
 
-#: scenes/main/character_select.tscn assets/castle/castle_layout.json
-msgid "Ravenclaw"
+#: scenes/main/character_select.tscn
+msgid "Ilvane"
 msgstr ""
 
-#: scenes/main/character_select.tscn assets/castle/castle_layout.json
-msgid "Hufflepuff"
+#: scenes/main/character_select.tscn
+msgid "Torvan"
 msgstr ""
 
 #: scenes/main/character_select.tscn
@@ -4896,11 +4888,11 @@ msgid "10-inch Hawthorn wood with unicorn hair core. Highly suited for healing a
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Elder Wand Replica"
+msgid "Ithrel Wand Replica"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "15-inch Elder wood with thestral tail hair core. Unlocks immense raw destructive power."
+msgid "15-inch starwood with night steed hair core. Unlocks immense raw destructive power."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -4952,7 +4944,7 @@ msgid "Sturdy woolen school robes tailored with silk house linings. +50 Max HP."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Auror Battle Cloak"
+msgid "Warden's Battle Cloak"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -4984,11 +4976,11 @@ msgid "Black velvet wound with silver thorns and emeralds; curses catch on its v
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Phoenix Regalia"
+msgid "Velkar Regalia"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Crimson brocade alive with woven flame, a golden phoenix spread across the shoulders."
+msgid "Crimson brocade alive with woven flame, a golden velkar spread across the shoulders."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5000,15 +4992,15 @@ msgid "Silver-blue silk scattered with stars and crescent moons; it shimmers lik
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Nimbus 2000"
+msgid "Windcutter 2000"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Sleek mahogany handle with tail twigs of select birch. Fly across Hogwarts Valley with speed."
+msgid "Sleek mahogany handle with tail twigs of select birch. Fly across Kaf Valley with speed."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Firebolt Supreme"
+msgid "Skysplitter"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5044,7 +5036,7 @@ msgid "Emberwing"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Crimson lacquer and gold filigree crowned by a phoenix head; its feathered tail smoulders like live embers."
+msgid "Crimson lacquer and gold filigree crowned by a velkar head; its feathered tail smoulders like live embers."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5056,7 +5048,7 @@ msgid "Pale moonwood threaded with starlight, a crystal tip and bristles spun fr
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Wiggenweld Potion"
+msgid "Healing Draught"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5072,15 +5064,15 @@ msgid "Refreshing cerulean elixir. Restores 120 Mana instantly."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Phoenix Ash"
+msgid "Velkar Ash"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Smoldering fiery ash gathered from a burning day. Used to refine wands from +0 to +4 at Ollivander."
+msgid "Smoldering fiery ash gathered from a burning day. Used to refine wands from +0 to +4 at Kestrin."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Dragon Heartstring"
+msgid "Dragon Sinew"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5088,7 +5080,7 @@ msgid "Vibrant magical core tissue from an Antipodean Opaleye. Needed to refine 
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Thestral Tail Hair"
+msgid "Night Steed Hair"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5096,7 +5088,7 @@ msgid "Spectral invisible hair of rare thestrals. Required for legendary +8 and 
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Elder Wood Core"
+msgid "Starwood Core"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5108,7 +5100,7 @@ msgid "Rune of Imbuing"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "A scroll that weaves one new enchantment into a wand, robe or broom at Ollivander's. The more an item already holds, the likelier the weave slips."
+msgid "A scroll that weaves one new enchantment into a wand, robe or broom at Kestrin's. The more an item already holds, the likelier the weave slips."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5116,7 +5108,7 @@ msgid "Rune of Reweaving"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Unravels every enchantment on a wand, robe or broom and weaves the same number anew at Ollivander's."
+msgid "Unravels every enchantment on a wand, robe or broom and weaves the same number anew at Kestrin's."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5252,7 +5244,7 @@ msgid "Emberwing Boots"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Lacquered crimson boots with golden phoenix wings at the heel."
+msgid "Lacquered crimson boots with golden velkar wings at the heel."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5284,7 +5276,7 @@ msgid "Emberwing Focus"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "A glowing amber heart cradled in golden phoenix feathers, warm as a hearth."
+msgid "A glowing amber heart cradled in golden velkar feathers, warm as a hearth."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5316,7 +5308,7 @@ msgid "Emberwing Pendant"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "A golden phoenix spreading its wings around a burning amber stone."
+msgid "A golden velkar spreading its wings around a burning amber stone."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5348,7 +5340,7 @@ msgid "Emberwing Ring"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "A gold band shaped like a phoenix, an ember-bright amber in its beak."
+msgid "A gold band shaped like a velkar, an ember-bright amber in its beak."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5360,7 +5352,7 @@ msgid "A mithril band set with a star crystal that shimmers like moonlight."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Acromantula Silk"
+msgid "Weaver Silk"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5368,7 +5360,7 @@ msgid "Pearly, rope-strong silk spun in the Blackweb Caverns. Weavers and robe-m
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Acromantula Venom"
+msgid "Weaver Venom"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5376,7 +5368,7 @@ msgid "Emerald venom milked from a Venomfang's glands - worth a fortune to potio
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Queen's Seal"
+msgid "Web Mother's Seal"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5384,15 +5376,15 @@ msgid "An obsidian seal wrapped in old silk. It answers the sealed web gate deep
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Floo Powder"
+msgid "Hearth Dust"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "A pinch thrown into a Floo Network fireplace carries you to any hearth you have visited. Sold at every Floo fireplace."
+msgid "A pinch thrown into a Hearthway fireplace carries you to any hearth you have visited. Sold at every Hearthway fireplace."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "A battered boot enchanted as a Portkey. Right-click to set it down and choose where it goes: for ten seconds your party may grab hold, then everyone holding on is carried there together."
+msgid "A battered boot enchanted as a Waylink. Right-click to set it down and choose where it goes: for ten seconds your party may grab hold, then everyone holding on is carried there together."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5412,23 +5404,23 @@ msgid "An iron key to the Trial Hall. The party leader spends keys at the gate t
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Forbidden Corridor Key"
+msgid "Sealed Wing Key"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "A brass key that fits the locked third-floor door. The party leader spends keys at the gate to open its Very Hard (1 key) and Legendary (3 keys) runs. Found in Hard runs, sold for seals."
+msgid "A brass key that fits the door of the sealed wing. The party leader spends keys at the gate to open its Very Hard (1 key) and Legendary (3 keys) runs. Found in Hard runs, sold for seals."
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
-msgid "Drowned Inferius"
+msgid "Drowned One"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
-msgid "Acromantula"
+msgid "Black Weaver"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
-msgid "Venomfang Acromantula"
+msgid "Venomfang Weaver"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
@@ -5436,7 +5428,7 @@ msgid "Broodguard"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
-msgid "Dark Snatcher"
+msgid "Dark Bandit"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
@@ -5448,10 +5440,6 @@ msgid "Mountain Troll"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
-msgid "Cornish Pixie"
-msgstr ""
-
-#: addons/hpmmo_sim/data/mobs.json
 msgid "Enchanted Armour"
 msgstr ""
 
@@ -5460,23 +5448,23 @@ msgid "Cursed Armour Commander"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
-msgid "Devil's Snare"
+msgid "Strangling Vine"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
 msgid "Snare Vine"
 msgstr ""
 
-#: addons/hpmmo_sim/data/mobs.json addons/hpmmo_sim/data/spawn_tables.json
-msgid "Fluffy"
+#: addons/hpmmo_sim/data/mobs.json addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
+msgid "Threehead"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
-msgid "Fluffy's Head"
+msgid "Threehead's Head"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
-msgid "Inferius Lake Warden"
+msgid "Drowned Warden of Lunra"
 msgstr ""
 
 #: addons/hpmmo_sim/data/mobs.json
@@ -5512,11 +5500,11 @@ msgid "Forest Edge"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
-msgid "Snatcher Woods"
+msgid "Bandit Woods"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
-msgid "Acromantula Thicket"
+msgid "Weaver Thicket"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
@@ -5556,7 +5544,7 @@ msgid "Eastern Road"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
-msgid "Hogsmeade Road"
+msgid "Orvell Road"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
@@ -5596,7 +5584,7 @@ msgid "Eastern Moor"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
-msgid "Hogsmeade Heights"
+msgid "Orvell Heights"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
@@ -5632,7 +5620,7 @@ msgid "Grak, Mountain Troll Chieftain"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json addons/hpmmo_sim/data/quests.json
-msgid "The Azkaban Warden"
+msgid "The Morhal Warden"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json
@@ -5648,7 +5636,7 @@ msgid "Brood Guardian"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json
-msgid "Blackweb Queen"
+msgid "Web Mother"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spawn_tables.json
@@ -5656,11 +5644,11 @@ msgid "Webbound Seal Stone"
 msgstr ""
 
 #: addons/hpmmo_sim/data/maps.json addons/hpmmo_sim/data/dungeons.json
-msgid "The Queen's Lair"
+msgid "The Web Mother's Lair"
 msgstr ""
 
 #: addons/hpmmo_sim/data/maps.json
-msgid "Hogwarts Entrance"
+msgid "Castle Entrance"
 msgstr ""
 
 #: addons/hpmmo_sim/data/maps.json
@@ -5672,11 +5660,11 @@ msgid "the Trial Hall"
 msgstr ""
 
 #: addons/hpmmo_sim/data/maps.json
-msgid "the Forbidden Corridor"
+msgid "the Sealed Wing"
 msgstr ""
 
 #: addons/hpmmo_sim/data/maps.json
-msgid "the Queen's Lair"
+msgid "the Web Mother's Lair"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
@@ -5688,7 +5676,7 @@ msgid "Quick wand flick releasing a sparkling bolt of magic."
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Stupefy"
+msgid "Stun Bolt"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
@@ -5696,15 +5684,15 @@ msgid "Stunning spell. Hits target, deals high damage and stuns for up to 1.8 se
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Incendio"
+msgid "Flame Wave"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Roaring cone of magical fire. Blast damage to everything in the cone, then burns over 3 seconds. Extra damage against Inferi."
+msgid "Roaring cone of magical fire. Blast damage to everything in the cone, then burns over 3 seconds. Extra damage against Drowned Ones."
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Bombarda"
+msgid "Shockwave"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
@@ -5712,7 +5700,7 @@ msgid "Detonates a violent concussive shockwave. Heavy AOE damage; enemies in th
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Expelliarmus"
+msgid "Disarm"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
@@ -5731,16 +5719,12 @@ msgstr ""
 msgid "Ultimate star sorcery. Calls down a falling star that bursts into a violet ring of starlight, scorching everything in a wide blast radius; its shards leave every enemy hit bleeding for 4 seconds."
 msgstr ""
 
-#: addons/hpmmo_sim/data/spells.json addons/hpmmo_sim/data/quests.json
-msgid "Expecto Patronum"
+#: addons/hpmmo_sim/data/spells.json
+msgid "Calls down a star-hawk of silver light that dives through a wide cone. Pallids take triple damage and the star-hawk breaks a Pallid's attack, soul-drain included; everything it passes through is slowed by 40% for 3 seconds. Requires level 40."
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
-msgid "Conjures a silver stag that charges through a wide cone. Dementors take triple damage and the stag breaks a dementor's attack, kiss included; everything it charges through is slowed by 40% for 3 seconds. Requires level 40."
-msgstr ""
-
-#: addons/hpmmo_sim/data/spells.json
-msgid "Glacius"
+msgid "Frost Grip"
 msgstr ""
 
 #: addons/hpmmo_sim/data/spells.json
@@ -5772,7 +5756,7 @@ msgid "Creatures below 30% health hit 50% harder and move faster."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "Protego Horribilis"
+msgid "Ward Shield Horribilis"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
@@ -5788,7 +5772,7 @@ msgid "Slain creatures burst two seconds after death - step out of the ring."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "Dementor's Chill"
+msgid "Pallid's Chill"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
@@ -5860,7 +5844,7 @@ msgid "The trial is complete. Claim your reward - the way out opens behind the a
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "The third-floor corridor is out of bounds... something is buzzing."
+msgid "The castle's sealed wing is out of bounds... something is buzzing."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
@@ -5884,11 +5868,11 @@ msgid "The commander falls. A damp stair leads down."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "Devil's Snare! Burn its vines - Incendio!"
+msgid "Strangling Vine! Burn its vines - Flame Wave!"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "Pixies pour out of the Snare's roots!"
+msgid "Fidgetlings pour out of the Snare's roots!"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
@@ -5896,27 +5880,27 @@ msgid "The Snare withers. Music drifts from below..."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "Pixies swarm the stair!"
+msgid "Fidgetlings swarm the stair!"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "Fluffy wakes! Play the harp to lull it to sleep."
+msgid "Threehead wakes! Ring the sleep chime to lull it."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "Pixies stream out from under Fluffy's paws!"
+msgid "Fidgetlings stream out from under Threehead's paws!"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "Fluffy collapses. Clear every creature left in the corridor to open the trapdoor."
+msgid "Threehead collapses. Clear every creature left in the corridor to open the stone hatch."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "The corridor is silent. The trapdoor swings open - claim your reward."
+msgid "The corridor is silent. The stone hatch swings open - claim your reward."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "Fluffy's sleeping breath rolls down the stair - brace yourself!"
+msgid "Threehead's sleeping breath rolls down the stair - brace yourself!"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
@@ -5944,7 +5928,7 @@ msgid "The guardian falls. The Queen's lair lies open below."
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
-msgid "The Blackweb Queen rises from her nest!"
+msgid "The Web Mother rises from her nest!"
 msgstr ""
 
 #: addons/hpmmo_sim/data/dungeons.json
@@ -5972,11 +5956,7 @@ msgid "The lair falls silent. Her hoard waits in the nest."
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json
-msgid "Castle Courtyard"
-msgstr ""
-
-#: addons/hpmmo_sim/data/travel.json
-msgid "Hogsmeade Square"
+msgid "Orvell Square"
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json
@@ -5988,7 +5968,7 @@ msgid "Blackweb Camp"
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json
-msgid "the Room of Requirement"
+msgid "the Wishing Room"
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json
@@ -6000,7 +5980,7 @@ msgid "the Egg Caverns"
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json
-msgid "the One-Eyed Witch"
+msgid "the Stone Raven"
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json
@@ -6008,11 +5988,11 @@ msgid "Tap the witch's hump - Dissendium!"
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json
-msgid "Honeydukes' cellar, Hogsmeade"
+msgid "the sweetshop cellar, Orvell"
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json
-msgid "Climb down the cellar trapdoor"
+msgid "Climb down the cellar hatch"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6020,7 +6000,7 @@ msgid "First Year"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Settle in at Hogwarts: your cloak, your first spells, your first broom."
+msgid "Settle in at Kaf Castle, raised over the shard of the fallen World-Star Ithrel: your cloak, your first spells, your first broom."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6028,15 +6008,15 @@ msgid "The Forest Edge"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The creatures at the forest edge grow bolder; learn the forge and the trial."
+msgid "Darkened shards fall into the Raven Woods and the creatures grow bolder; learn the forge and the trial."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Roads to Hogsmeade"
+msgid "Roads to Orvell"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Snatchers prowl the roads; the village needs a wand it can trust."
+msgid "Bandits prowl the roads; the village needs a wand it can trust."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6044,7 +6024,7 @@ msgid "Crypts and Trolls"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Something stirs in the crypts and the trolls come down from their hollow."
+msgid "The dead stir in the crypts, the trolls come down from their hollow - and an old name turns up in the records: the Ash Priest."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6052,7 +6032,7 @@ msgid "Barrows and Webs"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The dead rise in the barrows and the Matriarch spins in her hollow."
+msgid "The dead rise in the barrows; deep in the caverns the Web Mother broods on a shard the Ash Priest gave her."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6060,11 +6040,11 @@ msgid "The Moors"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Trolls and dark wizards hold the moors above Hogsmeade."
+msgid "Trolls and the Ash Priest's dark wizards hold the moors above Orvell."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The third-floor corridor is out of bounds - and something guards it."
+msgid "The castle's sealed wing hides a piece of an old gate to another realm - and something guards it."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6072,7 +6052,7 @@ msgid "Stone and Storm"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Mountain trolls gather under Grak at the Stone Circle Summit."
+msgid "Mountain trolls gather under Grak around a Dark Shard on the Stone Circle Summit."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6080,7 +6060,7 @@ msgid "The Long Mist"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Dementors drift in from the shore; only a Patronus will hold them back."
+msgid "The mist of Morhal rolls in from the shore and the Pallids with it; only the Light of Ithrel will hold them back."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6088,11 +6068,11 @@ msgid "First-Year Orientation"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Speak with Professor Fig by the fountain"
+msgid "Speak with Master Teral Venn by the fountain"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Professor Fig waits beside the courtyard fountain (the bobbing gold arrow). Walk up and click him or press F to talk."
+msgid "Master Teral Venn waits beside the courtyard fountain (the bobbing gold arrow). Walk up and click him or press F to talk."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6104,7 +6084,7 @@ msgid "Wear the Woolen Traveller's Cloak"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Open your bag with I and right-click the cloak Professor Fig gave you. It costs a little speed and buys a lot of armour."
+msgid "Open your bag with I and right-click the cloak Master Teral Venn gave you. It costs a little speed and buys a lot of armour."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6124,7 +6104,7 @@ msgid "Spiders at the Gate"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 6 Acromantulas"
+msgid "Defeat 6 Black Weavers"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6136,11 +6116,11 @@ msgid "Restless Dead"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 6 Inferi"
+msgid "Defeat 6 Drowned Ones"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Inferi stalk the Forest Edge past Borin's hut. Fire (Incendio) hurts them twice as much."
+msgid "Drowned Ones stalk the Forest Edge past Borin's hut. Fire (Flame Wave) hurts them twice as much."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6156,7 +6136,7 @@ msgid "Thinning the Brood"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 10 Acromantulas"
+msgid "Defeat 10 Black Weavers"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6168,7 +6148,7 @@ msgid "Through the Great Doors"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Enter Hogwarts Castle"
+msgid "Enter Kaf Castle"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6180,19 +6160,19 @@ msgid "Your First Broom"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Collect your broom from Professor Flitwick"
+msgid "Collect your broom from Flight Master Kaelen Rook"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "At level 5 every student gets a broom. Professor Flitwick waits at the castle approach."
+msgid "At level 5 every student gets a broom. Flight Master Kaelen Rook waits at the castle approach."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Quidditch Tryouts"
+msgid "Skyring Tryouts"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Fly to the Quidditch Pitch on your broom"
+msgid "Fly to the Skyring Pitch on your broom"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6204,23 +6184,23 @@ msgid "Ash and Bone"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 12 Inferi"
+msgid "Defeat 12 Drowned Ones"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The Inferi gather again at the Forest Edge and in Greenhouse Meadow."
+msgid "The Drowned Ones gather again at the Forest Edge and in Greenhouse Meadow."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Ollivander's Forge"
+msgid "Kestrin's Forge"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Speak with Ollivander"
+msgid "Speak with Kestrin"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Ollivander works his anvil in the courtyard. He can make a wand stronger, at a price."
+msgid "Kestrin works his anvil in the courtyard. He can make a wand stronger, at a price."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6228,11 +6208,11 @@ msgid "A Stronger Wand"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Refine your wand once at Ollivander"
+msgid "Refine your wand once at Kestrin"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Press O to open Ollivander's workshop, drag your wand onto the anvil and refine it with Phoenix Ash and Galleons."
+msgid "Press O to open Kestrin's workshop, drag your wand onto the anvil and refine it with Velkar Ash and Oril."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6240,7 +6220,7 @@ msgid "The Eastern Road"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 12 Acromantulas"
+msgid "Defeat 12 Black Weavers"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6252,7 +6232,7 @@ msgid "Woven Magic"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Enchant an item at Ollivander"
+msgid "Enchant an item at Kestrin"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6264,15 +6244,15 @@ msgid "The Long Road Home"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 14 Inferi"
+msgid "Defeat 14 Drowned Ones"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Inferi wander onto the Eastern Road at dusk. Keep the road open."
+msgid "Drowned Ones wander onto the Eastern Road at dusk. Keep the road open."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 16 Acromantulas"
+msgid "Defeat 16 Black Weavers"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6284,11 +6264,11 @@ msgid "Shatter the Darkness"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Help destroy a Dark Monolith"
+msgid "Help destroy a Dark Shard"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Dark Monoliths fall in the western forests: at the Forest Edge past Borin's hut, in the Acromantula Thicket beyond it, in Snatcher Woods to the north-west and in Crypt Hollow far to the west. Close by, a green light rises over the trees. Break one with others before its waves overrun you."
+msgid "The Ash Priest drags darkened star shards out of the Void and they fall in the western forests: at the Forest Edge past Borin's hut, in the Weaver Thicket beyond it, in Bandit Woods to the north-west and in Crypt Hollow far to the west. Close by, a green light rises over the trees. Break one with others before its waves overrun you."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6316,51 +6296,51 @@ msgid "Your new wand rolls a far higher Attack and Magic Attack Value. Equip it 
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Snatchers on the Road"
+msgid "Bandits on the Road"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 10 Snatchers"
+msgid "Defeat 10 Bandits"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Snatchers waylay travellers on the Hogsmeade Road. They cast back - keep your distance."
+msgid "Bandits waylay travellers on the Orvell Road. They cast back - keep your distance."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The Three Broomsticks"
+msgid "The Red Lantern"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Speak with Madam Rosmerta in Hogsmeade"
+msgid "Speak with Bessa Tull in Orvell"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Fly east along the Hogsmeade Road. Madam Rosmerta knows every rumour in the valley."
+msgid "Fly east along the Orvell Road. Bessa Tull knows every rumour in the valley."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 15 Acromantulas"
+msgid "Defeat 15 Black Weavers"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The woods behind the Quidditch Pitch are thick with webs."
+msgid "The woods behind the Skyring Pitch are thick with webs."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 15 Inferi"
+msgid "Defeat 15 Drowned Ones"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Inferi crawl out of the Black Lake at the Lakeside Glade."
+msgid "Drowned Ones crawl out of Lake Lunra at the Lakeside Glade."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 14 Snatchers"
+msgid "Defeat 14 Bandits"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The snatchers have a camp in the woods north-west of the castle. Drive them out."
+msgid "The bandits have a camp in the woods north-west of the castle. Drive them out."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6372,7 +6352,7 @@ msgid "Visit the Lakeside Glade"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Borin wants to know how far the Inferi have spread along the shore."
+msgid "Borin wants to know how far the Drowned Ones have spread along the shore."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6380,7 +6360,7 @@ msgid "Webs in the Glade"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 18 Acromantulas"
+msgid "Defeat 18 Black Weavers"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6396,7 +6376,7 @@ msgid "Refine any item twice"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Ollivander can refine cloaks, accessories and brooms as well as wands."
+msgid "Kestrin can refine cloaks, accessories and brooms as well as wands."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6404,19 +6384,19 @@ msgid "Breaking the Ring"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 18 Snatchers"
+msgid "Defeat 18 Bandits"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Rosmerta has heard the snatchers answer to a captain. Weaken them before he moves."
+msgid "Bessa has heard the bandits answer to a captain. Weaken them before he moves."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 18 Inferi"
+msgid "Defeat 18 Drowned Ones"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Deeper in the forest an old crypt has opened. The Inferi pour out of Crypt Hollow."
+msgid "Deeper in the forest an old crypt has opened. The Drowned Ones pour out of Crypt Hollow."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6424,11 +6404,11 @@ msgid "Records of the Crypt"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Speak with Madam Pince"
+msgid "Speak with Archivist Emrel Sav"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Madam Pince keeps the records of every grave on the grounds. She waits at the castle approach."
+msgid "Archivist Emrel Sav keeps the records of every grave in the valley - and one old entry names the Ash Priest, who once tried to open the gate of Morhal. She waits at the castle approach."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6444,19 +6424,19 @@ msgid "Sealing the Crypt"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 20 Inferi"
+msgid "Defeat 20 Drowned Ones"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Keep the Inferi in Crypt Hollow from reaching the forest paths."
+msgid "Keep the Drowned Ones in Crypt Hollow from reaching the forest paths."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 16 Snatchers"
+msgid "Defeat 16 Bandits"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The snatchers fell back into the Dark Thicket, far to the west."
+msgid "The bandits fell back into the Dark Thicket, far to the west."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6472,7 +6452,7 @@ msgid "The trolls beat drums every night. Silence them."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 20 Acromantulas"
+msgid "Defeat 20 Black Weavers"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6484,7 +6464,7 @@ msgid "The Southern Barrows"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 22 Inferi"
+msgid "Defeat 22 Drowned Ones"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6500,11 +6480,11 @@ msgid "Scout the Smugglers' Camp"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Find the snatcher captain's camp deep in the northern woods, past Snatcher Woods. Do not engage alone."
+msgid "Find the bandit captain's camp deep in the northern woods, past Bandit Woods. Do not engage alone."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The Snatcher Captain"
+msgid "The Bandit Chief"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6512,7 +6492,7 @@ msgid "Defeat the captain at the Smugglers' Camp"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Gather friends and defeat the Snatcher Captain in his camp."
+msgid "Gather friends and defeat the Bandit Chief in his camp."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6520,11 +6500,11 @@ msgid "Last of the Hollow"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Without the snatchers' coin the trolls of the hollow will scatter. Finish them."
+msgid "Without the bandits' coin the trolls of the hollow will scatter. Finish them."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 20 Snatchers"
+msgid "Defeat 20 Bandits"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6536,11 +6516,11 @@ msgid "Barrow Watch"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 24 Inferi"
+msgid "Defeat 24 Drowned Ones"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Hold the Southern Barrows while Madam Pince searches her records."
+msgid "Hold the Southern Barrows while Archivist Emrel Sav searches her records."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6548,7 +6528,7 @@ msgid "Brood of the Woods"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 22 Acromantulas"
+msgid "Defeat 22 Black Weavers"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6568,7 +6548,7 @@ msgid "Enchant items twice"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Ollivander says no one should face the Matriarch with bare robes."
+msgid "Kestrin says no one should face the Black Widow with bare robes."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6576,19 +6556,19 @@ msgid "Ridge Ambush"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 22 Snatchers"
+msgid "Defeat 22 Bandits"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The snatchers ambush anyone who climbs the Ridge Path."
+msgid "The bandits ambush anyone who climbs the Ridge Path."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The Matriarch's Guard"
+msgid "The Black Widow's Guard"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 26 Acromantulas"
+msgid "Defeat 26 Black Weavers"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6600,19 +6580,19 @@ msgid "Find Spider Hollow"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The Matriarch nests in Spider Hollow in the far south-west, beyond the Spider Woods."
+msgid "The Black Widow nests in Spider Hollow in the far south-west, beyond the Spider Woods."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The Matriarch"
+msgid "The Black Widow"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat the Acromantula Matriarch"
+msgid "Defeat the Black Widow"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Bring a party. The Matriarch's bite poisons and her brood answers her call."
+msgid "Bring a party. The Black Widow's bite poisons and her brood answers her call."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6620,11 +6600,11 @@ msgid "Gate of Bones"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 26 Inferi"
+msgid "Defeat 26 Drowned Ones"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "With the Matriarch gone, Madam Pince can finally seal the Crypt Gate."
+msgid "With the Black Widow gone, Archivist Emrel Sav can finally seal the Crypt Gate."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6636,7 +6616,7 @@ msgid "Refine any item three times"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The moors are harder still. Ollivander will not let you go up there half-made."
+msgid "The moors are harder still. Kestrin will not let you go up there half-made."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6652,11 +6632,11 @@ msgid "Moorland Orders"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Speak with Professor Flitwick"
+msgid "Speak with Flight Master Kaelen Rook"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Flitwick is organising the students who go up to the moors."
+msgid "Kaelen Rook is organising the students who go up to the moors."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6668,7 +6648,7 @@ msgid "Push the forest trolls off the Western Moor."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The heights above Hogsmeade are crawling with dark wizards."
+msgid "The heights above Orvell are crawling with dark wizards."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6676,7 +6656,7 @@ msgid "Watchers on the Heights"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 24 Snatchers"
+msgid "Defeat 24 Bandits"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6688,11 +6668,11 @@ msgid "Clearing the Heights"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 26 Snatchers"
+msgid "Defeat 26 Bandits"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "One last push and Hogsmeade can sleep again."
+msgid "One last push and Orvell can sleep again."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6736,23 +6716,23 @@ msgid "Out of Bounds"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Speak with Madam Pince about the third floor"
+msgid "Speak with Archivist Emrel Sav about the sealed wing"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Madam Pince has found a note: the third-floor corridor is out of bounds - and guarded."
+msgid "Archivist Emrel Sav has found a note: the sealed wing hides a piece of an old gate to another realm - and it is guarded."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Pests of the Third Floor"
+msgid "Pests of the Sealed Wing"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 8 Cornish Pixies"
+msgid "Defeat 8 Fidgetlings"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Enter the Forbidden Corridor from the castle. The pixies swarm and lift you off your feet."
+msgid "Enter the Sealed Wing from the castle. The fidgetlings swarm and lift you off your feet."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6780,7 +6760,7 @@ msgid "The commander of the armour stands at the corridor's first gate."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Burn the root of the Devil's Snare"
+msgid "Burn the root of the Strangling Vine"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6788,27 +6768,23 @@ msgid "Fire is the answer. Burn the vines, then the root."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "More Pixies"
+msgid "More Fidgetlings"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 10 Cornish Pixies"
+msgid "Defeat 10 Fidgetlings"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The pixies on the stairs beyond the snare are worse than the first lot."
+msgid "The fidgetlings on the stairs beyond the snare are worse than the first lot."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The Three-Headed Dog"
+msgid "Defeat Threehead"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat Fluffy"
-msgstr ""
-
-#: addons/hpmmo_sim/data/quests.json
-msgid "Use the harp to lull the heads to sleep, then strike while they doze."
+msgid "Ring the sleep chime to lull the heads, then strike while they doze."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6816,11 +6792,11 @@ msgid "The Corridor Cleared"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Complete the Forbidden Corridor"
+msgid "Complete the Sealed Wing"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Run the corridor from the pixies to the trapdoor in one go."
+msgid "Run the corridor from the fidgetlings to the stone hatch in one go."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6828,7 +6804,7 @@ msgid "A Wand for the Storm"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Ollivander has finished a wand worthy of what comes next."
+msgid "Kestrin has finished a wand worthy of what comes next."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6864,7 +6840,7 @@ msgid "Storm Riders"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 28 Snatchers"
+msgid "Defeat 28 Bandits"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6872,7 +6848,7 @@ msgid "The dark wizards ride the storm clouds over the moor."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Phoenix Weave"
+msgid "Velkar Weave"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6880,7 +6856,7 @@ msgid "Enchant items three times"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "A Phoenix Regalia deserves its weave. Make the most of it."
+msgid "A Velkar Regalia deserves its weave. Make the most of it."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6888,7 +6864,7 @@ msgid "Climb to the Stone Circle Summit"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Grak, the Mountain Troll Chieftain, waits at the summit."
+msgid "Grak, the Mountain Troll Chieftain, waits at the summit, where his clans worship a fallen Dark Shard."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6928,11 +6904,11 @@ msgid "Stones Still Standing"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Destroy a Dark Monolith or a Webbound Seal Stone"
+msgid "Destroy a Dark Shard or a Webbound Seal Stone"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Grak is gone, but the stones keep falling. Break a Dark Monolith in the western forests or a Webbound Seal Stone in the Blackweb Caverns, with others."
+msgid "Grak is gone, but the Ash Priest keeps pulling shards down. Break a Dark Shard in the western forests or a Webbound Seal Stone in the Blackweb Caverns, with others."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6940,15 +6916,15 @@ msgid "Masterwork"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Dementors are coming. Ollivander wants every piece you own at its best."
+msgid "Pallids are coming. Kestrin wants every piece you own at its best."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Speak with Professor Fig about the Patronus"
+msgid "Speak with Master Teral Venn about the Light of Ithrel"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Professor Fig says Dementors fear nothing but the Patronus Charm. Learn Expecto Patronum in your spell book (V) - it opens at level 40."
+msgid "Master Teral Venn says Pallids fear nothing but the Light of Ithrel, a guardian spirit drawn from the World-Star's light. Learn it in your spell book (V) - it opens at level 40."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6956,15 +6932,15 @@ msgid "The Misty Shore"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 10 Dementors"
+msgid "Defeat 10 Pallids"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Dementors drift in from the Misty Shore. Their aura stops your health from recovering."
+msgid "Pallids drift in from the Misty Shore. Their aura stops your health from recovering."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 12 Dementors"
+msgid "Defeat 12 Pallids"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6976,7 +6952,7 @@ msgid "Cold Platform"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 12 more Dementors"
+msgid "Defeat 12 more Pallids"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -6988,7 +6964,7 @@ msgid "Shoreline Vigil"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 14 Dementors"
+msgid "Defeat 14 Pallids"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -7000,7 +6976,7 @@ msgid "Warmth Against the Cold"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Ollivander has a theory about weaves that resist despair."
+msgid "Kestrin has a theory about weaves that resist despair."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -7024,7 +7000,7 @@ msgid "Shades of the Barrens"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 16 Dementors"
+msgid "Defeat 16 Pallids"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -7036,11 +7012,11 @@ msgid "Lights in the Fog"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 16 more Dementors"
+msgid "Defeat 16 more Pallids"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Every Patronus you cast lights the way for someone else."
+msgid "Every Light of Ithrel you cast lights the way for someone else."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -7052,7 +7028,7 @@ msgid "The Last Polish"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Ollivander wants one more look at your gear before the end."
+msgid "Kestrin wants one more look at your gear before the end."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -7060,11 +7036,11 @@ msgid "Marsh Wardens"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 18 Dementors"
+msgid "Defeat 18 Pallids"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Dementors circle a barrow at the far end of the marsh."
+msgid "Pallids circle a barrow at the far end of the marsh."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -7072,7 +7048,7 @@ msgid "Breaking the Circle"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 18 more Dementors"
+msgid "Defeat 18 more Pallids"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -7084,7 +7060,7 @@ msgid "The Cold Heart"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 20 Dementors"
+msgid "Defeat 20 Pallids"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -7096,7 +7072,7 @@ msgid "Find Warden's Barrow"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The Azkaban Warden sleeps in a barrow in the marsh."
+msgid "The Morhal Warden sleeps in a barrow in the marsh."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -7104,7 +7080,7 @@ msgid "Before the Storm"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat 22 Dementors"
+msgid "Defeat 22 Pallids"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -7116,15 +7092,15 @@ msgid "Final Preparations"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Speak with Professor Fig"
+msgid "Speak with Master Teral Venn"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Professor Fig has one last piece of advice before you face the Warden."
+msgid "Master Teral Venn has one last piece of advice before you face the Warden of Morhal, the jailer the Ash Priest turned to his side."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Defeat the Azkaban Warden"
+msgid "Defeat the Morhal Warden"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
@@ -7136,15 +7112,15 @@ msgid "Graduation"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Report your victory to Professor Fig"
+msgid "Report your victory to Master Teral Venn"
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "The valley is safe - for now. Professor Fig is waiting to congratulate you."
+msgid "The valley is safe - for now. The Ash Priest has fled through a rift into another realm. Master Teral Venn is waiting to congratulate you."
 msgstr ""
 
 #: addons/hpmmo_sim/data/quests.json
-msgid "Quidditch Pitch"
+msgid "Skyring Pitch"
 msgstr ""
 
 #: addons/hpmmo_sim/data/combat.json
@@ -7260,7 +7236,7 @@ msgid "Experience Gained"
 msgstr ""
 
 #: addons/hpmmo_sim/data/combat.json
-msgid "Galleons Found"
+msgid "Oril Found"
 msgstr ""
 
 #: addons/hpmmo_sim/data/combat.json
@@ -7312,11 +7288,11 @@ msgid "Adept"
 msgstr ""
 
 #: addons/hpmmo_sim/data/combat.json
-msgid "Prefect"
+msgid "Sentinel"
 msgstr ""
 
 #: addons/hpmmo_sim/data/combat.json
-msgid "Head Prefect"
+msgid "House Captain"
 msgstr ""
 
 #: addons/hpmmo_sim/data/combat.json
@@ -7332,7 +7308,15 @@ msgid "Bravery: +15% Fire Spell Damage & +10% Critical Strike Chance"
 msgstr ""
 
 #: data/json/houses.json
+msgid "From my ashes I rise again."
+msgstr ""
+
+#: data/json/houses.json
 msgid "Ambition: +20% Dark Magic Damage & 10% Life Leech on Hit"
+msgstr ""
+
+#: data/json/houses.json
+msgid "Knowledge runs deeper than venom."
 msgstr ""
 
 #: data/json/houses.json
@@ -7340,7 +7324,15 @@ msgid "Wisdom: -20% Spell Cooldowns & +25% Max Mana Pool"
 msgstr ""
 
 #: data/json/houses.json
+msgid "We arrive before the wind."
+msgstr ""
+
+#: data/json/houses.json
 msgid "Loyalty: +25% Max Health & +15% Damage Reduction"
+msgstr ""
+
+#: data/json/houses.json
+msgid "Together we hold."
 msgstr ""
 
 #: assets/castle/castle_layout.json
@@ -7368,11 +7360,11 @@ msgid "East Corridor"
 msgstr ""
 
 #: assets/castle/castle_layout.json
-msgid "Transfiguration"
+msgid "Transformation"
 msgstr ""
 
 #: assets/castle/castle_layout.json
-msgid "Defence Against the Dark Arts"
+msgid "Warding"
 msgstr ""
 
 #: assets/castle/castle_layout.json
@@ -7384,7 +7376,11 @@ msgid "Seventh-floor Corridor"
 msgstr ""
 
 #: assets/castle/castle_layout.json
-msgid "Room of Requirement"
+msgid "Velkar House"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Wishing Room"
 msgstr ""
 
 #: assets/castle/castle_layout.json
@@ -7392,7 +7388,11 @@ msgid "Library"
 msgstr ""
 
 #: assets/castle/castle_layout.json
-msgid "Owlery"
+msgid "Ilvane House"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Rookery"
 msgstr ""
 
 #: assets/castle/castle_layout.json
@@ -7416,7 +7416,15 @@ msgid "Potions"
 msgstr ""
 
 #: assets/castle/castle_layout.json
+msgid "Nisera House"
+msgstr ""
+
+#: assets/castle/castle_layout.json
 msgid "Kitchens"
+msgstr ""
+
+#: assets/castle/castle_layout.json
+msgid "Torvan House"
 msgstr ""
 
 #: data/json/quests.json
@@ -7424,7 +7432,7 @@ msgid "Wand Awakening"
 msgstr ""
 
 #: data/json/quests.json
-msgid "Speak with Ollivander in the courtyard and practice casting your Basic Cast and Stupefy on the Training Dummies."
+msgid "Speak with Kestrin in the courtyard and practice casting your Basic Cast and Stun Bolt on the Training Dummies."
 msgstr ""
 
 #: data/json/quests.json
@@ -7432,13 +7440,13 @@ msgid "The Whispering Woods"
 msgstr ""
 
 #: data/json/quests.json
-msgid "The Forbidden Forest is crawling with venomous Acromantulas. Defeat 5 Acromantulas to protect the castle grounds."
+msgid "The Raven Woods is crawling with venomous Black Weavers. Defeat 5 Black Weavers to protect the castle grounds."
 msgstr ""
 
 #: data/json/quests.json
-msgid "Shatter the Dark Monolith"
+msgid "Shatter the Dark Shard"
 msgstr ""
 
 #: data/json/quests.json
-msgid "A corrupted Dark Monolith has emerged near the Black Lake. Gather other wizards, shatter its obsidian core, and collect the ancient drops."
+msgid "A corrupted Dark Shard has emerged near Lake Lunra. Gather other wizards, shatter its obsidian core, and collect the ancient drops."
 msgstr ""
