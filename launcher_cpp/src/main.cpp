@@ -154,8 +154,8 @@ void LoadAssets() {
     DWORD size = 0;
     if (LoadResourceBytes(IDR_FONT_TITLE, &data, &size)) g_Fonts->AddMemoryFont(data, (INT)size);
     if (LoadResourceBytes(IDR_FONT_BODY, &data, &size)) g_Fonts->AddMemoryFont(data, (INT)size);
-    g_TitleFamily = FamilyOrFallback(L"Cinzel Decorative", L"Georgia");
-    g_BodyFamily = FamilyOrFallback(L"Marcellus", L"Georgia");
+    g_TitleFamily = FamilyOrFallback(L"Literata", L"Georgia");
+    g_BodyFamily = FamilyOrFallback(L"Literata Medium", L"Georgia");
 
     g_Background = LoadResourceBitmap(IDR_BACKGROUND);
     g_Logo = LoadResourceBitmap(IDR_LOGO);
@@ -253,7 +253,7 @@ Layout ComputeLayout(int cw, int ch) {
     L.progress = RectF(SF(48), L.h - SF(58), L.play.X - SF(48) - SF(28), SF(10));
     L.repair = RectF(SF(48), L.h - SF(34), SF(150), SF(22));
     L.pill = RectF(SF(52), SF(262), SF(230), SF(34));
-    L.notes = RectF(SF(48), SF(316), SF(390), SF(100));
+    L.notes = RectF(SF(48), SF(316), SF(390), SF(110));
     return L;
 }
 
@@ -429,6 +429,9 @@ void Paint(HDC hdc, int cw, int ch) {
         std::wstring notes = s.notes.empty() ? L"Bu sürüm için not eklenmemiş." : s.notes;
         StringFormat fmt;
         fmt.SetTrimming(StringTrimmingEllipsisWord);
+        // whole lines only: without it GDI+ draws the top half of a line that
+        // does not fit below the last one
+        fmt.SetFormatFlags(StringFormatFlagsLineLimit);
         SolidBrush tb(Pal::Text);
         RectF nb(L.notes.X + SF(18), L.notes.Y + SF(38), L.notes.Width - SF(32), L.notes.Height - SF(48));
         g.DrawString(notes.c_str(), (INT)notes.size(), body, nb, &fmt, &tb);

@@ -115,7 +115,7 @@ Layout ComputeLayout(const View& v, int cw, int ch) {
     L.progress = RectF(SF(v, 48), L.h - SF(v, 58), L.play.x - SF(v, 48) - SF(v, 28), SF(v, 10));
     L.repair = RectF(SF(v, 48), L.h - SF(v, 34), SF(v, 150), SF(v, 22));
     L.pill = RectF(SF(v, 52), SF(v, 262), SF(v, 230), SF(v, 34));
-    L.notes = RectF(SF(v, 48), SF(v, 316), SF(v, 390), SF(v, 100));
+    L.notes = RectF(SF(v, 48), SF(v, 316), SF(v, 390), SF(v, 110));
     return L;
 }
 

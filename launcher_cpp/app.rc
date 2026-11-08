@@ -12,8 +12,8 @@ IDI_MAIN ICON "assets/hpmmo.ico"
 // Embedded art and fonts: a lone HPMMO_Launcher.exe renders the full design.
 // Fonts are SIL OFL 1.1 (assets/OFL-*.txt).
 IDR_BACKGROUND RCDATA "assets/launcher_bg.jpg"
-IDR_FONT_TITLE RCDATA "assets/CinzelDecorative-Bold.ttf"
-IDR_FONT_BODY  RCDATA "assets/Marcellus-Regular.ttf"
+IDR_FONT_TITLE RCDATA "assets/Literata-Bold.ttf"
+IDR_FONT_BODY  RCDATA "assets/Literata-Medium.ttf"
 // The horizontal Thousand Realms logo drawn as the crest.
 IDR_LOGO       RCDATA "assets/thousand_realms_logo.png"
 

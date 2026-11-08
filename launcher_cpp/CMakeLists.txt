@@ -112,8 +112,8 @@ if(NOT WIN32)
     set(HPMMO_EMBEDDED ${CMAKE_CURRENT_BINARY_DIR}/embedded_assets.cpp)
     hpmmo_embed_assets(${HPMMO_EMBEDDED}
         Background ${CMAKE_CURRENT_SOURCE_DIR}/assets/launcher_bg.jpg
-        FontTitle ${CMAKE_CURRENT_SOURCE_DIR}/assets/CinzelDecorative-Bold.ttf
-        FontBody ${CMAKE_CURRENT_SOURCE_DIR}/assets/Marcellus-Regular.ttf
+        FontTitle ${CMAKE_CURRENT_SOURCE_DIR}/assets/Literata-Bold.ttf
+        FontBody ${CMAKE_CURRENT_SOURCE_DIR}/assets/Literata-Medium.ttf
         IconPng ${CMAKE_CURRENT_SOURCE_DIR}/assets/hpmmo_256.png
         LogoPng ${CMAKE_CURRENT_SOURCE_DIR}/assets/thousand_realms_logo.png)
 
