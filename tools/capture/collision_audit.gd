@@ -14,7 +14,7 @@ extends Node
 ## top inside the mesh are invisible blockers. Results are grouped per mesh.
 ## Needs a window (headless builds no visuals).
 
-const ROOTS := ["HogwartsCastle", "Courtyard", "Sites", "BroomLanding"]
+const ROOTS := ["HogwartsCastle", "Courtyard", "Precinct", "Sites", "BroomLanding"]
 const VISUAL_LAYER := 1 << 19
 const WORLD_LAYER := 1
 ## Meshes nobody stands on or that are meant to be passed through.

@@ -773,6 +773,7 @@ scripts/world/grounds/grounds_courtyard.gd
 scripts/world/grounds/grounds_horizon.gd
 scripts/world/grounds/grounds_lake.gd
 scripts/world/grounds/grounds_layout.gd
+scripts/world/grounds/grounds_precinct.gd
 scripts/world/grounds/grounds_scatter.gd
 scripts/world/grounds/grounds_sites.gd
 scripts/world/grounds/pumpkin_mesh.gd
