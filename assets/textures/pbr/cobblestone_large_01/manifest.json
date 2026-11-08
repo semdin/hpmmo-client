@@ -1,0 +1,31 @@
+{
+ "id": "cobblestone-large-01",
+ "name": "Cobblestone Large 01",
+ "source_page": "https://polyhaven.com/a/cobblestone_large_01",
+ "author": "Rob Tuytel",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt in this folder (snapshot of https://polyhaven.com/license)",
+ "files": [
+  {
+   "file": "cobblestone_large_01_diff_2k.jpg",
+   "bytes": 2583728,
+   "sha256": "be510fb251393cad99fb234bed846e51d5dea2d1594ef20c4c0bd3ffe13455bd"
+  },
+  {
+   "file": "cobblestone_large_01_nor_gl_2k.jpg",
+   "bytes": 4129342,
+   "sha256": "a9714d16402df7b62172e28d6a3bbbf72228983417f49fff480f2de6fa8daf7e"
+  },
+  {
+   "file": "cobblestone_large_01_rough_2k.jpg",
+   "bytes": 1870413,
+   "sha256": "0e5e5ab09253cd30731657631d20cd1fb020586b0694b088ceea95c92d3ff5cf"
+  },
+  {
+   "file": "cobblestone_large_01_ao_2k.jpg",
+   "bytes": 1612861,
+   "sha256": "47b864e1127e318f6b48461903537036902a5dce69201eeb2908e90774b7d619"
+  }
+ ]
+}

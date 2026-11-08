@@ -1,0 +1,31 @@
+{
+ "id": "leafy-grass",
+ "name": "Leafy Grass",
+ "source_page": "https://polyhaven.com/a/leafy_grass",
+ "author": "Charlotte Baglioni",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt in this folder (snapshot of https://polyhaven.com/license)",
+ "files": [
+  {
+   "file": "leafy_grass_diff_2k.jpg",
+   "bytes": 4766204,
+   "sha256": "8e1c6d21365d4b89bc5a35ab664da98a78dbc3ab9ba6100474881c8619a5b113"
+  },
+  {
+   "file": "leafy_grass_nor_gl_2k.jpg",
+   "bytes": 6047262,
+   "sha256": "df0cf0ce96e653f033e5b934d5b12995464bda027aa53bd12e329be889aa9f45"
+  },
+  {
+   "file": "leafy_grass_rough_2k.jpg",
+   "bytes": 2274652,
+   "sha256": "34e1733bf4064b6950a575ff57e78c8b7ff71b63749eb48a49221bd65de6fb4f"
+  },
+  {
+   "file": "leafy_grass_ao_2k.jpg",
+   "bytes": 4175463,
+   "sha256": "bcce4368f6a1affe11b4a643e14cfed7dfb46abf6bb9e6a28a3b87c2de2ddb11"
+  }
+ ]
+}

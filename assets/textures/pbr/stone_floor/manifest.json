@@ -1,0 +1,31 @@
+{
+ "id": "stone-floor",
+ "name": "Stone Floor",
+ "source_page": "https://polyhaven.com/a/stone_floor",
+ "author": "Dimitrios Savva",
+ "license": "CC0-1.0 (Public Domain Dedication)",
+ "license_url": "https://polyhaven.com/license",
+ "license_statement_location": "license.txt in this folder (snapshot of https://polyhaven.com/license)",
+ "files": [
+  {
+   "file": "stone_floor_diff_2k.jpg",
+   "bytes": 3800807,
+   "sha256": "ce19d3cb1e683419b6a596e1baffbf2b429f970f8ddba81e391ad9a38f310ed8"
+  },
+  {
+   "file": "stone_floor_nor_gl_2k.jpg",
+   "bytes": 4090235,
+   "sha256": "978242067a8b6d421ea6ef12f7757f8ba137e21914c71b259502a4582daa0122"
+  },
+  {
+   "file": "stone_floor_rough_2k.jpg",
+   "bytes": 2080072,
+   "sha256": "cd8e7c6f7e7a9f483e45286b65c0ba7308bc943e7dc51ee9fd4532158cf44612"
+  },
+  {
+   "file": "stone_floor_ao_2k.jpg",
+   "bytes": 1994682,
+   "sha256": "6cce3abcf8221c7fa3ec6737de3512b2457fd0a95e909ac74d20f50b9bae52a8"
+  }
+ ]
+}

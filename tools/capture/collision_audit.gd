@@ -70,6 +70,33 @@ func _ready() -> void:
 		body.add_child(cs)
 		add_child(body)
 		bodies[mi] = body
+	# Bushes drawn as MultiMesh instances (the courtyard's hedge row) are
+	# occluders only: a collider under a drawn bush is not an invisible one.
+	for root_name in ROOTS:
+		var root: Node = world.get_node_or_null(root_name)
+		if root == null:
+			continue
+		for node in root.find_children("*", "MultiMeshInstance3D", true, false):
+			var mmi := node as MultiMeshInstance3D
+			var mm := mmi.multimesh
+			if mm == null or mm.mesh == null or mm.mesh.get_aabb().size.y < 0.5 or not mmi.is_visible_in_tree():
+				continue
+			var faces := mm.mesh.get_faces()
+			var world_faces := PackedVector3Array()
+			for k in mm.instance_count:
+				var xf := mmi.global_transform * mm.get_instance_transform(k)
+				for f in faces:
+					world_faces.append(xf * f)
+			var shape := ConcavePolygonShape3D.new()
+			shape.backface_collision = true
+			shape.set_faces(world_faces)
+			var body := StaticBody3D.new()
+			body.collision_layer = VISUAL_LAYER
+			body.collision_mask = 0
+			var cs := CollisionShape3D.new()
+			cs.shape = shape
+			body.add_child(cs)
+			add_child(body)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	var space := get_viewport().world_3d.direct_space_state
