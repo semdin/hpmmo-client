@@ -343,6 +343,7 @@ assets/shaders/ember_spark.gdshader
 assets/shaders/energy_trail.gdshader
 assets/shaders/fire_flipbook.gdshader
 assets/shaders/footprint.gdshader
+assets/shaders/fountain_pool.gdshader
 assets/shaders/fountain_water.gdshader
 assets/shaders/hero_brow.gdshader
 assets/shaders/hero_brow_paint.gdshader
