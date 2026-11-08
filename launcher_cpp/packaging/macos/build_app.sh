@@ -2,8 +2,8 @@
 # Builds the macOS launcher on a macOS host (GitHub-hosted runner):
 #   build_app.sh <launcher_cpp dir> <launcher version> <out dir>
 # Produces in <out dir>:
-#   HPMMO_Launcher-macos.zip   "HPMMO Launcher.app" for the first download
-#   HPMMO_Launcher-macos       the bare universal Mach-O: the self-update payload
+#   ThousandRealms_Launcher-macos.zip   "Thousand Realms Launcher.app" for the first download
+#   ThousandRealms_Launcher-macos       the bare universal Mach-O: the self-update payload
 #                              (swapped into the .app, which is then re-signed)
 # Universal (x86_64 + arm64), ad-hoc signed (no Apple Developer certificate):
 # a downloaded .app needs right-click -> Open once; files the launcher fetches
@@ -17,13 +17,13 @@ build="$(mktemp -d)/build"
 cmake -S "$src" -B "$build" -G Ninja -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
     -DHPMMO_LAUNCHER_VERSION="$version" >/dev/null
-ninja -C "$build" HPMMO_Launcher HPMMO_UpdaterCLI >/dev/null
-lipo -info "$build/HPMMO_Launcher"
-otool -L "$build/HPMMO_Launcher"
+ninja -C "$build" ThousandRealms_Launcher HPMMO_UpdaterCLI >/dev/null
+lipo -info "$build/ThousandRealms_Launcher"
+otool -L "$build/ThousandRealms_Launcher"
 
-app="$build/HPMMO Launcher.app"
+app="$build/Thousand Realms Launcher.app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
-cp "$build/HPMMO_Launcher" "$app/Contents/MacOS/HPMMO_Launcher"
+cp "$build/ThousandRealms_Launcher" "$app/Contents/MacOS/ThousandRealms_Launcher"
 sed "s/@VERSION@/$version/g" "$src/packaging/macos/Info.plist.in" > "$app/Contents/Info.plist"
 
 iconset="$build/hpmmo.iconset"
@@ -39,8 +39,8 @@ codesign --force --deep --sign - "$app"
 codesign --verify --deep --strict "$app"
 
 mkdir -p "$out"
-rm -f "$out/HPMMO_Launcher-macos.zip"
-ditto -c -k --keepParent "$app" "$out/HPMMO_Launcher-macos.zip"
-cp "$app/Contents/MacOS/HPMMO_Launcher" "$out/HPMMO_Launcher-macos"
+rm -f "$out/ThousandRealms_Launcher-macos.zip"
+ditto -c -k --keepParent "$app" "$out/ThousandRealms_Launcher-macos.zip"
+cp "$app/Contents/MacOS/ThousandRealms_Launcher" "$out/ThousandRealms_Launcher-macos"
 cp "$build/HPMMO_UpdaterCLI" "$out/HPMMO_UpdaterCLI-macos"
 ls -la "$out"

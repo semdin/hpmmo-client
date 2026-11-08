@@ -119,6 +119,7 @@ std::string WideToUtf8(const std::wstring& wstr) {
 
 // ------------------------------------------------------------------ paths --
 std::wstring GetExePath() {
+    if (!ExePathOverride().empty()) return ExePathOverride();
     // Inside an AppImage the binary runs from a temporary mount; the file the
     // user owns (and that self-update must replace) is $APPIMAGE.
     const char* appimage = getenv("APPIMAGE");

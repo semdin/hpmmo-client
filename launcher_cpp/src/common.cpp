@@ -98,6 +98,13 @@ std::wstring JoinPath(const std::wstring& a, const std::wstring& b) {
 }
 
 
+namespace {
+std::wstring g_exePathOverride;
+}
+
+void SetExePathOverride(const std::wstring& path) { g_exePathOverride = path; }
+const std::wstring& ExePathOverride() { return g_exePathOverride; }
+
 std::wstring GetExeDir() {
     std::wstring p = GetExePath();
     size_t pos = p.find_last_of(L"\\/");

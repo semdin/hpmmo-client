@@ -132,6 +132,40 @@ bool SpawnDetached(const std::wstring& exe, const std::vector<std::wstring>& arg
 }
 #endif
 
+// Until the rename from HPMMO the per-user install lived in <data>/HPMMO. The
+// first start of a launcher that knows the new name moves that folder as a
+// whole (one rename: versions/, current.json, launcher_state.json, user/,
+// logs) to <data>/ThousandRealms. Anything that makes the move unsafe - the
+// game running from it, an activation half done (its journal holds absolute
+// paths), a file held open (Windows) - keeps the old folder for this start;
+// the move is tried again on the next one.
+std::wstring MigrateLegacyInstallRoot(const std::wstring& dataRoot) {
+    std::wstring root = NormalizePath(JoinPath(dataRoot, L"ThousandRealms"));
+    std::wstring legacy = NormalizePath(JoinPath(dataRoot, L"HPMMO"));
+    if (!DirExists(legacy) || FileExists(JoinPath(root, L"current.json"))) return root;
+    if (!FileExists(JoinPath(legacy, L"current.json")) && !DirExists(JoinPath(legacy, L"versions"))) return root;
+    auto keep = [&](const std::string& why) {
+        static std::string logged;  // every context resolves this; say it once
+        if (logged != why) LogMsg("[Updater] install stays in " + WideToUtf8(legacy) + " for now: " + why);
+        logged = why;
+        return legacy;
+    };
+    if (FileExists(JoinPath(legacy, L"pending_activation.json"))) return keep("an activation is pending");
+    std::vector<RunningProcess> running;
+    if (IsGameRunning(legacy, {}, &running)) return keep("the game is running");
+    if (DirExists(root)) {
+        // Only an empty leftover may be replaced; real files there win.
+        std::vector<std::wstring> files;
+        std::string err;
+        if (!ListFilesRecursive(root, files, err) || !files.empty() || !RemoveDirRecursive(root))
+            return keep(WideToUtf8(root) + " already has files");
+    }
+    if (!MoveNoReplace(legacy, root)) return keep("rename failed (" + std::to_string(LastErrorCode()) + ")");
+    DeleteFileQuiet(JoinPath(root, L"launcher.lock"));  // the old Linux/macOS single-instance lock
+    LogMsg("[Updater] moved the install " + WideToUtf8(legacy) + " -> " + WideToUtf8(root));
+    return root;
+}
+
 std::wstring ResolveInstallRoot(const CliOptions& cli, const AppConfig& cfg) {
     if (!cli.installRoot.empty()) return NormalizePath(cli.installRoot);
     if (!cfg.installRoot.empty()) return NormalizePath(cfg.installRoot);
@@ -144,7 +178,7 @@ std::wstring ResolveInstallRoot(const CliOptions& cli, const AppConfig& cfg) {
         return NormalizePath(exeDir);
     }
     std::wstring dataRoot = UserDataRoot();
-    if (!dataRoot.empty()) return NormalizePath(JoinPath(dataRoot, L"HPMMO"));
+    if (!dataRoot.empty()) return MigrateLegacyInstallRoot(dataRoot);
     return NormalizePath(exeDir);
 }
 
@@ -225,11 +259,16 @@ UpdaterContext MakeContext(const CliOptions& cli, AppConfig cfg) {
     cur.present = false;
     if (LoadCurrentImpl(ctx, cur) && cur.present) {
 #ifdef _WIN32
-        const wchar_t* candidates[] = {L"HPMMO.exe", L"HPMMO_Game.exe", L"game.exe", L"godot.exe"};
+        // The game's own name first; the HPMMO names are what versions
+        // installed before the rename (and a rollback to one) contain.
+        const wchar_t* candidates[] = {L"ThousandRealms.exe", L"HPMMO.exe", L"HPMMO_Game.exe", L"game.exe",
+                                       L"godot.exe"};
 #elif defined(__APPLE__)
-        const wchar_t* candidates[] = {L"HPMMO.app/Contents/MacOS/HPMMO"};
+        const wchar_t* candidates[] = {L"Thousand Realms.app/Contents/MacOS/Thousand Realms",
+                                       L"HPMMO.app/Contents/MacOS/HPMMO"};
 #else
-        const wchar_t* candidates[] = {L"HPMMO.x86_64", L"HPMMO.arm64", L"HPMMO"};
+        const wchar_t* candidates[] = {L"ThousandRealms.x86_64", L"ThousandRealms.arm64", L"HPMMO.x86_64",
+                                       L"HPMMO.arm64", L"HPMMO"};
 #endif
         if (!cfg.gameExeName.empty()) {
             std::wstring p = JoinPath(cur.dir, cfg.gameExeName);

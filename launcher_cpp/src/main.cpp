@@ -1,4 +1,4 @@
-// HPMMO Launcher (GUI).
+// Thousand Realms launcher (GUI).
 //
 // The launcher only installs, updates and starts the game: signing in happens
 // on the game's own login screen. On start it checks the signed release
@@ -8,7 +8,7 @@
 //
 // The window is borderless and fully custom drawn with GDI+; the background
 // art and the two fonts are embedded resources (app.rc), so a lone
-// HPMMO_Launcher.exe renders the complete design. Every network call runs on a
+// ThousandRealms_Launcher.exe renders the complete design. Every network call runs on a
 // worker thread; the UI thread only reads the shared state under g_Mutex.
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
@@ -809,6 +809,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
         }
         Sleep(250);
     }
+
+    // Before LoadConfig: an exe still called HPMMO_Launcher*.exe takes the
+    // game's name (and the player's shortcuts follow it).
+    hpmmo::SetLogPath(hpmmo::JoinPath(hpmmo::GetExeDir(), L"launcher.log"));
+    hpmmo::MigrateLegacyLauncherFile();
 
     SetProcessDPIAware();
     {

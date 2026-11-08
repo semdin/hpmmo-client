@@ -9,7 +9,7 @@
 // Application + window icon (multi-size ICO generated from assets/branding).
 IDI_MAIN ICON "assets/hpmmo.ico"
 
-// Embedded art and fonts: a lone HPMMO_Launcher.exe renders the full design.
+// Embedded art and fonts: a lone ThousandRealms_Launcher.exe renders the full design.
 // Fonts are SIL OFL 1.1 (assets/OFL-*.txt).
 IDR_BACKGROUND RCDATA "assets/launcher_bg.jpg"
 IDR_FONT_TITLE RCDATA "assets/Literata-Bold.ttf"
@@ -33,8 +33,8 @@ BEGIN
             VALUE "CompanyName",      "Thousand Realms"
             VALUE "FileDescription",  "Thousand Realms Launcher"
             VALUE "FileVersion",      "3.0.0"
-            VALUE "InternalName",     "HPMMO_Launcher"
-            VALUE "OriginalFilename", "HPMMO_Launcher.exe"
+            VALUE "InternalName",     "ThousandRealms_Launcher"
+            VALUE "OriginalFilename", "ThousandRealms_Launcher.exe"
             VALUE "ProductName",      "Thousand Realms Launcher"
             VALUE "ProductVersion",   "3.0.0"
         END

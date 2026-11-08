@@ -7,7 +7,7 @@
     <key>CFBundleDisplayName</key>
     <string>Thousand Realms</string>
     <key>CFBundleExecutable</key>
-    <string>HPMMO_Launcher</string>
+    <string>ThousandRealms_Launcher</string>
     <key>CFBundleIconFile</key>
     <string>hpmmo</string>
     <key>CFBundleIdentifier</key>

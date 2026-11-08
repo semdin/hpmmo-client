@@ -36,6 +36,7 @@ std::string WideToUtf8(const std::wstring& wstr) {
 
 // ------------------------------------------------------------------ paths --
 std::wstring GetExePath() {
+    if (!ExePathOverride().empty()) return ExePathOverride();
     std::wstring buf(MAX_PATH, 0);
     while (true) {
         DWORD n = GetModuleFileNameW(NULL, &buf[0], (DWORD)buf.size());

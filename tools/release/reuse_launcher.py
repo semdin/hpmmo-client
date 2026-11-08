@@ -14,7 +14,7 @@ when set.
 Usage:
   reuse_launcher.py --base https://github.com/OWNER/REPO/releases/latest/download \\
       --manifest manifest-macos.json --version 3.0.<ts> --out DIR \\
-      HPMMO_Launcher-macos HPMMO_Launcher-macos.zip
+      ThousandRealms_Launcher-macos ThousandRealms_Launcher-macos.zip
 """
 
 import argparse

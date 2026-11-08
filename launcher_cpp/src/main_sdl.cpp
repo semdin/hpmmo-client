@@ -1,4 +1,4 @@
-// HPMMO Launcher (GUI) for Linux and macOS.
+// Thousand Realms launcher (GUI) for Linux and macOS.
 //
 // The same launcher as the Windows build (main.cpp): it installs, updates and
 // starts the game, and the logic is shared (launcher_app.cpp). Only the shell
@@ -416,9 +416,13 @@ const char* ArgValue(int argc, char** argv, const char* flag) {
 
 // One launcher at a time (a relaunch after self-update waits for the old one).
 int AcquireSingleInstance(bool waitForOld) {
-    std::wstring dir = hpmmo::JoinPath(hpmmo::UserDataRoot(), L"HPMMO");
+    // Beside the install folder, not in it: the first start of a renamed
+    // launcher moves <data>/HPMMO to <data>/ThousandRealms, which must not
+    // exist yet (MigrateLegacyInstallRoot).
+    std::wstring dir = hpmmo::UserDataRoot();
+    if (dir.empty()) return -2;
     hpmmo::CreateDirs(dir);
-    std::string path = hpmmo::WideToUtf8(hpmmo::JoinPath(dir, L"launcher.lock"));
+    std::string path = hpmmo::WideToUtf8(hpmmo::JoinPath(dir, L".thousandrealms-launcher.lock"));
     int fd = open(path.c_str(), O_RDWR | O_CREAT | O_CLOEXEC, 0644);
     if (fd < 0) return -2;   // no lock possible: run anyway
     for (int attempt = 0; attempt < 20; attempt++) {
@@ -492,6 +496,12 @@ int main(int argc, char** argv) {
         if (!hpmmo::GetEnvW(L"HPMMO_TEST_NO_GUI").empty()) return 0;
     }
 
+    // Before LoadConfig: on macOS the config sits inside the bundle, which
+    // this renames ("HPMMO Launcher.app" -> "Thousand Realms Launcher.app").
+    if (!HasArg(argc, argv, "--screenshot")) {
+        hpmmo::SetLogPath(hpmmo::JoinPath(hpmmo::GetExeDir(), L"launcher.log"));
+        hpmmo::MigrateLegacyLauncherFile();
+    }
     hpmmo::LoadConfig();
     if (!LoadAssets()) hpmmo::LogMsg("[Launcher] embedded fonts could not be loaded");
 

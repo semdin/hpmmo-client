@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(HPMMO_Launcher LANGUAGES C CXX)
+project(ThousandRealms_Launcher LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 17)
@@ -37,6 +37,7 @@ add_library(hpmmo_core STATIC
     src/updater_cli.cpp
     src/launcher_app.cpp
     src/delta.cpp
+    src/legacy_names.cpp
     ${VENDOR_ED25519}/fe.c
     ${VENDOR_ED25519}/ge.c
     ${VENDOR_ED25519}/sc.c
@@ -50,6 +51,9 @@ if(WIN32)
         crypt32
         winhttp
         ws2_32
+        ole32     # legacy_names.cpp: shortcuts (IShellLink)
+        shell32
+        uuid
     )
 else()
     find_package(CURL REQUIRED)
@@ -67,13 +71,13 @@ target_compile_options(hpmmo_core PRIVATE -O2)
 if(WIN32)
     # GUI launcher: update/install/play only (signing in happens in the game).
     # app.rc embeds the exe/taskbar/titlebar icon + version info.
-    add_executable(HPMMO_Launcher WIN32
+    add_executable(ThousandRealms_Launcher WIN32
         src/main.cpp
         app.rc
     )
     # windres finds the embedded art/fonts (app.rc) through the include path.
-    target_include_directories(HPMMO_Launcher PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(HPMMO_Launcher PRIVATE
+    target_include_directories(ThousandRealms_Launcher PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(ThousandRealms_Launcher PRIVATE
         hpmmo_core
         ws2_32
         winhttp
@@ -117,13 +121,13 @@ if(NOT WIN32)
         IconPng ${CMAKE_CURRENT_SOURCE_DIR}/assets/hpmmo_256.png
         LogoPng ${CMAKE_CURRENT_SOURCE_DIR}/assets/thousand_realms_logo.png)
 
-    add_executable(HPMMO_Launcher
+    add_executable(ThousandRealms_Launcher
         src/main_sdl.cpp
         src/painter.cpp
         ${HPMMO_EMBEDDED}
     )
-    target_include_directories(HPMMO_Launcher PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb)
-    target_link_libraries(HPMMO_Launcher PRIVATE hpmmo_core SDL3::SDL3-static)
+    target_include_directories(ThousandRealms_Launcher PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb)
+    target_link_libraries(ThousandRealms_Launcher PRIVATE hpmmo_core SDL3::SDL3-static)
 endif()
 
 # Headless CLI used by the release tests and by operators.
@@ -133,9 +137,9 @@ add_executable(HPMMO_UpdaterCLI
 target_link_libraries(HPMMO_UpdaterCLI PRIVATE hpmmo_core)
 
 if(WIN32)
-    set(HPMMO_EXE_TARGETS HPMMO_Launcher HPMMO_UpdaterCLI)
+    set(HPMMO_EXE_TARGETS ThousandRealms_Launcher HPMMO_UpdaterCLI)
 else()
-    set(HPMMO_EXE_TARGETS HPMMO_Launcher HPMMO_UpdaterCLI)
+    set(HPMMO_EXE_TARGETS ThousandRealms_Launcher HPMMO_UpdaterCLI)
 endif()
 foreach(tgt ${HPMMO_EXE_TARGETS})
     target_compile_options(${tgt} PRIVATE -O2)
@@ -148,10 +152,10 @@ foreach(tgt ${HPMMO_EXE_TARGETS})
 endforeach()
 
 if(WIN32)
-add_custom_command(TARGET HPMMO_Launcher POST_BUILD
+add_custom_command(TARGET ThousandRealms_Launcher POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<TARGET_FILE:HPMMO_Launcher>
-    ${CMAKE_SOURCE_DIR}/../HPMMO_Launcher.exe
+    $<TARGET_FILE:ThousandRealms_Launcher>
+    ${CMAKE_SOURCE_DIR}/../ThousandRealms_Launcher.exe
 )
 add_custom_command(TARGET HPMMO_UpdaterCLI POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different

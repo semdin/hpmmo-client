@@ -36,8 +36,9 @@ struct Hooks {
     std::function<void()> exitForSelfUpdate;   // the update helper took over: quit
 };
 
-// The game's name as the shells draw it (crest, window title). Files, folders
-// and executables keep the HPMMO name: installs and self-updates depend on it.
+// The game's name as the shells draw it (crest, window title). Files and
+// folders on disk are ThousandRealms*; launchers and installs from before the
+// rename are moved over on start (legacy_names.cpp, MigrateLegacyInstallRoot).
 inline constexpr const wchar_t* kGameTitle = L"Thousand Realms";
 
 // How often the shells poll the server status and look for a new release.

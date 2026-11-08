@@ -1,4 +1,4 @@
-# HPMMO client release -> GitHub Releases (what the launcher updates from).
+# Thousand Realms client release -> GitHub Releases (what the launcher updates from).
 # Since 1.0.64 the game ships as chunks only (content*.json + chunks*.bin):
 # no full zip; the launchers install and repair from chunks.
 #
@@ -10,7 +10,9 @@
 # How the launcher consumes it (launcher_cpp/src/common.h):
 #   https://github.com/<repo>/releases/latest/download/manifest.json (+ .sig)
 #   -> verifies the Ed25519 signature with the key built into the launcher
-#   -> launcher_version newer than its own build?  replace HPMMO_Launcher.exe first
+#   -> launcher_version newer than its own build?  replace the launcher first
+#      (an old HPMMO_Launcher.exe follows the manifest's URL too; the new
+#      launcher then renames itself and moves the HPMMO install folder)
 #   -> client_version differs from the installed one?  fetch content.json (its
 #      sha256 is in the signed manifest), copy every chunk the installed version
 #      already has, download only the missing chunks (HTTP Range into the
@@ -107,7 +109,7 @@ jobs:
           python3 tools/release/reuse_launcher.py \
             --base "https://github.com/${{ github.repository }}/releases/latest/download" \
             --manifest manifest-macos.json --version "${{ steps.v.outputs.launcher }}" \
-            --out "$RUNNER_TEMP/mac" HPMMO_Launcher-macos HPMMO_Launcher-macos.zip
+            --out "$RUNNER_TEMP/mac" ThousandRealms_Launcher-macos ThousandRealms_Launcher-macos.zip
 
       - name: Build the app bundle
         if: steps.reuse.outputs.hit != 'true'
@@ -122,15 +124,15 @@ jobs:
           "$RUNNER_TEMP/venv/bin/pip" install --quiet cryptography numpy
           "$RUNNER_TEMP/venv/bin/python" tools/release/test_updater.py \
             --launcher "$RUNNER_TEMP/mac/HPMMO_UpdaterCLI-macos" \
-            --gui-launcher "$RUNNER_TEMP/mac/HPMMO_Launcher-macos" | tee "$RUNNER_TEMP/updater-tests.log"
+            --gui-launcher "$RUNNER_TEMP/mac/ThousandRealms_Launcher-macos" | tee "$RUNNER_TEMP/updater-tests.log"
           grep -q "UPDATER RESULT: .*, 0 failures" "$RUNNER_TEMP/updater-tests.log"
 
       - uses: actions/upload-artifact@v7
         with:
           name: launcher-macos
           path: |
-            ${{ runner.temp }}/mac/HPMMO_Launcher-macos.zip
-            ${{ runner.temp }}/mac/HPMMO_Launcher-macos
+            ${{ runner.temp }}/mac/ThousandRealms_Launcher-macos.zip
+            ${{ runner.temp }}/mac/ThousandRealms_Launcher-macos
           if-no-files-found: error
           retention-days: 7
 
@@ -211,9 +213,9 @@ jobs:
           base="https://github.com/${{ github.repository }}/releases/latest/download"
           mkdir -p dist
           python3 tools/release/reuse_launcher.py --base "$base" --manifest manifest.json --key windows \
-            --version "${{ steps.v.outputs.launcher }}" --out dist HPMMO_Launcher.exe
+            --version "${{ steps.v.outputs.launcher }}" --out dist ThousandRealms_Launcher.exe
           python3 tools/release/reuse_launcher.py --base "$base" --manifest manifest-linux-x86_64.json --key linux \
-            --version "${{ steps.v.outputs.launcher }}" --out dist HPMMO_Launcher-x86_64.AppImage
+            --version "${{ steps.v.outputs.launcher }}" --out dist ThousandRealms_Launcher-x86_64.AppImage
 
       - name: Build the launcher
         if: steps.reuse.outputs.windows != 'true'
@@ -228,7 +230,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DHPMMO_LAUNCHER_VERSION="${{ steps.v.outputs.launcher }}"
           # Compiler errors become annotations, readable without the job log.
-          if ! ninja -k 0 -C launcher_cpp/build-mingw HPMMO_Launcher > "$RUNNER_TEMP/launcher-build.log" 2>&1; then
+          if ! ninja -k 0 -C launcher_cpp/build-mingw ThousandRealms_Launcher > "$RUNNER_TEMP/launcher-build.log" 2>&1; then
             grep -E "error|Error" "$RUNNER_TEMP/launcher-build.log" | head -25 | while IFS= read -r line; do
               echo "::error::$line"
             done
@@ -236,7 +238,7 @@ jobs:
             exit 1
           fi
           mkdir -p dist
-          cp launcher_cpp/build-mingw/HPMMO_Launcher.exe dist/HPMMO_Launcher.exe
+          cp launcher_cpp/build-mingw/ThousandRealms_Launcher.exe dist/ThousandRealms_Launcher.exe
 
       - name: Fetch the macOS launcher built by launcher-macos
         uses: actions/download-artifact@v8
@@ -253,8 +255,8 @@ jobs:
           out="$RUNNER_TEMP/linux-launcher"
           rm -rf "$out"
           sudo /opt/hpmmo-ci/build_linux_launcher.sh "$PWD/launcher_cpp" "${{ steps.v.outputs.launcher }}" "$out"
-          cp "$out/HPMMO_Launcher-x86_64.AppImage" dist/HPMMO_Launcher-x86_64.AppImage
-          ls -la dist/HPMMO_Launcher-x86_64.AppImage
+          cp "$out/ThousandRealms_Launcher-x86_64.AppImage" dist/ThousandRealms_Launcher-x86_64.AppImage
+          ls -la dist/ThousandRealms_Launcher-x86_64.AppImage
 
       - name: Check the pinned Godot engine and export templates
         id: godot
@@ -291,31 +293,35 @@ jobs:
           "${{ steps.godot.outputs.path }}" --headless --path . --editor --import --quit \
             > "$RUNNER_TEMP/import.log" 2>&1 || { tail -80 "$RUNNER_TEMP/import.log"; exit 1; }
           "${{ steps.godot.outputs.path }}" --headless --path . \
-            --export-release "Windows Desktop" "$PWD/build/client/HPMMO.exe" \
+            --export-release "Windows Desktop" "$PWD/build/client/ThousandRealms.exe" \
             > "$RUNNER_TEMP/export.log" 2>&1 || { tail -80 "$RUNNER_TEMP/export.log"; echo "the Godot export failed" >&2; exit 1; }
-          test -f build/client/HPMMO.exe
-          test -f build/client/HPMMO.pck
+          test -f build/client/ThousandRealms.exe
+          test -f build/client/ThousandRealms.pck
           ls -la build/client
           "${{ steps.godot.outputs.path }}" --headless --path . \
-            --export-release "Linux" "$PWD/build-linux/client/HPMMO.x86_64" \
+            --export-release "Linux" "$PWD/build-linux/client/ThousandRealms.x86_64" \
             > "$RUNNER_TEMP/export-linux.log" 2>&1 || { tail -80 "$RUNNER_TEMP/export-linux.log"; echo "the Linux export failed" >&2; exit 1; }
-          test -x build-linux/client/HPMMO.x86_64
-          test -f build-linux/client/HPMMO.pck
+          test -x build-linux/client/ThousandRealms.x86_64
+          test -f build-linux/client/ThousandRealms.pck
           ls -la build-linux/client
           # macOS: universal .app (native on Apple Silicon -> Metal, and on Intel)
           # from the official template.
           rm -rf build-mac && mkdir -p build-mac/client
           "${{ steps.godot.outputs.path }}" --headless --path . \
-            --export-release "macOS" "$RUNNER_TEMP/HPMMO-macos.zip" \
+            --export-release "macOS" "$RUNNER_TEMP/game-macos.zip" \
             > "$RUNNER_TEMP/export-macos.log" 2>&1 || { tail -80 "$RUNNER_TEMP/export-macos.log"; echo "the macOS export failed" >&2; exit 1; }
-          unzip -q "$RUNNER_TEMP/HPMMO-macos.zip" -d build-mac/client
-          rm -f "$RUNNER_TEMP/HPMMO-macos.zip"
-          test -x build-mac/client/HPMMO.app/Contents/MacOS/HPMMO
-          test -f build-mac/client/HPMMO.app/Contents/Resources/HPMMO.pck
-          test -d build-mac/client/HPMMO.app/Contents/Frameworks/libterrain.macos.release.framework
+          unzip -q "$RUNNER_TEMP/game-macos.zip" -d build-mac/client
+          rm -f "$RUNNER_TEMP/game-macos.zip"
+          # Godot names the bundle, its binary and the pck after
+          # application/config/name ("Thousand Realms"): the launcher looks for
+          # exactly that (updater.cpp, release_common.GAME_EXECUTABLES).
+          app="build-mac/client/Thousand Realms.app"
+          test -x "$app/Contents/MacOS/Thousand Realms" || { ls -la build-mac/client; echo "::error::the macOS export is not $app"; exit 1; }
+          test -f "$app/Contents/Resources/Thousand Realms.pck"
+          test -d "$app/Contents/Frameworks/libterrain.macos.release.framework"
           # The game and Terrain3D must both carry an arm64 and an x86_64 slice.
-          python3 - build-mac/client/HPMMO.app/Contents/MacOS/HPMMO \
-            build-mac/client/HPMMO.app/Contents/Frameworks/libterrain.macos.release.framework/libterrain.macos.release <<'PY'
+          python3 - "$app/Contents/MacOS/Thousand Realms" \
+            "$app/Contents/Frameworks/libterrain.macos.release.framework/libterrain.macos.release" <<'PY'
           import struct, sys
           for path in sys.argv[1:]:
               d = open(path, "rb").read(4096)
@@ -405,7 +411,7 @@ jobs:
             printf '%s\n' "$SIGNING_KEY" > "$key"
           fi
           python3 tools/release/gen_manifest.py \
-            --launcher-artifact dist/HPMMO_Launcher.exe \
+            --launcher-artifact dist/ThousandRealms_Launcher.exe \
             --launcher-version "${{ steps.v.outputs.launcher }}" \
             --channel release \
             --client-version "${{ steps.v.outputs.client }}" \
@@ -419,7 +425,7 @@ jobs:
             --out dist --key "$key"
           # Linux manifest (with the AppImage as the launcher self-update payload).
           python3 tools/release/gen_manifest.py \
-            --launcher-artifact dist/HPMMO_Launcher-x86_64.AppImage \
+            --launcher-artifact dist/ThousandRealms_Launcher-x86_64.AppImage \
             --launcher-version "${{ steps.v.outputs.launcher }}" \
             --channel release \
             --client-version "${{ steps.v.outputs.client }}" \
@@ -433,7 +439,7 @@ jobs:
             --out dist --key "$key"
           # macOS manifest (the bare launcher Mach-O is the self-update payload).
           python3 tools/release/gen_manifest.py \
-            --launcher-artifact dist/HPMMO_Launcher-macos \
+            --launcher-artifact dist/ThousandRealms_Launcher-macos \
             --launcher-version "${{ steps.v.outputs.launcher }}" \
             --channel release \
             --client-version "${{ steps.v.outputs.client }}" \
@@ -468,22 +474,34 @@ jobs:
         run: |
           set -eu
           tag="${{ steps.v.outputs.tag }}"
+          # The launchers under their names from before the rename, as
+          # byte-identical copies: links shared as .../HPMMO_Launcher.exe keep
+          # working. (The manifests name the new files; a launcher self-updates
+          # from whatever URL its manifest gives.)
+          legacy=()
+          for name in ThousandRealms_Launcher.exe ThousandRealms_Launcher-x86_64.AppImage \
+              ThousandRealms_Launcher-macos ThousandRealms_Launcher-macos.zip; do
+            old="dist/HPMMO_Launcher${name#ThousandRealms_Launcher}"
+            cp "dist/$name" "$old"
+            legacy+=("$old")
+          done
           # chunks[-<platform>]-<ver>.bin is absent when no chunk changed.
           shopt -s nullglob
           chunks=(dist/chunks-*.bin)
           gh release create "$tag" \
-            dist/HPMMO_Launcher.exe dist/content.json "${chunks[@]}" \
+            dist/ThousandRealms_Launcher.exe dist/content.json "${chunks[@]}" \
             dist/manifest.json dist/manifest.json.sig dist/manifest.json.keyid dist/SHA256SUMS \
             dist/content-linux-x86_64.json \
-            dist/HPMMO_Launcher-x86_64.AppImage \
+            dist/ThousandRealms_Launcher-x86_64.AppImage \
             dist/manifest-linux-x86_64.json dist/manifest-linux-x86_64.json.sig \
             dist/manifest-linux-x86_64.json.keyid dist/SHA256SUMS-linux-x86_64 \
-            dist/content-macos.json dist/HPMMO_Launcher-macos dist/HPMMO_Launcher-macos.zip \
+            dist/content-macos.json dist/ThousandRealms_Launcher-macos dist/ThousandRealms_Launcher-macos.zip \
             dist/manifest-macos.json dist/manifest-macos.json.sig \
             dist/manifest-macos.json.keyid dist/SHA256SUMS-macos \
+            "${legacy[@]}" \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
-            --title "HPMMO $tag" \
+            --title "Thousand Realms $tag" \
             --notes-file "$RUNNER_TEMP/release_notes.txt" \
             --latest
 
@@ -507,11 +525,11 @@ jobs:
           python3 tools/release/gen_manifest.py --verify \
             --manifest "$RUNNER_TEMP/live-macos.json" --pubkey "$RUNNER_TEMP/release.pub.pem" --artifacts dist
           {
-            echo "### HPMMO ${{ steps.v.outputs.tag }}"
+            echo "### Thousand Realms ${{ steps.v.outputs.tag }}"
             echo "- client \`${{ steps.v.outputs.client }}\`, launcher \`${{ steps.v.outputs.launcher }}\`"
-            echo "- installer link: $base/HPMMO_Launcher.exe"
-            echo "- Linux launcher: $base/HPMMO_Launcher-x86_64.AppImage"
-            echo "- macOS launcher: $base/HPMMO_Launcher-macos.zip"
+            echo "- installer link: $base/ThousandRealms_Launcher.exe"
+            echo "- Linux launcher: $base/ThousandRealms_Launcher-x86_64.AppImage"
+            echo "- macOS launcher: $base/ThousandRealms_Launcher-macos.zip"
           } >> "$GITHUB_STEP_SUMMARY"
 
   # The published release, on a Mac: the downloaded launcher installs the game
@@ -528,13 +546,13 @@ jobs:
           base="https://github.com/${{ github.repository }}/releases/latest/download"
           work="$RUNNER_TEMP/hpmmo"
           mkdir -p "$work" && cd "$work"
-          curl -fsSL -o launcher.zip "$base/HPMMO_Launcher-macos.zip"
+          curl -fsSL -o launcher.zip "$base/ThousandRealms_Launcher-macos.zip"
           ditto -x -k launcher.zip .
-          codesign --verify --deep --strict "HPMMO Launcher.app"
-          bin="$work/HPMMO Launcher.app/Contents/MacOS/HPMMO_Launcher"
+          codesign --verify --deep --strict "Thousand Realms Launcher.app"
+          bin="$work/Thousand Realms Launcher.app/Contents/MacOS/ThousandRealms_Launcher"
           "$bin" --install-root "$work/install" --user-dir "$work/install/user" --update | tee update.json
           grep -q '"ok":true' update.json
-          game="$(ls -d "$work"/install/versions/*/HPMMO.app/Contents/MacOS/HPMMO)"
+          game="$(ls -d "$work"/install/versions/*/"Thousand Realms.app/Contents/MacOS/Thousand Realms")"
           chmod +x "$game"
           codesign --verify --deep --strict "$(dirname "$(dirname "$(dirname "$game")")")"
           lipo -archs "$game" | tee archs.txt

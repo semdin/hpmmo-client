@@ -42,6 +42,14 @@ std::wstring FormatBytesW(uint64_t v);
 std::wstring JoinPath(const std::wstring& a, const std::wstring& b);
 std::wstring GetExePath();
 std::wstring GetExeDir();
+// After the launcher renamed its own running file (legacy_names.cpp) the OS
+// still reports the old path; GetExePath returns this instead when set.
+void SetExePathOverride(const std::wstring& path);
+const std::wstring& ExePathOverride();
+// GUI start, before LoadConfig: renames a launcher still called by the game's
+// old name (HPMMO_Launcher*, "HPMMO Launcher.app") and points the player's
+// shortcuts / desktop entries at the new file. No-op once renamed.
+void MigrateLegacyLauncherFile();
 std::wstring GetCwd();
 std::wstring TempDirPath();
 std::wstring NormalizePath(const std::wstring& path);

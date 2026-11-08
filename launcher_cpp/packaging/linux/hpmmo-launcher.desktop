@@ -2,7 +2,7 @@
 Type=Application
 Name=Thousand Realms
 Comment=Thousand Realms - Büyücülük Diyarı
-Exec=HPMMO_Launcher
+Exec=ThousandRealms_Launcher
 Icon=hpmmo-launcher
 Categories=Game;
 Terminal=false

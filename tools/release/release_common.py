@@ -47,10 +47,11 @@ PLATFORMS = ("windows-x86_64", "linux-x86_64", "macos")
 #: into the same GitHub release with a "-<platform>" suffix.
 LEGACY_PLATFORM = "windows-x86_64"
 #: Game executable names the launcher resolves at the version root (lower case).
+#: The ThousandRealms names first; the HPMMO ones are builds from before the rename.
 GAME_EXECUTABLES = {
-    "windows-x86_64": ("hpmmo.exe", "hpmmo_game.exe", "game.exe", "godot.exe"),
-    "linux-x86_64": ("hpmmo.x86_64", "hpmmo"),
-    "macos": ("hpmmo.app/contents/macos/hpmmo",),
+    "windows-x86_64": ("thousandrealms.exe", "hpmmo.exe", "hpmmo_game.exe", "game.exe", "godot.exe"),
+    "linux-x86_64": ("thousandrealms.x86_64", "hpmmo.x86_64", "hpmmo"),
+    "macos": ("thousand realms.app/contents/macos/thousand realms", "hpmmo.app/contents/macos/hpmmo"),
 }
 #: What this pipeline publishes today. Deltas are accepted by the tooling but
 #: the plan's order is full packages first.

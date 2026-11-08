@@ -8,7 +8,7 @@ Steps, all against the real tools:
   1. package the REAL Godot export with `tools/release/package_client.py`,
   2. serve it over HTTPS with a throwaway certificate (the same shape the
      release host serves) using `test_updater.py`'s ReleaseServer,
-  3. run the distributed launcher binary (`HPMMO_Launcher.exe`) in its headless
+  3. run the distributed launcher binary (`ThousandRealms_Launcher.exe`) in its headless
      CLI mode to install it - the launcher's own updater engine, not a copy,
   4. launch the INSTALLED game exactly the way `hpmmo::LaunchInstalledGame`
      (launcher_cpp/src/updater.cpp) does - same argv, same environment,
@@ -123,13 +123,13 @@ def main():
     parser.add_argument("--out-dir", default=str(CLIENT / "tools" / "downloads" / "release-launcher"))
     parser.add_argument("--no-launch", action="store_true")
     parser.add_argument("--install-only", action="store_true")
-    parser.add_argument("--launcher", default="", help="launcher binary (default: the tracked HPMMO_Launcher.exe)")
+    parser.add_argument("--launcher", default="", help="launcher binary (default: the tracked ThousandRealms_Launcher.exe)")
     args = parser.parse_args()
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
 
     source_build = CLIENT / "tools" / "downloads" / "release-build"
-    if not (source_build / "client" / "HPMMO.exe").is_file():
+    if not (source_build / "client" / "ThousandRealms.exe").is_file():
         print("LAUNCHER SKIP: no packaged build at %s (export it first)" % source_build)
         return 2
     # package_client only accepts build directories whose top level is exactly
@@ -138,9 +138,9 @@ def main():
     if build_dir.exists():
         shutil.rmtree(build_dir)
     (build_dir / "client").mkdir(parents=True)
-    for name in ("HPMMO.exe", "HPMMO.pck"):
+    for name in ("ThousandRealms.exe", "ThousandRealms.pck"):
         shutil.copy(source_build / "client" / name, build_dir / "client" / name)
-    launcher = Path(args.launcher) if args.launcher else CLIENT / "HPMMO_Launcher.exe"
+    launcher = Path(args.launcher) if args.launcher else CLIENT / "ThousandRealms_Launcher.exe"
     if not launcher.is_file():
         print("LAUNCHER SKIP: %s is missing" % launcher)
         return 2
@@ -194,7 +194,7 @@ def main():
     try:
         # 3. install with the distributed launcher's own updater ------------
         code, payload, log = tu.run_cli(common + ["--update"], exe=launcher, timeout=900)
-        installed = install_root / "versions" / args.client_version / "HPMMO.exe"
+        installed = install_root / "versions" / args.client_version / "ThousandRealms.exe"
         check("launcher --update exit 0", code == 0, log[-300:])
         check("launcher installed the packaged game", installed.is_file(),
               "%s (%d bytes)" % (installed, installed.stat().st_size if installed.is_file() else 0))
@@ -234,7 +234,7 @@ def main():
         ticket = post(api + "/api/game-ticket", {}, token).get("ticket", "")
         check("single-use game ticket issued (launcher handoff)", ticket != "")
 
-        game_exe = install_root / "versions" / args.client_version / "HPMMO.exe"
+        game_exe = install_root / "versions" / args.client_version / "ThousandRealms.exe"
         user_dir = install_root / "user"
         # Exactly what the (fixed) launcher builds: no scene argument, because a
         # packaged Godot binary aborts on one, and the ticket handoff.
@@ -251,9 +251,9 @@ def main():
         time.sleep(28)
         screenshot(out / "packaged-01-character-select.png")
         titles = window_titles()
-        check("the packaged window is up", any("HPMMO" in t for t in titles),
+        check("the packaged window is up", any("Thousand Realms" in t for t in titles),
               "titles seen: %s" % ", ".join(t for t in titles if t.strip())[:200])
-        sent = press_enter("HPMMO")
+        sent = press_enter("Thousand Realms")
         check("Enter reached the packaged window", sent)
         time.sleep(12)
         screenshot(out / "packaged-02-world.png")
@@ -286,7 +286,7 @@ def main():
         # Safety net: this driver is the only thing in the release gates that puts a
         # windowed game on the desktop, and it must never outlive the run. Kill
         # by executable path (scoped to this run's install dir), not by name.
-        exe = str(install_root / "versions" / args.client_version / "HPMMO.exe")
+        exe = str(install_root / "versions" / args.client_version / "ThousandRealms.exe")
         subprocess.run(["powershell", "-NoProfile", "-Command",
                         "Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -eq '%s' } |"
                         " ForEach-Object { Stop-Process -Id $_.ProcessId -Force }" % exe],

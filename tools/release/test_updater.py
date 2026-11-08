@@ -48,15 +48,15 @@ CLIENT = HERE.parent.parent
 IS_WINDOWS = os.name == "nt"
 EXE = ".exe" if IS_WINDOWS else ""
 DEFAULT_LAUNCHER = CLIENT / "launcher_cpp" / "build" / ("HPMMO_UpdaterCLI" + EXE)
-DEFAULT_GUI_LAUNCHER = CLIENT / "launcher_cpp" / "build" / ("HPMMO_Launcher" + EXE)
+DEFAULT_GUI_LAUNCHER = CLIENT / "launcher_cpp" / "build" / ("ThousandRealms_Launcher" + EXE)
 # The fake releases target the platform the launcher under test runs on (the
 # launcher refuses a release built for another platform).
 if IS_WINDOWS:
-    HOST_PLATFORM, GAME_EXE = "windows-x86_64", "HPMMO.exe"
+    HOST_PLATFORM, GAME_EXE = "windows-x86_64", "ThousandRealms.exe"
 elif sys.platform == "darwin":
-    HOST_PLATFORM, GAME_EXE = "macos", "HPMMO.app/Contents/MacOS/HPMMO"
+    HOST_PLATFORM, GAME_EXE = "macos", "Thousand Realms.app/Contents/MacOS/Thousand Realms"
 else:
-    HOST_PLATFORM, GAME_EXE = "linux-x86_64", "HPMMO.x86_64"
+    HOST_PLATFORM, GAME_EXE = "linux-x86_64", "ThousandRealms.x86_64"
 # Windows keeps manifest.json; other platforms fetch manifest-<platform>.json.
 MANIFEST = "manifest.json" if HOST_PLATFORM == "windows-x86_64" else "manifest-%s.json" % HOST_PLATFORM
 
@@ -770,7 +770,7 @@ def test_self_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519Priv
     if not gui_launcher.is_file():
         check("self-update: GUI launcher present", False, str(gui_launcher))
         return
-    running_copy = root / ("HPMMO_Launcher" + EXE)
+    running_copy = root / ("ThousandRealms_Launcher" + EXE)
     root.mkdir(parents=True, exist_ok=True)
     shutil.copy(str(ARGS.launcher), str(running_copy))
 
@@ -865,7 +865,7 @@ def test_chunked_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519P
     rnd = __import__("random").Random(7)
     exe = b"MZ" + bytes(rnd.getrandbits(8) for _ in range(300_000))
     pck = bytes(rnd.getrandbits(8) for _ in range(4_000_000))
-    v1 = {GAME_EXE: exe, "HPMMO.pck": pck, "data/notes.txt": b"one"}
+    v1 = {GAME_EXE: exe, "ThousandRealms.pck": pck, "data/notes.txt": b"one"}
     build = t / "build"
     _write_build(build, v1)
     release = Release(rel, signer)
@@ -886,7 +886,7 @@ def test_chunked_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519P
     pck2 = bytearray(pck)
     pck2[2_000_000:2_100_000] = bytes(rnd.getrandbits(8) for _ in range(100_000))
     pck2[1_000_000:1_000_000] = bytes(rnd.getrandbits(8) for _ in range(10_000))
-    v2 = {GAME_EXE: exe, "HPMMO.pck": bytes(pck2), "data/notes.txt": b"two"}
+    v2 = {GAME_EXE: exe, "ThousandRealms.pck": bytes(pck2), "data/notes.txt": b"two"}
     _write_build(build, v2)
     release = Release(rel, signer)
     release.add_package("game-1.0.1.zip", build_package(v2))
@@ -904,7 +904,7 @@ def test_chunked_update(t: Path, server: ReleaseServer, signer: ed25519.Ed25519P
 
     # v3: the chunk file is missing -> the full package still installs.
     shutil.copy(rel / "files" / "content.json", t / "prev.json")
-    v3 = {GAME_EXE: exe, "HPMMO.pck": bytes(pck2[:-5000]), "data/notes.txt": b"three"}
+    v3 = {GAME_EXE: exe, "ThousandRealms.pck": bytes(pck2[:-5000]), "data/notes.txt": b"three"}
     _write_build(build, v3)
     release = Release(rel, signer)
     release.add_package("game-1.0.2.zip", build_package(v3))

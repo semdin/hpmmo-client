@@ -4,7 +4,7 @@
 Builds the zip a launcher installs, from a *build directory* laid out as:
 
     <build>/
-      client/           required. The Godot export payload (HPMMO.exe, HPMMO.pck,
+      client/           required. The Godot export payload (ThousandRealms.exe, ThousandRealms.pck,
                         and any data the export writes next to them).
       launcher/         optional. The native launcher executable and its assets
                         (this is what a launcher self-update consumes).
@@ -12,13 +12,13 @@ Builds the zip a launcher installs, from a *build directory* laid out as:
 Nothing else may sit at the top level. The artifact:
 
     hpmmo-client-<client_version>-<platform>.zip
-      HPMMO.exe          the game payload, FLAT at the archive root
-      HPMMO.pck
+      ThousandRealms.exe the game payload, FLAT at the archive root
+      ThousandRealms.pck
       launcher/...       the launcher payload, kept in its own directory
       release.json       format, versions, and the size+sha256 of every file
 
 The game payload is flat because the launcher extracts a package straight into
-its version directory and resolves the executable as `<versionDir>/HPMMO.exe`
+its version directory and resolves the executable as `<versionDir>/ThousandRealms.exe`
 (with a configurable override and a short candidate list). Nesting the game
 under a wrapper directory would install a build the launcher could not launch.
 The launcher payload keeps a directory of its own so it can never collide with
@@ -105,7 +105,7 @@ def validate_build_dir(build_dir: str, platform: str = rc.LEGACY_PLATFORM) -> No
     if not os.path.isdir(client):
         rc.fail("%s has no client/ directory - there is nothing to install" % build_dir)
     # Every file below client/ as a lower-case relative path: on macOS the game
-    # is a bundle (HPMMO.app/Contents/MacOS/HPMMO, .../Resources/HPMMO.pck).
+    # is a bundle ("Thousand Realms.app/Contents/MacOS/Thousand Realms", .../Resources/Thousand Realms.pck).
     client_files = []
     for base, _dirs, names in os.walk(client):
         for name in names:

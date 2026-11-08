@@ -4,7 +4,7 @@
 
 | Piece | Job |
 |---|---|
-| `HPMMO_Launcher.exe` (`launcher_cpp/`) | Checks for updates, updates itself and the game, starts the game. **No login.** |
+| `ThousandRealms_Launcher.exe` (`launcher_cpp/`) | Checks for updates, updates itself and the game, starts the game. **No login.** |
 | Game login screen (`scenes/main/main_menu.tscn`, `scripts/ui/main_menu.gd`) | Sign in / create an account, then world join and character selection. |
 | `.github/workflows/client-release.yml` | Every push to `main`: exports the game, builds the launcher, signs a manifest, publishes GitHub Release `v1.0.<run>` (marked latest). |
 | Account service `/api/status`, maintenance gate (`server/services/cpp`) | Reports ONLINE / maintenance; refuses `/api/login` and `/api/game-ticket` with 503 `code=maintenance` while `maintenance.flag` exists. |
@@ -15,8 +15,8 @@
 1. The launcher fetches `https://github.com/semdin/hpmmo-client/releases/latest/download/manifest.json` and `.sig`
    and verifies the Ed25519 signature with the key built into it (`HPMMO_DEFAULT_RELEASE_KEY` in
    `launcher_cpp/src/common.h`). GitHub's TLS is validated by Windows; the signature is what authorizes an install.
-2. `launcher_version` in the manifest newer than the running launcher -> it downloads `HPMMO_Launcher.exe`
-   from the release, swaps itself and restarts.
+2. `launcher_version` in the manifest newer than the running launcher -> it downloads the launcher the manifest
+   names (`ThousandRealms_Launcher.exe`), swaps itself and restarts.
 3. `client_version` different from the installed one -> **delta update**: it fetches `content.json` (its
    sha256 is in the signed manifest), which lists every file as content-defined chunks (~256 KiB,
    `tools/release/chunk_release.py`). Chunks the installed version already has are copied locally; only the
@@ -24,19 +24,54 @@
    published them. Every chunk and every file is checked against its sha256, then the version is activated.
    If anything in that path fails (except a cancel or a full disk) the full zip is installed instead.
    Measured on the real build: v1.0.3 -> v1.0.4 downloaded 26 MB instead of ~500 MB.
-4. PLAY starts `HPMMO.exe`; the game opens at its own login screen.
+4. PLAY starts `ThousandRealms.exe`; the game opens at its own login screen.
 
 Versions are automatic: client `1.0.<workflow run number>`, launcher `3.0.<unix time of the last commit that
 touched launcher_cpp/>`. A release that did not change the launcher does not reinstall it.
 
 Install location: next to the launcher when that folder already holds an install (`current.json`, `versions/`)
-or a `portable.txt`; otherwise `%LOCALAPPDATA%\HPMMO`. Player download link:
-`https://github.com/semdin/hpmmo-client/releases/latest/download/HPMMO_Launcher.exe`.
+or a `portable.txt`; otherwise `%LOCALAPPDATA%\ThousandRealms` (`~/.local/share/ThousandRealms`, `~/Library/Application Support/ThousandRealms`).
+Player download link:
+`https://github.com/semdin/hpmmo-client/releases/latest/download/ThousandRealms_Launcher.exe`.
 
 **Never delete old GitHub releases**: newer releases reference chunks stored in older releases' `chunks-*.bin`.
 The CI keeps the Godot import cache (`.godot`) between runs so unchanged assets re-export byte-identically
 (Godot imports are not bit-reproducible; without the cache ~25 MB of models change every release).
 `HPMMO_FULL_PACKAGE=1` forces the full zip (diagnostics).
+
+## Rename from HPMMO (2026-11)
+
+The game shipped as "HPMMO" until 1.0.x of November 2026. Everything a player sees on disk now carries the
+game's name; installs from before move over by themselves:
+
+| Before | Now |
+|---|---|
+| `HPMMO_Launcher.exe`, `HPMMO_Launcher-x86_64.AppImage`, `HPMMO Launcher.app` | `ThousandRealms_Launcher.exe`, `ThousandRealms_Launcher-x86_64.AppImage`, `Thousand Realms Launcher.app` |
+| `HPMMO.exe` + `HPMMO.pck`, `HPMMO.x86_64`, `HPMMO.app` | `ThousandRealms.exe` + `ThousandRealms.pck`, `ThousandRealms.x86_64`, `Thousand Realms.app` |
+| `%LOCALAPPDATA%\HPMMO` (and the Linux/macOS equivalents) | `%LOCALAPPDATA%\ThousandRealms` |
+| `application/config/name="HPMMO"`: user data in `…/app_userdata/HPMMO` | `"Thousand Realms"`: `…/app_userdata/Thousand Realms` |
+
+- **Releases** publish the launchers under both names (byte-identical copies under the old names), so old
+  download links keep working. The manifests name the new files; an old launcher self-updates from whatever URL
+  its manifest gives and writes the new binary over its own file, which still has the old name.
+- **The new launcher, on start** (`launcher_cpp/src/legacy_names.cpp`, before the config is read): a file still
+  called `HPMMO_Launcher*` (or a bundle `HPMMO Launcher*.app`) renames itself in place unless the new name
+  exists; Windows `.lnk` files on the Desktop, in the Start menu and in the taskbar/Start pins that pointed at it
+  are retargeted (desktop/Start menu entries with HPMMO in the name become `Thousand Realms.lnk`); Linux
+  `.desktop` files in `~/.local/share/applications` and on the desktop are rewritten. The macOS Dock follows a
+  bundle rename by itself.
+- **The install folder** (`MigrateLegacyInstallRoot`, `launcher_cpp/src/updater.cpp`): the default
+  `<data>/HPMMO` is renamed to `<data>/ThousandRealms` in one step (versions, `current.json`,
+  `launcher_state.json`, `user/`, logs). While the game runs from it, an activation is pending or a file is held
+  open, the old folder is used and the move is tried on the next start. Portable installs and an explicit
+  `install_root` stay where they are. The installed old version (`HPMMO.exe`) keeps starting until the next
+  update, which downloads nothing extra for the rename: chunks are matched by content, not by file name.
+- **Game data** (`scripts/autoload/user_data_migration.gd`, first autoload): copies `…/app_userdata/HPMMO`
+  into the new `user://` once (settings, saved login, quick slots, bag layout, looks, …; never overwrites;
+  logs and GPU caches stay behind) and leaves the old folder for a rollback. The world server's project gets
+  the same name and autoload through `dev.ps1 sync-world`, so its `user://` (local saves) moves the same way.
+- Unchanged, because no player sees them: `HPMMO_*` environment variables, `HPMMO_UpdaterCLI`, the Windows
+  mutex/window class, bundle ids, the `hpmmo-client` repository.
 
 ## One-time setup
 

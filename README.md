@@ -1,8 +1,8 @@
-# HPMMO — Wizarding Realm MMORPG
+# Thousand Realms — Wizarding Realm MMORPG
 
 An online 3D wizarding action RPG: real-time spell combat, monster packs and bosses, dungeons, broom flight, quests and Hogwarts houses.
 
-![HPMMO](assets/branding/hpmmo_banner.jpg)
+![Thousand Realms](assets/branding/hpmmo_banner.jpg)
 
 ## Download
 
@@ -10,15 +10,15 @@ Download the launcher for your system. It installs the game, keeps it up to date
 
 | System | Download |
 |---|---|
-| Windows 10/11 (64-bit) | [HPMMO_Launcher.exe](https://github.com/semdin/hpmmo-client/releases/latest/download/HPMMO_Launcher.exe) |
-| macOS 11+ (Apple Silicon or Intel) | [HPMMO_Launcher-macos.zip](https://github.com/semdin/hpmmo-client/releases/latest/download/HPMMO_Launcher-macos.zip) |
-| Linux (x86_64) | [HPMMO_Launcher-x86_64.AppImage](https://github.com/semdin/hpmmo-client/releases/latest/download/HPMMO_Launcher-x86_64.AppImage) |
+| Windows 10/11 (64-bit) | [ThousandRealms_Launcher.exe](https://github.com/semdin/hpmmo-client/releases/latest/download/ThousandRealms_Launcher.exe) |
+| macOS 11+ (Apple Silicon or Intel) | [ThousandRealms_Launcher-macos.zip](https://github.com/semdin/hpmmo-client/releases/latest/download/ThousandRealms_Launcher-macos.zip) |
+| Linux (x86_64) | [ThousandRealms_Launcher-x86_64.AppImage](https://github.com/semdin/hpmmo-client/releases/latest/download/ThousandRealms_Launcher-x86_64.AppImage) |
 
 **First start:**
 
 - **Windows:** if SmartScreen warns you, click **More info → Run anyway**.
-- **macOS:** unzip the file and open **HPMMO Launcher**. If macOS blocks it, go to **System Settings → Privacy & Security** and click **Open Anyway**.
-- **Linux:** make the file executable (`chmod +x HPMMO_Launcher-x86_64.AppImage`), then run it.
+- **macOS:** unzip the file and open **Thousand Realms Launcher**. If macOS blocks it, go to **System Settings → Privacy & Security** and click **Open Anyway**.
+- **Linux:** make the file executable (`chmod +x ThousandRealms_Launcher-x86_64.AppImage`), then run it.
 
 The game is about 1 GB. Updates download only what changed.
 
@@ -56,9 +56,9 @@ The server status ("Sunucu çevrimiçi" = online) is shown on the login screen. 
 
 - **The game won't start or crashes:** update your graphics drivers (Windows and Linux need Vulkan support), then click **Dosyaları onar** (repair files) in the launcher.
 - **Bug reports:** send the log file along with what happened:
-  - Windows: `%APPDATA%\Godot\app_userdata\HPMMO\logs`
-  - macOS: `~/Library/Application Support/Godot/app_userdata/HPMMO/logs`
-  - Linux: `~/.local/share/godot/app_userdata/HPMMO/logs`
+  - Windows: `%APPDATA%\Godot\app_userdata\Thousand Realms\logs`
+  - macOS: `~/Library/Application Support/Godot/app_userdata/Thousand Realms/logs`
+  - Linux: `~/.local/share/godot/app_userdata/Thousand Realms/logs`
 
 ## For developers
 
