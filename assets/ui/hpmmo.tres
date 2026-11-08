@@ -13,22 +13,7 @@
 ; Type scale and the screen grid stay in `scripts/ui/ui_theme.gd`, because they
 ; are read by layout code rather than by the theme system.
 
-[gd_resource type="Theme" load_steps=36 format=3]
-
-[ext_resource type="FontFile" path="res://assets/fonts/Marcellus-Regular.ttf" id="1_body"]
-[ext_resource type="FontFile" path="res://assets/fonts/Marcellus-Regular.ttf" id="2_body_medium"]
-[ext_resource type="FontFile" path="res://assets/fonts/Marcellus-Regular.ttf" id="3_body_bold"]
-[ext_resource type="FontFile" path="res://assets/fonts/Cinzel-Variable.ttf" id="4_title"]
-
-[sub_resource type="FontVariation" id="fv_bold"]
-base_font = ExtResource("3_body_bold")
-variation_embolden = 0.55
-
-[sub_resource type="FontVariation" id="fv_title"]
-base_font = ExtResource("4_title")
-variation_opentype = {
-"wght": 700
-}
+[gd_resource type="Theme" load_steps=30 format=3]
 
 [sub_resource type="StyleBoxFlat" id="sb_window"]
 content_margin_left = 12.0
@@ -494,7 +479,6 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [resource]
-default_font = ExtResource("2_body_medium")
 default_font_size = 15
 Palette/colors/ink = Color(0.0431, 0.051, 0.0706, 1)
 Palette/colors/night = Color(0.0706, 0.0784, 0.1059, 1)
@@ -524,7 +508,6 @@ Button/colors/font_focus_color = Color(0.9255, 0.8824, 0.7529, 1)
 Button/colors/font_hover_color = Color(0.9569, 0.8863, 0.6275, 1)
 Button/colors/font_pressed_color = Color(0.8471, 0.7137, 0.2902, 1)
 Button/font_sizes/font_size = 15
-Button/fonts/font = SubResource("fv_bold")
 Button/styles/disabled = SubResource("sb_btn_disabled")
 Button/styles/focus = SubResource("sb_btn_focus")
 Button/styles/hover = SubResource("sb_btn_hover")
@@ -546,7 +529,6 @@ PrimaryButton/colors/font_color = Color(0.9255, 0.8824, 0.7529, 1)
 PrimaryButton/colors/font_hover_color = Color(0.9569, 0.8863, 0.6275, 1)
 PrimaryButton/colors/font_pressed_color = Color(0.8471, 0.7137, 0.2902, 1)
 PrimaryButton/font_sizes/font_size = 15
-PrimaryButton/fonts/font = SubResource("fv_bold")
 PrimaryButton/styles/disabled = SubResource("sb_primary_disabled")
 PrimaryButton/styles/focus = SubResource("sb_primary_normal")
 PrimaryButton/styles/hover = SubResource("sb_primary_hover")
@@ -559,10 +541,8 @@ SlotButton/styles/normal = SubResource("sb_slot_normal")
 SlotButton/styles/pressed = SubResource("sb_slot_pressed")
 Label/colors/font_color = Color(0.8118, 0.7922, 0.7294, 1)
 Label/font_sizes/font_size = 15
-Label/fonts/font = ExtResource("2_body_medium")
 TitleLabel/colors/font_color = Color(0.8471, 0.7137, 0.2902, 1)
 TitleLabel/font_sizes/font_size = 18
-TitleLabel/fonts/font = SubResource("fv_title")
 Panel/styles/panel = SubResource("sb_card")
 PanelContainer/styles/panel = SubResource("sb_card")
 PopupMenu/colors/font_color = Color(0.8118, 0.7922, 0.7294, 1)

@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://d4nfwdtn3l0kk"
-path="res://.godot/imported/AlegreyaSans-Medium.ttf-b08635d81291c3b640fcee7a2823ec07.fontdata"
+uid="uid://dt073plp7dihp"
+path="res://.godot/imported/Literata-Variable.ttf-4f37faa15341f1125b6bdeee4d9d1f4f.fontdata"
 
 [deps]
 
-source_file="res://assets/fonts/AlegreyaSans-Medium.ttf"
-dest_files=["res://.godot/imported/AlegreyaSans-Medium.ttf-b08635d81291c3b640fcee7a2823ec07.fontdata"]
+source_file="res://assets/fonts/Literata-Variable.ttf"
+dest_files=["res://.godot/imported/Literata-Variable.ttf-4f37faa15341f1125b6bdeee4d9d1f4f.fontdata"]
 
 [params]
 

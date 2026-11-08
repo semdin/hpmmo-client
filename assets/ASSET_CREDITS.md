@@ -35,8 +35,8 @@ Provenance and slice geometry: `assets/ui/arcane/PROVENANCE.md`.
 Hashes: `family-arcane-chrome` and `family-arcane-equipment-icons` in the manifest.
 Existing screens continue to use the central flat theme unless they opt in.
 
-- Fonts: **Cinzel** (headings) and **Alegreya Sans** (body), both SIL OFL 1.1,
-  vendored in `assets/fonts/` with the licence beside each face.
+- Font: **Literata** (every piece of interface text, one variable family),
+  SIL OFL 1.1, vendored in `assets/fonts/` with its licence beside it.
 
 The earlier PNG kit (Kenney *Fantasy UI Borders*, Kenney *UI Pack* and the
 procedural shapes) was removed in the same pass: nothing in the project loads
