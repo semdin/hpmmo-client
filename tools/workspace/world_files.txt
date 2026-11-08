@@ -328,6 +328,7 @@ assets/models/props/wands/wand_runebound.glb
 assets/models/props/wands/wand_runebound_wand_runebound_paint.png
 assets/models/props/wands/wand_silverthorn.glb
 assets/models/props/wands/wand_silverthorn_wand_silverthorn_paint.png
+assets/models/village/village_kit.json
 assets/shaders/body_flame.gdshader
 assets/shaders/castle/candle_flame.gdshader
 assets/shaders/castle/enchanted_sky.gdshader
@@ -790,6 +791,7 @@ scripts/world/grounds/grounds_precinct.gd
 scripts/world/grounds/grounds_scatter.gd
 scripts/world/grounds/grounds_sites.gd
 scripts/world/grounds/pumpkin_mesh.gd
+scripts/world/grounds/village_kit.gd
 scripts/world/grounds_terrain.gd
 scripts/world/map_controller.gd
 scripts/world/npc.gd

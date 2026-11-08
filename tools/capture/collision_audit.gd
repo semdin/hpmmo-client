@@ -10,8 +10,9 @@ extends Node
 ## temporary trimesh on its own physics layer; a grid of downward rays over each
 ## mesh compares the drawn top with the collision top (layer 1: terrain, cover,
 ## buildings). Cells whose drawn top stands more than --gap above the collision
-## are walk-through; cells whose collision stands more than --gap above a drawn
-## top inside the mesh are invisible blockers. Results are grouped per mesh.
+## are walk-through; cells whose collision stands more than --gap off a drawn
+## top (measured along the surface normal, so steep roofs are fair) inside the
+## mesh are invisible blockers. Results are grouped per mesh.
 ## Needs a window (headless builds no visuals).
 
 const ROOTS := ["HogwartsCastle", "Courtyard", "Precinct", "Sites", "BroomLanding"]
@@ -131,7 +132,9 @@ func _ready() -> void:
 						worst = maxf(worst, top - floor_y)
 						if under == "":
 							under = String(solid.collider.name) if not solid.is_empty() else "(nothing)"
-					elif floor_y - top > gap:
+					# a blocker is measured off the surface (along its normal): on a
+					# 70-degree tower roof a hull 5 cm proud stands 0.7 m higher
+					elif (floor_y - top) * (drawn.normal as Vector3).y > gap:
 						blocked.append(Vector3(x, top, z))
 				z += step
 			x += step
