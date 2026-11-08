@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://met7gnpgqu8d"
-path="res://.godot/imported/noise_flow_512.png-9eec6083cc8b431d77984d74474391b0.ctex"
+path.s3tc="res://.godot/imported/noise_flow_512.png-9eec6083cc8b431d77984d74474391b0.s3tc.ctex"
+path.etc2="res://.godot/imported/noise_flow_512.png-9eec6083cc8b431d77984d74474391b0.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/tex/noise_flow_512.png"
-dest_files=["res://.godot/imported/noise_flow_512.png-9eec6083cc8b431d77984d74474391b0.ctex"]
+dest_files=["res://.godot/imported/noise_flow_512.png-9eec6083cc8b431d77984d74474391b0.s3tc.ctex", "res://.godot/imported/noise_flow_512.png-9eec6083cc8b431d77984d74474391b0.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

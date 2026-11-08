@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dwtybqrdvbh1s"
-path="res://.godot/imported/house_tower_T_VineLeaf_png.webp-c824758ab17c4ef38d6652fe30028ca5.ctex"
+path.s3tc="res://.godot/imported/house_tower_T_VineLeaf_png.webp-c824758ab17c4ef38d6652fe30028ca5.s3tc.ctex"
+path.etc2="res://.godot/imported/house_tower_T_VineLeaf_png.webp-c824758ab17c4ef38d6652fe30028ca5.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "1d8658b11717255cfaeec2b4870d0724"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/village/house_tower_T_VineLeaf_png.webp"
-dest_files=["res://.godot/imported/house_tower_T_VineLeaf_png.webp-c824758ab17c4ef38d6652fe30028ca5.ctex"]
+dest_files=["res://.godot/imported/house_tower_T_VineLeaf_png.webp-c824758ab17c4ef38d6652fe30028ca5.s3tc.ctex", "res://.godot/imported/house_tower_T_VineLeaf_png.webp-c824758ab17c4ef38d6652fe30028ca5.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

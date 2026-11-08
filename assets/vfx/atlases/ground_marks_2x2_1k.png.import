@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://43hpr3ggc1fd"
-path="res://.godot/imported/ground_marks_2x2_1k.png-73dc8454763a5a8267f8bfb5d2912788.ctex"
+path.s3tc="res://.godot/imported/ground_marks_2x2_1k.png-73dc8454763a5a8267f8bfb5d2912788.s3tc.ctex"
+path.etc2="res://.godot/imported/ground_marks_2x2_1k.png-73dc8454763a5a8267f8bfb5d2912788.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/atlases/ground_marks_2x2_1k.png"
-dest_files=["res://.godot/imported/ground_marks_2x2_1k.png-73dc8454763a5a8267f8bfb5d2912788.ctex"]
+dest_files=["res://.godot/imported/ground_marks_2x2_1k.png-73dc8454763a5a8267f8bfb5d2912788.s3tc.ctex", "res://.godot/imported/ground_marks_2x2_1k.png-73dc8454763a5a8267f8bfb5d2912788.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

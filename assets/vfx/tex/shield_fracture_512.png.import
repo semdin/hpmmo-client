@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cp14d48wlptf4"
-path="res://.godot/imported/shield_fracture_512.png-949a365c08f4b5b4d3af56568a7f0152.ctex"
+path.s3tc="res://.godot/imported/shield_fracture_512.png-949a365c08f4b5b4d3af56568a7f0152.s3tc.ctex"
+path.etc2="res://.godot/imported/shield_fracture_512.png-949a365c08f4b5b4d3af56568a7f0152.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/vfx/tex/shield_fracture_512.png"
-dest_files=["res://.godot/imported/shield_fracture_512.png-949a365c08f4b5b4d3af56568a7f0152.ctex"]
+dest_files=["res://.godot/imported/shield_fracture_512.png-949a365c08f4b5b4d3af56568a7f0152.s3tc.ctex", "res://.godot/imported/shield_fracture_512.png-949a365c08f4b5b4d3af56568a7f0152.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

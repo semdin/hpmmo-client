@@ -788,14 +788,6 @@ msgid "Fonts"
 msgstr ""
 
 #: scripts/ui/game_credits.gd
-msgid "Titles"
-msgstr ""
-
-#: scripts/ui/game_credits.gd
-msgid "Body text"
-msgstr ""
-
-#: scripts/ui/game_credits.gd
 msgid "Interface lettering"
 msgstr ""
 
@@ -1384,7 +1376,7 @@ msgid "Despair"
 msgstr ""
 
 #: scripts/ui/hud_buff_bar.gd
-msgid "A dementor's cold: no natural health recovery."
+msgid "A Pallid's cold: no natural health recovery."
 msgstr ""
 
 #: scripts/ui/hud_buff_bar.gd
@@ -3840,7 +3832,7 @@ msgid "Take it off the anvil"
 msgstr ""
 
 #: scripts/ui/ollivander_ui.gd
-msgid "Takes wands, cloaks, brooms and accessories from +0 to +9. Every step needs materials and galleons; the chance falls with each level, and from +%d a failure drops the item one level."
+msgid "Takes wands, cloaks, brooms and accessories from +0 to +9. Every step needs materials and Oril; the chance falls with each level, and from +%d a failure drops the item one level."
 msgstr ""
 
 #: scripts/ui/ollivander_ui.gd
@@ -4436,7 +4428,7 @@ msgid "Time is up - the run is over."
 msgstr ""
 
 #: scripts/world/dungeon_director.gd
-msgid "A dementor's chill sweeps the halls - nobody recovers for a while."
+msgid "A Pallid's chill sweeps the halls - nobody recovers for a while."
 msgstr ""
 
 #: scripts/world/dungeon_director.gd
@@ -4520,7 +4512,7 @@ msgid "The library is inside, past the great doors. Mind the books."
 msgstr ""
 
 #: scripts/world/game_world.gd
-msgid "The Great Hall is through the entrance hall. Charms is across the hall."
+msgid "The Great Hall is through the entrance hall. The classrooms are across the hall."
 msgstr ""
 
 #: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json
@@ -4848,10 +4840,6 @@ msgid "SLOT 1 / 2"
 msgstr ""
 
 #: scenes/main/character_select.tscn
-msgid "Harry"
-msgstr ""
-
-#: scenes/main/character_select.tscn
 msgid "[ Velkar ]"
 msgstr ""
 
@@ -5092,7 +5080,7 @@ msgid "Dragon Sinew"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Vibrant magical core tissue from an Antipodean Opaleye. Needed to refine wands to +5 - +7."
+msgid "Vibrant magical core tissue from a mountain drake. Needed to refine wands to +5 - +7."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5100,7 +5088,7 @@ msgid "Night Steed Hair"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Spectral invisible hair of rare thestrals. Required for legendary +8 and +9 wand transmutations."
+msgid "Spectral, near-invisible hair of the rare night steeds. Required for legendary +8 and +9 wand transmutations."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -6000,7 +5988,7 @@ msgid "the Stone Raven"
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json
-msgid "Tap the witch's hump - Dissendium!"
+msgid "Press the Stone Raven's eye - the wall slides open!"
 msgstr ""
 
 #: addons/hpmmo_sim/data/travel.json

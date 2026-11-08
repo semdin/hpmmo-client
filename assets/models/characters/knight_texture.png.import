@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bghdv50d7aoal"
-path="res://.godot/imported/knight_texture.png-63bf7dfbf09d359a92a99870ddd8695f.ctex"
+path.s3tc="res://.godot/imported/knight_texture.png-63bf7dfbf09d359a92a99870ddd8695f.s3tc.ctex"
+path.etc2="res://.godot/imported/knight_texture.png-63bf7dfbf09d359a92a99870ddd8695f.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/models/characters/knight_texture.png"
-dest_files=["res://.godot/imported/knight_texture.png-63bf7dfbf09d359a92a99870ddd8695f.ctex"]
+dest_files=["res://.godot/imported/knight_texture.png-63bf7dfbf09d359a92a99870ddd8695f.s3tc.ctex", "res://.godot/imported/knight_texture.png-63bf7dfbf09d359a92a99870ddd8695f.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
