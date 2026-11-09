@@ -230,7 +230,8 @@ func _ready() -> void:
 			_corrections += 1)
 	SimAuthority.cast_landed.connect(func(cast_id: int, _caster: int, spell_id: String, hits: Array):
 		if not hits.is_empty():
-			_record("landed", {"cast_id": cast_id, "spell": spell_id, "hits": hits.size()}))
+			_record("landed", {"cast_id": cast_id, "spell": spell_id, "hits": hits.size(),
+				"on": hits.map(func(h): return [int(h.get("uid", 0)), int(h.get("amount", 0))])}))
 	var err := SimNet.join("127.0.0.1", port, probe_name)
 	if err != OK:
 		_record("error", {"message": "join_failed"})
@@ -652,6 +653,23 @@ func _update_target() -> void:
 		_pack_uids = _pack_members(pack)
 		_pack_anchor = _uid_position(int(_pack_uids[0])) if not _pack_uids.is_empty() else player.global_position
 		_record("pack_selected", {"pack_id": pack, "members": _pack_uids.duplicate()})
+	# Party: only Lead casts, and a bolt lands on the first pack member in its
+	# path, so with the pack crowding him his hits spread over it and he could
+	# die (~11 s) before any one of them fell. Focus whichever member is lowest
+	# now, so the stray hits still add up to a kill.
+	if mode == "party":
+		var low := 0
+		var low_hp := 0
+		for uid in _pack_uids:
+			if _is_dead(uid):
+				continue
+			var hp := int((SimAuthority.entities.get(uid, {}) as Dictionary).get("hp", 0))
+			if low == 0 or hp < low_hp:
+				low = uid
+				low_hp = hp
+		if low != 0:
+			_set_target(low)
+			return
 	# Keep the current target while it lives; otherwise take the next live member
 	# of the same pack (a pack respawns together only when all of it is dead).
 	if _target_uid != 0 and not _is_dead(_target_uid):

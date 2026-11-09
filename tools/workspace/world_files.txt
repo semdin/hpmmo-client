@@ -386,6 +386,7 @@ assets/terrain/grounds/scatter/fern_b.bin
 assets/terrain/grounds/scatter/fir_a.bin
 assets/terrain/grounds/scatter/fir_b.bin
 assets/terrain/grounds/scatter/fir_c.bin
+assets/terrain/grounds/scatter/lamp.bin
 assets/terrain/grounds/scatter/log.bin
 assets/terrain/grounds/scatter/pine_a.bin
 assets/terrain/grounds/scatter/pine_b.bin

@@ -179,4 +179,12 @@ func _add_vegetation(terrain: Terrain3D, src: String) -> int:
 				Vector3(data[o], data[o + 1], data[o + 2])))
 		total += xforms.size()
 		id += 1
+	# Lamp posts are not vegetation (no Terrain3D mesh asset, no colliders):
+	# GroundsBuilder._road_lamps builds them from scatter/lamp.bin, which this
+	# build never shipped - the 53 road lamps silently did not exist.
+	var lamps := src.path_join("scatter_lamp.bin")
+	if FileAccess.file_exists(lamps):
+		DirAccess.copy_absolute(lamps, ProjectSettings.globalize_path(scatter_dir + "lamp.bin"))
+	else:
+		push_warning("build_grounds: %s is missing; the road lamps will not be built" % lamps)
 	return total
