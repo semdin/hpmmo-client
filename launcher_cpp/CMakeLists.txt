@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(VENDOR_ED25519 ${CMAKE_CURRENT_SOURCE_DIR}/vendor/ed25519)
+set(VENDOR_LIBDEFLATE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/libdeflate)
 
 # The launcher's own version (self-update compares it with the manifest's
 # launcher_version). CI passes -DHPMMO_LAUNCHER_VERSION=3.0.<unix time of the
@@ -18,9 +19,9 @@ if(WIN32)
     add_compile_definitions(_WIN32_WINNT=0x0A00 WINVER=0x0A00 _WIN32_IE=0x0A00)
 endif()
 
-# Shared launcher/updater core. Ed25519 (vendored, public-domain-style zlib
-# license - see vendor/PROVENANCE.md) is the only third-party code; libcurl is
-# the HTTP transport on Linux/macOS (WinHTTP on Windows).
+# Shared launcher/updater core. Ed25519 (zlib-style license) and libdeflate's
+# decompressor (MIT) are vendored - see vendor/PROVENANCE.md; libcurl is the
+# HTTP transport on Linux/macOS (WinHTTP on Windows).
 if(WIN32)
     set(HPMMO_PLATFORM_SOURCES src/common_win.cpp src/http_winhttp.cpp)
 else()
@@ -43,8 +44,14 @@ add_library(hpmmo_core STATIC
     ${VENDOR_ED25519}/sc.c
     ${VENDOR_ED25519}/sha512.c
     ${VENDOR_ED25519}/verify.c
+    # Release chunks inflate with libdeflate (vendor/PROVENANCE.md).
+    ${VENDOR_LIBDEFLATE}/lib/deflate_decompress.c
+    ${VENDOR_LIBDEFLATE}/lib/utils.c
+    ${VENDOR_LIBDEFLATE}/lib/x86/cpu_features.c
+    ${VENDOR_LIBDEFLATE}/lib/arm/cpu_features.c
 )
 target_include_directories(hpmmo_core PUBLIC src ${VENDOR_ED25519})
+target_include_directories(hpmmo_core PRIVATE ${VENDOR_LIBDEFLATE})
 if(WIN32)
     target_link_libraries(hpmmo_core PUBLIC
         bcrypt

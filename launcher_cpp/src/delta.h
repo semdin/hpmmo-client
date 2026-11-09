@@ -51,6 +51,10 @@ struct DeltaCallbacks {
                        std::string& err)>
         fetchRange;
     std::function<void(uint64_t done, uint64_t total)> progress;   // compressed bytes
+    // Once the plan is known: may the build use `storeBytes` more disk for the
+    // chunk store (inflated downloads) on top of the staged files? false with
+    // a message refuses before anything is downloaded.
+    std::function<bool(uint64_t storeBytes, std::string& message)> reserve;
     std::atomic<bool>* cancel = nullptr;
 };
 
@@ -58,6 +62,9 @@ struct DeltaStats {
     uint64_t reusedBytes = 0;      // copied from the local install
     uint64_t downloadBytes = 0;    // fetched over the network (compressed)
     uint64_t requests = 0;
+    // The build stopped for lack of disk space (refused up front, or a write
+    // to the chunk store or a staged file failed).
+    bool noSpace = false;
 };
 
 // Builds every file of `index` under stagedDir. storeDir keeps downloaded

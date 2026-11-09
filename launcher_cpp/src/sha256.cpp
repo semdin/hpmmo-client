@@ -98,6 +98,37 @@ std::string Sha256FileHex(const std::wstring& path) {
     return HexLower(digest, 32);
 }
 
+Sha256Stream::Sha256Stream() : state_(nullptr) {
+    BCRYPT_ALG_HANDLE alg = Sha256Alg();
+    BCRYPT_HASH_HANDLE hash = NULL;
+    if (alg && BCryptCreateHash(alg, &hash, NULL, 0, NULL, 0, 0) == 0) state_ = hash;
+}
+
+Sha256Stream::~Sha256Stream() {
+    if (state_) BCryptDestroyHash((BCRYPT_HASH_HANDLE)state_);
+}
+
+bool Sha256Stream::Update(const void* data, size_t len) {
+    if (!state_) return false;
+    const unsigned char* p = (const unsigned char*)data;
+    while (len > 0) {
+        ULONG take = len > 0x40000000u ? 0x40000000u : (ULONG)len;
+        if (BCryptHashData((BCRYPT_HASH_HANDLE)state_, (PUCHAR)p, take, 0) != 0) return false;
+        p += take;
+        len -= take;
+    }
+    return true;
+}
+
+std::string Sha256Stream::FinishHex() {
+    if (!state_) return "";
+    unsigned char digest[32];
+    bool ok = BCryptFinishHash((BCRYPT_HASH_HANDLE)state_, digest, 32, 0) == 0;
+    BCryptDestroyHash((BCRYPT_HASH_HANDLE)state_);
+    state_ = nullptr;
+    return ok ? HexLower(digest, 32) : "";
+}
+
 }  // namespace hpmmo
 
 #else  // !_WIN32: portable SHA-256 (FIPS 180-4), no system crypto needed.
@@ -237,6 +268,25 @@ std::string Sha256FileHex(const std::wstring& path) {
     unsigned char digest[32];
     std::string err;
     if (!Sha256File(path, digest, nullptr, err)) return "";
+    return HexLower(digest, 32);
+}
+
+Sha256Stream::Sha256Stream() : state_(new Sha256Ctx()) {}
+
+Sha256Stream::~Sha256Stream() { delete (Sha256Ctx*)state_; }
+
+bool Sha256Stream::Update(const void* data, size_t len) {
+    if (!state_) return false;
+    ((Sha256Ctx*)state_)->Update((const unsigned char*)data, len);
+    return true;
+}
+
+std::string Sha256Stream::FinishHex() {
+    if (!state_) return "";
+    unsigned char digest[32];
+    ((Sha256Ctx*)state_)->Final(digest);
+    delete (Sha256Ctx*)state_;
+    state_ = nullptr;
     return HexLower(digest, 32);
 }
 

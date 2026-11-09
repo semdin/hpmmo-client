@@ -78,6 +78,10 @@ bool MoveReplace(const std::wstring& from, const std::wstring& to, bool writeThr
 bool MoveNoReplace(const std::wstring& from, const std::wstring& to);
 // Copies a file, replacing dst.
 bool CopyFilePlain(const std::wstring& src, const std::wstring& dst);
+// Forces a written file's data to the disk (FlushFileBuffers / fsync), so a
+// power loss right after an update cannot leave a half-written game file
+// behind an already-activated version.
+bool FlushToDisk(const std::wstring& path);
 // Marks a file executable (no-op on Windows).
 bool MakeExecutable(const std::wstring& path);
 FILE* OpenFileW(const std::wstring& path, const wchar_t* mode);

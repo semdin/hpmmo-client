@@ -31,9 +31,9 @@ Source:
 
 SHA-256 for artifact/manifest/certificate hashing is not vendored: it uses the
 Windows CNG API (`bcrypt.dll`, `BCRYPT_SHA256_ALGORITHM`). ZIP container
-parsing and DEFLATE decompression are implemented in-tree
-(`src/zip.cpp`, `src/inflate.cpp`); Ed25519 is the only vendored third-party
-code.
+parsing and streaming DEFLATE decompression are implemented in-tree
+(`src/zip.cpp`, `src/inflate.cpp`); release chunks are inflated with the
+vendored libdeflate (section below).
 
 ## stb (Linux/macOS launcher UI, 2026-10-19)
 
@@ -48,3 +48,32 @@ Source:
   https://github.com/nothings/stb) - public domain / MIT dual license (the
   license text is at the end of each header). Used only by the SDL launcher UI:
   JPEG decode of the background, TrueType rasterisation, PNG screenshots.
+
+## libdeflate (chunk inflate, 2026-11-09)
+
+| file | bytes | sha256 |
+| --- | --- | --- |
+| vendor/libdeflate/COPYING | 1078 | 4ad69099cb4374836fd27583d9991e2838cd86b6e4666ab26b2d32582c91e73a |
+| vendor/libdeflate/common_defs.h | 21815 | 0702970eb23da9bca3be9f31fe71824b2f88c4fbac55c59cee8d42cdaec63b63 |
+| vendor/libdeflate/lib/arm/cpu_features.c | 6562 | c75efd51385cb7f5aa729d95a8f5b3888920fd3fc7e198554f69d1e0dad2f62c |
+| vendor/libdeflate/lib/arm/cpu_features.h | 7107 | 0cff5c0110021dc8b18511e328f913f1bad21f31ad927497d1f428db4e6ed239 |
+| vendor/libdeflate/lib/cpu_features_common.h | 2788 | f4eb0800558e9116dd14446ccfb9b1896f970aec6de42c18366a29bde73fd0da |
+| vendor/libdeflate/lib/decompress_template.h | 25048 | ade3034c1d5c840cb31bd9738a015be804862a8dfce03c14ac2f5b3a826792b8 |
+| vendor/libdeflate/lib/deflate_constants.h | 1747 | 72ea6e5f0abe53e781203e3f383603a765a768b860a09b3356be36bfd87c8af3 |
+| vendor/libdeflate/lib/deflate_decompress.c | 49297 | bc16ab65325ce4ac14af830b2cf6c805770beab01fd2f09226dca3dfa3f8bb47 |
+| vendor/libdeflate/lib/lib_common.h | 3624 | e7aa1f2750434e1019ffabda577dab0fdf5b95f010f6f20aa7e21323b3bcceea |
+| vendor/libdeflate/lib/utils.c | 3425 | 3d4c9f6d488610d4d9ff314b2dc783e24079325b78af13d3ee37b18fcc0b0d8a |
+| vendor/libdeflate/lib/x86/cpu_features.c | 6371 | 9ed976e4c66478e8b6a8856424816147a971f75894c66f03274ab8119074dde0 |
+| vendor/libdeflate/lib/x86/cpu_features.h | 5696 | 7bfbea8cd8e801209771f2190f27bbd3d4e386ce13dd8401a2c276e5bccd1593 |
+| vendor/libdeflate/lib/x86/decompress_impl.h | 2190 | 81ab9fd7d4723fdc7ae81dca82f817bcecb7baf5bdfffde0ccfbba70569ac2f1 |
+| vendor/libdeflate/libdeflate.h | 17098 | 957cda6906c2be6c8978cf19779f1aad9dd121af1147a10e184b137db353678d |
+
+Source:
+- ebiggers/libdeflate, release v1.24 (https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.24.tar.gz,
+  tarball sha256 ad8d3723d0065c4723ab738be9723f2ff1cb0f1571e8bfcf0301ff9661f475e8, fetched
+  2026-11-09) - MIT license (vendor/libdeflate/COPYING). Decompression only:
+  `lib/deflate_decompress.c`, `lib/utils.c` and the x86/arm CPU feature probes with
+  their headers; the compressors, gzip/zlib wrappers and checksums are not vendored.
+  Used by `src/delta.cpp` to inflate downloaded release chunks straight into their
+  known-size buffer (measured 719 MB/s against 117 MB/s for `src/inflate.cpp`, which
+  still serves the streaming ZIP path).

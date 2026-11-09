@@ -15,4 +15,20 @@ bool Sha256File(const std::wstring& path, unsigned char out[32], uint64_t* sizeO
                 std::string& err);
 std::string Sha256FileHex(const std::wstring& path);
 
+// Incremental SHA-256 over data fed in pieces (a file assembled from chunks is
+// hashed as it is written, instead of being read back afterwards).
+class Sha256Stream {
+public:
+    Sha256Stream();
+    ~Sha256Stream();
+    Sha256Stream(const Sha256Stream&) = delete;
+    Sha256Stream& operator=(const Sha256Stream&) = delete;
+    bool Update(const void* data, size_t len);
+    // Lower-case hex digest, or "" on failure. The stream is spent afterwards.
+    std::string FinishHex();
+
+private:
+    void* state_;
+};
+
 }  // namespace hpmmo

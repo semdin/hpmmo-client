@@ -419,6 +419,15 @@ bool CopyFilePlain(const std::wstring& src, const std::wstring& dst) {
     return CopyFileW(src.c_str(), dst.c_str(), FALSE) != 0;
 }
 
+bool FlushToDisk(const std::wstring& path) {
+    HANDLE h = CreateFileW(path.c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+                           FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE) return false;
+    bool ok = FlushFileBuffers(h) != 0;
+    CloseHandle(h);
+    return ok;
+}
+
 bool MakeExecutable(const std::wstring&) { return true; }
 
 FILE* OpenFileW(const std::wstring& path, const wchar_t* mode) { return _wfopen(path.c_str(), mode); }

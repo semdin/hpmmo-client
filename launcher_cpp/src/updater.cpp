@@ -9,6 +9,7 @@
 #include <chrono>
 #include <cstdio>
 #include <map>
+#include <mutex>
 #include <thread>
 
 #ifndef _WIN32
@@ -1189,16 +1190,53 @@ bool CopyFileAtomic(const std::wstring& src, const std::wstring& dst, std::strin
 }
 
 // The full update pipeline. verifyOnly/repair select the mode.
+// The launcher checks, then updates: the update fetched the signed manifest,
+// its signature and the status document all over again (and the old launcher
+// checked a third time afterwards), each over a fresh TLS session through
+// GitHub's redirect - 1-2.5 s of a typical update. A check's verified
+// documents are reused by an update in the same process within kReuseFetchMs.
+constexpr int64_t kReuseFetchMs = 60 * 1000;
+struct RecentFetch {
+    std::mutex mu;
+    bool valid = false;
+    ReleaseManifest m;
+    StatusDoc st;
+    std::chrono::steady_clock::time_point at;
+};
+RecentFetch& LastFetch() {
+    static RecentFetch r;
+    return r;
+}
+
 bool RunFetchAndCompare(UpdaterContext& ctx, ReleaseManifest& m, StatusDoc& st,
                         InstalledState& inst, CheckSummary* summary, std::string& message,
-                        int& code) {
+                        int& code, bool reuseRecent = false) {
     LoadCurrentImpl(ctx, inst);
-    if (!FetchManifest(ctx, m, message, code)) return false;
-    std::string statusWarn;
-    bool statusOk = FetchStatus(ctx, st, statusWarn);
-    if (!statusOk) {
-        LogMsg("[Updater] " + statusWarn + " (continuing with the manifest)");
-        if (st.state.empty() || st.state == "UNKNOWN") st.state = "OFFLINE";
+    bool reused = false;
+    if (reuseRecent) {
+        RecentFetch& r = LastFetch();
+        std::lock_guard<std::mutex> lock(r.mu);
+        auto age = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - r.at).count();
+        if (r.valid && age >= 0 && age < kReuseFetchMs) {
+            m = r.m;
+            st = r.st;
+            reused = true;
+        }
+    }
+    if (!reused) {
+        if (!FetchManifest(ctx, m, message, code)) return false;
+        std::string statusWarn;
+        bool statusOk = FetchStatus(ctx, st, statusWarn);
+        if (!statusOk) {
+            LogMsg("[Updater] " + statusWarn + " (continuing with the manifest)");
+            if (st.state.empty() || st.state == "UNKNOWN") st.state = "OFFLINE";
+        }
+        RecentFetch& r = LastFetch();
+        std::lock_guard<std::mutex> lock(r.mu);
+        r.m = m;
+        r.st = st;
+        r.at = std::chrono::steady_clock::now();
+        r.valid = true;
     }
     std::string serverProto, protoReason;
     bool protoOk = ProtocolCompatible(m, st, serverProto, protoReason);
@@ -1380,6 +1418,11 @@ bool StageFromChunks(UpdaterContext& ctx, const ReleaseManifest& m, const Instal
     }
     DeltaCallbacks cb;
     cb.cancel = ctx.cancel;
+    // The staged files (checked above) plus the chunk store's inflated
+    // downloads: a fresh install peaks at about twice the game's size.
+    cb.reserve = [&](uint64_t storeBytes, std::string& msg) {
+        return CheckDiskSpace(ctx, total + storeBytes + kSpaceSlack, msg);
+    };
     bool assembling = false;
     cb.progress = [&](uint64_t done, uint64_t all) {
         ReportProgress(ctx, L"Downloading", done, all);
@@ -1422,7 +1465,7 @@ bool StageFromChunks(UpdaterContext& ctx, const ReleaseManifest& m, const Instal
                          cancelled, err)) {
         RemoveDirRecursive(stagedDir);
         message = err;
-        code = cancelled ? kExitCancelled : kExitDownload;
+        code = cancelled ? kExitCancelled : (stats.noSpace ? kExitDiskSpace : kExitDownload);
         return false;
     }
 
@@ -1432,12 +1475,21 @@ bool StageFromChunks(UpdaterContext& ctx, const ReleaseManifest& m, const Instal
     contentArt.sha256 = m.contentIndexSha256;
     contentArt.size = raw.size();
     JsonValue rec;
-    VerifyResult vr;
     std::string verr;
+    // BuildFromChunks hashed every file as it wrote it (and checked the size of
+    // every copy), so the record is checked against the files by size here; a
+    // full re-hash read all 1.3 GB back a second time. Repair, journal recovery
+    // and the zip path still verify every file in full.
+    bool sizesOk = true;
+    for (const auto& ef : files) {
+        std::wstring rel = Utf8ToWide(ef.relPath);
+        std::replace(rel.begin(), rel.end(), L'/', kPathSep);
+        if (FileSizeOrZero(JoinPath(stagedDir, rel)) != ef.size) sizesOk = false;
+    }
     if (!WriteFileAtomic(JoinPath(stagedDir, L".install-record.json"),
                          BuildRecordJson(m.clientVersion, m, contentArt, files)) ||
         !WriteFileAtomic(JoinPath(stagedDir, L".content.json"), raw) || !LoadInstallRecord(stagedDir, rec, verr) ||
-        !VerifyInstallFiles(stagedDir, rec, vr, verr) || !vr.missing.empty() || !vr.corrupt.empty()) {
+        !sizesOk) {
         RemoveDirRecursive(stagedDir);
         message = "the chunk-built installation failed verification";
         code = kExitIntegrity;
@@ -1460,7 +1512,7 @@ CommandResult UpdateImpl(UpdaterContext& ctx, CheckSummary* summary) {
     if (!RecoverPendingActivation(ctx)) {
         LogMsg("[Updater] pending activation could not be recovered; it will be redone");
     }
-    if (!RunFetchAndCompare(ctx, m, st, inst, summary, message, code)) {
+    if (!RunFetchAndCompare(ctx, m, st, inst, summary, message, code, ctx.interactive)) {
         return Fail("update", code, message);
     }
     std::string serverProto, protoReason;

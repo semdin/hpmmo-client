@@ -392,6 +392,14 @@ bool MoveNoReplace(const std::wstring& from, const std::wstring& to) {
     return rename(U8(from).c_str(), U8(to).c_str()) == 0;
 }
 
+bool FlushToDisk(const std::wstring& path) {
+    int fd = open(U8(path).c_str(), O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return false;
+    bool ok = fsync(fd) == 0;
+    close(fd);
+    return ok;
+}
+
 bool CopyFilePlain(const std::wstring& src, const std::wstring& dst) {
     FILE* in = fopen(U8(src).c_str(), "rb");
     if (!in) return false;

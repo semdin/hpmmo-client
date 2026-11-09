@@ -233,9 +233,19 @@ void UpdateWorker(bool repair) {
             PostRefresh();
             return;
         }
-        // Refresh what is installed now.
-        hpmmo::CheckSummary after = hpmmo::DoCheck(cli, g_Cfg, &g_Cancel, status);
-        if (after.ok) ApplySummary(after);
+        // What is installed now comes from the update's own answer: a third
+        // full check (manifest, signature and status over fresh connections)
+        // only to learn the version just installed cost about a second.
+        hpmmo::JsonValue done;
+        std::string derr;
+        if (hpmmo::JsonValue::Parse(r.json, done, derr) && done.isObject()) {
+            std::string v = done.str("installed_version");
+            if (v.empty()) v = done.str("to_version");
+            if (!v.empty()) {
+                std::lock_guard<std::mutex> lock(g_Mutex);
+                g_InstalledVersion = v;
+            }
+        }
     }
 
     SetState(Phase::Ready, L"Oyun hazır", ReadyDetail());

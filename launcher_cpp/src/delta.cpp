@@ -1,9 +1,10 @@
 #include "delta.h"
 
 #include "common.h"
-#include "inflate.h"
+
 #include "json.h"
 #include "sha256.h"
+#include "libdeflate.h"
 
 #include <algorithm>
 #include <atomic>
@@ -50,18 +51,48 @@ std::wstring NativePath(const std::wstring& root, const std::string& rel) {
     return JoinPath(root, w);
 }
 
-bool ReadAt(const std::wstring& path, uint64_t offset, uint64_t len, std::string& out) {
-    out.clear();
-    FILE* f = OpenFileW(path, L"rb");
-    if (!f) return false;
-    bool ok = SeekFile64(f, offset);
-    if (ok) {
-        out.resize((size_t)len);
-        ok = len == 0 || fread(&out[0], 1, (size_t)len, f) == len;
+// Reads chunks out of a few large files. One handle per file stays open
+// (an fopen per chunk was ~3,600 opens an update), and the buffer only grows:
+// clearing it first made every read zero-fill the whole chunk.
+class ChunkReader {
+public:
+    ~ChunkReader() { Close(); }
+    void Close() {
+        for (auto& kv : open_) fclose(kv.second);
+        open_.clear();
     }
-    fclose(f);
-    return ok;
-}
+    bool Read(const std::wstring& path, uint64_t offset, uint64_t len, std::string& out) {
+        auto it = open_.find(path);
+        if (it == open_.end()) {
+            FILE* f = OpenFileW(path, L"rb");
+            if (!f) return false;
+            it = open_.emplace(path, f).first;
+        }
+        if (!SeekFile64(it->second, offset)) return false;
+        out.resize((size_t)len);
+        return len == 0 || fread(&out[0], 1, (size_t)len, it->second) == len;
+    }
+
+private:
+    std::map<std::wstring, FILE*> open_;
+};
+
+// One libdeflate decompressor per download worker.
+struct Inflater {
+    libdeflate_decompressor* d = libdeflate_alloc_decompressor();
+    ~Inflater() {
+        if (d) libdeflate_free_decompressor(d);
+    }
+    // Inflates exactly `clen` raw-DEFLATE bytes into exactly `length` bytes.
+    bool Run(const unsigned char* in, size_t clen, size_t length, std::string& out) {
+        if (!d) return false;
+        out.resize(length);
+        size_t usedIn = 0, produced = 0;
+        libdeflate_result r = libdeflate_deflate_decompress_ex(d, in, clen, length ? &out[0] : nullptr, length,
+                                                               &usedIn, &produced);
+        return r == LIBDEFLATE_SUCCESS && usedIn == clen && produced == length;
+    }
+};
 
 bool ParseChunks(const JsonValue& file, size_t sourceCount, ContentFile& out, std::string& err) {
     const auto* chunks = file.arr("chunks");
@@ -204,13 +235,26 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
     }
     std::map<std::string, Ref> verifiedLocal;
     std::string buf;
-    for (const auto& kv : needed) {
-        auto it = localChunks.find(kv.first);
-        if (it == localChunks.end() || it->second.length != kv.second->length) continue;
-        if (ReadAt(it->second.path, it->second.offset, it->second.length, buf) && Sha256Hex(buf.data(), buf.size()) == kv.first) {
-            verifiedLocal.emplace(kv.first, it->second);
+    {
+        // In file order: reading 3,600 chunks in hash order jumped all over a
+        // 1.2 GB file.
+        std::vector<std::pair<const Ref*, const std::string*>> candidates;
+        for (const auto& kv : needed) {
+            auto it = localChunks.find(kv.first);
+            if (it == localChunks.end() || it->second.length != kv.second->length) continue;
+            candidates.emplace_back(&it->second, &kv.first);
         }
-        if (stop()) return cancelled = true, false;
+        std::sort(candidates.begin(), candidates.end(), [](const auto& a, const auto& b) {
+            return a.first->path != b.first->path ? a.first->path < b.first->path : a.first->offset < b.first->offset;
+        });
+        ChunkReader reader;
+        for (const auto& cand : candidates) {
+            if (reader.Read(cand.first->path, cand.first->offset, cand.first->length, buf) &&
+                Sha256Hex(buf.data(), buf.size()) == *cand.second) {
+                verifiedLocal.emplace(*cand.second, *cand.first);
+            }
+            if (stop()) return cancelled = true, false;
+        }
     }
 
     // 4. The chunk store: downloads survive an interrupted update.
@@ -222,6 +266,7 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
         std::string idxText;
         uint64_t binSize = FileSizeOrZero(storeBin);
         if (ReadFileBytes(storeIdx, idxText, 16u << 20)) {
+            ChunkReader reader;   // closed before the workers append to the store
             size_t pos = 0;
             while (pos < idxText.size()) {
                 size_t nl = idxText.find('\n', pos);
@@ -231,7 +276,7 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
                 unsigned long long off = 0, len = 0;
                 if (sscanf(line.c_str(), "%64s %llu %llu", hash, &off, &len) != 3) continue;
                 if (off + len > binSize || !needed.count(hash)) continue;
-                if (ReadAt(storeBin, off, len, buf) && Sha256Hex(buf.data(), buf.size()) == hash) {
+                if (reader.Read(storeBin, off, len, buf) && Sha256Hex(buf.data(), buf.size()) == hash) {
                     stored.emplace(hash, Ref{storeBin, off, len});
                 }
             }
@@ -266,6 +311,19 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
         }
     }
     for (const auto& g : groups) totalBytes += g.last - g.first + 1;
+    // The store keeps every download inflated until the files are assembled, so
+    // a fresh install needs about twice the game's size on disk, not once.
+    uint64_t storeBytes = 0;
+    for (const auto& kv : bySource)
+        for (const ContentChunk* c : kv.second) storeBytes += c->length;
+    if (cb.reserve) {
+        std::string rmsg;
+        if (!cb.reserve(storeBytes, rmsg)) {
+            stats.noSpace = true;
+            err = rmsg;
+            return false;
+        }
+    }
     LogMsg("[Delta] " + std::to_string(needed.size()) + " chunks needed: " + std::to_string(verifiedLocal.size()) +
            " local, " + std::to_string(stored.size()) + " already downloaded, " + std::to_string(groups.size()) +
            " range request(s) for " + std::to_string(totalBytes) + " bytes; " + std::to_string(wholeOk.size()) +
@@ -288,6 +346,7 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
     auto worker = [&]() {
         std::string body;
         std::vector<std::string> plains;
+        Inflater inflater;
         while (!failed.load() && !stop()) {
             size_t gi = next.fetch_add(1);
             if (gi >= groups.size()) return;
@@ -306,16 +365,8 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
             for (size_t ci = 0; ci < g.chunks.size(); ci++) {
                 const ContentChunk* c = g.chunks[ci];
                 std::string& plain = plains[ci];
-                plain.reserve((size_t)c->length);
-                uint64_t produced = 0;
-                std::string ierr;
-                bool ok = InflateDecompress(reinterpret_cast<const unsigned char*>(body.data()) + (c->offset - g.first),
-                                            (size_t)c->clen, c->length,
-                                            [&](const unsigned char* d, size_t n) {
-                                                plain.append(reinterpret_cast<const char*>(d), n);
-                                                return true;
-                                            },
-                                            &produced, ierr);
+                bool ok = inflater.Run(reinterpret_cast<const unsigned char*>(body.data()) + (c->offset - g.first),
+                                       (size_t)c->clen, (size_t)c->length, plain);
                 if (!ok || plain.size() != c->length || Sha256Hex(plain.data(), plain.size()) != c->sha256) {
                     fail("a downloaded chunk failed verification (" + c->sha256.substr(0, 12) + ")");
                     return;
@@ -332,7 +383,8 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
                 err = "cannot write the chunk store";
                 return;
             }
-            for (size_t ci = 0; ci < g.chunks.size(); ci++) {
+            bool wrote = true;
+            for (size_t ci = 0; ci < g.chunks.size() && wrote; ci++) {
                 const ContentChunk* c = g.chunks[ci];
                 const std::string& plain = plains[ci];
 #ifdef _WIN32
@@ -341,15 +393,22 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
                 fseeko(bin, 0, SEEK_END);
 #endif
                 uint64_t off = TellFile64(bin);
-                fwrite(plain.data(), 1, plain.size(), bin);
-                fprintf(idx, "%s %llu %llu\n", c->sha256.c_str(), (unsigned long long)off,
-                        (unsigned long long)plain.size());
-                stored.emplace(c->sha256, Ref{storeBin, off, (uint64_t)plain.size()});
+                // An unchecked short write (a full disk) only surfaced later as
+                // "a chunk failed verification" and a retry that could never work.
+                wrote = fwrite(plain.data(), 1, plain.size(), bin) == plain.size() && fflush(bin) == 0 &&
+                        fprintf(idx, "%s %llu %llu\n", c->sha256.c_str(), (unsigned long long)off,
+                                (unsigned long long)plain.size()) > 0;
+                if (wrote) stored.emplace(c->sha256, Ref{storeBin, off, (uint64_t)plain.size()});
             }
-            fflush(bin);
-            fflush(idx);
-            fclose(bin);
-            fclose(idx);
+            wrote = (fflush(idx) == 0) && wrote;
+            wrote = (fclose(bin) == 0) && wrote;
+            wrote = (fclose(idx) == 0) && wrote;
+            if (!wrote) {
+                failed = true;
+                stats.noSpace = true;
+                err = "writing the chunk store failed - is the disk full?";
+                return;
+            }
             stats.requests++;
             stats.downloadBytes += body.size();
             done += body.size();
@@ -367,15 +426,21 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
     if (failed.load()) return false;
     if (stop()) return cancelled = true, false;
 
-    // 6. Assemble every file, then prove it byte-for-byte.
+    // 6. Assemble every file and prove it byte-for-byte while it is written:
+    //    each chunk was already verified, and hashing the stream as it goes
+    //    out proves their order without reading 1.3 GB back (twice). Every
+    //    file is forced to the disk before the version can be activated.
+    ChunkReader reader;
     for (const auto& f : index.files) {
         if (stop()) return cancelled = true, false;
         std::wstring dest = NativePath(stagedDir, f.path);
         size_t slash = dest.find_last_of(kPathSep);
         if (slash != std::wstring::npos) CreateDirs(dest.substr(0, slash));
         if (wholeOk.count(f.sha256)) {
-            if (!CopyFilePlain(wholeSource[f.sha256], dest)) {
-                err = "cannot copy " + f.path + " from the installed version";
+            // Hashed in step 2; the copy is checked by its size.
+            if (!CopyFilePlain(wholeSource[f.sha256], dest) || FileSizeOrZero(dest) != f.size) {
+                stats.noSpace = true;
+                err = "cannot copy " + f.path + " from the installed version - is the disk full?";
                 return false;
             }
             stats.reusedBytes += f.size;
@@ -385,6 +450,8 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
                 err = "cannot create " + f.path;
                 return false;
             }
+            Sha256Stream hash;
+            uint64_t written = 0;
             for (const auto& c : f.chunks) {
                 const Ref* ref = nullptr;
                 auto lit = verifiedLocal.find(c.sha256);
@@ -395,20 +462,34 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
                     auto sit = stored.find(c.sha256);
                     if (sit != stored.end()) ref = &sit->second;
                 }
-                if (!ref || !ReadAt(ref->path, ref->offset, ref->length, buf) ||
-                    fwrite(buf.data(), 1, buf.size(), out) != buf.size()) {
+                if (!ref || !reader.Read(ref->path, ref->offset, ref->length, buf)) {
                     fclose(out);
                     err = "cannot assemble " + f.path;
                     return false;
                 }
+                if (fwrite(buf.data(), 1, buf.size(), out) != buf.size()) {
+                    fclose(out);
+                    stats.noSpace = true;
+                    err = "cannot write " + f.path + " - is the disk full?";
+                    return false;
+                }
+                hash.Update(buf.data(), buf.size());
+                written += buf.size();
             }
-            fclose(out);
+            bool closed = fflush(out) == 0;
+            closed = (fclose(out) == 0) && closed;
+            if (!closed) {
+                stats.noSpace = true;
+                err = "cannot finish " + f.path + " - is the disk full?";
+                return false;
+            }
+            if (written != f.size || hash.FinishHex() != f.sha256) {
+                err = "assembled " + f.path + " does not match the content index";
+                return false;
+            }
         }
-        unsigned char digest[32];
-        uint64_t size = 0;
-        std::string herr;
-        if (!Sha256File(dest, digest, &size, herr) || HexLower(digest, 32) != f.sha256 || size != f.size) {
-            err = "assembled " + f.path + " does not match the content index";
+        if (!FlushToDisk(dest)) {
+            err = "cannot flush " + f.path + " to the disk";
             return false;
         }
         ExtractedFile ef;
