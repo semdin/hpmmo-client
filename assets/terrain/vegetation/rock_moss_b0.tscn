@@ -2,7 +2,6 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_b0_lod0.res" id="1_w2s2i"]
 [ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_b0_lod1.res" id="2_0hqw4"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/rock_moss_b0_lod2.res" id="3_n81yb"]
 
 [node name="rock_moss_b0" type="Node3D" unique_id=1952555048]
 
@@ -12,5 +11,3 @@ mesh = ExtResource("1_w2s2i")
 [node name="LOD1" type="MeshInstance3D" parent="." unique_id=709001962]
 mesh = ExtResource("2_0hqw4")
 
-[node name="LOD2" type="MeshInstance3D" parent="." unique_id=193169766]
-mesh = ExtResource("3_n81yb")

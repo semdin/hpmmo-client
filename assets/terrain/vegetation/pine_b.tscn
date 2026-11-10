@@ -1,16 +1,12 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_b_lod0.res" id="1_nd615"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_b_lod1.res" id="2_yn286"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_b_lod2.res" id="3_rjp0y"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_b_lod0.res" id="1_4venr"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_b_lod1.res" id="2_nd615"]
 
-[node name="pine_b" type="Node3D" unique_id=692748894]
+[node name="pine_b" type="Node3D" unique_id=2002010407]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=809058736]
-mesh = ExtResource("1_nd615")
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=29173227]
+mesh = ExtResource("1_4venr")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=122904929]
-mesh = ExtResource("2_yn286")
-
-[node name="LOD2" type="MeshInstance3D" parent="." unique_id=260498661]
-mesh = ExtResource("3_rjp0y")
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=2068470224]
+mesh = ExtResource("2_nd615")

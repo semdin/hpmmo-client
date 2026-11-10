@@ -1,16 +1,12 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fir_a_lod0.res" id="1_xmbsj"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fir_a_lod1.res" id="2_rhomu"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fir_a_lod2.res" id="3_rbanj"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fir_a_lod0.res" id="1_qsy84"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/fir_a_lod1.res" id="2_xmbsj"]
 
-[node name="fir_a" type="Node3D" unique_id=394162039]
+[node name="fir_a" type="Node3D" unique_id=1042010250]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=2039793109]
-mesh = ExtResource("1_xmbsj")
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=792464062]
+mesh = ExtResource("1_qsy84")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=420274794]
-mesh = ExtResource("2_rhomu")
-
-[node name="LOD2" type="MeshInstance3D" parent="." unique_id=639700779]
-mesh = ExtResource("3_rbanj")
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=1809859083]
+mesh = ExtResource("2_xmbsj")

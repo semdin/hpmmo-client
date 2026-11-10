@@ -1,16 +1,12 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/broadleaf_b_lod0.res" id="1_ihvey"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/broadleaf_b_lod1.res" id="2_02six"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/broadleaf_b_lod2.res" id="3_f1wlg"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/broadleaf_b_lod0.res" id="1_h7517"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/broadleaf_b_lod1.res" id="2_ihvey"]
 
-[node name="broadleaf_b" type="Node3D" unique_id=1340586513]
+[node name="broadleaf_b" type="Node3D" unique_id=483850357]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1704311849]
-mesh = ExtResource("1_ihvey")
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=40523010]
+mesh = ExtResource("1_h7517")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=1352763017]
-mesh = ExtResource("2_02six")
-
-[node name="LOD2" type="MeshInstance3D" parent="." unique_id=36550881]
-mesh = ExtResource("3_f1wlg")
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=1989918417]
+mesh = ExtResource("2_ihvey")

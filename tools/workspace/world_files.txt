@@ -778,6 +778,7 @@ scripts/world/grounds/fountain_water.gd
 scripts/world/grounds/grounds_builder.gd
 scripts/world/grounds/grounds_courtyard.gd
 scripts/world/grounds/grounds_horizon.gd
+scripts/world/grounds/grounds_impostors.gd
 scripts/world/grounds/grounds_lake.gd
 scripts/world/grounds/grounds_layout.gd
 scripts/world/grounds/grounds_precinct.gd

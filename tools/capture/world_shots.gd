@@ -1,11 +1,17 @@
 extends Node
 
 ## Ad-hoc visual review of the live game world, outside a login.
-##   godot --path . tools/capture/world_shots.tscn -- --views=<views.json> --out=<dir> [--interior] [--quality=low]
+##   godot --path . tools/capture/world_shots.tscn -- --views=<views.json> --out=<dir> [--interior] [--quality=low] [--measure]
 ## views.json: [["name", [x, y, z], [tx, ty, tz]], ...] in world coordinates
 ## (relative to an NPC's feet with a 5th element {"npc": "<name>"}).
 ## --interior builds the castle interior in place (its L0 floor is y 200).
 ## --map=<id> loads a scene map (e.g. spider_caverns) through the map controller.
+## --quality=<preset> forces a quality preset (low / medium / high) on the world.
+## --measure prints a MEASURE line per view: mean GPU, render-thread CPU and
+## frame ms over 90 frames, draw calls and objects in the last one (the window
+## must be shown).
+
+const QualityPreset = preload("res://scripts/world/quality_preset.gd")
 
 @onready var world = $GameWorld
 ## Frame hitches since the last shot (frames over 100 ms, the longest frame).
@@ -22,6 +28,7 @@ func _ready() -> void:
 	var out_dir := "user://world_shots"
 	var interior := false
 	var scene_map := ""
+	var measure := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--views="):
 			views_path = arg.trim_prefix("--views=")
@@ -31,6 +38,12 @@ func _ready() -> void:
 			interior = true
 		elif arg.begins_with("--map="):
 			scene_map = arg.trim_prefix("--map=")
+		elif arg.begins_with("--quality="):
+			QualityPreset.forced(arg.trim_prefix("--quality="))
+			QualityPreset.apply(world)
+		elif arg == "--measure":
+			measure = true
+			RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(views_path)) if views_path != "" else null
 	if not parsed is Array:
 		printerr("world_shots: --views=<views.json> must name a JSON array of views (see the header)")
@@ -109,6 +122,9 @@ func _ready() -> void:
 					hud_map.call("_show_level", int(opts["map_level"]))
 		await get_tree().create_timer(float(v[3]) if v.size() > 3 else 0.8).timeout
 		await RenderingServer.frame_post_draw
+		if measure:
+			_measure(String(v[0]))
+			await get_tree().create_timer(2.0).timeout
 		get_viewport().get_texture().get_image().save_jpg(out_dir.path_join("%s.jpg" % v[0]), 0.88)
 		print("SHOT %s  hitches>100ms=%d worst=%.0fms" % [v[0], _hitches, _worst * 1000.0])
 		_hitches = 0
@@ -122,3 +138,25 @@ func _ready() -> void:
 			for node in world.find_children("*", "CanvasLayer", true, false):
 				(node as CanvasLayer).visible = false
 	get_tree().quit()
+
+
+## Mean GPU / frame time of the next 90 frames on this view (MEASURE line).
+func _measure(view: String) -> void:
+	var vp := get_viewport().get_viewport_rid()
+	var gpu := 0.0
+	var render_cpu := 0.0
+	var cpu := 0.0
+	var frames := 90
+	var last := Time.get_ticks_usec()
+	for i in frames:
+		await RenderingServer.frame_post_draw
+		var now := Time.get_ticks_usec()
+		cpu += float(now - last) / 1000.0
+		last = now
+		gpu += RenderingServer.viewport_get_measured_render_time_gpu(vp)
+		render_cpu += RenderingServer.viewport_get_measured_render_time_cpu(vp) + RenderingServer.get_frame_setup_time_cpu()
+	print("MEASURE %s preset=%s gpu=%.2fms render_cpu=%.2fms frame=%.2fms draws=%d objects=%d prims=%d" % [view, QualityPreset.current(),
+		gpu / frames, render_cpu / frames, cpu / frames,
+		RenderingServer.viewport_get_render_info(vp, RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE, RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME),
+		RenderingServer.viewport_get_render_info(vp, RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE, RenderingServer.VIEWPORT_RENDER_INFO_OBJECTS_IN_FRAME),
+		RenderingServer.viewport_get_render_info(vp, RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE, RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)])

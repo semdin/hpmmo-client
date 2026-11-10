@@ -1,16 +1,12 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_c_lod0.res" id="1_astjj"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_c_lod1.res" id="2_eiagw"]
-[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_c_lod2.res" id="3_ujqlq"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_c_lod0.res" id="1_ntg2k"]
+[ext_resource type="ArrayMesh" path="res://assets/terrain/vegetation/pine_c_lod1.res" id="2_astjj"]
 
-[node name="pine_c" type="Node3D" unique_id=1394972639]
+[node name="pine_c" type="Node3D" unique_id=262436395]
 
-[node name="LOD0" type="MeshInstance3D" parent="." unique_id=1836929758]
-mesh = ExtResource("1_astjj")
+[node name="LOD0" type="MeshInstance3D" parent="." unique_id=726424029]
+mesh = ExtResource("1_ntg2k")
 
-[node name="LOD1" type="MeshInstance3D" parent="." unique_id=1495041091]
-mesh = ExtResource("2_eiagw")
-
-[node name="LOD2" type="MeshInstance3D" parent="." unique_id=533065897]
-mesh = ExtResource("3_ujqlq")
+[node name="LOD1" type="MeshInstance3D" parent="." unique_id=400006347]
+mesh = ExtResource("2_astjj")

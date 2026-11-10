@@ -3,6 +3,9 @@ extends RefCounted
 ## Cooks the vegetation / rock models (assets/models/vegetation/*.glb, exported
 ## by art/vegetation/scripts) into game scenes for the Terrain3D instancer:
 ##   assets/terrain/vegetation/<variant>.tscn   Node3D with LOD0, LOD1 (, LOD2) MeshInstance3Ds
+##   An impostor card last LOD (material `<variant>_impostor`) is saved as its
+##   .res but left out of the scene: the far band of every tree is drawn by
+##   GroundsImpostors from bake_impostors.gd's texture array and tiles.
 ##   assets/terrain/vegetation/<variant>_lod<i>.res, <model>_<surface>.tres
 ## Called by build_grounds.gd with the parsed vegetation.json.
 ##
@@ -55,6 +58,8 @@ static func cook(variant: String, spec: Dictionary) -> String:
 			mesh.surface_set_material(s, materials[key])
 		var mesh_path := "%s%s_lod%d.res" % [OUT_DIR, variant, i]
 		ResourceSaver.save(mesh, mesh_path)
+		if i > 0 and i == meshes.size() - 1 and _is_impostor_card(mesh):
+			continue
 		var out := MeshInstance3D.new()
 		out.name = "LOD%d" % i
 		out.mesh = load(mesh_path)
@@ -69,9 +74,17 @@ static func cook(variant: String, spec: Dictionary) -> String:
 	return scene_path
 
 
+static func _is_impostor_card(mesh: ArrayMesh) -> bool:
+	var mat := mesh.surface_get_material(0) if mesh.get_surface_count() == 1 else null
+	return mat != null and mat.resource_name.ends_with("_impostor")
+
+
 ## LODs from one source mesh: for each fraction, the generated detail level
 ## whose index count is closest to that share of the source (1.0 = the source).
 ## Vertices are compacted so a low LOD does not carry the full vertex buffer.
+## A fraction the simplifier cannot reach picks the same level as the one
+## before it; that copy is dropped (it saved no triangles and cost Terrain3D a
+## second multimesh per cell), so the chain can come out shorter.
 static func _simplified_chain(source: ArrayMesh, fractions: Array) -> Array:
 	var im := ImporterMesh.new()
 	for s in source.get_surface_count():
@@ -79,8 +92,10 @@ static func _simplified_chain(source: ArrayMesh, fractions: Array) -> Array:
 			source.surface_get_material(s), source.surface_get_name(s))
 	im.generate_lods(60.0, 25.0, [])
 	var out: Array = []
+	var last_size := -1
 	for f in fractions:
 		var mesh := ArrayMesh.new()
+		var size := 0
 		for s in im.get_surface_count():
 			var arrays: Array = im.get_surface_arrays(s)
 			var full: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
@@ -94,6 +109,10 @@ static func _simplified_chain(source: ArrayMesh, fractions: Array) -> Array:
 			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _compact(arrays, best))
 			mesh.surface_set_material(s, im.get_surface_material(s))
 			mesh.surface_set_name(s, im.get_surface_name(s))
+			size += best.size()
+		if size == last_size:
+			continue
+		last_size = size
 		out.append(mesh)
 	return out
 

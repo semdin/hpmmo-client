@@ -28,6 +28,7 @@ const ASSETS_PATH := "res://assets/terrain/grounds_assets.tres"
 const TEX_DIR := "res://assets/terrain/textures/"
 const GROUNDS_DIR := "res://assets/terrain/grounds/"
 const Cook = preload("res://tools/terrain/cook_vegetation.gd")
+const Impostors = preload("res://tools/terrain/bake_impostors.gd")
 ## Must match GroundsLake.DEPTH_RECT / DEPTH_SCALE.
 const LAKE_RECT := Rect2(-640.0, 10.0, 1280.0, 660.0)
 const LAKE_DEPTH_SCALE := 20.0
@@ -164,6 +165,11 @@ func _add_vegetation(terrain: Terrain3D, src: String) -> int:
 		for l in lods.size():
 			asset.set_lod_range(l, float(lods[l]))
 		asset.last_lod = asset.get_lod_count() - 1
+		# A chain cooked shorter than the catalogue (a simplified level that
+		# saved nothing was dropped) keeps the catalogue's far end. Impostor
+		# variants end at LOD1 on purpose: GroundsImpostors draws their far band.
+		if asset.last_lod < lods.size() - 1 and not Impostors.is_banded(variant):
+			asset.set_lod_range(asset.last_lod, float(lods[lods.size() - 1]))
 		asset.last_shadow_lod = mini(1, asset.last_lod)
 		asset.fade_margin = 4.0
 		asset.height_offset = 0.0
@@ -179,6 +185,8 @@ func _add_vegetation(terrain: Terrain3D, src: String) -> int:
 				Vector3(data[o], data[o + 1], data[o + 2])))
 		total += xforms.size()
 		id += 1
+	# The trees' far band (GroundsImpostors) from the scatter just copied.
+	Impostors.bake(catalog)
 	# Lamp posts are not vegetation (no Terrain3D mesh asset, no colliders):
 	# GroundsBuilder._road_lamps builds them from scatter/lamp.bin, which this
 	# build never shipped - the 53 road lamps silently did not exist.
