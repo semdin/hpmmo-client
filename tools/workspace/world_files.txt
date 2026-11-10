@@ -3,15 +3,6 @@ assets/audio/sound_library.json
 assets/castle/castle_blockout.glb
 assets/castle/castle_interior.glb
 assets/castle/castle_layout.json
-assets/castle/props/armour.glb
-assets/castle/props/armour_0.webp
-assets/castle/props/armour_1.webp
-assets/castle/props/owl.glb
-assets/castle/props/owl_0.webp
-assets/castle/props/owl_1.webp
-assets/castle/props/owl_lectern.glb
-assets/castle/props/owl_lectern_0.webp
-assets/castle/props/owl_lectern_1.webp
 assets/maps/spider_caverns/cavern_height.res
 assets/maps/spider_caverns/cavern_layout.json
 assets/models/characters/barbarian_texture.png
