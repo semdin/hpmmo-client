@@ -228,9 +228,9 @@ func _ready() -> void:
 	SimAuthority.entity_moved.connect(func(uid: int, _pos: Vector3, _rot: float, _flags: int):
 		if uid == SimAuthority.local_uid:
 			_corrections += 1)
-	SimAuthority.cast_landed.connect(func(cast_id: int, _caster: int, spell_id: String, hits: Array):
+	SimAuthority.cast_landed.connect(func(cast_id: int, caster: int, spell_id: String, hits: Array):
 		if not hits.is_empty():
-			_record("landed", {"cast_id": cast_id, "spell": spell_id, "hits": hits.size(),
+			_record("landed", {"cast_id": cast_id, "by": caster, "spell": spell_id, "hits": hits.size(),
 				"on": hits.map(func(h): return [int(h.get("uid", 0)), int(h.get("amount", 0))])}))
 	var err := SimNet.join("127.0.0.1", port, probe_name)
 	if err != OK:

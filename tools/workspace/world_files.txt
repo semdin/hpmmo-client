@@ -5,6 +5,14 @@ assets/castle/castle_interior.glb
 assets/castle/castle_layout.json
 assets/maps/spider_caverns/cavern_height.res
 assets/maps/spider_caverns/cavern_layout.json
+assets/models/caverns/cavern_cocoon.glb
+assets/models/caverns/cavern_cocoon_chest_albedo.png
+assets/models/caverns/cavern_cocoon_chest_mr.png
+assets/models/caverns/cavern_cocoon_chest_normal.png
+assets/models/caverns/cavern_eggs.glb
+assets/models/caverns/cavern_eggs_chest_albedo.png
+assets/models/caverns/cavern_eggs_chest_mr.png
+assets/models/caverns/cavern_eggs_chest_normal.png
 assets/models/characters/barbarian_texture.png
 assets/models/characters/borin.glb
 assets/models/characters/borin_borin_albedo.png
@@ -337,6 +345,7 @@ assets/shaders/fire_flipbook.gdshader
 assets/shaders/footprint.gdshader
 assets/shaders/fountain_pool.gdshader
 assets/shaders/fountain_water.gdshader
+assets/shaders/ground_telegraph.gdshader
 assets/shaders/hero_brow.gdshader
 assets/shaders/hero_brow_paint.gdshader
 assets/shaders/hero_cloth.gdshader
@@ -349,6 +358,8 @@ assets/shaders/lake_water.gdshader
 assets/shaders/loot/chest_beam.gdshader
 assets/shaders/loot/chest_pool.gdshader
 assets/shaders/loot/chest_rim.gdshader
+assets/shaders/portal_pool.gdshader
+assets/shaders/rising_motes.gdshader
 assets/shaders/safe_ward.gdshader
 assets/shaders/sky_day_night.gdshader
 assets/shaders/slime_pool.gdshader
@@ -358,6 +369,7 @@ assets/shaders/spell_layer_add.gdshader
 assets/shaders/spell_ribbon.gdshader
 assets/shaders/stair_threshold.gdshader
 assets/shaders/stair_ward.gdshader
+assets/shaders/standing_flipbook.gdshader
 assets/shaders/status_skin.gdshader
 assets/shaders/target_ring.gdshader
 assets/shaders/triplanar_pbr.gdshader
@@ -674,7 +686,9 @@ scripts/fx/fire_card.gd
 scripts/fx/flipbook_fx.gd
 scripts/fx/level_up_fx.gd
 scripts/fx/monolith_shatter.gd
+scripts/fx/rising_motes.gd
 scripts/fx/spark_ember.gd
+scripts/fx/standing_cards.gd
 scripts/fx/status_fx.gd
 scripts/server/db_manager.gd
 scripts/server/dedicated_server.gd

@@ -121,6 +121,11 @@ def build(client):
     for n in sorted(os.listdir(os.path.join(client, "locale"))) if os.path.isdir(os.path.join(client, "locale")) else []:
         if n.endswith(".po"):
             files.append("locale/" + n)
+    # Two creature bodies live with the cavern set, not with the monsters: the
+    # egg sac and the web cocoon (mob_egg_sac.tscn, mob_web_cocoon.tscn). Left
+    # out, the server loaded both scenes with a missing-resource error.
+    files.append("assets/models/caverns/cavern_eggs.glb")
+    files.append("assets/models/caverns/cavern_cocoon.glb")
     files.append("assets/terrain/grounds_material.tres")
     files.append("assets/terrain/grounds_server_assets.tres")
     files.append("assets/textures/masonry.gdshader")
