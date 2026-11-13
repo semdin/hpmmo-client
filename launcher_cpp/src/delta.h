@@ -56,6 +56,9 @@ struct DeltaCallbacks {
     // a message refuses before anything is downloaded.
     std::function<bool(uint64_t storeBytes, std::string& message)> reserve;
     std::atomic<bool>* cancel = nullptr;
+    // Stop once every missing chunk is in the chunk store: nothing is
+    // assembled and `files` stays empty (the updater's --stop-after download).
+    bool downloadOnly = false;
 };
 
 struct DeltaStats {

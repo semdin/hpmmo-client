@@ -22,7 +22,8 @@
    `tools/release/chunk_release.py`). Chunks the installed version already has are copied locally; only the
    missing ones are downloaded with HTTP Range requests into the `chunks-<ver>.bin` of the release that first
    published them. Every chunk and every file is checked against its sha256, then the version is activated.
-   If anything in that path fails (except a cancel or a full disk) the full zip is installed instead.
+   Since 1.0.64 releases ship chunks only: a failure in that path is the update's error (the full-zip fallback
+   is used only by a release that still carries a zip).
    Measured on the real build: v1.0.3 -> v1.0.4 downloaded 26 MB instead of ~500 MB.
 4. PLAY starts `ThousandRealms.exe`; the game opens at its own login screen.
 
@@ -34,10 +35,23 @@ or a `portable.txt`; otherwise `%LOCALAPPDATA%\ThousandRealms` (`~/.local/share/
 Player download link:
 `https://github.com/semdin/hpmmo-client/releases/latest/download/ThousandRealms_Launcher.exe`.
 
-**Never delete old GitHub releases**: newer releases reference chunks stored in older releases' `chunks-*.bin`.
+**Chunk source window - never delete the last 30 releases**: a release's `content*.json` references chunks only
+in the `chunks-*.bin` of the last 30 client versions, counting itself (`CHUNK_SOURCE_WINDOW` in
+`tools/release/release_common.py`, `chunk_release.py --source-window`). A chunk whose only published copy is older
+is re-packed into the new release's own bin, and `gen_manifest.py --verify` refuses a content index that points
+outside the window. So the latest release depends on at most the 29 releases before it: those must stay; anything
+older may be deleted. Cost: when the bulk of the game ages out of the window one release re-uploads it (about one
+compressed build per platform, ~0.85 GB each), at most once per 30 releases; players download nothing extra
+(chunks are matched by hash, so a re-packed chunk they already have is copied locally).
 The CI keeps the Godot import cache (`.godot`) between runs so unchanged assets re-export byte-identically
 (Godot imports are not bit-reproducible; without the cache ~25 MB of models change every release).
-`HPMMO_FULL_PACKAGE=1` forces the full zip (diagnostics).
+`HPMMO_FULL_PACKAGE=1` forces the full zip (diagnostics); on a chunk-only release the update/repair stops at once
+with a config error (exit 3) that says so. `HPMMO_UpdaterCLI --update --stop-after download|verify|stage` goes
+through the chunk path: `download` stops once every missing chunk is in `staging/chunks`, `verify` once the
+verified files are staged in `versions/<ver>.tmp`, `stage` once the activation journal is written as well.
+
+A repair that fails (`Dosyaları onar`) ends in the failed state with its reason; the launcher never reports
+"Oyun hazır" after it, since the following check only compares versions.
 
 ## Rename from HPMMO (2026-11)
 

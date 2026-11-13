@@ -4451,7 +4451,7 @@ msgstr ""
 msgid "Elite Bodyguard"
 msgstr ""
 
-#: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json data/json/quests.json
+#: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json
 msgid "Master Teral Venn"
 msgstr ""
 
@@ -4495,7 +4495,7 @@ msgstr ""
 msgid "Buy Healing Draughts before heading to the Raven Woods. Trust me."
 msgstr ""
 
-#: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json data/json/quests.json
+#: scripts/world/game_world.gd addons/hpmmo_sim/data/quests.json
 msgid "Borin"
 msgstr ""
 
@@ -4948,7 +4948,7 @@ msgid "Apprentice Robe"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Sturdy woolen school robes tailored with silk house linings. +50 Max HP."
+msgid "Sturdy woolen school robes tailored with silk house linings."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -4956,7 +4956,7 @@ msgid "Warden's Battle Cloak"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Enchanted heavy dragonhide battle cloak. +150 Max HP and 15% Magic Armor."
+msgid "Enchanted heavy dragonhide battle cloak."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5012,7 +5012,7 @@ msgid "Skysplitter"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Ash handle with aerodynamic ash finish and goblin-forged ironwork. Supreme 22.0 speed."
+msgid "Ash handle with aerodynamic ash finish and goblin-forged ironwork. Supreme speed."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5124,7 +5124,7 @@ msgid "Apprentice Hat"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Enchanted apprentice gear. +0 maximum HP, +20 maximum mana."
+msgid "Enchanted apprentice gear."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5132,23 +5132,11 @@ msgid "Apprentice Gloves"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Enchanted apprentice gear. +0 maximum HP, +15 maximum mana."
-msgstr ""
-
-#: addons/hpmmo_sim/data/items.json
 msgid "Apprentice Boots"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Enchanted apprentice gear. +25 maximum HP, +0 maximum mana."
-msgstr ""
-
-#: addons/hpmmo_sim/data/items.json
 msgid "Apprentice Focus"
-msgstr ""
-
-#: addons/hpmmo_sim/data/items.json
-msgid "Enchanted apprentice gear. +0 maximum HP, +25 maximum mana."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -5160,11 +5148,11 @@ msgid "Apprentice Ring"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Enchanted apprentice gear. +0 maximum HP, +10 maximum mana."
+msgid "Adept Ring"
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
-msgid "Adept Ring"
+msgid "Enchanted adept gear."
 msgstr ""
 
 #: addons/hpmmo_sim/data/items.json
@@ -7312,7 +7300,7 @@ msgid "Legend"
 msgstr ""
 
 #: data/json/houses.json
-msgid "Bravery: +15% Fire Spell Damage & +10% Critical Strike Chance"
+msgid "Bravery: +15% Flame Wave damage"
 msgstr ""
 
 #: data/json/houses.json
@@ -7320,7 +7308,7 @@ msgid "From my ashes I rise again."
 msgstr ""
 
 #: data/json/houses.json
-msgid "Ambition: +20% Dark Magic Damage & 10% Life Leech on Hit"
+msgid "Ambition: +20% Stella Ruina and Disarm damage"
 msgstr ""
 
 #: data/json/houses.json
@@ -7336,7 +7324,7 @@ msgid "We arrive before the wind."
 msgstr ""
 
 #: data/json/houses.json
-msgid "Loyalty: +25% Max Health & +15% Damage Reduction"
+msgid "Loyalty: +25% Max Health"
 msgstr ""
 
 #: data/json/houses.json
@@ -7433,28 +7421,4 @@ msgstr ""
 
 #: assets/castle/castle_layout.json
 msgid "Torvan House"
-msgstr ""
-
-#: data/json/quests.json
-msgid "Wand Awakening"
-msgstr ""
-
-#: data/json/quests.json
-msgid "Speak with Kestrin in the courtyard and practice casting your Basic Cast and Stun Bolt on the Training Dummies."
-msgstr ""
-
-#: data/json/quests.json
-msgid "The Whispering Woods"
-msgstr ""
-
-#: data/json/quests.json
-msgid "The Raven Woods is crawling with venomous Black Weavers. Defeat 5 Black Weavers to protect the castle grounds."
-msgstr ""
-
-#: data/json/quests.json
-msgid "Shatter the Dark Shard"
-msgstr ""
-
-#: data/json/quests.json
-msgid "A corrupted Dark Shard has emerged near Lake Lunra. Gather other wizards, shatter its obsidian core, and collect the ancient drops."
 msgstr ""

@@ -63,7 +63,6 @@ DATA_RULES = [
     ("addons/hpmmo_sim/data/combat.json", ("desc", "label", "titles")),
     ("data/json/houses.json", ("trait", "motto")),
     ("assets/castle/castle_layout.json", ("label",)),
-    ("data/json/quests.json", ("title", "desc", "npc")),
 ]
 
 STR = r'"((?:[^"\\\n]|\\.)*)"'

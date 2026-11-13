@@ -700,13 +700,16 @@ bool CheckDiskSpace(UpdaterContext& ctx, uint64_t required, std::string& message
     return true;
 }
 
+// Starts a new download's progress: the per-percent throttle below must not
+// carry the previous download's last value into this one.
+void ResetProgress(UpdaterContext& ctx) { ctx.lastProgressPct = -1; }
+
 void ReportProgress(UpdaterContext& ctx, const wchar_t* phase, uint64_t done, uint64_t total) {
     if (ctx.progress) ctx.progress(done, total);
     if (!ctx.status) return;
-    static int lastPct = -1;
     int pct = total ? (int)((done * 100) / total) : -1;
-    if (pct == lastPct && pct != 100) return;
-    lastPct = pct;
+    if (pct == ctx.lastProgressPct && pct != 100) return;
+    ctx.lastProgressPct = pct;
     std::wstring text = phase;
     if (pct >= 0) {
         text += L": %" + std::to_wstring(pct) + L" (" + FormatBytesW(done) + L" / " +
@@ -723,6 +726,7 @@ bool DownloadArtifact(UpdaterContext& ctx, const Artifact& art, std::wstring& fi
     finalPath = JoinPath(ctx.paths.stagingDir, Utf8ToWide(name));
     std::wstring partPath = finalPath + L".part";
     CreateDirs(ctx.paths.stagingDir);
+    ResetProgress(ctx);
 
     if (FileExists(finalPath)) {
         uint64_t size = FileSizeOrZero(finalPath);
@@ -1352,12 +1356,29 @@ bool FullPackageForced() {
     return !v.empty() && v[0] == L'1';
 }
 
+// HPMMO_FULL_PACKAGE=1 against a release without a package for this install
+// (every release since 1.0.64 ships chunks only): there is nothing it could
+// download, so say that up front instead of failing later as an integrity
+// error. True when the forced full-package path has a package to use.
+bool ForcedFullPackageUsable(const ReleaseManifest& m, const std::string& installedVersion,
+                             std::string& message) {
+    Artifact art;
+    std::string why;
+    if (SelectInstallArtifact(m, installedVersion, art, why)) return true;
+    message = "HPMMO_FULL_PACKAGE=1 forces the full package, but release " + m.clientVersion +
+              " has none (" + why + "); it ships chunks only - unset HPMMO_FULL_PACKAGE";
+    return false;
+}
+
 // Chunked (delta) staging: builds <versions>/<ver>.tmp from the chunks the
 // installed version already has plus ranged downloads of the missing ones
 // (delta.cpp). On success stagedDir holds a verified install with its record
-// and .content.json (the next update's source of local chunks).
+// and .content.json (the next update's source of local chunks). downloadOnly
+// (--stop-after download) stops once every missing chunk is in the chunk
+// store; nothing is staged then.
 bool StageFromChunks(UpdaterContext& ctx, const ReleaseManifest& m, const InstalledState& inst,
-                     const std::wstring& stagedDir, std::string& message, int& code) {
+                     const std::wstring& stagedDir, std::string& message, int& code,
+                     bool downloadOnly = false) {
     if (ctx.status) ctx.status(L"Downloading the changes...");
     std::string raw;
     DocFetch f = FetchDoc(ctx, Utf8ToWide(JoinUrlBase(ctx.releaseBase, m.contentIndexUrl)), raw, 64u << 20, true);
@@ -1418,12 +1439,14 @@ bool StageFromChunks(UpdaterContext& ctx, const ReleaseManifest& m, const Instal
     }
     DeltaCallbacks cb;
     cb.cancel = ctx.cancel;
+    cb.downloadOnly = downloadOnly;
     // The staged files (checked above) plus the chunk store's inflated
     // downloads: a fresh install peaks at about twice the game's size.
     cb.reserve = [&](uint64_t storeBytes, std::string& msg) {
         return CheckDiskSpace(ctx, total + storeBytes + kSpaceSlack, msg);
     };
     bool assembling = false;
+    ResetProgress(ctx);
     cb.progress = [&](uint64_t done, uint64_t all) {
         ReportProgress(ctx, L"Downloading", done, all);
         if (done >= all && !assembling) {
@@ -1467,6 +1490,12 @@ bool StageFromChunks(UpdaterContext& ctx, const ReleaseManifest& m, const Instal
         message = err;
         code = cancelled ? kExitCancelled : (stats.noSpace ? kExitDiskSpace : kExitDownload);
         return false;
+    }
+    if (downloadOnly) {
+        RemoveDirRecursive(stagedDir);
+        LogMsg("[Updater] chunks for " + m.clientVersion + " downloaded (" + FormatU64(stats.downloadBytes) +
+               " bytes in " + std::to_string(stats.requests) + " request(s)); stopping before assembly");
+        return true;
     }
 
     Artifact contentArt;
@@ -1571,21 +1600,41 @@ CommandResult UpdateImpl(UpdaterContext& ctx, CheckSummary* summary) {
                         "); close it before updating - nothing was written");
     }
 
+    if (FullPackageForced() && !ForcedFullPackageUsable(m, inst.version, message)) {
+        return Fail("update", kExitConfig, message);
+    }
     if (!CreateDirs(ctx.paths.versionsDir)) {
         return Fail("update", kExitIntegrity, "cannot create the versions directory");
     }
     std::wstring tmpDir = JoinPath(ctx.paths.versionsDir, Utf8ToWide(m.clientVersion)) + L".tmp";
     std::wstring pkgPath;
+    // --stop-after download|verify (test hook): the download (chunk path: every
+    // missing chunk in the chunk store; zip path: the package) or the verified
+    // staged files are left in place and nothing is activated.
+    auto stoppedAt = [&](const std::string& stage) {
+        CommandResult r;
+        JsonValue j = JsonValue::Obj();
+        j.set("command", JsonValue::Str("update"));
+        j.set("ok", JsonValue::Bool(true));
+        j.set("stage", JsonValue::Str(stage));
+        j.set("package", JsonValue::Str(WideToUtf8(pkgPath)));
+        if (stage == "verify" && DirExists(tmpDir)) j.set("staged_dir", JsonValue::Str(WideToUtf8(tmpDir)));
+        j.set("from_version", JsonValue::Str(inst.version));
+        j.set("to_version", JsonValue::Str(m.clientVersion));
+        r.json = j.Dump();
+        return r;
+    };
 
     // Delta first: only the changed chunks travel. Any failure other than a
     // cancel or a full disk falls back to the complete package below.
     bool chunked = false;
     std::string chunkMsg;
     int chunkCode = kExitOk;
-    if (!m.contentIndexUrl.empty() && ctx.cli.stopAfter.empty() && !FullPackageForced()) {
-        chunked = StageFromChunks(ctx, m, inst, tmpDir, chunkMsg, chunkCode);
+    if (!m.contentIndexUrl.empty() && !FullPackageForced()) {
+        chunked = StageFromChunks(ctx, m, inst, tmpDir, chunkMsg, chunkCode, ctx.cli.stopAfter == "download");
         if (chunked) {
             pkgPath = Utf8ToWide(m.contentIndexUrl);
+            if (ctx.cli.stopAfter == "download" || ctx.cli.stopAfter == "verify") return stoppedAt(ctx.cli.stopAfter);
         } else {
             if (chunkCode == kExitCancelled || chunkCode == kExitDiskSpace) return Fail("update", chunkCode, chunkMsg);
             LogMsg("[Updater] chunked update unavailable (" + chunkMsg + "); downloading the full package");
@@ -1605,18 +1654,7 @@ CommandResult UpdateImpl(UpdaterContext& ctx, CheckSummary* summary) {
         if (!DownloadArtifact(ctx, art, pkgPath, message, code)) {
             return Fail("update", code, message);
         }
-        if (ctx.cli.stopAfter == "download" || ctx.cli.stopAfter == "verify") {
-            CommandResult r;
-            JsonValue j = JsonValue::Obj();
-            j.set("command", JsonValue::Str("update"));
-            j.set("ok", JsonValue::Bool(true));
-            j.set("stage", JsonValue::Str(ctx.cli.stopAfter));
-            j.set("package", JsonValue::Str(WideToUtf8(pkgPath)));
-            j.set("from_version", JsonValue::Str(inst.version));
-            j.set("to_version", JsonValue::Str(m.clientVersion));
-            r.json = j.Dump();
-            return r;
-        }
+        if (ctx.cli.stopAfter == "download" || ctx.cli.stopAfter == "verify") return stoppedAt(ctx.cli.stopAfter);
 
         // Extraction: verify the staged installation before activation.
         if (ctx.status) ctx.status(L"Verifying and staging the update...");
@@ -1795,6 +1833,9 @@ CommandResult RepairImpl(UpdaterContext& ctx) {
     // version (healthy local files are reused, only broken ones download);
     // otherwise from the full package, when the release still has one.
     bool viaChunks = !m.contentIndexUrl.empty() && SameVersion(inst.version, m.clientVersion) && !FullPackageForced();
+    if (FullPackageForced() && !ForcedFullPackageUsable(m, inst.version, message)) {
+        return Fail("repair", kExitConfig, message);
+    }
     Artifact art;
     std::string why;
     if (!viaChunks && !SelectInstallArtifact(m, inst.version, art, why)) {

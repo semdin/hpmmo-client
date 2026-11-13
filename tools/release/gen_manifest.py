@@ -27,7 +27,10 @@ Key custody (also spelled out in tools/release/keys/README.md):
 
 This tool can prove its own output: `--verify` checks the signature over the
 exact bytes, the key id, the manifest schema, and (by default) the size and
-sha256 of every local artifact.
+sha256 of every local artifact and of the content index (content.json), every
+chunk of this release's own chunks-<ver>.bin against that index (and every
+file built only from them), and that every other chunk source lies inside the
+chunk source window (release_common.CHUNK_SOURCE_WINDOW).
 
 Usage:
     python gen_manifest.py --artifact dist/hpmmo-client-0.7.0-windows-x86_64.zip \\
@@ -47,11 +50,14 @@ Exit codes: 0 ok, 2 usage, 3 refused / verification failed.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import mmap
 import os
 import re
 import sys
 import zipfile
+import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -343,7 +349,131 @@ def check_schema(doc: dict) -> list[str]:
                 problems.append("artifacts[%d].sha256 is not 64 lowercase hex characters" % index)
             if not isinstance(entry.get("size"), int) or isinstance(entry.get("size"), bool) or entry.get("size") <= 0:
                 problems.append("artifacts[%d].size must be a positive integer" % index)
+    if "content_index" in doc:
+        ci = doc["content_index"]
+        if not isinstance(ci, dict):
+            problems.append("content_index is not an object")
+        else:
+            if not str(ci.get("url", "")).startswith("https://"):
+                problems.append("content_index.url must be https://")
+            if not re.match(r"^[0-9a-f]{64}$", str(ci.get("sha256", ""))):
+                problems.append("content_index.sha256 is not 64 lowercase hex characters")
+            if not isinstance(ci.get("size"), int) or isinstance(ci.get("size"), bool) or ci.get("size") <= 0:
+                problems.append("content_index.size must be a positive integer")
     return problems
+
+
+def _safe_rel_path(path: str) -> bool:
+    # The launcher's SafeRelPath (delta.cpp): relative, forward slashes, no
+    # empty, "." or ".." segment, no drive.
+    if not path or path.startswith("/") or "\\" in path or ":" in path:
+        return False
+    return all(part not in ("", ".", "..") for part in path.split("/"))
+
+
+def verify_content_index(doc: dict, directory: str, window: int) -> int:
+    """Checks the signed content index against the manifest and the chunks.
+
+    The local content.json must have the manifest's size and sha256 and
+    describe this client version. Every chunk in this release's own
+    chunks-<ver>.bin (a source under the content index's own base URL) is
+    inflated and checked for its length and sha256, and a file built only from
+    those chunks for its size and sha256 - what the launcher will check.
+    Chunks in earlier releases cannot be read here; their source must lie
+    inside the chunk source window (the releases that must be kept). Returns
+    the number of chunks verified."""
+    ci = doc["content_index"]
+    name = ci["url"].rsplit("/", 1)[-1]
+    local = os.path.join(directory, name)
+    if not os.path.isfile(local):
+        rc.fail("content index %s (from %s) is not present in %s" % (name, ci["url"], directory), 3)
+    size = os.path.getsize(local)
+    if size != ci["size"]:
+        rc.fail("content index %s is %d bytes but the manifest says %d - refusing it" % (name, size, ci["size"]), 3)
+    if rc.sha256_file(local) != ci["sha256"]:
+        rc.fail("content index %s does not hash to the manifest's sha256 - refusing it" % name, 3)
+    with open(local, "rb") as handle:
+        try:
+            index = json.loads(handle.read().decode("utf-8"))
+        except ValueError as exc:
+            rc.fail("content index %s is not valid JSON: %s" % (name, exc), 3)
+    if not isinstance(index, dict) or index.get("format") != rc.CONTENT_INDEX_FORMAT:
+        rc.fail("content index %s is not format %d" % (name, rc.CONTENT_INDEX_FORMAT), 3)
+    version = doc["client_version"]
+    if index.get("client_version") != version:
+        rc.fail("content index %s describes %r, the manifest %s" % (name, index.get("client_version"), version), 3)
+    sources = index.get("sources")
+    files = index.get("files")
+    if not isinstance(sources, list) or not isinstance(files, list) or not files:
+        rc.fail("content index %s needs a list of sources and a non-empty list of files" % name, 3)
+
+    own_base = ci["url"].rsplit("/", 1)[0]
+    bins = {}   # source index -> this release's own chunks-<ver>.bin, mapped
+    handles = []
+    try:
+        for src, url in enumerate(sources):
+            if not isinstance(url, str) or not url.startswith("https://"):
+                rc.fail("content index %s: source %d is not an https:// URL" % (name, src), 3)
+            base, _, bin_name = url.rpartition("/")
+            if base == own_base:
+                path = os.path.join(directory, bin_name)
+                if not os.path.isfile(path):
+                    rc.fail("chunk file %s of this release is not present in %s" % (bin_name, directory), 3)
+                handle = open(path, "rb")
+                handles.append(handle)
+                bins[src] = mmap.mmap(handle.fileno(), 0, access=mmap.ACCESS_READ) if os.path.getsize(path) else b""
+            elif not rc.chunk_source_in_window(url, version, window):
+                rc.fail("content index %s references %s, outside the %d-version chunk source window of %s "
+                        "(a release that may be deleted) - re-chunk with tools/release/chunk_release.py"
+                        % (name, url, window, version), 3)
+        verified = set()
+        for entry in files:
+            path = entry.get("path") if isinstance(entry, dict) else None
+            if not isinstance(path, str) or not _safe_rel_path(path):
+                rc.fail("content index %s lists an unsafe or missing path %r" % (name, path), 3)
+            chunks = entry.get("chunks")
+            fsize = entry.get("size")
+            fsha = str(entry.get("sha256", ""))
+            if not isinstance(chunks, list) or not isinstance(fsize, int) or not re.match(r"^[0-9a-f]{64}$", fsha):
+                rc.fail("content index %s: %s needs size, sha256 and chunks" % (name, path), 3)
+            total = 0
+            stream = hashlib.sha256()
+            whole = True   # every chunk is in this release's bin: the file can be rebuilt here
+            for chunk in chunks:
+                if not (isinstance(chunk, list) and len(chunk) == 5 and re.match(r"^[0-9a-f]{64}$", str(chunk[0]))
+                        and all(isinstance(v, int) and not isinstance(v, bool) and v >= 0 for v in chunk[1:])
+                        and chunk[2] < len(sources) and chunk[1] > 0 and chunk[4] > 0):
+                    rc.fail("content index %s: %s has a malformed chunk %r" % (name, path, chunk), 3)
+                digest, length, src, offset, clen = chunk
+                total += length
+                if src not in bins:
+                    whole = False
+                    continue
+                blob = bins[src]
+                if offset + clen > len(blob):
+                    rc.fail("chunk %s of %s lies past the end of %s" % (digest[:12], path, sources[src]), 3)
+                try:
+                    plain = zlib.decompressobj(-15).decompress(blob[offset:offset + clen], length + 1)
+                except zlib.error as exc:
+                    rc.fail("chunk %s of %s does not inflate: %s" % (digest[:12], path, exc), 3)
+                if digest not in verified:
+                    if len(plain) != length or hashlib.sha256(plain).hexdigest() != digest:
+                        rc.fail("chunk %s of %s does not match the content index" % (digest[:12], path), 3)
+                    verified.add(digest)
+                stream.update(plain)
+            if total != fsize:
+                rc.fail("content index %s: the chunks of %s add up to %d bytes, not %d" % (name, path, total, fsize), 3)
+            if whole and stream.hexdigest() != fsha:
+                rc.fail("%s rebuilt from %s's chunks does not hash to the content index's sha256" % (path, name), 3)
+    finally:
+        for blob in bins.values():
+            if isinstance(blob, mmap.mmap):
+                blob.close()
+        for handle in handles:
+            handle.close()
+    say("content index %s matches the manifest; %d chunk(s) of this release verified, %d source(s), all inside "
+        "the %d-version window" % (name, len(verified), len(sources), window))
+    return len(verified)
 
 
 def cmd_verify(args: argparse.Namespace) -> int:
@@ -408,6 +538,9 @@ def cmd_verify(args: argparse.Namespace) -> int:
                 rc.fail("artifact %s hashes to %s but the manifest says %s - refusing it" % (name, digest, entry["sha256"]), 3)
             checked += 1
             say("artifact %s matches its recorded size and sha256" % name)
+        if doc.get("content_index"):
+            verify_content_index(doc, directory, args.source_window)
+            checked += 1
 
     print("MANIFEST OK: %s (channel %s, client %s, %d artifact(s) checked)"
           % (os.path.basename(manifest_path), doc["channel"], doc["client_version"], checked))
@@ -531,6 +664,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pubkey", default="", help="pinned public key to verify against")
     parser.add_argument("--artifacts", default="", help="directory holding the artifacts (default: manifest dir)")
     parser.add_argument("--no-artifacts", action="store_true", help="verify the signature only, not artifact hashes")
+    parser.add_argument("--source-window", type=int, default=rc.CHUNK_SOURCE_WINDOW,
+                        help="with --verify: the chunk source window content.json must keep to (default %(default)s)")
     parser.add_argument("--gate", action="store_true", help="apply the documented compatibility gate")
     parser.add_argument("--installed-client", default="", help="client version already installed (with --gate)")
     parser.add_argument("--installed-launcher", default="", help="launcher version already installed (with --gate)")

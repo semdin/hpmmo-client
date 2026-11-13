@@ -265,7 +265,22 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
     {
         std::string idxText;
         uint64_t binSize = FileSizeOrZero(storeBin);
-        if (ReadFileBytes(storeIdx, idxText, 16u << 20)) {
+        bool idxRead = ReadFileBytes(storeIdx, idxText, 16u << 20);
+        // The workers below append to chunks.idx ("ab"). A run that died
+        // mid-line left a torn last entry, and the first new entry would be
+        // glued onto it (both lost). Cut the index back to its last complete
+        // line - all of it when none is complete or it cannot be read - before
+        // anything is appended.
+        size_t keep = idxRead ? idxText.rfind('\n') : std::string::npos;
+        keep = keep == std::string::npos ? 0 : keep + 1;
+        if ((idxRead && keep != idxText.size()) || (!idxRead && FileExists(storeIdx))) {
+            idxText.resize(keep);
+            if (!WriteFileAtomic(storeIdx, idxText)) {
+                err = "cannot write the chunk store";
+                return false;
+            }
+        }
+        if (idxRead) {
             ChunkReader reader;   // closed before the workers append to the store
             size_t pos = 0;
             while (pos < idxText.size()) {
@@ -425,6 +440,7 @@ bool BuildFromChunks(const ContentIndex& index, const LocalInstall& local, const
     }
     if (failed.load()) return false;
     if (stop()) return cancelled = true, false;
+    if (cb.downloadOnly) return true;
 
     // 6. Assemble every file and prove it byte-for-byte while it is written:
     //    each chunk was already verified, and hashing the stream as it goes

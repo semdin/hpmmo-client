@@ -127,6 +127,10 @@ struct UpdaterContext {
     std::atomic<bool>* cancel = nullptr;
     std::function<void(const std::wstring&)> status;  // progress text (GUI)
     std::function<void(uint64_t, uint64_t)> progress; // download bytes (done, total) (GUI)
+    // Last percentage ReportProgress printed for the current download; reset
+    // by ResetProgress at the start of every download so a later one (the
+    // self-update, a retry after a failed chunk pass) is reported from 0.
+    int lastProgressPct = -1;
     bool interactive = false;
 };
 

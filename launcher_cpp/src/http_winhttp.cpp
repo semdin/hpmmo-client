@@ -13,6 +13,12 @@
 
 #include <vector>
 
+// llvm-mingw's winhttp.h has it; older mingw-w64 headers (the CI's Ubuntu
+// cross toolchain) may not. Value from the Windows SDK's winhttp.h.
+#ifndef WINHTTP_QUERY_FLAG_NUMBER64
+#define WINHTTP_QUERY_FLAG_NUMBER64 0x08000000
+#endif
+
 namespace hpmmo {
 
 namespace {
@@ -230,11 +236,13 @@ static HttpOutcome RunRequest(const HttpRequestOptions& opts, std::wstring* dest
     out.resumed = (opts.resumeFrom > 0 && status == 206);
     uint64_t effectiveResume = out.resumed ? opts.resumeFrom : 0;
 
-    // Content-Length (informational; the hash check is authoritative).
+    // Content-Length (informational; the hash check is authoritative). The
+    // 64-bit query: FLAG_NUMBER writes a 32-bit DWORD, which leaves the upper
+    // half alone and cannot hold a body over 4 GB.
     uint64_t contentLength = 0;
     {
         DWORD lenSize = sizeof(contentLength);
-        WinHttpQueryHeaders(h.request, WINHTTP_QUERY_CONTENT_LENGTH | WINHTTP_QUERY_FLAG_NUMBER,
+        WinHttpQueryHeaders(h.request, WINHTTP_QUERY_CONTENT_LENGTH | WINHTTP_QUERY_FLAG_NUMBER64,
                             WINHTTP_HEADER_NAME_BY_INDEX, &contentLength, &lenSize,
                             WINHTTP_NO_HEADER_INDEX);
     }

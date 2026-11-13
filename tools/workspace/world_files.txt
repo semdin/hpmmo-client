@@ -594,7 +594,6 @@ assets/vfx/tex/shield_fracture_512.png
 assets/vfx/tex/soft_glow_512.png
 assets/vfx/tex/star_flare_256.png
 data/json/houses.json
-data/json/quests.json
 locale/tr.po
 project.godot
 scenes/entities/loot/loot_drop.tscn

@@ -103,6 +103,56 @@ def chunks_bin_name(version: str, platform: str) -> str:
     return "chunks%s-%s.bin" % (platform_suffix(platform), version)
 
 
+#: content[-<platform>].json layout (chunk_release.py writes it, the launcher's
+#: delta.cpp and gen_manifest.py --verify read it).
+CONTENT_INDEX_FORMAT = 1
+
+#: Chunk source window: a release's content index may point at the
+#: chunks-<ver>.bin of the last CHUNK_SOURCE_WINDOW client versions only,
+#: counting itself (1.0.180 may use the bins of 1.0.151..1.0.180). A chunk
+#: whose only published copy is older is packed again into the new release's
+#: own chunks-<ver>.bin. Without the bound an unchanged chunk pointed at the
+#: release that first published it for ever (1.0.64's bin, say), and since no
+#: release ships a full zip, deleting any old release broke every new install
+#: and repair. Invariant: the releases inside the window of the latest release
+#: must not be deleted; anything older may be.
+#:
+#: Why 30: about a week of releases at the usual pace (~5 a day), so a
+#: cleanup that keeps "the last month" or "the last 50" is always safe. The
+#: cost is upload, not player download (the launcher matches chunks by hash,
+#: a re-packed chunk it already has is copied locally): when the bulk of the
+#: game ages out, one release re-packs it - about one full compressed build
+#: per platform (~0.85 GB each in 11/2026) - at most once per 30 releases,
+#: ~85 MB per release on average for the three platforms. A smaller window
+#: re-uploads the game more often; a much larger one protects more releases
+#: than anyone would think to keep.
+CHUNK_SOURCE_WINDOW = 30
+
+_CHUNKS_BIN_VERSION_RE = re.compile(r"-([0-9]+(?:\.[0-9]+){1,3})\.bin$")
+
+
+def chunk_source_version(url: str) -> str | None:
+    """The client version that published a chunks[-<platform>]-<ver>.bin URL
+    (None when the name carries none)."""
+    match = _CHUNKS_BIN_VERSION_RE.search(url.rsplit("/", 1)[-1])
+    return match.group(1) if match else None
+
+
+def chunk_source_in_window(url: str, version: str, window: int = CHUNK_SOURCE_WINDOW) -> bool:
+    """May release `version` reference chunks published at `url`? Only when
+    that bin belongs to one of the last `window` versions (same leading
+    components, last component at most window - 1 lower). Anything that cannot
+    be placed (another major/minor, an unversioned name) is out of the window."""
+    source = chunk_source_version(url)
+    if source is None or not VERSION_RE.match(version):
+        return False
+    a = [int(x) for x in source.split(".")]
+    b = [int(x) for x in version.split(".")]
+    if len(a) != len(b) or a[:-1] != b[:-1]:
+        return False
+    return 0 <= b[-1] - a[-1] < window
+
+
 def sums_name(platform: str) -> str:
     return "SHA256SUMS%s" % platform_suffix(platform)
 

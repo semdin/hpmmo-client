@@ -16,9 +16,14 @@
 #   -> client_version differs from the installed one?  fetch content.json (its
 #      sha256 is in the signed manifest), copy every chunk the installed version
 #      already has, download only the missing chunks (HTTP Range into the
-#      chunks-<ver>.bin of the release that introduced them), verify each chunk
-#      and file, activate. The full zip stays as the fallback.
-#   Old releases must NOT be deleted: newer releases reference their chunks.
+#      chunks-<ver>.bin of the release that published them), verify each chunk
+#      and file, activate. There is no full zip to fall back to: the chunks are
+#      the only copy of the game.
+#   A release references chunks only in the bins of the last 30 client
+#   versions (CHUNK_SOURCE_WINDOW in tools/release/release_common.py); older
+#   chunks are re-packed into the new release's bin, and gen_manifest.py
+#   --verify refuses a content index that points further back.
+#   The releases inside that window must NOT be deleted; older ones may be.
 #   -> PLAY starts the game at its own login screen.
 #
 # Versions are automatic:
@@ -356,7 +361,10 @@ jobs:
             --check
 
       # Delta delivery: chunks the previous release already published are
-      # referenced, only new ones go into chunks-<ver>.bin.
+      # referenced, only new ones go into chunks-<ver>.bin - and so are chunks
+      # whose published copy is older than the chunk source window (the last
+      # 30 versions, release_common.CHUNK_SOURCE_WINDOW), so a release never
+      # depends on one outside it.
       # The three platforms are chunked in parallel (each writes only its own
       # content[-<platform>].json + chunks[-<platform>]-<ver>.bin).
       - name: Chunk the build (delta updates)

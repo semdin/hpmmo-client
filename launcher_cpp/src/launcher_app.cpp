@@ -120,6 +120,31 @@ std::wstring FriendlyError(const std::string& raw, int code) {
     return hpmmo::Utf8ToWide(raw);
 }
 
+// The user-facing reason a repair failed. RepairImpl answers kExitLocalVerify
+// two ways: before it starts (no installation, or one older than the release
+// when the release has no package for it - an update fixes both) and after it
+// ran but files are still missing/corrupt (the answer then lists them).
+std::wstring RepairError(const hpmmo::CommandResult& r) {
+    std::string message;
+    hpmmo::JsonValue root;
+    std::string perr;
+    bool parsed = hpmmo::JsonValue::Parse(r.json, root, perr) && root.isObject();
+    if (parsed) message = root.str("message");
+    if (r.code == hpmmo::kExitLocalVerify) {
+        const auto* missing = parsed ? root.arr("missing") : nullptr;
+        const auto* corrupt = parsed ? root.arr("corrupt") : nullptr;
+        if (missing || corrupt) {
+            size_t n = (missing ? missing->size() : 0) + (corrupt ? corrupt->size() : 0);
+            if (const auto* failed = root.arr("failed")) n = std::max(n, failed->size());
+            return L"Oyun dosyalarından " + std::to_wstring(n) +
+                   L" tanesi onarılamadı. Oyunu ve launcher'ı kapatıp \"Dosyaları onar\" ile yeniden dene.";
+        }
+        return L"Kurulum onarılamadı: oyun eksik ya da güncel değil. \"Tekrar dene\" ile oyunu güncelle.";
+    }
+    if (r.code == hpmmo::kExitGameRunning) return L"Oyun açıkken onarım yapılamaz. Önce oyunu kapat.";
+    return FriendlyError(message, r.code);
+}
+
 bool InstalledGamePresent() {
     hpmmo::UpdaterPaths paths = hpmmo::ResolvePathsForGui(g_Cfg);
     return !paths.gameExe.empty() && hpmmo::FileExists(paths.gameExe);
@@ -168,7 +193,13 @@ void UpdateWorker(bool repair) {
         SetState(Phase::Installing, L"Oyun dosyaları onarılıyor", L"Dosyalar doğrulanıyor ve eksikler indiriliyor…");
         hpmmo::CommandResult r = hpmmo::DoRepair(cli, g_Cfg, &g_Cancel, status);
         if (r.code != hpmmo::kExitOk) {
+            // A failed repair must never read as "ready": the check below only
+            // compares versions, so it would report a broken install as fine.
             hpmmo::LogMsg("[Launcher] repair failed: " + r.json);
+            SetState(Phase::Failed, L"Onarım başarısız", RepairError(r));
+            g_WorkerBusy = false;
+            PostRefresh();
+            return;
         }
     }
 

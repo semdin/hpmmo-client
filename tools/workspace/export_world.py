@@ -25,7 +25,6 @@ FILE_LIST = os.path.join(HERE, "world_files.txt")
 # are server-owned since the authority handover and pinned by sync_sim.py instead.
 CONTRACTS = [
     "data/json/houses.json",
-    "data/json/quests.json",
 ]
 # Server-authored trees inside the exported world. They are never produced from
 # the client and must survive the deterministic wipe below.
